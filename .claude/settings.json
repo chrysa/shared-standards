@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/secret-scanner.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/circuit-breaker.cjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/verifiable-thresholds.cjs"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/frustration-detection.cjs"
+          }
+        ]
+      }
+    ]
+  }
+}
