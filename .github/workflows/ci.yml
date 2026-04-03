@@ -1,0 +1,49 @@
+---
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+            - master
+    pull_request:
+        branches:
+            - main
+            - master
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        name: Lint & validate
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Run pre-commit hooks
+              uses: pre-commit/action@v3.0.1
+
+    validate-templates:
+        runs-on: ubuntu-latest
+        name: Validate template YAML/JSON
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Validate YAML templates
+              run: |
+                  find templates/ workflows/ -name "*.yml" -o -name "*.yaml" 2>/dev/null | \
+                    while read f; do python3 -c "import yaml,sys; yaml.safe_load(open('$f'))" || exit 1; done
+                  echo "All YAML templates valid"
+
+            - name: Validate JSON templates
+              run: |
+                  find templates/ -name "*.json" 2>/dev/null | \
+                    while read f; do python3 -m json.tool "$f" > /dev/null || exit 1; done
+                  echo "All JSON templates valid"
