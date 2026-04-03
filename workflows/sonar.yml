@@ -1,0 +1,72 @@
+---
+# Reusable SonarCloud analysis workflow (chrysa ecosystem)
+# Usage:
+#   uses: chrysa/shared-standards/.github/workflows/sonar.yml@main
+#   (or copy to .github/workflows/sonar.yml and adapt)
+#
+# Required secrets: SONAR_TOKEN, SONAR_HOST_URL (defaults to sonarcloud.io)
+#
+# ⚠️ Never use sonar-project.properties — all config via inputs/env.
+
+name: SonarCloud Analysis
+
+on:
+    workflow_call:
+        inputs:
+            project-name:
+                description: SonarCloud project key (e.g. chrysa_my-repo)
+                required: true
+                type: string
+            sources:
+                description: Comma-separated list of source directories
+                required: false
+                type: string
+                default: .
+            python-version:
+                description: Python version for coverage report
+                required: false
+                type: string
+                default: '3.12'
+            coverage-report:
+                description: Path to coverage.xml (set empty to skip coverage)
+                required: false
+                type: string
+                default: coverage.xml
+        secrets:
+            SONAR_TOKEN:
+                required: true
+            SONAR_HOST_URL:
+                required: false
+
+    push:
+        branches:
+            - main
+            - master
+    pull_request:
+        types: [opened, synchronize, reopened]
+
+permissions:
+    contents: read
+    pull-requests: read
+
+jobs:
+    sonar:
+        runs-on: ubuntu-latest
+        name: SonarCloud
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: SonarSource/sonarcloud-github-action@master
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+              with:
+                  args: >
+                      -Dsonar.projectKey=${{ inputs.project-name }}
+                      -Dsonar.organization=chrysa
+                      -Dsonar.sources=${{ inputs.sources }}
+                      -Dsonar.python.coverage.reportPaths=${{ inputs.coverage-report }}
+                      -Dsonar.verbose=false
