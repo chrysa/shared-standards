@@ -6,11 +6,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/secret-scanner.cjs"
+            "command": "node .claude/hooks/secret-scanner.cjs"
           },
           {
             "type": "command",
-            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/circuit-breaker.cjs"
+            "command": "node .claude/hooks/circuit-breaker.cjs"
           }
         ]
       }
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/verifiable-thresholds.cjs"
+            "command": "node .claude/hooks/verifiable-thresholds.cjs"
           }
         ]
       }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /home/anthony/Documents/perso/projects/chrysa/shared-standards/.claude/hooks/frustration-detection.cjs"
+            "command": "node .claude/hooks/frustration-detection.cjs"
           }
         ]
       }
