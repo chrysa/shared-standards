@@ -1,0 +1,95 @@
+---
+# Reusable semantic release workflow (chrysa ecosystem)
+# Uses: GitVersion + cliff (git-cliff) for changelog generation
+#
+# Usage:
+#   uses: chrysa/shared-standards/.github/workflows/release.yml@main
+#
+# Required secrets: GITHUB_TOKEN (automatic), RELEASE_TOKEN (for protected branches)
+#
+# Expects:
+#   - GitVersion.yml at repo root
+#   - cliff.toml at repo root (or pass changelog-config input)
+
+name: Release
+
+on:
+    workflow_call:
+        inputs:
+            changelog-config:
+                description: Path to cliff.toml
+                required: false
+                type: string
+                default: cliff.toml
+            tag-prefix:
+                description: Version tag prefix (e.g. v)
+                required: false
+                type: string
+                default: v
+            create-github-release:
+                description: Create a GitHub Release with the generated changelog
+                required: false
+                type: boolean
+                default: true
+        secrets:
+            RELEASE_TOKEN:
+                required: false
+
+    push:
+        branches:
+            - main
+            - master
+        paths-ignore:
+            - '**.md'
+            - '.github/**'
+
+permissions:
+    contents: write
+    pull-requests: read
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        name: Semantic Release
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+            - name: Install GitVersion
+              uses: gittools/actions/gitversion/setup@v3
+              with:
+                  versionSpec: '6.x'
+
+            - name: Determine version
+              id: gitversion
+              uses: gittools/actions/gitversion/execute@v3
+
+            - name: Install git-cliff
+              uses: taiki-e/install-action@git-cliff
+
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  CURRENT_TAG="${{ inputs.tag-prefix }}${{ steps.gitversion.outputs.semVer }}"
+                  git cliff --output CHANGELOG_RELEASE.md --tag "$CURRENT_TAG" 2>/dev/null || \
+                    git cliff --unreleased --output CHANGELOG_RELEASE.md
+                  echo "version=$CURRENT_TAG" >> "$GITHUB_OUTPUT"
+
+            - name: Create tag
+              run: |
+                  git config user.name 'chrysa'
+                  git config user.email 'greau.anthony@gmail.com'
+                  git tag "${{ steps.changelog.outputs.version }}" || echo "Tag already exists"
+                  git push origin "${{ steps.changelog.outputs.version }}" || echo "Tag push skipped"
+
+            - name: Create GitHub Release
+              if: ${{ inputs.create-github-release }}
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.changelog.outputs.version }}
+                  name: Release ${{ steps.changelog.outputs.version }}
+                  body_path: CHANGELOG_RELEASE.md
+                  token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}

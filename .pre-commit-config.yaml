@@ -15,13 +15,13 @@ repos:
           - id: no-commit-to-branch
             args: [--branch, main]
     - repo: https://github.com/igorshubovych/markdownlint-cli
-      rev: f7ed74202ac8ec26bab4a68359556c5243df142f
+      rev: 70466ee0aa1d9bca1fd4ce54bfbba370431ecced
       hooks:
           - id: markdownlint
             args: [--fix]
             stages: [manual]
     - repo: https://github.com/chrysa/pre-commit-tools
-      rev: 78d8bd3118110cc9095fcd61eb4772061c3ab628
+      rev: b11e9940de8f7a43f6bb7cf2af6b3b2ecd70696d
       hooks:
           - id: yaml-sorter
             exclude: ^\.github/
