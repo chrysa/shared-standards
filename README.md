@@ -25,7 +25,10 @@ workflows/
   ci-python.yml                 # Reusable CI workflow for Python projects
   ci-node.yml                   # Reusable CI workflow for Node/React projects
   sonar.yml                     # SonarQube analysis workflow
-  release.yml                   # Semantic release workflow
+  release.yml                   # Semantic release workflow (softprops/action-gh-release)
+  labeler.yml                   # PR auto-labeler workflow (actions/labeler@v6)
+  pr-size.yml                   # PR size label workflow (codelytv/pr-size-labeler)
+  pages.yml                     # GitHub Pages deploy (peaceiris or official actions/deploy-pages)
 
 templates/
   CLAUDE.md                     # Bootstrap CLAUDE.md template

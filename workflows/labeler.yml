@@ -1,0 +1,55 @@
+---
+# Reusable PR auto-labeler workflow (chrysa ecosystem)
+# Applies labels to pull requests based on changed files using .github/labeler.yml config.
+#
+# Uses: actions/labeler@v6
+# Marketplace: https://github.com/marketplace/actions/auto-labeler
+#
+# Usage in your repo's .github/workflows/labeler.yml:
+#
+#   on:
+#     pull_request_target:
+#       types: [opened, reopened, synchronize]
+#   jobs:
+#     labels:
+#       uses: chrysa/shared-standards/.github/workflows/labeler.yml@main
+#       secrets: inherit
+#
+# Requires a .github/labeler.yml config file in your repo.
+# See templates/labeler.yml for a starter config.
+#
+# Note: pull_request_target is used (not pull_request) to allow label
+# writes on PRs from forks without granting unnecessary write permissions.
+
+name: PR Auto-Labeler
+
+on:
+    pull_request_target:
+        types: [opened, reopened, synchronize]
+    workflow_call:
+        inputs:
+            sync-labels:
+                description: Remove labels that no longer match after a force push
+                required: false
+                type: boolean
+                default: true
+            dot:
+                description: Include dot files (hidden files) when matching globs
+                required: false
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    labeler:
+        runs-on: ubuntu-latest
+        name: Apply labels on PR
+        steps:
+            - uses: actions/labeler@v6
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  sync-labels: ${{ inputs.sync-labels != '' && inputs.sync-labels || true }}
+                  dot: ${{ inputs.dot || false }}
