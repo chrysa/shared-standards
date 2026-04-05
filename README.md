@@ -29,6 +29,7 @@ workflows/
 
 templates/
   CLAUDE.md                     # Bootstrap CLAUDE.md template
+  CODEOWNERS                    # CODEOWNERS template (copy and adapt)
   .gitignore.python             # Python .gitignore
   .gitignore.node               # Node .gitignore
   dependabot.yml                # Dependabot config template
