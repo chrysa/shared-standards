@@ -1,6 +1,6 @@
 # Claude Code Hook Suite
 
-Shared DevEx/LLM tooling for the chrysa ecosystem.
+Shared DevEx/LLM tooling for the ecosystem.
 All hooks are written in Node.js (`.cjs`) and require only the standard library.
 
 ---
