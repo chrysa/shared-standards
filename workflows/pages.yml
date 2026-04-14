@@ -1,5 +1,5 @@
 ---
-# Reusable GitHub Pages deploy workflow
+# Reusable GitHub Pages deploy workflow (chrysa ecosystem)
 # Supports two modes:
 #   - peaceiris (default): Push directly to gh-pages branch (simpler, widely used)
 #   - official: GitHub's native pages deploy via actions/upload-pages-artifact +
@@ -17,7 +17,7 @@
 #       paths: [docs/**]
 #   jobs:
 #     pages:
-#       uses: shared-standards/.github/workflows/pages.yml@main
+#       uses: chrysa/shared-standards/.github/workflows/pages.yml@main
 #       with:
 #         build-command: 'pip install mkdocs-material && mkdocs build'
 #         publish-dir: site
@@ -54,7 +54,7 @@ on:
                 description: Python version to use when build-command uses Python
                 required: false
                 type: string
-                default: '3.14'
+                default: '3.12'
             node-version:
                 description: Node version to use when build-command uses Node
                 required: false
