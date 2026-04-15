@@ -25,7 +25,7 @@ repos:
   repo: https://github.com/igorshubovych/markdownlint-cli
   rev: 70466ee0aa1d9bca1fd4ce54bfbba370431ecced
 - hooks:
-  - exclude: ^\.github/
+  - exclude: ^(\.github/|workflows/|templates/)
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check

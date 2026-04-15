@@ -60,3 +60,11 @@ make lint     # Run pre-commit on all files
 | verifiable-thresholds.cjs | PostToolUse (file writes) | Warn on quality threshold violations |
 | memory-consolidation.cjs | CLI | Consolidate and compress memory files |
 | model-debt-inventory.cjs | CLI | Audit model-specific tagged rules |
+
+## Compact instructions
+
+When compacting, always preserve:
+1. List of all files modified this session (with paths)
+2. Current task description and next steps
+3. Any uncommitted / unpushed changes
+4. Open blockers and errors not yet resolved
