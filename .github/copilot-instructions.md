@@ -1,6 +1,6 @@
 # shared-standards — Copilot Instructions
 
-<!-- @[claude-sonnet-4] -->
+<!-- @[claude-sonnet-4-6] -->
 
 ## Project purpose
 

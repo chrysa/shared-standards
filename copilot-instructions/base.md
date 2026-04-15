@@ -1,10 +1,10 @@
 # GitHub Copilot Instructions — Base
 
-<!-- @[claude-sonnet-4] -->
+<!-- @[claude-sonnet-4-6] -->
 
 ## Role
 
-You are a senior software engineer working on the chrysa ecosystem.
+You are a senior software engineer working on this ecosystem.
 Your role is to write clean, maintainable, idiomatic, and secure code.
 
 ## Coding standards
@@ -17,7 +17,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Do not over-engineer. Prefer simple, readable solutions over clever abstractions.
 
 ### Python
-- Target Python 3.14. Maintain backward compatibility to 3.12.
+- Target Python 3.14.
 - Use `ruff` for formatting and linting (`ruff check`, `ruff format`).
 - Use `mypy` for type checking in typed projects.
 - Keep functions under 50 lines.
@@ -45,8 +45,8 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 ### Docker
 - **Always use multi-stage builds** (`AS deps`, `AS builder`, `AS production` or equivalent). Never ship build tools in the final image.
 - **Always add a `HEALTHCHECK`** to every production image. Use the service's own health endpoint (e.g. `CMD curl -f http://localhost:PORT/health || exit 1`).
-- Use official or chrysa/usefull-containers images for tooling.
-- Pin image versions explicitly (e.g. `python:3.12-slim`, not `python:latest`).
+- Use official or usefull-containers images for tooling.
+- Pin image versions explicitly (e.g. `python:3.14-slim`, not `python:latest`).
 - Non-root user in the final stage (`USER nonroot` or equivalent).
 
 ## Architecture
@@ -68,7 +68,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Do not bypass pre-commit hooks (`--no-verify`) without explicit approval.
 - CI must pass before merging any PR.
 
-## Measurable thresholds (@[claude-sonnet-4])
+## Measurable thresholds (@[claude-sonnet-4-6])
 - Max function length: 50 lines
 - Max file length: 500 lines
 - Estimated cyclomatic complexity: ≤ 10 per function
