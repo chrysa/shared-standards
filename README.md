@@ -1,6 +1,6 @@
 # shared-standards
 
-Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the chrysa ecosystem.
+Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the ecosystem.
 
 ## Structure
 
