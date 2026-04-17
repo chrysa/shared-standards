@@ -15,7 +15,7 @@ repos:
     - main
     id: no-commit-to-branch
   repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: b89c5eef3ba3a74ecd506d968e63a8b80f697abf
+  rev: f1dff44d3a9ae852957f34def96390f28719c232
 - hooks:
   - args:
     - --fix
@@ -23,11 +23,12 @@ repos:
     stages:
     - manual
   repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: cfc833bfc00c7cc40f702bd9e02df34d850d0291
+  rev: 70466ee0aa1d9bca1fd4ce54bfbba370431ecced
 - hooks:
   - exclude: ^(\.github/|workflows/|templates/)
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check
+  - id: env-example-sync
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: e538371cdb5dff59d3b67ef5e63dae3dce8bfc37
+  rev: 04936a6cf718400fe9d2fd883c188fdf4d09eba2
