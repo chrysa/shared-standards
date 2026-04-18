@@ -74,3 +74,11 @@ Run the inventory tool to find them:
 ```bash
 node .claude/hooks/model-debt-inventory.cjs --dir .
 ```
+
+## Local LLM Stack Reference
+
+This standard repository hosts ecosystem-wide guidelines and can reference the **Local LLM Stack for Software + Data Engineering** for projects requiring local LLM infrastructure.
+
+📖 **Reference:** [Local LLM Stack (Notion)](https://www.notion.so/Local-LLM-Stack-for-Software-Data-Engineering-34459293e35e81c2b5b0f8283640b338)
+
+**Purpose:** Central knowledge base for fully local, containerized LLM workflows (code generation, documentation, API connectors, ETL pipelines) to be adopted across the chrysa ecosystem.

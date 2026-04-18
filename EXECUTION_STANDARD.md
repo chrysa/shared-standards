@@ -89,7 +89,7 @@ description: imperative, lowercase, no period
 
 ## 4. Testing Standards
 
-- Minimum **80% line coverage** on all new code
+- Minimum **85% line coverage** on all new code (per-project override allowed, never below 80%)
 - Tests are **deterministic**: no network, no real filesystem without mocking
 - Test names: `test_<unit>_when_<condition>_should_<expected>`
 - Coverage artifact: `coverage.xml` generated on every CI run
