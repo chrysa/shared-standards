@@ -20,9 +20,9 @@ jobs:
         name: Lint & validate
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v4
 
-            - uses: actions/setup-python@v6
+            - uses: actions/setup-python@v5
               with:
                   python-version: '3.12'
 
@@ -34,7 +34,7 @@ jobs:
         name: Validate template YAML/JSON
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v4
 
             - name: Validate YAML templates
               run: |
