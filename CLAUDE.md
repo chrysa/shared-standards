@@ -13,8 +13,8 @@ and standards for the ecosystem.
   testing-pytest/       # pytest DDD + pytest-mock + constants pattern
   dockerfile-multistage/# 4-stage base/builder/production/dev — Python 3.14
   api-design/           # REST standards + FastAPI patterns + status codes
-copilot-instructions/   # GitHub Copilot instruction templates
-templates/              # Bootstrap file templates (CLAUDE.md, .gitignore, dependabot.yml, etc.)
+copilot-instructions/   # GitHub Copilot instruction templates (base.md = ecosystem-wide)
+templates/              # Bootstrap file templates (CLAUDE.md, opencode.json, settings.json, copilot-instructions.md, .gitignore, dependabot.yml, etc.)
 workflows/              # Reusable GitHub Actions workflow templates
 ```
 
