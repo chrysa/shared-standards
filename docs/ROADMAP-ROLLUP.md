@@ -1,6 +1,6 @@
 # ROADMAP ROLLUP — chrysa
 
-> Généré 2026-04-20 21:25 par generate-roadmap-rollup.sh
+> Généré 2026-04-20 21:42 par generate-roadmap-rollup.sh
 > Aggrégation des ROADMAP.md + DECISIONS.md des repos actifs
 
 ---
@@ -37,7 +37,7 @@
 
 ## ai-aggregator
 
-*Dernière activité : il y a 5 heures · branche : chore/quality-uniformization*
+*Dernière activité : il y a 2 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -178,7 +178,7 @@
 
 ## coach
 
-*Dernière activité : il y a 5 heures · branche : chore/quality-uniformization*
+*Dernière activité : il y a 12 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -322,19 +322,19 @@
 > Format Now / Next / Later — à mettre à jour à chaque sprint (10h environ).
 > Source de vérité priorités : CLAUDE.md global règle 1+2 (max 1 Socle + 2 Actifs).
 
----
+______________________________________________________________________
 
 ## NOW (sprint actuel)
 
-| Item | Issue | Priorité | Effort | Statut |
-| ---- | ----- | -------- | ------ | ------ |
-| {{item}} | #{{n}} | P0/P1 | XS/S/M/L | IN_PROGRESS |
+| Item     | Issue  | Priorité | Effort   | Statut      |
+| -------- | ------ | -------- | -------- | ----------- |
+| {{item}} | #{{n}} | P0/P1    | XS/S/M/L | IN_PROGRESS |
 
 ## NEXT (sprint +1, priorisés)
 
 | Item | Prérequis | Effort | Valeur |
 | ---- | --------- | ------ | ------ |
-| | | | |
+|      |           |        |        |
 
 ## LATER (backlog priorisé, pas encore scopé)
 
@@ -345,7 +345,7 @@
 
 - {{item exclu + raison}}
 
----
+______________________________________________________________________
 
 ## Phases produit
 
@@ -358,7 +358,7 @@
 
 | Bloqueur | Impact | Action attendue |
 | -------- | ------ | --------------- |
-| | | |
+|          |        |                 |
 
 ## Dépendances amont
 
@@ -368,7 +368,7 @@
 
 - {{autre_repo}} — ce que ça débloque
 
----
+______________________________________________________________________
 
 ## Revues
 
@@ -655,7 +655,7 @@
 
 ## epub-sorter
 
-*Dernière activité : il y a 4 heures · branche : chore/quality-uniformization*
+*Dernière activité : il y a 79 secondes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -791,7 +791,7 @@
 
 ## github-actions
 
-*Dernière activité : il y a 3 jours · branche : chore/quality-uniformization*
+*Dernière activité : il y a 12 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -859,7 +859,7 @@
 
 ## guideline-checker
 
-*Dernière activité : il y a 4 heures · branche : chore/quality-uniformization*
+*Dernière activité : il y a 11 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -1150,19 +1150,19 @@ Aucune formalisée à ce jour (voir DECISIONS.md vide).
 > Format Now / Next / Later — à mettre à jour à chaque sprint (10h environ).
 > Source de vérité priorités : CLAUDE.md global règle 1+2 (max 1 Socle + 2 Actifs).
 
----
+______________________________________________________________________
 
 ## NOW (sprint actuel)
 
-| Item | Issue | Priorité | Effort | Statut |
-| ---- | ----- | -------- | ------ | ------ |
-| {{item}} | #{{n}} | P0/P1 | XS/S/M/L | IN_PROGRESS |
+| Item     | Issue  | Priorité | Effort   | Statut      |
+| -------- | ------ | -------- | -------- | ----------- |
+| {{item}} | #{{n}} | P0/P1    | XS/S/M/L | IN_PROGRESS |
 
 ## NEXT (sprint +1, priorisés)
 
 | Item | Prérequis | Effort | Valeur |
 | ---- | --------- | ------ | ------ |
-| | | | |
+|      |           |        |        |
 
 ## LATER (backlog priorisé, pas encore scopé)
 
@@ -1173,7 +1173,7 @@ Aucune formalisée à ce jour (voir DECISIONS.md vide).
 
 - {{item exclu + raison}}
 
----
+______________________________________________________________________
 
 ## Phases produit
 
@@ -1186,7 +1186,7 @@ Aucune formalisée à ce jour (voir DECISIONS.md vide).
 
 | Bloqueur | Impact | Action attendue |
 | -------- | ------ | --------------- |
-| | | |
+|          |        |                 |
 
 ## Dépendances amont
 
@@ -1196,7 +1196,7 @@ Aucune formalisée à ce jour (voir DECISIONS.md vide).
 
 - {{autre_repo}} — ce que ça débloque
 
----
+______________________________________________________________________
 
 ## Revues
 
@@ -1346,7 +1346,7 @@ Aucune formalisée à ce jour (voir DECISIONS.md vide).
 
 ## pycharm_settings
 
-*Dernière activité : il y a 4 heures · branche : chore/quality-uniformization*
+*Dernière activité : il y a 11 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -1564,7 +1564,7 @@ Débloque une fois Phase 0 close.
 
 ## shared-standards
 
-*Dernière activité : il y a 2 jours · branche : chore/claude-code-optimization*
+*Dernière activité : il y a 50 secondes · branche : chore/claude-code-optimization*
 
 ### Décisions (extrait)
 
