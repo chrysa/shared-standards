@@ -235,4 +235,6 @@ fi
 
 echo ""
 ok "apply-standards terminé"
-$DRY_RUN && warn "mode dry-run · aucune modif réelle"
+$DRY_RUN && warn "mode dry-run · aucune modif réelle" || true
+
+exit 0

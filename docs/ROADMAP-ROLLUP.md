@@ -1,6 +1,6 @@
 # ROADMAP ROLLUP — chrysa
 
-> Généré 2026-04-20 21:42 par generate-roadmap-rollup.sh
+> Généré 2026-04-20 23:11 par generate-roadmap-rollup.sh
 > Aggrégation des ROADMAP.md + DECISIONS.md des repos actifs
 
 ---
@@ -37,7 +37,7 @@
 
 ## ai-aggregator
 
-*Dernière activité : il y a 2 minutes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 58 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -178,7 +178,7 @@
 
 ## coach
 
-*Dernière activité : il y a 12 minutes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 77 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -246,7 +246,7 @@
 
 ## container-webview
 
-*Dernière activité : il y a 2 jours · branche : fix/frontend-build*
+*Dernière activité : il y a 3 jours · branche : fix/frontend-build*
 
 ### Roadmap
 
@@ -655,7 +655,7 @@ ______________________________________________________________________
 
 ## epub-sorter
 
-*Dernière activité : il y a 79 secondes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 77 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -791,7 +791,7 @@ ______________________________________________________________________
 
 ## github-actions
 
-*Dernière activité : il y a 12 minutes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 2 heures · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -859,7 +859,7 @@ ______________________________________________________________________
 
 ## guideline-checker
 
-*Dernière activité : il y a 11 minutes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 57 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -1210,7 +1210,7 @@ ______________________________________________________________________
 
 ## pre-commit-tools
 
-*Dernière activité : il y a 5 heures · branche : chore/chrysa-cowork-20260419*
+*Dernière activité : il y a 6 heures · branche : chore/chrysa-cowork-20260419*
 
 ### Roadmap
 
@@ -1346,7 +1346,7 @@ ______________________________________________________________________
 
 ## pycharm_settings
 
-*Dernière activité : il y a 11 minutes · branche : chore/quality-uniformization*
+*Dernière activité : il y a 76 minutes · branche : chore/quality-uniformization*
 
 ### Roadmap
 
@@ -1487,7 +1487,7 @@ ______________________________________________________________________
 
 ## server
 
-*Dernière activité : il y a 6 heures · branche : chore/post-industrialization-cleanup*
+*Dernière activité : il y a 8 heures · branche : chore/post-industrialization-cleanup*
 
 ### Roadmap
 
@@ -1564,7 +1564,7 @@ Débloque une fois Phase 0 close.
 
 ## shared-standards
 
-*Dernière activité : il y a 50 secondes · branche : chore/claude-code-optimization*
+*Dernière activité : il y a 76 minutes · branche : chore/claude-code-optimization*
 
 ### Décisions (extrait)
 
@@ -1576,7 +1576,7 @@ Débloque une fois Phase 0 close.
 
 ## usefull-containers
 
-*Dernière activité : il y a 7 heures · branche : develop*
+*Dernière activité : il y a 8 heures · branche : develop*
 
 ### Roadmap
 

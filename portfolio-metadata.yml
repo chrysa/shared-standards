@@ -183,6 +183,23 @@ epub-sorter:
   role: Opportuniste
   status: V0
   valeur_plateforme: "Trieur EPUB par m\xE9tadonn\xE9es"
+game-solver-platform:
+  bloqueurs:
+  - "D\xE9pend de chrysa-lib/auth"
+  - "Int\xE9gration Steam API trophies (V2)"
+  - "PRD V1 \xE0 r\xE9diger (scope : puzzles/\xE9nigmes + leaderboard amis)"
+  - "Repo \xE0 cr\xE9er (chrysa/game-solver-platform)"
+  budget_annuel_eur:
+    effort_h: 180
+    infra: 40
+    saas: 0
+  priority: P2
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Plateforme IA game solver \xB7 platinage rapide multi-jeux \xB7\
+    \ partage amis \xB7 leaderboard global \xB7 hints progressifs \xB7 LangGraph +\
+    \ Claude API + Ollama fallback"
 genealogy-validator:
   bloqueurs: []
   budget_annuel_eur:
@@ -287,15 +304,19 @@ project-init:
   valeur_plateforme: "Scaffolder \xB7 appel\xE9 par chrysa-init.sh"
 satisfactory-automated_calculator:
   bloqueurs:
-  - "Extension multi-jeu (SAT v2) n\xE9cessite PRD"
+  - "Multi-jeu d\xE9l\xE9gu\xE9 \xE0 game-solver-platform"
+  - "Rename propos\xE9 : satisfactory-factory-manager (SAT v2)"
+  - "Split D-0020 : scope restreint \xE0 Satisfactory uniquement"
   budget_annuel_eur:
-    effort_h: 30
+    effort_h: 60
     infra: 0
     saas: 0
   public: true
   role: Opportuniste
   status: V1
-  valeur_plateforme: "Outil calcul cha\xEEnes production Satisfactory"
+  valeur_plateforme: "SAT v2 \xB7 Gestion d'usine Satisfactory : import save \xB7\
+    \ layout planner \xB7 optimizer cha\xEEnes production \xB7 blueprints partag\xE9\
+    s entre amis"
 server:
   bloqueurs:
   - "Backup DB quotidien \xE0 configurer"

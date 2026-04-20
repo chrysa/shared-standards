@@ -119,6 +119,26 @@ apply_core_settings() {
         fi
     fi
 
+    # Retry sans allow_forking si compte user (Allow forks réservé aux org)
+    if echo "$output" | grep -qE "Allow forks can only be changed on org-owned"; then
+        echo "  ⚠️  allow_forking rejeté (compte user), retry sans..."
+        payload=$(build_payload "$is_public" true | jq 'del(.allow_forking)')
+        output=$(echo "$payload" | gh api -X PATCH "/repos/$repo" --input - 2>&1)
+        exit_code=$?
+        if [ $exit_code -eq 0 ]; then
+            echo "  ✅ core settings applied (sans allow_forking)"
+            return 0
+        fi
+        # Re-retry sans has_discussions non plus
+        payload=$(build_payload "$is_public" false | jq 'del(.allow_forking)')
+        output=$(echo "$payload" | gh api -X PATCH "/repos/$repo" --input - 2>&1)
+        exit_code=$?
+        if [ $exit_code -eq 0 ]; then
+            echo "  ✅ core settings applied (sans allow_forking ni has_discussions)"
+            return 0
+        fi
+    fi
+
     # Échec réel - afficher l'erreur
     local err_msg
     err_msg=$(echo "$output" | grep -oE '"message":\s*"[^"]*"' | head -1 | sed 's/"message":\s*//; s/^"//; s/"$//')
