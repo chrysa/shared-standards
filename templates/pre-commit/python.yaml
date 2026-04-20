@@ -1,0 +1,116 @@
+# .pre-commit-config.yaml — template Python chrysa (enrichi patterns padam-av)
+# Convention : CLAUDE.md global · Python 3.14 · Ruff + Mypy + detect-secrets + commitlint
+# Plus : actionlint · markdownlint · hadolint · codespell · pip-audit
+
+default_language_version:
+  python: python3.14
+
+repos:
+  # ── Hygiène générique ─────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: mixed-line-ending
+      - id: debug-statements
+      - id: no-commit-to-branch
+        args: ["--branch", "main", "--branch", "master"]
+
+  # ── Secrets ────────────────────────────────────────────
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # ── Python lint + format + type ─────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        additional_dependencies: [pydantic, types-requests]
+
+  # ── Orthographe + docstrings ────────────────────────────
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args: ["--ignore-words-list=chrysa,crate,nd"]
+
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args: ["--fail-under=80", "--quiet"]
+
+  # ── Audit dépendances ───────────────────────────────────
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.7.3
+    hooks:
+      - id: pip-audit
+        args: ["--disable-pip"]
+
+  # ── CI / Docker / scripts lint ──────────────────────────
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.4
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.1-beta
+    hooks:
+      - id: hadolint-docker
+        args: ["--ignore", "DL3008", "--ignore", "DL3015"]
+
+  - repo: https://github.com/openstack/bashate
+    rev: 2.1.1
+    hooks:
+      - id: bashate
+        args: ["--max-line-length=120"]
+
+  # ── Markdown ────────────────────────────────────────────
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ["--fix"]
+
+  # ── Commit message ──────────────────────────────────────
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.18.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ["@commitlint/config-conventional"]
+
+  # ── Standards sync check (warn-only, non-bloquant) ─────
+  - repo: local
+    hooks:
+      - id: check-standards-sync
+        name: Vérifie sync templates shared-standards
+        entry: bash shared-standards/scripts/check-standards-sync.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        # --strict pour bloquer si drift · --auto-update pour écraser local

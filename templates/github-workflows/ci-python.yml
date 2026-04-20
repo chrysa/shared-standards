@@ -1,0 +1,17 @@
+# ci-python.yml — thin wrapper vers _reusable-ci.yml
+# Pour une logique différente, édite _reusable-ci.yml (mutualisé avec ci-node.yml)
+
+name: CI
+on:
+  push:
+    branches: [develop, main, master]
+  pull_request:
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-ci.yml
+    with:
+      stack: python
+      python-version: "3.14"
+      coverage-min: 85
+    secrets: inherit

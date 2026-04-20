@@ -1,108 +1,110 @@
-# [PROJECT_NAME] — GitHub Copilot Instructions
+# Copilot Instructions — chrysa gold standard
 
-<!-- @[claude-sonnet-4-6] -->
+> Dérivé des refs padam-av + padam-av-backoffice. À copier dans `<repo>/.github/copilot-instructions.md` et adapter le nom du projet + stack spécifique.
 
-## Mandatory Workflow
+## ⚠️ MANDATORY WORKFLOW
 
-**Before starting ANY task:**
+**AVANT TOUTE TÂCHE :**
 
-1. Read `.github/instructions/*.instructions.md` if present
-2. Apply relevant patterns matching your task context
-3. Follow project standards from `CLAUDE.md`
+1. **Lire `.github/instructions/*.instructions.md`** — guidelines techniques du repo
+2. **Lire `CLAUDE.md`** — règles chrysa globales + repo-specific
+3. **Appliquer les patterns** — aucune déviation sans ADR
 
-## Role
+Si tu contournes ces instructions, le workflow `standards-adoption-audit` (lundi 09h30) ouvrira une issue `standards-drift` sur le repo.
 
-You are a senior software engineer working on **[PROJECT_NAME]**.
-Write clean, maintainable, idiomatic, and secure code.
+## Rôle
 
-## Project Context
+Tu es l'assistant IA spécialisé pour ce projet chrysa. Focus dans cet ordre :
+**qualité > sécurité > maintenabilité > performance**.
 
-**Stack:** [STACK_DESCRIPTION]
-**Purpose:** [ONE_SENTENCE_DESCRIPTION]
-**Default branch:** `develop`
+## Stack standard chrysa (ADRs actés, non négociables)
 
-## Coding Standards
+Voir `~/.claude/CLAUDE.md` section `STACK TRANSVERSALE`. Règles clés :
 
-### General
+- Python 3.14 · FastAPI ≥ 0.115 + Pydantic v2 · Django 6
+- React 19 + TS · Vite 6 · shadcn/ui + Tailwind · TanStack Query + Zustand
+- PostgreSQL 16 · Redis 7 · SQLAlchemy 2.0 async + Alembic
+- Docker multi-stage · user non-root · HEALTHCHECK obligatoire
+- i18n FR+EN dès V1 · dark mode dès V1 · WCAG 2.1 AA
+- Coverage ≥ 85% Python / 80% Node · ruff/eslint 0 warning · mypy/tsc 0 erreur
 
-- Write in English: code, comments, commit messages, documentation, issues, PRs.
-- Follow the existing style and conventions in the file you are editing.
-- Do not add features, refactors, or "improvements" not explicitly requested.
-- Do not add docstrings, comments, or type annotations to code you did not change.
-- Do not over-engineer. Prefer simple, readable solutions over clever abstractions.
+## Conventions NON-NÉGOCIABLES
 
-### Quality Thresholds
+### 1. Une tâche = une action atomique
 
-- Max function length: 50 lines
-- Max file length: 500 lines
-- Max cyclomatic complexity: 10
-- Lint warnings: 0
-- Test coverage: [X]% (project-specific — see `CLAUDE.md`)
+Intitulé = verbe infinitif + objet unique. Pas de `+`, `et`, `puis`, `,`. Critère binaire.
 
-## Security
+### 2. Commits Conventional Commits
 
-- Never commit secrets, tokens, or credentials.
-- Use environment variables for all config that varies between environments.
-- Validate all external inputs at system boundaries.
+`type(scope): description`. Types : feat, fix, chore, docs, refactor, test, ci, perf, style, build.
 
-## Git and CI
+### 3. Branches
 
-- Follow Conventional Commits: `type(scope): description`
-- Valid types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`, `style`
-- Do not bypass pre-commit hooks (`--no-verify`) without explicit approval.
-- CI must pass before merging any PR.
+`[type]/[name]` — feature/, fix/, chore/, hotfix/, release/. Default = `develop`.
 
-## Build System
+### 4. Code structure
 
-- All commands through `make <target>` — never run build tools directly on host.
-- See `Makefile` for available targets.
+- One file per class (snake_case Python, PascalCase TSX)
+- Single return point par fonction
+- Business logic en service classes, views restent légères
+- Max 40 lignes/fonction (Py) ou 50 (TS), max 300 lignes/fichier (Py) ou 500 (TS)
+- Max 5 paramètres, complexité cyclomatique max 10
 
-## Response Style
+### 5. Tests
 
-- Be concise and direct.
-- Lead with the answer or the code.
-- Do not recap what was already said.
-- Do not explain obvious things.
-- If uncertain, say so in one sentence and give the most likely answer.
+- Mock DB dans unit tests, integration sous `@pytest.mark.integration`
+- NO hardcoded strings → factories + parametrize
+- Au moins 1 test négatif par API
 
-## Automation & Industrialization (NON-NEGOTIABLE)
+### 6. Secrets / env
 
-- Projects must be **maximally automated and industrialized**.
-- Every repetitive task must be covered by one of: CI/CD pipeline, Makefile target, pre-commit hook, GitHub Actions workflow, or a bot/script.
-- Required automation baseline for any project:
-  - **CI/CD**: automated lint, type-check, tests, build on every push/PR.
-  - **Formatting**: auto-applied via pre-commit or CI (no manual `ruff`/`prettier` runs).
-  - **Releases**: automated versioning and changelog generation (e.g. `cliff`, `semantic-release`).
-  - **Dependency updates**: automated via Dependabot or Renovate.
-  - **Secret scanning**: automated on every commit (pre-commit hook + CI step).
-- When proposing or implementing a feature, always include the automation layer (tests, CI step, Makefile target) — not just the code.
-- Any manual step that could be automated is considered **technical debt** and must be tracked.
+- `.env.example` dans git, `.env` jamais
+- Secrets k8s via Sealed Secrets
+- Zéro secret dans code/logs/images
 
-## Canonical Templates & Shared Tooling
+### 7. i18n
 
-### React applications
-- All new React apps **must** be bootstrapped from `Forge-Stack-Workshop/react-app-generator`.
-- Never scaffold from scratch or from `create-react-app`/`vite` directly.
+Aucun string user-visible en dur. `useTranslation()` React, `gettext_lazy` Django.
 
-### Makefiles
-- All project Makefiles **must** extend or be derived from `Forge-Stack-Workshop/base-makefile`.
-- Do not duplicate targets that already exist in the base — inherit instead.
+### 8. UI conventions (frontend)
 
-### Pre-commit hooks
-- If a required hook is missing from `chrysa/pre-commit-tools`, **open an issue** on that repo describing the hook needed before proceeding.
-- In the requesting repo, open a matching issue/PR and mark it as dependent (`Depends on chrysa/pre-commit-tools#<N>`).
-- Do not implement a workaround locally — wait for the hook to land in the shared repo.
+- Toasts top-right only · pas de breadcrumbs sur home · KPIs uniquement home
+- Dark mode obligatoire dès V1
+- React Router `<Link>`, `<Navigate>`, `useNavigate()` — **zéro** `window.location`
+- **NO try/catch** — pattern Result<T, E> + typed errors
+- `STORAGE_KEYS` constantes, pas de clé localStorage en dur
+- Auth flow event-driven (`auth:unauthorized`), zéro `isLoading` pendant action user
 
-### Issue resolution automation (desired workflow)
-- When a blocking issue is opened (e.g. missing hook, missing template), an agent should:
-  1. Analyse the issue and propose a solution on the upstream repo.
-  2. Once the solution is validated (human approval), automatically unblock the dependent issue/PR in the requesting repo.
-- This workflow is aspirational — track automation gaps as issues on the relevant repos.
+### 9. Docker / build
 
-## Project-Specific Rules
+- docker-compose centralisé — tous services montent code depuis `./src` vers `/code`
+- Makefile-only : jamais `python`/`pytest`/`docker` direct, toujours `make <target>`
+- Chemins relatifs depuis racine projet
 
-[Add project-specific patterns, architecture decisions, and conventions here.]
+### 10. PR workflow
 
----
+- Stacked PRs via `gregsdennis/dependencies-action` : `Depends on #<N>` dans le body
+- Squash merge à la fin
+- 1 PR par issue, scopée minimum
 
-All contributors and automation must comply with these rules.
+## Process de review (avant PR)
+
+1. `make lint` = 0 warning
+2. `make type-check` = 0 erreur
+3. `make test` = vert + coverage ≥ seuil
+4. `pre-commit run --all-files` = vert
+5. Commit messages Conventional Commits
+6. PR body décrit **pourquoi**, pas **quoi**
+
+## Références obligatoires
+
+- `~/.claude/CLAUDE.md` (global chrysa)
+- `<repo>/CLAUDE.md` (repo)
+- `.github/copilot-instructions.md` (ce fichier)
+- `.github/instructions/*.instructions.md` (détail par domaine)
+- [chrysa/shared-standards](https://github.com/chrysa/shared-standards) — templates + workflows reusable
+- [chrysa/pre-commit-tools](https://github.com/chrysa/pre-commit-tools) — 36 hooks customs
+
+## Model tagging
+
+Règles spécifiques à un modèle tagguées `@[MODEL_NAME]` (voir `.github/instructions/model-tagged.md`).

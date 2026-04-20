@@ -1,0 +1,54 @@
+flowchart LR
+  subgraph SOCLE["🔴 SOCLE (prérequis)"]
+    cl["chrysa-lib/auth"]
+    ss["shared-standards v1.0.0"]
+    sv["server Kimsufi"]
+    cw["chrysa-workstation"]
+  end
+  subgraph CENTRAL["🟠 Centraux"]
+    pct["pre-commit-tools v0.2.0"]
+    pi["project-init"]
+  end
+  subgraph ACTIFS["🟢 ACTIFS"]
+    dn["DEV Nexus V1"]
+    fa["FridgeAI"]
+    dg["doc-gen"]
+    lo["LifeOS"]
+  end
+  subgraph OPP["⚪ Opportunistes"]
+    d3["Discordium V3"]
+    jai["JardinAI"]
+    tt["TerraTag"]
+    dnd["D-D"]
+    aia["AI Aggregator"]
+  end
+  ss --> pct
+  ss --> pi
+  pct --> dn
+  pct --> fa
+  pct --> dg
+  pct --> lo
+  pi --> dn
+  pi --> fa
+  pi --> lo
+  cl --> dn
+  cl --> fa
+  cl --> lo
+  cl --> aia
+  sv --> dn
+  sv --> fa
+  sv --> lo
+  sv --> dg
+  cw --> sv
+  dn --> d3
+  dn --> dnd
+  dn --> jai
+  lo --> tt
+  classDef socle fill:#fecaca,stroke:#dc2626,color:#111
+  classDef central fill:#fed7aa,stroke:#ea580c,color:#111
+  classDef actif fill:#bbf7d0,stroke:#16a34a,color:#111
+  classDef opp fill:#e5e7eb,stroke:#6b7280,color:#111
+  class cl,ss,sv,cw socle
+  class pct,pi central
+  class dn,fa,dg,lo actif
+  class d3,jai,tt,dnd,aia opp

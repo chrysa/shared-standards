@@ -1,77 +1,141 @@
 ---
-# Labeler configuration template for chrysa ecosystem repos
-# Copy this file to .github/labeler.yml in your repository.
-# Used by actions/labeler@v6 (see workflows/labeler.yml).
-#
-# Each key is a label name. The value defines which changed files trigger it.
-# See full syntax: https://github.com/actions/labeler
+# labeler.yml — règles auto-labels pour PR (actions/labeler@v6)
+# Source de vérité couleurs : labels.yml (sync via sync-labels.yml)
+# Aligne les noms avec labels.yml (case exacte)
 
-# ── CI / Infrastructure ────────────────────────────────────────────────────
-ci:
-    - changed-files:
-          - any-glob-to-any-file:
-                - .github/**
-                - Dockerfile*
-                - docker-compose*.yml
-                - .dockerignore
-                - Makefile
-
-dependencies:
-    - changed-files:
-          - any-glob-to-any-file:
-                - '**/pyproject.toml'
-                - '**/requirements*.txt'
-                - '**/package.json'
-                - '**/package-lock.json'
-                - '**/yarn.lock'
-                - .pre-commit-config.yaml
-
-# ── Backend (Python) ───────────────────────────────────────────────────────
-backend:
-    - changed-files:
-          - any-glob-to-any-file:
-                - backend/**
-                - '**/src/**/*.py'
-
-api:
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# DOMAINES techniques
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Api:
     - changed-files:
           - any-glob-to-any-file:
                 - '**/api/**'
-                - '**/routers/**'
+                - '**/api_urls.py'
+                - '**/routes/**'
                 - '**/endpoints/**'
+                - '**/routers/**'
 
-# ── Frontend (Node/React) ──────────────────────────────────────────────────
-frontend:
+Auth:
     - changed-files:
           - any-glob-to-any-file:
-                - frontend/**
-                - app/**
-                - '**/src/**/*.ts'
-                - '**/src/**/*.tsx'
+                - '**/auth/**'
+                - '**/authentication/**'
+                - '**/*oauth*'
+                - '**/*login*'
 
-# ── Tests ──────────────────────────────────────────────────────────────────
-tests:
+Database:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/migrations/**'
+                - '**/alembic/**'
+                - '**/models/**'
+                - '**/schema*.sql'
+                - '**/db-schema.dbml'
+
+Frontend:
+    - changed-files:
+          - any-glob-to-any-file:
+                - 'src/components/**'
+                - 'src/pages/**'
+                - 'src/hooks/**'
+                - 'app/src/**'
+                - '**/*.tsx'
+                - '**/*.jsx'
+                - '**/*.css'
+
+i18n:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/i18n/**'
+                - '**/locales/**'
+                - '**/*.po'
+                - '**/translations/**'
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# MÉTADONNÉES (CI · docs · tooling)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ci:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '.github/workflows/**'
+                - '.github/actions/**'
+
+Pre-commit:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '.pre-commit-config.yaml'
+                - '.pre-commit-hooks.yaml'
+
+Makefiles:
+    - changed-files:
+          - any-glob-to-any-file:
+                - 'Makefile'
+                - 'makefiles/**'
+
+Dockerfile:
+    - changed-files:
+          - any-glob-to-any-file:
+                - 'Dockerfile*'
+                - 'docker-compose*.yml'
+                - '.dockerignore'
+
+docs:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/*.md'
+                - 'docs/**'
+
+Configurations:
+    - changed-files:
+          - any-glob-to-any-file:
+                - 'pyproject.toml'
+                - 'package.json'
+                - 'tsconfig.json'
+                - '.editorconfig'
+                - 'GitVersion.yml'
+
+Security:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/security/**'
+                - '.secrets.baseline'
+
+test:
     - changed-files:
           - any-glob-to-any-file:
                 - '**/tests/**'
-                - '**/*.test.*'
-                - '**/*.spec.*'
+                - '**/test_*.py'
+                - '**/*_test.py'
+                - '**/*.test.ts'
+                - '**/*.test.tsx'
+                - '**/*.spec.ts'
                 - '**/conftest.py'
 
-# ── Documentation ──────────────────────────────────────────────────────────
-documentation:
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# DEPENDENCIES (déclenché par Dependabot)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'dependencies/python':
     - changed-files:
           - any-glob-to-any-file:
-                - '*.md'
-                - docs/**
-                - '**/README.md'
+                - 'pyproject.toml'
+                - 'poetry.lock'
+                - 'requirements*.txt'
 
-# ── Configuration ──────────────────────────────────────────────────────────
-config:
+'dependencies/node':
     - changed-files:
           - any-glob-to-any-file:
-                - '**/config/**'
-                - '**/settings.py'
-                - '*.toml'
-                - '*.cfg'
-                - '*.ini'
+                - 'package.json'
+                - 'pnpm-lock.yaml'
+                - 'package-lock.json'
+                - 'yarn.lock'
+
+'dependencies/docker':
+    - changed-files:
+          - any-glob-to-any-file:
+                - 'Dockerfile'
+                - 'docker-compose*.yml'
+
+'dependencies/actions':
+    - changed-files:
+          - any-glob-to-any-file:
+                - '.github/workflows/**'

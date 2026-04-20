@@ -1,0 +1,353 @@
+D-D:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 10
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V1
+  valeur_plateforme: Outil joueur/MJ Donjons & Dragons
+DJango-CustomeCommands:
+  bloqueurs: []
+  public: false
+  role: "Gel\xE9"
+  status: Archive
+  valeur_plateforme: "ARCHIV\xC9 2026-04-20 (user-confirmed obsolete)"
+FabForge:
+  bloqueurs:
+  - "Repo non encore cr\xE9\xE9 \xB7 GDD dans Notion"
+  budget_annuel_eur:
+    effort_h: 0
+    infra: 0
+    saas: 0
+  notion_only: true
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: GDD jeu FabForge
+PO-GO-DEX:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 10
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V1
+  valeur_plateforme: "Dex/optimizer Pok\xE9mon GO"
+_reprio_2026_04_20:
+  note: "server P0 inchang\xE9 \xB7 dev-nexus Actif P0 \xB7 ai-aggregator Actif P1\
+    \ (ex-Opportuniste)"
+  overrides:
+    ai-aggregator:
+      debloqueur: true
+      demarrable_sans_auth: true
+      priority_new: P1
+      role_new: Actif
+      role_precision: Actif multiplicateur (prompt-optimizer + Ollama fallback)
+    dev-nexus:
+      debloqueur: true
+      priority_new: P0
+      role_precision: Actif multiplicateur (cockpit portefeuille)
+      scaffold_sans_auth: true
+    doc-gen:
+      priority_new: P2
+    lifeos:
+      priority_new: P2
+    my-fridge:
+      priority_new: P2
+  rule: "Exception r\xE8gle 1+2 pendant bootstrap \xE9cosyst\xE8me : 2 Socles + 2\
+    \ Actifs P0-P1"
+  sequence:
+  - 'Phase 0 : server infra (bloque tout)'
+  - "Phase 1 parall\xE8le : ai-aggregator V0 (prompt-optimizer local sans auth) +\
+    \ dev-nexus V0 scaffold UI (sans auth)"
+  - 'Phase 2 : chrysa-lib Sprint 1 @chrysa/auth'
+  - 'Phase 3 : merge A+B = dev-nexus V1 complet avec IA prio via ai-aggregator'
+ai-aggregator:
+  bloqueurs:
+  - "Ollama self-hosted \xE0 installer"
+  budget_annuel_eur:
+    effort_h: 80
+    infra: 40
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Hub IA + prompt-optimizer local-first (r\xE9duit tokens Claude)"
+chrysa-lib:
+  bloqueurs:
+  - "D\xE9pend de server Phase 0 compl\xE8te (infra + monitoring)"
+  - "Sprint 1 @chrysa/auth non d\xE9marr\xE9"
+  budget_annuel_eur:
+    effort_h: 80
+    infra: 0
+    saas: 0
+  priority: P1
+  public: true
+  role: Socle
+  status: V0
+  valeur_plateforme: Fondation auth/config/logging pour 8+ projets aval
+coach:
+  bloqueurs:
+  - "Fusion coaching-sport + coaching-guitare non ex\xE9cut\xE9e"
+  budget_annuel_eur:
+    effort_h: 40
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: Tracker coaching (fusion D-0012)
+container-webview:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 15
+    infra: 0
+    saas: 0
+  public: false
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Webview conteneuris\xE9e desktop"
+dev-nexus:
+  bloqueurs:
+  - "D\xE9pend de chrysa-lib/auth"
+  - "GitHub MCP non configur\xE9"
+  budget_annuel_eur:
+    effort_h: 200
+    infra: 60
+    saas: 120
+  public: true
+  role: Actif
+  status: V1
+  valeur_plateforme: Cockpit GitHub+SonarCloud+AI prioritization solo dev
+discord-bot-back:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 30
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Backend bot Discord \xB7 utilit\xE9 projet Discordium"
+diy-stream-deck:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 20
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: Stream Deck DIY logiciel
+doc-gen:
+  bloqueurs:
+  - "PR #1 python-jose \u2192 joserfc BLOQUANTE"
+  budget_annuel_eur:
+    effort_h: 60
+    infra: 0
+    saas: 0
+  public: true
+  role: Actif
+  status: V1
+  valeur_plateforme: Pipeline doc Sphinx/MkDocs pour tous repos chrysa
+drive-cleanup:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 5
+    infra: 0
+    saas: 0
+  public: false
+  role: "Am\xE9nagement"
+  status: V1
+  valeur_plateforme: "Nettoyage Google Drive \xB7 scheduled task"
+ecosystem-reorg:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 10
+    infra: 0
+    saas: 0
+  public: false
+  role: "Am\xE9nagement"
+  status: V0
+  valeur_plateforme: Restructuration workspace
+epub-sorter:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 15
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Trieur EPUB par m\xE9tadonn\xE9es"
+genealogy-validator:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 20
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Validation coh\xE9rence GEDCOM"
+github-actions:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 0
+    infra: 0
+    saas: 0
+  public: false
+  role: "Gel\xE9"
+  status: Frozen
+  valeur_plateforme: "FUSIONN\xC9 dans shared-standards (D-0001)"
+guideline-checker:
+  bloqueurs:
+  - Devenir package shared-standards/packages/ (D-0004 shared-standards)
+  budget_annuel_eur:
+    effort_h: 25
+    infra: 0
+    saas: 0
+  priority: P2
+  public: true
+  role: Opportuniste
+  status: V0
+  valeur_plateforme: "Validation r\xE8gles impl\xE9mentation + report HTML"
+lifeos:
+  bloqueurs:
+  - "D\xE9pend de chrysa-lib/auth"
+  - "MCP Notion d\xE9j\xE0 OK"
+  budget_annuel_eur:
+    effort_h: 300
+    infra: 30
+    saas: 0
+  public: true
+  role: Actif
+  status: V0
+  valeur_plateforme: Assistant vie + visualisation Notion ergonomique (D-0003)
+linkendin-resume:
+  bloqueurs:
+  - "Archiver \xB7 voir archive-merged-repos.sh"
+  public: false
+  role: "Gel\xE9"
+  status: Frozen
+  valeur_plateforme: "FUSIONN\xC9 dans resume (D-0011/D-0025)"
+my-fridge:
+  bloqueurs:
+  - "D\xE9pend de chrysa-lib/auth"
+  - "Mod\xE8le allerg\xE8nes V1 \xE0 arr\xEAter"
+  budget_annuel_eur:
+    effort_h: 120
+    infra: 20
+    saas: 0
+  public: true
+  role: Actif
+  status: V0
+  valeur_plateforme: "PWA allerg\xE8nes/nutrition + TheMealDB (conformit\xE9 familiale)"
+my-resume:
+  bloqueurs:
+  - "Archiver \xB7 voir archive-merged-repos.sh"
+  public: false
+  role: "Gel\xE9"
+  status: Frozen
+  valeur_plateforme: "FUSIONN\xC9 dans resume (D-0011/D-0025)"
+notion-automation:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 15
+    infra: 0
+    saas: 0
+  public: false
+  role: "Am\xE9nagement"
+  status: V0
+  valeur_plateforme: Scripts automation Notion
+pre-commit-tools:
+  bloqueurs:
+  - 'Issue #83 release workflow (patch ISSUE-83-DIAGNOSTIC.md)'
+  budget_annuel_eur:
+    effort_h: 15
+    infra: 0
+    saas: 0
+  priority: P1
+  public: true
+  role: Socle
+  status: V1
+  valeur_plateforme: "Hooks pre-commit r\xE9utilisables pour portefeuille chrysa"
+project-init:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 10
+    infra: 0
+    saas: 0
+  public: false
+  role: Socle
+  status: V1
+  valeur_plateforme: "Scaffolder \xB7 appel\xE9 par chrysa-init.sh"
+satisfactory-automated_calculator:
+  bloqueurs:
+  - "Extension multi-jeu (SAT v2) n\xE9cessite PRD"
+  budget_annuel_eur:
+    effort_h: 30
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V1
+  valeur_plateforme: "Outil calcul cha\xEEnes production Satisfactory"
+server:
+  bloqueurs:
+  - "Backup DB quotidien \xE0 configurer"
+  - "Let's Encrypt cert \xE0 v\xE9rifier/renouveler"
+  - "Stack Prometheus/Grafana/Loki/Qdrant \xE0 d\xE9ployer (~4 Go RAM)"
+  - "Tailscale auth keys \xE0 r\xE9g\xE9n\xE9rer"
+  budget_annuel_eur:
+    effort_h: 40
+    infra: 180
+    saas: 0
+  priority: P0
+  public: false
+  role: Socle
+  status: V1
+  valeur_plateforme: Infra Kimsufi Docker+Nginx+Tailscale + monitoring local-first
+shared-standards:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 20
+    infra: 0
+    saas: 0
+  public: false
+  role: Socle
+  status: V1
+  valeur_plateforme: Conventions + CI + templates + scripts portefeuille
+skills:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 20
+    infra: 0
+    saas: 0
+  public: false
+  role: Socle
+  status: V1
+  valeur_plateforme: "Biblioth\xE8que skills Claude Code personnels"
+usefull-containers:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 5
+    infra: 0
+    saas: 0
+  public: true
+  role: Opportuniste
+  status: V1
+  valeur_plateforme: Collection containers Docker utilitaires
+windows-docker-state-notification:
+  bloqueurs: []
+  budget_annuel_eur:
+    effort_h: 10
+    infra: 0
+    saas: 0
+  public: false
+  role: Opportuniste
+  status: V1
+  valeur_plateforme: "Notifications \xE9tat Docker Windows"

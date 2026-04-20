@@ -1,0 +1,265 @@
+# .pre-commit-config.yaml — chrysa gold standard
+# Dérivé du pre-commit padam-av (68 hooks) — adapté solo-dev chrysa.
+# SHA pinning obligatoire : exécuter `pre-commit autoupdate --bleeding-edge --freeze` à la fin.
+#
+# Install : pip install pre-commit && pre-commit install && pre-commit install --hook-type commit-msg
+# Run     : pre-commit run --all-files
+
+default_language_version:
+  python: python3.14
+  node: "25"
+fail_fast: false
+minimum_pre_commit_version: 4.1.0
+
+exclude: |
+  (?x)^(
+    \.venv/|node_modules/|dist/|build/|htmlcov/|\.cache/|\.mypy_cache/|\.ruff_cache/|
+    .*_pb2\.py$|.*_pb2_grpc\.py$|
+    \.github/workflows/pull_request_template\.md
+  )$
+
+repos:
+  # ── Basics ────────────────────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ── Secret detection ──────────────────────────────────────────────────────
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  # ── Python ────────────────────────────────────────────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [pydantic>=2, types-requests]
+        exclude: ^(tests/|docs/|migrations/)
+
+  - repo: https://github.com/asottile/setup-cfg-fmt
+    rev: v2.7.0
+    hooks:
+      - id: setup-cfg-fmt
+
+  - repo: https://github.com/dannysepler/rm_unneeded_f_str
+    rev: v0.2.0
+    hooks:
+      - id: rm-unneeded-f-str
+
+  - repo: https://github.com/MarcoGorelli/auto-walrus
+    rev: v0.3.4
+    hooks:
+      - id: auto-walrus
+
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.13
+    hooks:
+      - id: vulture
+        args: [--min-confidence, "80", "."]
+
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args: [--fail-under=80, --quiet]
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.22.2
+    hooks:
+      - id: django-upgrade
+        args: [--target-version, "5.1"]
+
+  # ── Sécurité / supply chain ───────────────────────────────────────────────
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.7.3
+    hooks:
+      - id: pip-audit
+        args: [--skip-editable]
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.4
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.0.1
+    hooks:
+      - id: zizmor
+
+  # ── Shell / bash ──────────────────────────────────────────────────────────
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: https://github.com/lovesegfault/beautysh.git
+    rev: v6.2.1
+    hooks:
+      - id: beautysh
+        args: [--indent-size, "2"]
+
+  - repo: https://github.com/openstack/bashate.git
+    rev: 2.1.1
+    hooks:
+      - id: bashate
+        args: [-i, E006]
+
+  # ── Makefile ──────────────────────────────────────────────────────────────
+  - repo: https://github.com/smian/pre-commit-makefile.git
+    rev: v0.3.0
+    hooks:
+      - id: check-makefile-lint
+
+  # ── YAML ──────────────────────────────────────────────────────────────────
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-s]
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.2.3
+    hooks:
+      - id: yamlfmt
+        args: [--mapping, "2", --sequence, "4", --offset, "2"]
+
+  # ── Markdown ──────────────────────────────────────────────────────────────
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        additional_dependencies: [mdformat-gfm, mdformat-frontmatter]
+
+  - repo: https://github.com/frnmst/md-toc
+    rev: 9.0.0
+    hooks:
+      - id: md-toc
+        args: [--in-place, github]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+
+  # ── Dockerfile ────────────────────────────────────────────────────────────
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.12.1b3
+    hooks:
+      - id: hadolint
+        args: [--ignore, DL3008, --ignore, DL3013]
+
+  # ── Typo detection ────────────────────────────────────────────────────────
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.6.7
+    hooks:
+      - id: fix-smartquotes
+      - id: fix-ligatures
+      - id: fix-spaces
+
+  # ── Frontend (Node/TS/React) — actif uniquement si app/ présent ───────────
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: ^app/.*\.(css|js|ts|tsx|json|yaml|yml)$
+        args: [--print-width=120, --single-quote, --trailing-comma=es5]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.15.0
+    hooks:
+      - id: eslint
+        files: ^app/.*\.(ts|tsx|js|jsx)$
+        args: [--fix, --max-warnings=0]
+
+  - repo: https://github.com/pre-commit/mirrors-csslint
+    rev: v1.0.5
+    hooks:
+      - id: csslint
+        files: ^app/.*\.css$
+
+  # ── Conventional Commits ──────────────────────────────────────────────────
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+
+  # ── chrysa custom hooks (v0.2.0+) ─────────────────────────────────────────
+  - repo: https://github.com/chrysa/pre-commit-tools
+    rev: v0.2.0
+    hooks:
+      # Dockerfiles
+      - id: format-dockerfiles
+      - id: dockerfile-no-latest-detection
+      # JS/TS console
+      - id: console-debug-detection
+      - id: console-log-detection
+      - id: console-table-detection
+      - id: no-console-warn
+      - id: react-console-error-detection
+      - id: react-direct-dom
+      # Python quality
+      - id: debugger-detection
+      - id: print-detection
+      - id: pprint-detection
+      - id: unreachable-code-detection
+      - id: logger-detection
+      - id: no-bare-except-detection
+      - id: no-sync-in-async
+      - id: no-print-in-migration
+      # Django / FastAPI security
+      - id: django-hardcoded-secret-detection
+      - id: django-no-raw-sql
+      - id: no-debug-in-settings
+      - id: fastapi-missing-response-model
+      # TS / React
+      - id: ts-hardcoded-secret-detection
+      - id: ts-unreachable-code-detection
+      - id: import-no-relative-parent
+      # CSS
+      - id: css-duplicate-property-detection
+      - id: css-unused-variable-detection
+      # Files
+      - id: env-file-check
+      - id: env-example-sync
+      - id: json-sorter
+      - id: yaml-sorter
+      - id: requirements-sort
+      - id: js-syntax-check
+      - id: dead-code-detection
+      # Coverage ratchet (v0.2.0+, non-bloquant)
+      - id: coverage-ratchet-hook
+        stages: [manual, post-commit]
+      # Changelog (absorbé depuis pre-commit-hooks-changelog)
+      - id: changelog-check
+      # Helm (si repo contient charts/)
+      - id: helm-lint

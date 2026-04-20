@@ -1,0 +1,111 @@
+# .pre-commit-config.yaml — template Node/TS chrysa (enrichi padam-av)
+# React 19 + Vite 6 + shadcn/ui + TypeScript + pnpm
+
+repos:
+  # ── Hygiène générique ─────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: mixed-line-ending
+      - id: no-commit-to-branch
+        args: ["--branch", "main", "--branch", "master"]
+
+  # ── Secrets ────────────────────────────────────────────
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # ── Format + lint JS/TS ────────────────────────────────
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [javascript, typescript, tsx, jsx, json, yaml, markdown, css]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.11.1
+    hooks:
+      - id: eslint
+        files: \.(js|ts|tsx|jsx)$
+        types: [file]
+        args: ["--max-warnings=0"]
+        additional_dependencies:
+          - eslint@9.11.1
+          - "@typescript-eslint/parser@8.7.0"
+          - "@typescript-eslint/eslint-plugin@8.7.0"
+
+  # ── console.log / debugger detection (React) ──────────
+  - repo: local
+    hooks:
+      - id: no-console-log-in-src
+        name: Pas de console.log dans src/
+        language: pygrep
+        entry: 'console\.(log|debug|trace)\('
+        types: [file]
+        files: ^(src|app/src)/.*\.(ts|tsx|js|jsx)$
+        exclude: \.test\.(ts|tsx|js|jsx)$
+      - id: no-debugger
+        name: Pas de debugger
+        language: pygrep
+        entry: '^\s*debugger\s*;'
+        types: [file]
+        files: \.(ts|tsx|js|jsx)$
+
+  # ── Orthographe ────────────────────────────────────────
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args: ["--ignore-words-list=chrysa,crate,nd"]
+
+  # ── CI / Docker lint ────────────────────────────────────
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.4
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.1-beta
+    hooks:
+      - id: hadolint-docker
+
+  # ── Markdown ────────────────────────────────────────────
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ["--fix"]
+
+  # ── Commit message ──────────────────────────────────────
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.18.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ["@commitlint/config-conventional"]
+
+  # ── Standards sync check (warn-only, non-bloquant) ─────
+  - repo: local
+    hooks:
+      - id: check-standards-sync
+        name: Vérifie sync templates shared-standards
+        entry: bash shared-standards/scripts/check-standards-sync.sh
+        language: system
+        pass_filenames: false
+        always_run: true

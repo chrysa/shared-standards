@@ -1,0 +1,67 @@
+%%{init: {'theme':'dark', 'flowchart':{'curve':'basis'}}}%%
+graph LR
+
+%% Styles par rôle (infos portfolio-metadata.yml)
+classDef socle fill:#ef4444,stroke:#fff,color:#fff
+classDef actif fill:#10b981,stroke:#fff,color:#fff
+classDef opp fill:#3b82f6,stroke:#fff,color:#fff
+classDef gele fill:#6b7280,stroke:#fff,color:#fff
+
+usefull_containers["usefull-containers"]
+genealogy_validator["genealogy-validator"]
+D_D["D-D"]
+epub_sorter["epub-sorter"]
+windows_docker_state_notification["windows-docker-state-notification"]
+server["server"]
+pre_commit_tools["pre-commit-tools"]
+satisfactory_automated_calculator["satisfactory-automated_calculator"]
+my_resume["my-resume"]
+github_actions["github-actions"]
+lifeos["lifeos"]
+project_init["project-init"]
+container_webview["container-webview"]
+discord_bot_back["discord-bot-back"]
+diy_stream_deck["diy-stream-deck"]
+doc_gen["doc-gen"]
+my_fridge["my-fridge"]
+PO_GO_DEX["PO-GO-DEX"]
+ai_aggregator["ai-aggregator"]
+chrysa_lib["chrysa-lib"]
+pycharm_settings["pycharm_settings"]
+guideline_checker["guideline-checker"]
+notion_automation["notion-automation"]
+shared_standards["shared-standards"]
+dev_nexus["dev-nexus"]
+coach["coach"]
+linkendin_resume["linkendin-resume"]
+
+notion_automation --> chrysa_lib
+
+class D_D opp
+class PO_GO_DEX opp
+class ai_aggregator opp
+class chrysa_lib socle
+class coach opp
+class dev_nexus actif
+class doc_gen actif
+class lifeos actif
+class my_fridge actif
+class satisfactory_automated_calculator opp
+class server socle
+class shared_standards socle
+class pre_commit_tools socle
+class project_init socle
+class epub_sorter opp
+class genealogy_validator opp
+class skills socle
+class guideline_checker opp
+class github_actions gele
+class discord_bot_back opp
+class container_webview opp
+class diy_stream_deck opp
+class usefull_containers opp
+class windows_docker_state_notification opp
+class FabForge opp
+class linkendin_resume gele
+class my_resume gele
+class DJango_CustomeCommands gele

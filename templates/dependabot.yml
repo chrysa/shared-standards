@@ -1,29 +1,77 @@
+# dependabot.yml — template rate-limited pour GitHub Free tier
+# Objectifs :
+#   - Max 3 PRs simultanées par écosystème (réduit quota + bruit)
+#   - Grouper patch/minor pour mergeabilité
+#   - Schedule hebdo (pas quotidien) pour limiter minutes CI
+#   - Labels cohérents avec workflow dependabot-auto-merge.yml
+
 version: 2
 updates:
+  # ─── GitHub Actions (mensuel — peu de churn) ───────
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 2
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["patch", "minor"]
     labels:
       - "dependencies"
+      - "ci"
+      - "auto-merge"
 
-  # Uncomment the block appropriate for your project:
-
-  # Python
+  # ─── Python (hebdo) — décommenter si applicable ────
   # - package-ecosystem: "pip"
   #   directory: "/"
   #   schedule:
   #     interval: "weekly"
-  #   open-pull-requests-limit: 5
-  #   labels:
-  #     - "dependencies"
+  #     day: "monday"
+  #     time: "06:00"
+  #     timezone: "Europe/Paris"
+  #   open-pull-requests-limit: 3
+  #   groups:
+  #     dev-dependencies:
+  #       patterns: ["ruff*", "mypy*", "pytest*", "types-*"]
+  #       update-types: ["patch", "minor"]
+  #     production-minor:
+  #       patterns: ["*"]
+  #       exclude-patterns: ["ruff*", "mypy*", "pytest*"]
+  #       update-types: ["patch", "minor"]
+  #   labels: ["dependencies", "auto-merge"]
+  #   commit-message:
+  #     prefix: "chore(deps)"
+  #     include: "scope"
 
-  # Node / npm
+  # ─── Node / npm (hebdo) — décommenter si applicable ─
   # - package-ecosystem: "npm"
   #   directory: "/"
   #   schedule:
   #     interval: "weekly"
-  #   open-pull-requests-limit: 5
-  #   labels:
-  #     - "dependencies"
+  #     day: "monday"
+  #     time: "06:00"
+  #     timezone: "Europe/Paris"
+  #   open-pull-requests-limit: 3
+  #   groups:
+  #     dev-dependencies:
+  #       patterns: ["eslint*", "prettier*", "vitest*", "@types/*", "typescript"]
+  #       update-types: ["patch", "minor"]
+  #     react-ecosystem:
+  #       patterns: ["react*", "@tanstack/*"]
+  #       update-types: ["patch", "minor"]
+  #   labels: ["dependencies", "auto-merge"]
+
+  # ─── Docker (mensuel) — décommenter si Dockerfile ──
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+  #     day: "monday"
+  #     time: "06:00"
+  #     timezone: "Europe/Paris"
+  #   open-pull-requests-limit: 2
+  #   labels: ["dependencies", "docker", "auto-merge"]

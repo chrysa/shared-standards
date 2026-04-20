@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings",
+  "description": "Claude Code settings · chrysa repo · hooks wired to .claude/hooks/",
+  "env": {
+    "CHRYSA_REPO": "true"
+  },
+  "hooks": {
+    "PostToolUse": {
+      "Edit": ".claude/hooks/quality-check.sh",
+      "MultiEdit": ".claude/hooks/quality-check.sh",
+      "Write": ".claude/hooks/quality-check.sh"
+    }
+  }
+}

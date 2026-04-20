@@ -1,0 +1,100 @@
+# docker-compose.yml — template chrysa (compose v2)
+# Copy to repo root + rename services. Use `docker compose --profile dev up` for
+# local dev, default profile for prod-like.
+#
+# Assumes:
+#   - Dockerfile at root
+#   - .env.example → .env (copy on first run)
+#   - Ports: app 8000, postgres 5432, redis 6379 (override via .env)
+
+name: ${PROJECT_NAME:-chrysa-app}
+
+x-common-labels: &common-labels
+  org.chrysa.project: ${PROJECT_NAME:-chrysa-app}
+  org.chrysa.env: ${ENV:-dev}
+
+x-common-restart: &common-restart
+  restart: unless-stopped
+
+services:
+  app:
+    <<: *common-restart
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.14-slim"   # ou NODE_VERSION si projet node
+    image: ${PROJECT_NAME:-chrysa-app}:${TAG:-local}
+    container_name: ${PROJECT_NAME:-chrysa-app}-app
+    env_file: .env
+    ports:
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [backend, frontend]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:${APP_PORT:-8000}/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels: *common-labels
+
+  postgres:
+    <<: *common-restart
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME:-chrysa-app}-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-in-env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels: *common-labels
+
+  redis:
+    <<: *common-restart
+    image: redis:7-alpine
+    container_name: ${PROJECT_NAME:-chrysa-app}-redis
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels: *common-labels
+
+  # ── Dev-only profile ────────────────────────────────────────────────────
+  adminer:
+    image: adminer:4
+    container_name: ${PROJECT_NAME:-chrysa-app}-adminer
+    profiles: [dev]
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [backend]
+    labels: *common-labels
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

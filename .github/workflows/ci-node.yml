@@ -1,0 +1,131 @@
+---
+# Reusable CI workflow for Node / React / Vite projects
+name: CI — Node (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node major version. Default 25.
+        required: false
+        type: string
+        default: "25"
+      package-manager:
+        description: pnpm | yarn | npm. Default pnpm.
+        required: false
+        type: string
+        default: pnpm
+      build-command:
+        description: Command to build. Default "pnpm build".
+        required: false
+        type: string
+        default: "pnpm build"
+      test-command:
+        description: Command to run tests. Default "pnpm test".
+        required: false
+        type: string
+        default: "pnpm test"
+      coverage-threshold:
+        required: false
+        type: number
+        default: 80
+      # Coverage ratchet automatique : déplacé vers chrysa/pre-commit-tools (hook coverage-ratchet-hook).
+      run-sonar:
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+jobs:
+  quality:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: ${{ inputs.package-manager }}
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install deps
+        run: |
+          case "${{ inputs.package-manager }}" in
+            pnpm) pnpm install --frozen-lockfile ;;
+            yarn) yarn install --frozen-lockfile ;;
+            npm)  npm ci ;;
+          esac
+
+      - name: Lint
+        run: ${{ inputs.package-manager }} lint
+
+      - name: Type check
+        run: ${{ inputs.package-manager }} type-check || true
+
+      - name: Test with coverage
+        run: ${{ inputs.test-command }} --coverage
+
+      - name: Build
+        run: ${{ inputs.build-command }}
+
+      - name: Extract actual coverage
+        id: coverage
+        if: success() || failure()
+        shell: bash
+        run: |
+          if [ ! -f coverage/coverage-summary.json ] && [ ! -f coverage/lcov.info ]; then
+            echo "actual=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -f coverage/coverage-summary.json ]; then
+            ACTUAL=$(node -e "const s=require('./coverage/coverage-summary.json');console.log(s.total.lines.pct)")
+          else
+            # Fallback — parse lcov.info for total lines
+            LF=$(grep -c '^DA:' coverage/lcov.info || echo 0)
+            LH=$(awk -F: '/^DA:/ {if ($2+0 > 0 || $3+0 > 0) { if ($3+0 > 0) hit++ ; total++ } } END { printf "%.2f", (total>0 ? hit*100/total : 0) }' coverage/lcov.info)
+            ACTUAL="$LH"
+          fi
+          echo "actual=$ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "ℹ️ Actual coverage: $ACTUAL%"
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 7
+
+      # Coverage ratchet déplacé dans chrysa/pre-commit-tools hook `coverage-ratchet-hook`.
+
+  sonar:
+    name: SonarCloud
+    if: inputs.run-sonar
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info

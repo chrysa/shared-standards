@@ -1,0 +1,55 @@
+gantt
+    title Roadmap chrysa 2026-04-19 (10h/sprint perso)
+    dateFormat  YYYY-MM-DD
+    axisFormat  W%V
+
+    section S0 dette session
+    PAT GitHub fine-grained            :crit, s0a, 2026-04-20, 1d
+    chrysa-bootstrap apply push pr     :crit, s0b, 2026-04-20, 1d
+    Merge 7 PRs cowork                 :crit, s0c, 2026-04-20, 1d
+    Tag shared-standards v1.0.0        :crit, s0d, after s0c, 1d
+    Restart Claude Desktop 9 MCPs      :crit, s0e, 2026-04-20, 1d
+    Resoudre doc-gen PR 1              :crit, s0i, 2026-04-20, 1d
+
+    section S1 chrysa-lib kickoff
+    init Poetry + user model           :crit, s1a, 2026-04-21, 2d
+    endpoint health + tests            :crit, s1c, after s1a, 1d
+    ADR-0010 tag v0.2.0                :s1d, 2026-04-22, 1d
+    Freeze SHAs 5 repos                :s1e, 2026-04-23, 1d
+    Monday-audit-combo run             :s1f, 2026-04-21, 1d
+    Copier 17 instructions padam       :s1g, 2026-04-24, 1d
+
+    section S2 auth multi-providers
+    Google OAuth                       :crit, s2a, 2026-04-28, 3d
+    local bcrypt                       :s2b, 2026-04-29, 2d
+    tests coverage 85                  :s2c, 2026-04-30, 2d
+    Composite actions GH               :s2d, 2026-05-01, 1d
+    Drive scan + reorg                 :s2e, 2026-04-28, 1d
+
+    section S3 auth v0.1.0 release
+    LDAP                               :crit, s3a, 2026-05-05, 2d
+    release v0.1.0 + tag               :crit, s3b, after s3a, 1d
+    Module incidents DBs INC01-06      :s3c, 2026-05-06, 1d
+    Runbooks argocd + postgres-oom     :s3d, 2026-05-07, 1d
+    Coach relaxation setup             :s3e, 2026-05-05, 1d
+
+    section S4 produits perso
+    DEV Nexus cockpit React            :s4a, 2026-05-12, 3d
+    DEV Nexus AI prioritization        :s4b, after s4a, 2d
+    FridgeAI PWA allergenes V1         :s4c, 2026-05-12, 3d
+    LifeOS Planning + Meals            :s4d, 2026-05-15, 2d
+
+    section S5 Vikunja + travaux
+    Vikunja Helm chart                 :s5a, 2026-05-19, 2d
+    Deploy Vikunja Kimsufi             :s5b, after s5a, 1d
+    notion-vikunja-sync                :s5c, after s5b, 1d
+    Travaux tracker setup              :s5d, 2026-05-19, 1d
+    LifeOS Chores + Stocks             :s5e, 2026-05-21, 2d
+
+    section S6 consolidation
+    Velero backup Kimsufi              :s6a, 2026-05-26, 2d
+    ADR-0009 fusion github-actions     :s6b, 2026-05-28, 1d
+    ADR-0013 fusion project-init       :s6c, 2026-05-29, 1d
+    Archive 2 repos deprecated         :s6d, 2026-05-29, 1d
+    Ops Tasks purge Done               :s6e, 2026-05-29, 1d
+    Retro + planning Q3 2026           :s6f, 2026-05-30, 1d

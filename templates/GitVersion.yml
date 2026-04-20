@@ -1,0 +1,22 @@
+mode: Mainline
+tag-prefix: 'prd-'
+branches:
+  main:
+    mode: ContinuousDeployment
+    tag: ''
+    increment: Minor
+  master:
+    mode: ContinuousDeployment
+    tag: ''
+    increment: Minor
+  develop:
+    mode: ContinuousDelivery
+    tag: 'beta'
+    increment: Minor
+  feature:
+    tag: 'alpha.{BranchName}'
+  hotfix:
+    tag: 'hotfix'
+    increment: Patch
+ignore:
+  sha: []

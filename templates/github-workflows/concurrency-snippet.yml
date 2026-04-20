@@ -1,0 +1,11 @@
+# Snippet à ajouter au top de chaque workflow `.yml` existant
+# pour économiser les minutes GitHub Actions (gratuit limité à 2000 min/mois sur repo privé)
+#
+# Pattern : une nouvelle push sur une branche annule les runs précédents en cours
+# → économie quand on push 3-4 fois rapidement sur la même feature branch
+#
+# À insérer après `name:` et `on:` dans chaque workflow (ci.yml, release.yml, etc.)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

@@ -1,0 +1,145 @@
+---
+# Reusable CI workflow for Python projects — chrysa/shared-standards
+# Called from caller repos via:
+#
+#   jobs:
+#     ci:
+#       uses: chrysa/shared-standards/.github/workflows/ci-python.yml@v1
+#       with:
+#         python-version: "3.14"
+#         paths: "src/ tests/"
+#         coverage-threshold: 85
+#
+# Requires chrysa/pre-commit-tools and chrysa/github-actions composite actions
+# to be pinned. Pinning by SHA is enforced by the caller's dependabot.
+
+name: CI — Python (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version (major.minor). Default 3.14.
+        required: false
+        type: string
+        default: "3.14"
+      paths:
+        description: Space-separated paths to lint/test (default repo root).
+        required: false
+        type: string
+        default: "."
+      coverage-threshold:
+        description: Minimum coverage percent (fails below).
+        required: false
+        type: number
+        default: 85
+      # Note : le coverage-ratchet automatique est géré par le hook pre-commit
+      # `coverage-ratchet-hook` du repo chrysa/pre-commit-tools (v0.2.0+).
+      # Voir : https://github.com/chrysa/pre-commit-tools#coverage-ratchet-hook
+      poetry-version:
+        required: false
+        type: string
+        default: "1.8.4"
+      run-sonar:
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+jobs:
+  quality:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+
+      - name: Install Poetry
+        run: pipx install "poetry==${{ inputs.poetry-version }}"
+
+      - name: Install deps
+        run: |
+          if [ -f pyproject.toml ]; then
+            poetry install --no-interaction
+          else
+            pip install -r requirements.txt -r requirements-dev.txt 2>/dev/null || true
+          fi
+
+      - name: Ruff (lint + format check)
+        run: |
+          poetry run ruff check ${{ inputs.paths }}
+          poetry run ruff format --check ${{ inputs.paths }}
+
+      - name: Mypy
+        run: poetry run mypy ${{ inputs.paths }}
+
+      - name: Pytest with coverage
+        id: pytest
+        run: |
+          poetry run pytest \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-fail-under=${{ inputs.coverage-threshold }}
+
+      - name: Extract actual coverage
+        id: coverage
+        if: success() || failure()
+        shell: bash
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "actual=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ACTUAL=$(python -c "
+          import xml.etree.ElementTree as ET
+          root = ET.parse('coverage.xml').getroot()
+          pct = float(root.get('line-rate', 0)) * 100
+          print(f'{pct:.2f}')
+          ")
+          echo "actual=$ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "ℹ️ Actual coverage: $ACTUAL%"
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage.xml
+          retention-days: 7
+
+      # Coverage ratchet déplacé dans chrysa/pre-commit-tools hook `coverage-ratchet-hook`
+      # (v0.2.0+). Ce workflow CI échoue si coverage < threshold ; le hook pre-commit
+      # ouvre une issue automatiquement par package si coverage réelle > threshold.
+
+  sonar:
+    name: SonarCloud
+    if: inputs.run-sonar
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml

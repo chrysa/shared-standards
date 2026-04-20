@@ -1,0 +1,13 @@
+# Template FUNDING.yml chrysa
+# À placer dans .github/FUNDING.yml de chaque repo open source
+# Décommenter la plateforme utilisée, remplir l'identifiant.
+
+# github: [chrysa]
+# patreon: chrysa
+# open_collective: chrysa
+# ko_fi: chrysa
+# tidelift: npm/package-name
+# custom: ['https://chrysa.dev/sponsor']
+
+# Si aucun mécanisme de sponsoring actif, laisser le fichier commenté:
+# cela désactive simplement le bouton Sponsor GitHub, sans erreur.

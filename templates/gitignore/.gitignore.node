@@ -1,0 +1,65 @@
+# .gitignore.node — chrysa standard for Node / React / Vite repos
+# Usage: cp templates/gitignore/.gitignore.node .gitignore
+
+# ── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# ── Build outputs ───────────────────────────────────────────────────────────
+dist/
+build/
+.next/
+.nuxt/
+.svelte-kit/
+.output/
+.turbo/
+.vite/
+.cache/
+
+# ── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Test / coverage ─────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+.vitest-cache/
+.jest-cache/
+playwright-report/
+test-results/
+playwright/.cache/
+
+# ── Env ─────────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editors ─────────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+
+# ── Typescript ──────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Storybook / docs builds ─────────────────────────────────────────────────
+storybook-static/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# ── Project-specific ────────────────────────────────────────────────────────
+.vercel
+.local/
