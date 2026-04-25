@@ -1,6 +1,6 @@
 # shared-standards
 
-Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the chrysa ecosystem.
+Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the ecosystem.
 
 ## Structure
 
@@ -25,10 +25,14 @@ workflows/
   ci-python.yml                 # Reusable CI workflow for Python projects
   ci-node.yml                   # Reusable CI workflow for Node/React projects
   sonar.yml                     # SonarQube analysis workflow
-  release.yml                   # Semantic release workflow
+  release.yml                   # Semantic release workflow (softprops/action-gh-release)
+  labeler.yml                   # PR auto-labeler workflow (actions/labeler@v6)
+  pr-size.yml                   # PR size label workflow (codelytv/pr-size-labeler)
+  pages.yml                     # GitHub Pages deploy (peaceiris or official actions/deploy-pages)
 
 templates/
   CLAUDE.md                     # Bootstrap CLAUDE.md template
+  CODEOWNERS                    # CODEOWNERS template (copy and adapt)
   .gitignore.python             # Python .gitignore
   .gitignore.node               # Node .gitignore
   dependabot.yml                # Dependabot config template
@@ -70,3 +74,11 @@ Run the inventory tool to find them:
 ```bash
 node .claude/hooks/model-debt-inventory.cjs --dir .
 ```
+
+## Local LLM Stack Reference
+
+This standard repository hosts ecosystem-wide guidelines and can reference the **Local LLM Stack for Software + Data Engineering** for projects requiring local LLM infrastructure.
+
+📖 **Reference:** [Local LLM Stack (Notion)](https://www.notion.so/Local-LLM-Stack-for-Software-Data-Engineering-34459293e35e81c2b5b0f8283640b338)
+
+**Purpose:** Central knowledge base for fully local, containerized LLM workflows (code generation, documentation, API connectors, ETL pipelines) to be adopted across the chrysa ecosystem.

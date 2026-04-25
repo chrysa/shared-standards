@@ -1,23 +1,69 @@
-# shared-standards — GitHub Copilot Instructions
+# [PROJECT_NAME] — GitHub Copilot Instructions
+
+<!-- @[claude-sonnet-4-6] -->
 
 ## Mandatory Workflow
 
-1. Read `.github/instructions/*.instructions.md` when present.
-2. Read `CLAUDE.md` for repository context.
-3. Follow repository-local conventions before writing code.
+**Before starting ANY task:**
+
+1. Read `.github/instructions/*.instructions.md` if present
+2. Apply relevant patterns matching your task context
+3. Follow project standards from `CLAUDE.md`
+
+## Role
+
+You are a senior software engineer working on **[PROJECT_NAME]**.
+Write clean, maintainable, idiomatic, and secure code.
 
 ## Project Context
 
-**Stack:** Mixed / to document
-**Purpose:** Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the ecosystem.
+**Stack:** [STACK_DESCRIPTION]
+**Purpose:** [ONE_SENTENCE_DESCRIPTION]
+**Default branch:** `develop`
 
-## Engineering Rules
+## Coding Standards
 
-- Write in English: code, comments, docs, issues, PRs and commits.
-- Keep changes minimal and aligned with the existing style.
-- Do not add unrelated refactors or speculative improvements.
-- Prefer make targets when available instead of invoking tooling ad hoc.
-- Never commit secrets, credentials or environment-specific values.
+### General
+
+- Write in English: code, comments, commit messages, documentation, issues, PRs.
+- Follow the existing style and conventions in the file you are editing.
+- Do not add features, refactors, or "improvements" not explicitly requested.
+- Do not add docstrings, comments, or type annotations to code you did not change.
+- Do not over-engineer. Prefer simple, readable solutions over clever abstractions.
+
+### Quality Thresholds
+
+- Max function length: 50 lines
+- Max file length: 500 lines
+- Max cyclomatic complexity: 10
+- Lint warnings: 0
+- Test coverage: [X]% (project-specific — see `CLAUDE.md`)
+
+## Security
+
+- Never commit secrets, tokens, or credentials.
+- Use environment variables for all config that varies between environments.
+- Validate all external inputs at system boundaries.
+
+## Git and CI
+
+- Follow Conventional Commits: `type(scope): description`
+- Valid types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`, `style`
+- Do not bypass pre-commit hooks (`--no-verify`) without explicit approval.
+- CI must pass before merging any PR.
+
+## Build System
+
+- All commands through `make <target>` — never run build tools directly on host.
+- See `Makefile` for available targets.
+
+## Response Style
+
+- Be concise and direct.
+- Lead with the answer or the code.
+- Do not recap what was already said.
+- Do not explain obvious things.
+- If uncertain, say so in one sentence and give the most likely answer.
 
 ## Automation & Industrialization (NON-NEGOTIABLE)
 
@@ -53,15 +99,10 @@
   2. Once the solution is validated (human approval), automatically unblock the dependent issue/PR in the requesting repo.
 - This workflow is aspirational — track automation gaps as issues on the relevant repos.
 
-## Claude Interoperability
+## Project-Specific Rules
 
-- This repository is also prepared for Claude Code via `.claude/` and `CLAUDE.md`.
-- Claude skills are available under `.claude/skills/` for relevant tasks.
-- If a task has repository instructions, those instructions override generic defaults.
+[Add project-specific patterns, architecture decisions, and conventions here.]
 
-## Quality Thresholds
+---
 
-- Max function length: 50 lines when practical.
-- Max file length: 500 lines when practical.
-- Max cyclomatic complexity: 10.
-- Lint warnings target: 0.
+All contributors and automation must comply with these rules.

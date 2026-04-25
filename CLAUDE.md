@@ -1,15 +1,20 @@
 # shared-standards
 
+> @[claude-sonnet-4-6]
 ## Project Overview
 Shared GitHub Copilot instructions, Claude Code DevEx hooks, reusable CI templates,
-and standards for the chrysa ecosystem.
+and standards for the ecosystem.
 
 ## Repository Structure
 ```
 .claude/hooks/          # Claude Code DevEx hooks (circuit breaker, secret scanner, etc.)
 .claude/settings.json   # Claude Code hook configuration
-copilot-instructions/   # GitHub Copilot instruction templates
-templates/              # Bootstrap file templates (CLAUDE.md, .gitignore, dependabot.yml, etc.)
+.claude/skills/         # On-demand skill modules (auto-invoked SKILL.md per domain)
+  testing-pytest/       # pytest DDD + pytest-mock + constants pattern
+  dockerfile-multistage/# 4-stage base/builder/production/dev — Python 3.14
+  api-design/           # REST standards + FastAPI patterns + status codes
+copilot-instructions/   # GitHub Copilot instruction templates (base.md = ecosystem-wide)
+templates/              # Bootstrap file templates (CLAUDE.md, opencode.json, settings.json, copilot-instructions.md, .gitignore, dependabot.yml, etc.)
 workflows/              # Reusable GitHub Actions workflow templates
 ```
 
@@ -18,6 +23,11 @@ workflows/              # Reusable GitHub Actions workflow templates
 make install  # Install pre-commit hooks
 make lint     # Run pre-commit on all files
 ```
+
+## Adding a new skill
+1. Create `.claude/skills/<name>/SKILL.md`
+2. Define: when to auto-invoke, concrete rules, code patterns, forbidden patterns
+3. Reference it from the project's CLAUDE.md under `## Skills`
 
 ## Adding a new hook
 1. Create `hooks/<name>.cjs` in `.claude/hooks/`
@@ -50,3 +60,11 @@ make lint     # Run pre-commit on all files
 | verifiable-thresholds.cjs | PostToolUse (file writes) | Warn on quality threshold violations |
 | memory-consolidation.cjs | CLI | Consolidate and compress memory files |
 | model-debt-inventory.cjs | CLI | Audit model-specific tagged rules |
+
+## Compact instructions
+
+When compacting, always preserve:
+1. List of all files modified this session (with paths)
+2. Current task description and next steps
+3. Any uncommitted / unpushed changes
+4. Open blockers and errors not yet resolved
