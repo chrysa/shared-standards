@@ -15,6 +15,10 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Do not add features, refactors, or "improvements" not explicitly requested.
 - Do not add docstrings, comments, or type annotations to code you did not change.
 - Do not over-engineer. Prefer simple, readable solutions over clever abstractions.
+- **No nested named functions > 5 lines.** Extract helpers to module top-level.
+  Lambdas / arrow inline (callbacks `map`/`filter`/`reduce`, predicates 1-3 lines)
+  and 1-call private closure factories are allowed.
+  Cross-repo Notion ADR : 2026-04-26 · `34e59293e35e816396f0ce86102953e8`.
 
 ### Python
 - Target Python 3.14. Maintain backward compatibility to 3.12.
@@ -23,17 +27,29 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Keep functions under 50 lines.
 - Keep files under 500 lines. Split when appropriate.
 - 0 lint warnings is the target. Every warning must be resolved or suppressed with justification.
+- No `def` inside `def` for helpers > 5 lines (cf. cross-repo ADR). Use `_private_helper`
+  at module top-level. Lambdas in `key=`, `map()`, `filter()`, `sorted()` OK.
 
 ### JavaScript / TypeScript
 - Target Node.js LTS.
 - Use ESLint + Prettier. Run before committing.
 - Prefer `const` over `let`. Never use `var`.
 - Keep functions under 50 lines.
+- No nested `function`/declaration > 5 lines (cf. cross-repo ADR). Inline arrow
+  callbacks and `useMemo(() => ..., [])` factories OK if 1 site of use.
+  ESLint config target : `max-nested-callbacks: ["error", 2]`.
 
 ### Docker
 - Prefer multi-stage builds.
 - Use official or chrysa/usefull-containers images for tooling.
 - Pin image versions explicitly.
+- **One container = one responsibility**: never mix application code with infrastructure concerns (reverse proxy, database, cache) in the same image.
+  - ✅ `node:alpine` serves the app → app container
+  - ✅ `postgres:alpine` stores data → db container
+  - ❌ Do NOT bundle nginx / caddy / traefik inside an app image
+  - ❌ Do NOT run a database process alongside application code
+  - Use `docker compose` to wire services together, not a fat single container.
+  - App containers must be stateless and ephemeral.
 
 ## Security
 - Never commit secrets, tokens, or credentials.
