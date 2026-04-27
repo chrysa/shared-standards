@@ -1,41 +1,91 @@
----
-# Reusable CI workflow for Node.js/React projects (chrysa ecosystem)
-# Usage: copy to .github/workflows/ci.yml and adapt.
-
-name: CI Node
-
-on:
-    push:
-        branches: [main, master]
-    pull_request:
-        branches: [main, master]
-
-permissions:
-    contents: read
-
+true:
+  pull_request:
+    branches:
+    - main
+    - master
+  push:
+    branches:
+    - main
+    - master
+  workflow_call:
+    inputs:
+      coverage-report:
+        default: coverage/lcov.info
+        description: Path to lcov/coverage file (empty = skip upload)
+        required: false
+        type: string
+      node-version:
+        default: '22'
+        description: Node.js version to use
+        required: false
+        type: string
+      package-manager:
+        default: npm
+        description: Package manager to use (npm | pnpm | yarn)
+        required: false
+        type: string
+      run-build:
+        default: true
+        description: Whether to run the build step
+        required: false
+        type: boolean
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        name: Lint & pre-commit
-        steps:
-            - uses: actions/checkout@v6
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22'
-                  cache: 'npm'
-            - run: npm ci
-            - name: Lint
-              run: npm run lint
-
-    test:
-        runs-on: ubuntu-latest
-        name: Tests
-        needs: lint
-        steps:
-            - uses: actions/checkout@v6
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22'
-                  cache: 'npm'
-            - run: npm ci
-            - run: npm test
+  build:
+    if: ${{ inputs.run-build != false }}
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        cache: ${{ inputs.package-manager || 'npm' }}
+        node-version: ${{ inputs.node-version || '22' }}
+    - name: Install dependencies
+      run: "case \"${{ inputs.package-manager || 'npm' }}\" in\n  pnpm) npm install\
+        \ -g pnpm && pnpm install --frozen-lockfile ;;\n  yarn) yarn install --frozen-lockfile\
+        \ ;;\n  *)    npm ci ;;\nesac\n"
+    - name: Build
+      run: npm run build
+  lint:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        cache: ${{ inputs.package-manager || 'npm' }}
+        node-version: ${{ inputs.node-version || '22' }}
+    - name: Install dependencies
+      run: "case \"${{ inputs.package-manager || 'npm' }}\" in\n  pnpm) npm install\
+        \ -g pnpm && pnpm install --frozen-lockfile ;;\n  yarn) yarn install --frozen-lockfile\
+        \ ;;\n  *)    npm ci ;;\nesac\n"
+    - name: Lint
+      run: npm run lint --if-present
+    - name: Type-check
+      run: npm run type-check --if-present || npx tsc --noEmit
+  test:
+    name: Tests & coverage
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        cache: ${{ inputs.package-manager || 'npm' }}
+        node-version: ${{ inputs.node-version || '22' }}
+    - name: Install dependencies
+      run: "case \"${{ inputs.package-manager || 'npm' }}\" in\n  pnpm) npm install\
+        \ -g pnpm && pnpm install --frozen-lockfile ;;\n  yarn) yarn install --frozen-lockfile\
+        \ ;;\n  *)    npm ci ;;\nesac\n"
+    - name: Run tests
+      run: npm test --if-present
+    - if: ${{ inputs.coverage-report != '' }}
+      name: Upload coverage
+      uses: codecov/codecov-action@v5
+      with:
+        fail_ci_if_error: false
+        files: ${{ inputs.coverage-report || 'coverage/lcov.info' }}
+name: CI Node
+permissions:
+  contents: read

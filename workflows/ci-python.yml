@@ -1,42 +1,60 @@
----
-# Reusable CI workflow for Python projects (chrysa ecosystem)
-# Usage: uses: chrysa/shared-standards/.github/workflows/ci-python.yml@main
-#
-# Or copy this file to .github/workflows/ci.yml and adapt.
-
-name: CI Python
-
-on:
-    push:
-        branches: [main, master]
-    pull_request:
-        branches: [main, master]
-
-permissions:
-    contents: read
-
+true:
+  pull_request:
+    branches:
+    - main
+    - master
+  push:
+    branches:
+    - main
+    - master
+  workflow_call:
+    inputs:
+      coverage-report:
+        default: coverage.xml
+        description: Path to coverage.xml file (empty = skip upload)
+        required: false
+        type: string
+      install-extras:
+        default: dev
+        description: "pip extras to install (e.g. 'dev' \u2192 pip install -e \".[dev]\"\
+          )"
+        required: false
+        type: string
+      python-version:
+        default: '3.12'
+        description: Python version to use
+        required: false
+        type: string
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        name: Lint & pre-commit
-        steps:
-            - uses: actions/checkout@v6
-            - uses: actions/setup-python@v6
-              with:
-                  python-version: '3.12'
-            - name: Run pre-commit
-              uses: pre-commit/action@v3.0.1
-
-    test:
-        runs-on: ubuntu-latest
-        name: Tests
-        needs: lint
-        steps:
-            - uses: actions/checkout@v6
-            - uses: actions/setup-python@v6
-              with:
-                  python-version: '3.12'
-            - name: Install dependencies
-              run: pip install -e ".[dev]"
-            - name: Run pytest
-              run: pytest --tb=short
+  lint:
+    name: Lint & pre-commit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version || '3.12' }}
+    - name: Run pre-commit hooks
+      uses: pre-commit/action@v3.0.1
+  test:
+    name: Tests & coverage
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version || '3.12' }}
+    - name: Install dependencies
+      run: pip install -e ".[${inputs.install-extras || 'dev'}]"
+    - name: Run pytest
+      run: pytest --tb=short --cov --cov-report=xml
+    - if: ${{ inputs.coverage-report != '' }}
+      name: Upload coverage
+      uses: codecov/codecov-action@v5
+      with:
+        fail_ci_if_error: false
+        files: ${{ inputs.coverage-report || 'coverage.xml' }}
+name: CI Python
+permissions:
+  contents: read

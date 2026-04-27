@@ -20,11 +20,11 @@ jobs:
         name: Lint & validate
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v4
 
-            - uses: actions/setup-python@v6
+            - uses: actions/setup-python@v5
               with:
-                  python-version: '3.12'
+                  python-version: "3.12"
 
             - name: Run pre-commit hooks
               uses: pre-commit/action@v3.0.1
@@ -34,7 +34,7 @@ jobs:
         name: Validate template YAML/JSON
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v4
 
             - name: Validate YAML templates
               run: |
@@ -47,3 +47,17 @@ jobs:
                   find templates/ -name "*.json" 2>/dev/null | \
                     while read f; do python3 -m json.tool "$f" > /dev/null || exit 1; done
                   echo "All JSON templates valid"
+
+    secret-scan:
+        runs-on: ubuntu-latest
+        name: Secret scanning (gitleaks)
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Run gitleaks
+              uses: gitleaks/gitleaks-action@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

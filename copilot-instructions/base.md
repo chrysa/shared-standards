@@ -69,6 +69,33 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Lint warnings: 0
 - Test coverage target: project-specific (see repo CLAUDE.md)
 
+## Regression Prevention (NON-NEGOTIABLE)
+
+Before marking any task done, verify no regression was introduced.
+
+**Baseline:** record before starting — passing test count, coverage %, lint count, type error count.
+
+**Checks to run after every implementation step:**
+
+| Check | Command | Gate |
+|---|---|---|
+| Tests | `make test` | passing count ≥ baseline, 0 new failures |
+| Coverage | `make test` with coverage | % ≥ baseline |
+| Lint | `make lint` | 0 warnings |
+| Types | `mypy` / `tsc --noEmit` | error count ≤ baseline |
+| Build | `make build` | exit 0 |
+
+**If any check regresses:** stop, fix, re-run all checks — then continue.
+
+**Report after each task:**
+```
+Tests : <N> passed (baseline <N>) ✓/✗
+Coverage: <X>% (baseline <X>%) ✓/✗
+Lint    : 0 warnings ✓/✗
+Types   : 0 errors ✓/✗
+Build   : ok ✓/✗
+```
+
 ## Response style
 - Be concise and direct.
 - Lead with the answer or the code.
