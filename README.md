@@ -37,6 +37,10 @@ templates/
   .gitignore.node               # Node .gitignore
   dependabot.yml                # Dependabot config template
   pr-template.md                # Pull request template
+  vscode/
+    tasks.python.json           # VS Code tasks template for Python projects
+    tasks.fullstack.json        # VS Code tasks template for full-stack projects (Python + TS)
+    README.md                   # Documentation and keyboard shortcuts
   issue-templates/
     bug.md
     feature.md
@@ -66,6 +70,21 @@ Reference the generic workflows from `.github/workflows/` in your repo CIs.
 ### Templates
 
 Use `templates/CLAUDE.md` as a starting point for repo-specific `CLAUDE.md` files.
+
+### VS Code Tasks
+
+Copy the appropriate `tasks.json` template to `.vscode/tasks.json` in your project.
+See [templates/vscode/README.md](templates/vscode/README.md) for the full task catalog and keyboard shortcut setup.
+
+```bash
+# Python project
+cp path/to/shared-standards/templates/vscode/tasks.python.json .vscode/tasks.json
+
+# Full-stack project (Python backend + TS frontend)
+cp path/to/shared-standards/templates/vscode/tasks.fullstack.json .vscode/tasks.json
+```
+
+Then remove tasks that do not have a corresponding `make` target.
 
 ## Model tagging
 
