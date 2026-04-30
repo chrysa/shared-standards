@@ -1,167 +1,167 @@
 {
-  "version": "2.0.0",
   "tasks": [
-
     {
-      "label": "lint",
-      "type": "shell",
       "command": "make lint",
       "group": "test",
+      "label": "lint",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "format",
-      "type": "shell",
       "command": "make format",
       "group": "none",
+      "label": "format",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "typecheck",
-      "type": "shell",
       "command": "make typecheck",
       "group": "test",
+      "label": "typecheck",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "pre-commit",
-      "type": "shell",
       "command": "make pre-commit",
       "group": "none",
+      "label": "pre-commit",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
-
     {
-      "label": "test",
-      "type": "shell",
       "command": "make test",
       "group": {
-        "kind": "test",
-        "isDefault": true
+        "isDefault": true,
+        "kind": "test"
       },
+      "label": "test",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "test-cov",
-      "type": "shell",
       "command": "make test-cov",
       "group": "test",
+      "label": "test-cov",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
-
     {
-      "label": "dev",
-      "type": "shell",
       "command": "make dev",
       "group": {
-        "kind": "build",
-        "isDefault": true
+        "isDefault": true,
+        "kind": "build"
       },
       "isBackground": true,
+      "label": "dev",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": true,
         "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "docker-up",
-      "type": "shell",
       "command": "make docker-up",
       "group": "build",
       "isBackground": true,
+      "label": "docker-up",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
     {
-      "label": "docker-down",
-      "type": "shell",
       "command": "make docker-down",
       "group": "none",
+      "label": "docker-down",
       "presentation": {
+        "clear": false,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": false
+        "reveal": "always",
+        "showReuseMessage": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "type": "shell"
     },
-
     {
-      "label": "quality-check",
-      "dependsOn": ["lint", "typecheck", "test"],
+      "dependsOn": [
+        "lint",
+        "typecheck",
+        "test"
+      ],
       "dependsOrder": "sequence",
       "group": "test",
+      "label": "quality-check",
       "presentation": {
+        "clear": true,
         "echo": true,
-        "reveal": "always",
         "focus": false,
         "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
+        "reveal": "always",
+        "showReuseMessage": false
       },
       "problemMatcher": []
     }
-  ]
+  ],
+  "version": "2.0.0"
 }

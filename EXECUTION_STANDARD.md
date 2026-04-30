@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.0 — 2026-04-12**
+**Version 1.1 — 2026-04-30**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -173,3 +173,59 @@ Never commit `.env`. Always commit `.env.example` with placeholder values.
 - Agents read `CLAUDE.md` (global base + repo-specific) before acting
 - MCP integrations: GitHub (all repos) + Notion (projects with Notion content)
 - Unattended agent mode: no code changes outside open PRs
+
+---
+
+## 11. Python Packaging & Tooling Standard
+
+**`pyproject.toml` is the single source of truth** for all Python projects.
+`setup.cfg` and `setup.py` are **forbidden** — do not create or commit them.
+
+### Build backend
+
+| Project type | Backend | `requires` |
+|---|---|---|
+| Library / package | `hatchling` | `["hatchling"]` |
+| Application (no distribution) | `setuptools` | `["setuptools>=72", "wheel"]` |
+
+### Mandatory sections
+
+```toml
+[build-system]
+requires = ["hatchling"]           # or setuptools for apps
+build-backend = "hatchling.build"
+
+[project]
+name = "..."
+version = "..."
+requires-python = ">=3.14"        # minimum 3.12 for legacy packages
+dependencies = [...]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3", "pytest-cov>=6", "ruff>=0.11", "mypy>=1.15"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short --cov=src --cov-report=xml --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"          # match requires-python
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S", "RUF"]
+ignore = ["S101"]                  # assert OK in tests
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+ignore_missing_imports = true
+```
+
+### Rules
+
+- All tool config (`ruff`, `mypy`, `pytest`, `coverage`) lives in `[tool.*]` sections of `pyproject.toml`.
+- External config files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.mypy.ini`) are **forbidden**.
+- `setup.cfg` is permitted only for non-Python tooling (e.g. uwsgi); never for Python packaging.
+- Library packages use `src/` layout with `[tool.hatch.build.targets.wheel] packages = ["src/<pkg>"]`.
+- Applications without distribution do not need `[build-system]`; only `[tool.*]` sections are required.

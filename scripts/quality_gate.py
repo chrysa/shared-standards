@@ -10,11 +10,11 @@ Machine-readable output lines:
 
 import json
 import re
-import subprocess
+import subprocess  # nosec B404
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 class QualityGate:
@@ -31,7 +31,7 @@ class QualityGate:
             print(f"ERROR: configuration file not found: {self.CONFIG_FILE}")
             sys.exit(1)
 
-        with open(self.config_path, "r", encoding="utf-8") as handle:
+        with open(self.config_path, encoding="utf-8") as handle:
             self.config = json.load(handle)
 
         self.gates = [
@@ -40,13 +40,25 @@ class QualityGate:
             ("Lint", "lint", "warning_count", "=", "make lint"),
             ("Types", "types", "error_count", "≤", "make type-check"),
             ("Build", "build", "build_status", "=", "make build"),
-            ("Secrets", "security_secrets", "secret_count", "=", "detect-secrets scan --all-files 2>&1 || true"),
-            ("VulnDeps", "security_vulns", "vuln_count", "≤", "pip-audit 2>&1 || npm audit --audit-level=high 2>&1 || true"),
+            (
+                "Secrets",
+                "security_secrets",
+                "secret_count",
+                "=",
+                "detect-secrets scan --all-files 2>&1 || true",
+            ),
+            (
+                "VulnDeps",
+                "security_vulns",
+                "vuln_count",
+                "≤",
+                "pip-audit 2>&1 || npm audit --audit-level=high 2>&1 || true",
+            ),
         ]
 
-    def _run(self, cmd: str) -> Tuple[int, str]:
+    def _run(self, cmd: str) -> tuple[int, str]:
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B602 B603
                 cmd,
                 shell=True,
                 capture_output=True,
@@ -144,7 +156,9 @@ class QualityGate:
             return current <= target
         return False
 
-    def _run_gate(self, gate_name: str, key: str, metric_name: str, default_cmd: str) -> Dict[str, Any]:
+    def _run_gate(
+        self, gate_name: str, key: str, metric_name: str, default_cmd: str
+    ) -> dict[str, Any]:
         cmd = self.config.get("commands", {}).get(key, default_cmd)
         print(f"RUN_GATE|{gate_name}|{cmd}")
         exit_code, output = self._run(cmd)
@@ -159,13 +173,13 @@ class QualityGate:
             "output": output,
         }
 
-    def _write_report(self, report: Dict[str, Any]) -> None:
+    def _write_report(self, report: dict[str, Any]) -> None:
         with open(self.last_report_path, "w", encoding="utf-8") as handle:
             json.dump(report, handle, indent=2)
 
     def baseline(self) -> bool:
         print("BASELINE|START")
-        baseline_data: Dict[str, Any] = {
+        baseline_data: dict[str, Any] = {
             "recorded_at": datetime.now().isoformat(),
             "gates": {},
             "valid": True,
@@ -200,7 +214,9 @@ class QualityGate:
             return True
 
         print("OVERALL_RESULT|FAIL")
-        print("ERROR: baseline contains failing gates; fix quality checks before using this baseline")
+        print(
+            "ERROR: baseline contains failing gates; fix quality checks before using this baseline"
+        )
         return False
 
     def verify(self) -> bool:
@@ -217,12 +233,12 @@ class QualityGate:
             print("ERROR: baseline file not found; run quality-gate-baseline first")
             return False
 
-        with open(self.baseline_path, "r", encoding="utf-8") as handle:
+        with open(self.baseline_path, encoding="utf-8") as handle:
             baseline = json.load(handle)
 
         baseline_valid = bool(baseline.get("valid", True))
         all_passed = True
-        gate_reports: List[Dict[str, Any]] = []
+        gate_reports: list[dict[str, Any]] = []
 
         for gate_name, key, metric_name, default_op, default_cmd in self.gates:
             current = self._run_gate(gate_name, key, metric_name, default_cmd)
