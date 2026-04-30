@@ -47,13 +47,16 @@ jobs:
       - name: Run quality gate verification
         id: quality-gate
         run: |
-          make quality-gate-verify || exit_code=$?
-          exit ${exit_code:-0}
+          if [ ! -f ".quality-gate-baseline.json" ]; then
+            echo "⚠️  No baseline found — skipping quality gate (run make quality-gate-baseline to set up)"
+            exit 0
+          fi
+          make quality-gate-verify
 
       - name: Report quality gate status
         if: always()
         run: |
-          if [ ${{ steps.quality-gate.outcome }} == 'success' ]; then
+          if [ "${{ steps.quality-gate.outcome }}" == 'success' ]; then
             echo "✅ All quality gates passed"
             exit 0
           else
