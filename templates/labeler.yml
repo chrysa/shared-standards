@@ -1,0 +1,77 @@
+---
+# Labeler configuration template for chrysa ecosystem repos
+# Copy this file to .github/labeler.yml in your repository.
+# Used by actions/labeler@v6 (see workflows/labeler.yml).
+#
+# Each key is a label name. The value defines which changed files trigger it.
+# See full syntax: https://github.com/actions/labeler
+
+# ── CI / Infrastructure ────────────────────────────────────────────────────
+ci:
+    - changed-files:
+          - any-glob-to-any-file:
+                - .github/**
+                - Dockerfile*
+                - docker-compose*.yml
+                - .dockerignore
+                - Makefile
+
+dependencies:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/pyproject.toml'
+                - '**/requirements*.txt'
+                - '**/package.json'
+                - '**/package-lock.json'
+                - '**/yarn.lock'
+                - .pre-commit-config.yaml
+
+# ── Backend (Python) ───────────────────────────────────────────────────────
+backend:
+    - changed-files:
+          - any-glob-to-any-file:
+                - backend/**
+                - '**/src/**/*.py'
+
+api:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/api/**'
+                - '**/routers/**'
+                - '**/endpoints/**'
+
+# ── Frontend (Node/React) ──────────────────────────────────────────────────
+frontend:
+    - changed-files:
+          - any-glob-to-any-file:
+                - frontend/**
+                - app/**
+                - '**/src/**/*.ts'
+                - '**/src/**/*.tsx'
+
+# ── Tests ──────────────────────────────────────────────────────────────────
+tests:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/tests/**'
+                - '**/*.test.*'
+                - '**/*.spec.*'
+                - '**/conftest.py'
+
+# ── Documentation ──────────────────────────────────────────────────────────
+documentation:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '*.md'
+                - docs/**
+                - '**/README.md'
+
+# ── Configuration ──────────────────────────────────────────────────────────
+config:
+    - changed-files:
+          - any-glob-to-any-file:
+                - '**/config/**'
+                - '**/settings.py'
+                - '*.toml'
+                - '*.cfg'
+                - '*.ini'

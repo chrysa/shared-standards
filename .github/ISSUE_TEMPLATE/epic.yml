@@ -1,0 +1,38 @@
+---
+name: Epic / Milestone
+about: Track a large feature or goal spanning multiple issues
+title: 'epic: '
+labels: ['epic']
+assignees: ''
+---
+
+## Goal
+<!-- What is this epic trying to achieve? (1–3 sentences) -->
+
+## Milestone
+<!-- GitHub milestone this epic maps to — create the milestone first -->
+
+## Notion
+<!-- Notion project page link -->
+
+## Success criteria
+<!-- How will we know this epic is done? -->
+- [ ]
+- [ ]
+
+## Child issues
+<!-- List of issues this epic includes. Format: - [ ] #NUMBER title -->
+- [ ]
+
+## Depends on
+<!-- Other epics or issues this depends on. Format: chrysa/REPO#NUMBER or bare #NUMBER -->
+<!-- None -->
+
+## Priority
+<!-- Select one: High | Medium | Low -->
+
+## Out of scope
+<!-- What is explicitly excluded -->
+
+## Next step
+<!-- First concrete action — usually: create the child issues -->
