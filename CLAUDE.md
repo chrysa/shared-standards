@@ -50,6 +50,30 @@ make lint     # Run pre-commit on all files
 - PR labeler: `.github/workflows/labeler.yml`
 - PR dependency check: `.github/workflows/dependencies.yml`
 
+## Notion Branch Sync workflow
+
+`workflows/notion-branch-sync.yml` — triggers on every push to every branch.
+
+**What it does:**
+1. Creates / updates a row in the shared `NOTION_BRANCHES_DB_ID` database (one row per repo+branch).
+2. On `main`/`master` push: syncs the latest CHANGELOG.md entry to the roadmap table row (`NOTION_PROJECT_BLOCK_ID`).
+
+**One-time Notion setup** (do once for the whole ecosystem):
+1. Create a Notion database called "Branch Activity" with these exact property names:
+   - `Branch` (Title), `Repo` (Text), `Status` (Select: active/stale/merged),
+     `Last SHA` (Text), `Commit Msg` (Text), `Author` (Text),
+     `PR Count` (Number), `CI Status` (Select: passing/failing/unknown),
+     `Changelog` (Text), `Updated At` (Date)
+2. Copy the database UUID and add it as an **org-level variable**: `NOTION_BRANCHES_DB_ID`
+
+**Per-repo setup:**
+| Variable | Scope | Required | Value |
+|---|---|---|---|
+| `NOTION_BRANCHES_DB_ID` | org | yes | shared Branch Activity DB UUID |
+| `NOTION_PROJECT_BLOCK_ID` | repo | only for changelog sync | table row block UUID (same as `notion-roadmap-sync.yml`) |
+
+**Secrets required (org level):** `NOTION_TOKEN`, `GITHUB_TOKEN` (auto-provided by Actions)
+
 ## Code Standards
 - All commit messages: Conventional Commits format
 - All YAML files sorted (via yaml-sorter) except `.github/` workflows
