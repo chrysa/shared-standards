@@ -1,7 +1,7 @@
 # CLAUDE.md — [PROJECT_NAME]
 
 > Replace [PROJECT_NAME] and all [PLACEHOLDER] values before committing.
-> @[claude-sonnet-4]
+> @[claude-sonnet-4-6]
 
 ## Project
 
@@ -11,7 +11,7 @@
 
 ## Conventions
 
-- Language: English (code, comments, docs, issues, PRs)
+- Language: English — all code, comments, documentation, instructions, and configuration files must be in English.
 - Commits: Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`)
 - Branch naming: `feature/`, `bugfix/`, `chore/`, `hotfix/`, `release/`
 - Default branch: `develop`
@@ -46,6 +46,13 @@ make build     # Build (if applicable)
 - [ ] Describe custom thresholds vs shared defaults
 - [ ] Note any hooks that are disabled for this repo and why
 
-## Model-specific notes (@[claude-sonnet-4])
+## Model-specific notes (@[claude-sonnet-4-6])
 
 [Add any rules or instructions that apply only when using a specific model.]
+
+## Skills
+
+Shared skills from `shared-standards/.claude/skills/`:
+- `testing-pytest/SKILL.md` — pytest DDD + pytest-mock + constants (load when writing tests)
+- `dockerfile-multistage/SKILL.md` — 4-stage Python 3.14 containers (load when editing Dockerfile)
+- `api-design/SKILL.md` — REST standards + FastAPI patterns (load when designing endpoints)
