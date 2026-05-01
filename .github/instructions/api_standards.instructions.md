@@ -158,6 +158,11 @@ async def list_characters(
 
 ## Swagger / OpenAPI
 
+**Visibility rule**: The generated OpenAPI schema MUST reflect the authenticated user's permissions.
+- Endpoints the caller cannot access MUST be **excluded** from the schema (dynamic generation) or flagged with `x-hidden: true` if dynamic exclusion is not supported by the framework.
+- Unauthenticated requests to `/docs` or `/openapi.json` MUST NOT expose protected-route details.
+- In FastAPI, use a dependency on the `openapi()` override to filter paths by current user scopes; in Django/DRF, use `drf-spectacular` hooks (`AutoSchema` + `postprocessing_hooks`).
+
 **Mandatory** on every endpoint:
 
 ```python
