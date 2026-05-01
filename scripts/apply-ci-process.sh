@@ -18,9 +18,9 @@
 #   bash apply-ci-process.sh <repo_path>        # déploie sur 1 repo
 #   bash apply-ci-process.sh --all              # déploie sur tous les repos chrysa
 #   bash apply-ci-process.sh --dry-run <path>   # preview sans écriture
-#   bash apply-ci-process.sh --force <path>     # écrase sans backup
+#   bash apply-ci-process.sh --force <path>     # no-op (kept for compat)
 #
-# Sortie : table résumé des actions + backups en .ci-backup-<TS>/ si overwrite
+# Sortie : table résumé des actions
 #
 # Exit : 0 OK · 1 erreur · 2 repo absent
 
@@ -32,7 +32,6 @@ CHRYSA_ROOT="${CHRYSA_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 TEMPLATES_DIR="$CHRYSA_ROOT/shared-standards/templates"
 WF_TEMPLATES="$TEMPLATES_DIR/workflows-process"
 CFG_TEMPLATES="$TEMPLATES_DIR/github-config"
-TS=$(date +%Y%m%d-%H%M%S)
 
 DRY_RUN=false
 FORCE=false
@@ -43,7 +42,7 @@ TARGET_REPO=""
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=true ;;
-        --force)   FORCE=true ;;
+        --force)   FORCE=true ;; # kept for backward compat, no-op
         --all)     TARGET_ALL=true ;;
         -h|--help)
             sed -n '2,25p' "$0" | sed 's/^# \?//'
@@ -76,6 +75,7 @@ check_templates() {
         "$WF_TEMPLATES/update-pr-body.yml" \
         "$WF_TEMPLATES/action-check.yml" \
         "$WF_TEMPLATES/auto-update-pre-commit.yml" \
+        "$WF_TEMPLATES/dependabot-auto-merge.yml" \
         "$CFG_TEMPLATES/labels.yml" \
         "$CFG_TEMPLATES/labeler.yml" \
         "$CFG_TEMPLATES/auto_assign.yml" \
@@ -193,13 +193,6 @@ generate_dependabot() {
     fi
 
     mkdir -p "$(dirname "$dest")"
-    # Backup si exists
-    if [[ -f "$dest" ]] && ! $FORCE; then
-        local backup_dir="$repo/.ci-backup-$TS"
-        mkdir -p "$backup_dir"
-        cp "$dest" "$backup_dir/dependabot.yml"
-        info "Backup : .ci-backup-$TS/dependabot.yml"
-    fi
     mv "$tmp" "$dest"
     ok "dependabot.yml écrit (stacks : $stacks)"
 }
@@ -229,7 +222,6 @@ deploy_one() {
     # ─── Tier 1 : 10 workflows ─────────────
     mkdir -p "$repo/.github/workflows"
     local wf_dest="$repo/.github/workflows"
-    local backup_dir="$repo/.ci-backup-$TS"
     local copied=0
     for wf in "$WF_TEMPLATES"/*.yml; do
         local name
@@ -241,15 +233,10 @@ deploy_one() {
             continue
         fi
 
-        if [[ -f "$dest" ]] && ! $FORCE; then
-            mkdir -p "$backup_dir/workflows"
-            cp "$dest" "$backup_dir/workflows/$name"
-        fi
-
         cp "$wf" "$dest"
         copied=$((copied + 1))
     done
-    ok "Workflows copiés : $copied/10"
+    ok "Workflows copiés : $copied/11"
 
     # ─── Tier 3 : github-config ─────────────
     mkdir -p "$repo/.github"
@@ -262,10 +249,6 @@ deploy_one() {
             continue
         fi
 
-        if [[ -f "$dest" ]] && ! $FORCE; then
-            mkdir -p "$backup_dir"
-            cp "$dest" "$backup_dir/$cfg"
-        fi
         cp "$src" "$dest"
     done
     ok "github-config copié (4 fichiers)"

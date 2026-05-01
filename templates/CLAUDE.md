@@ -11,7 +11,7 @@
 
 ## Conventions
 
-- Language: English (code, comments, docs, issues, PRs)
+- Language: English — all code, comments, documentation, instructions, and configuration files must be in English.
 - Commits: Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`)
 - Branch naming: `feature/`, `bugfix/`, `chore/`, `hotfix/`, `release/`
 - Default branch: `develop`
