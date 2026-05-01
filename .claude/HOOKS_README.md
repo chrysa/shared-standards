@@ -1,6 +1,6 @@
 # Claude Code Hook Suite
 
-Shared DevEx/LLM tooling for the chrysa ecosystem.
+Shared DevEx/LLM tooling for the ecosystem.
 All hooks are written in Node.js (`.cjs`) and require only the standard library.
 
 ---
@@ -193,7 +193,7 @@ node .claude/hooks/memory-consolidation.cjs --dry-run --verbose
 
 **Tagging convention:**
 ```markdown
-<!-- @[claude-sonnet-4] — This rule only makes sense for Claude Sonnet 4 -->
+<!-- @[claude-sonnet-4-6] — This rule only makes sense for Claude Sonnet 4 -->
 - Keep responses under 200 words
 ```
 

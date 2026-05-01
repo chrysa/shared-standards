@@ -1,0 +1,69 @@
+---
+# Reusable PR size label workflow (chrysa ecosystem)
+# Adds a size label (XS/S/M/L/XL) to pull requests based on diff size.
+#
+# Uses: codelytv/pr-size-labeler@v1
+# Marketplace: https://github.com/marketplace/actions/pr-size
+#
+# Usage in your repo's .github/workflows/pull-request-size.yml:
+#
+#   on: pull_request
+#   jobs:
+#     size:
+#       uses: chrysa/shared-standards/.github/workflows/pr-size.yml@main
+#       secrets: inherit
+#
+# Or standalone (copy this file and remove workflow_call trigger):
+#   on: pull_request
+
+name: PR Size Label
+
+on:
+    pull_request:
+        types: [opened, reopened, synchronize]
+    workflow_call:
+        inputs:
+            xs-max-size:
+                description: Max lines for XS label
+                required: false
+                type: number
+                default: 20
+            s-max-size:
+                description: Max lines for S label
+                required: false
+                type: number
+                default: 50
+            m-max-size:
+                description: Max lines for M label
+                required: false
+                type: number
+                default: 200
+            l-max-size:
+                description: Max lines for L label (above = XL)
+                required: false
+                type: number
+                default: 800
+            fail-if-xl:
+                description: Fail the workflow if PR is XL
+                required: false
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    pr-size:
+        runs-on: ubuntu-latest
+        name: Label PR by size
+        steps:
+            - name: Label pull request by size
+              uses: codelytv/pr-size-labeler@v1
+              with:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  xs_max_size: ${{ inputs.xs-max-size || 20 }}
+                  s_max_size: ${{ inputs.s-max-size || 50 }}
+                  m_max_size: ${{ inputs.m-max-size || 200 }}
+                  l_max_size: ${{ inputs.l-max-size || 800 }}
+                  fail_if_xl: ${{ inputs.fail-if-xl || false }}
