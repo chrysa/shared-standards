@@ -1,0 +1,133 @@
+---
+# Reusable consumer-driven contract testing workflow (chrysa ecosystem)
+#
+# Purpose:
+#   Verify that a library (provider) does not break its consumers'
+#   declared contracts before merging or releasing.
+#
+# How it works:
+#   1. Consumer projects store their contracts in contracts/<provider-name>/
+#   2. This workflow is called by the PROVIDER (chrysa-lib) on push/release
+#   3. It validates each consumer contract against the provider's current API
+#
+# Stack:
+#   - TypeScript packages: @pact-foundation/pact (Pact v11)
+#   - Python packages: schemathesis (OpenAPI contract tests)
+#
+# Usage from provider (chrysa-lib/.github/workflows/ci.yml):
+#   uses: chrysa/shared-standards/.github/workflows/contract-testing.yml@main
+#   with:
+#     provider: "@chrysa/auth"
+#     contracts-repo: chrysa/chrysa-contracts
+#     language: typescript
+#
+# Consumer setup:
+#   - Fork contracts file to chrysa/chrysa-contracts/consumers/<app>/<provider>.json
+#   - Or declare contracts inline in the consumer repo at contracts/<provider>.json
+
+name: Contract Testing (reusable)
+
+on:
+    workflow_call:
+        inputs:
+            provider:
+                description: "Package name being verified (e.g. @chrysa/auth)"
+                required: true
+                type: string
+            language:
+                description: "typescript or python"
+                required: false
+                type: string
+                default: typescript
+            node-version:
+                description: Node.js version (TypeScript only)
+                required: false
+                type: string
+                default: "22"
+            python-version:
+                description: Python version (Python only)
+                required: false
+                type: string
+                default: "3.12"
+            contracts-path:
+                description: "Path to consumer contract files (glob)"
+                required: false
+                type: string
+                default: "contracts/**/*.json"
+            install-command:
+                description: "Command to install dependencies"
+                required: false
+                type: string
+                default: "npm ci"
+
+permissions:
+    contents: read
+
+jobs:
+    contract-test-ts:
+        name: Pact — ${{ inputs.provider }}
+        if: inputs.language == 'typescript'
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node-version }}
+                  cache: npm
+
+            - name: Install dependencies
+              run: ${{ inputs.install-command }}
+
+            - name: Verify provider against consumer contracts
+              run: npx pact-provider-verifier \
+                --provider "${{ inputs.provider }}" \
+                --provider-base-url "${PROVIDER_URL:-http://localhost:3000}" \
+                --pact-broker-url "${PACT_BROKER_URL:-}" \
+                --pact-dir "${{ inputs.contracts-path }}" \
+                || node scripts/verify-contracts.mjs
+              env:
+                  PROVIDER: ${{ inputs.provider }}
+
+            - name: Upload pact results
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: pact-results-${{ github.run_id }}
+                  path: pact/logs/
+                  retention-days: 7
+
+    contract-test-python:
+        name: Schemathesis — ${{ inputs.provider }}
+        if: inputs.language == 'python'
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: ${{ inputs.python-version }}
+
+            - name: Install schemathesis
+              run: pip install schemathesis
+
+            - name: Run contract tests against OpenAPI spec
+              run: |
+                  st run "${{ inputs.contracts-path }}" \
+                    --checks all \
+                    --hypothesis-max-examples 50 \
+                    --junit-xml contract-results.xml
+              env:
+                  PROVIDER: ${{ inputs.provider }}
+
+            - name: Upload results
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: contract-results-${{ github.run_id }}
+                  path: contract-results.xml
+                  retention-days: 7
