@@ -29,6 +29,8 @@ workflows/
   labeler.yml                   # PR auto-labeler workflow (actions/labeler@v6)
   pr-size.yml                   # PR size label workflow (codelytv/pr-size-labeler)
   pages.yml                     # GitHub Pages deploy (peaceiris or official actions/deploy-pages)
+  notion-roadmap-sync.yml       # Notion roadmap sync (issues/PR events → Notion table row)
+  notion-branch-sync.yml        # Per-branch Notion docs (every push → Branch Activity DB)
 
 templates/
   CLAUDE.md                     # Bootstrap CLAUDE.md template
