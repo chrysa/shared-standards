@@ -1,0 +1,121 @@
+---
+# Reusable mutation testing workflow (chrysa ecosystem)
+#
+# Usage:
+#   uses: chrysa/shared-standards/.github/workflows/mutation-testing.yml@main
+#   with:
+#     python-version: "3.12"            # optional, default 3.12
+#     paths-to-mutate: "src/engine/"    # required
+#     test-runner: "pytest tests/ -x -q --no-header"  # optional
+#     threshold: 70                      # optional, default 70
+#
+# Designed for weekly schedule runs, NOT PR gates.
+
+name: Mutation Testing (reusable)
+
+on:
+    workflow_call:
+        inputs:
+            python-version:
+                description: Python version
+                required: false
+                type: string
+                default: "3.12"
+            paths-to-mutate:
+                description: Comma-separated paths to mutate (e.g. "src/engine/,src/domain/")
+                required: true
+                type: string
+            test-runner:
+                description: Command mutmut uses to run tests
+                required: false
+                type: string
+                default: "python -m pytest tests/ -x -q --no-header"
+            threshold:
+                description: Minimum mutation score (0–100) to pass
+                required: false
+                type: number
+                default: 70
+            install-command:
+                description: Command to install project + dev dependencies
+                required: false
+                type: string
+                default: "pip install -e .[dev]"
+        secrets:
+            DISCORD_WEBHOOK:
+                required: false
+
+permissions:
+    contents: read
+
+jobs:
+    mutation:
+        name: Mutmut
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: ${{ inputs.python-version }}
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  ${{ inputs.install-command }}
+
+            - name: Run mutmut
+              run: |
+                  mutmut run \
+                    --paths-to-mutate "${{ inputs.paths-to-mutate }}" \
+                    --runner "${{ inputs.test-runner }}" \
+                    --no-progress \
+                    || true
+
+            - name: Compute mutation score
+              id: score
+              run: |
+                  KILLED=$(mutmut results 2>/dev/null | grep -c "^Killed" || echo 0)
+                  SURVIVED=$(mutmut results 2>/dev/null | grep -c "^Survived" || echo 0)
+                  TOTAL=$((KILLED + SURVIVED))
+                  SCORE=$([ "$TOTAL" -eq 0 ] && echo 100 || echo $((KILLED * 100 / TOTAL)))
+                  echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+                  echo "killed=$KILLED" >> "$GITHUB_OUTPUT"
+                  echo "survived=$SURVIVED" >> "$GITHUB_OUTPUT"
+                  echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+
+            - name: Show surviving mutants
+              if: always()
+              run: mutmut results || true
+
+            - name: Fail if score below threshold
+              run: |
+                  SCORE=${{ steps.score.outputs.score }}
+                  THRESHOLD=${{ inputs.threshold }}
+                  echo "Mutation score: ${SCORE}% (threshold: ${THRESHOLD}%)"
+                  if [ "$SCORE" -lt "$THRESHOLD" ]; then
+                    echo "❌ Score ${SCORE}% below threshold ${THRESHOLD}%"
+                    exit 1
+                  fi
+                  echo "✅ Score ${SCORE}% meets threshold ${THRESHOLD}%"
+
+            - name: Notify Discord on failure
+              if: failure() && secrets.DISCORD_WEBHOOK != ''
+              uses: Ilshidur/action-discord@0.3.2
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              with:
+                  args: |
+                      ❌ **Mutation score regression** on `${{ github.repository }}`
+                      Score: ${{ steps.score.outputs.score }}% (threshold: ${{ inputs.threshold }}%)
+                      Survived: ${{ steps.score.outputs.survived }}/${{ steps.score.outputs.total }}
+                      Branch: `${{ github.ref_name }}`
+
+            - name: Upload mutmut cache
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: mutmut-cache
+                  path: .mutmut-cache
+                  retention-days: 14
