@@ -1,0 +1,121 @@
+name: Notion Roadmap Sync
+
+# Automatic sync of issue/PR events to Notion roadmap.
+# Triggered when an issue or PR is opened, closed, or merged in the repo.
+#
+# Setup required:
+#   1. Add NOTION_TOKEN as an org or repo secret.
+#   2. Add NOTION_PROJECT_BLOCK_ID as a repository variable (vars.NOTION_PROJECT_BLOCK_ID)
+#      → value = the Notion table row UUID for this project (from "Avancement par projet" table).
+#   3. Optionally set NOTION_ORG = "chrysa" (defaults to chrysa).
+#
+# Block IDs per repo (Centre de suivi — Avancement par projet):
+#   dev-nexus                      → a5a83a0f-...
+#   satisfactory-automated_calculator → 149afd18-...
+#   genealogy-validator            → 6a4c373c-...
+#   ai-aggregator                  → c0d4adba-...
+#   container-webview (TraceControl) → b791a3e1-...
+#   server                         → f58840fb-...
+#   agent-config (OpenCode)        → b6c15ef5-...
+#   diy-stream-deck                → f5122def-...
+#   pre-commit-tools               → 1acc43e0-...
+#   shared-standards               → adcb76fe-...
+#   guideline-checker              → 3fa62a12-...
+#   project-init                   → 73f59624-...
+#   github-actions                 → 5e244262-...
+#   usefull-containers             → c00555f8-...
+
+on:
+  issues:
+    types: [opened, closed, reopened]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  notion-sync:
+    runs-on: ubuntu-latest
+    # Only run if the repo has configured a Notion block ID
+    if: vars.NOTION_PROJECT_BLOCK_ID != ''
+    steps:
+      - name: Sync event to Notion roadmap
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_BLOCK_ID: ${{ vars.NOTION_PROJECT_BLOCK_ID }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request, datetime
+
+          token = os.environ.get('NOTION_TOKEN', '')
+          block_id = os.environ.get('NOTION_BLOCK_ID', '')
+          event_name = os.environ.get('GITHUB_EVENT_NAME', '')
+          action = os.environ.get('GITHUB_EVENT_ACTION', '')
+          today = datetime.date.today().isoformat()
+
+          if not token or not block_id:
+              print('Missing NOTION_TOKEN or NOTION_BLOCK_ID — skipping')
+              exit(0)
+
+          # Build a concise task description from the event
+          if event_name == 'pull_request':
+              num = os.environ.get('PR_NUMBER', '')
+              title = os.environ.get('PR_TITLE', '')[:55]
+              merged = os.environ.get('PR_MERGED', 'false').lower() == 'true'
+              state = 'merged' if merged else action
+              task = 'PR#%s %s [%s]' % (num, title, state)
+          elif event_name == 'issues':
+              num = os.environ.get('ISSUE_NUMBER', '')
+              title = os.environ.get('ISSUE_TITLE', '')[:55]
+              task = 'Issue#%s %s [%s]' % (num, title, action)
+          else:
+              task = '%s [%s]' % (event_name, action)
+
+          # GET current block to preserve existing cell values
+          url = 'https://api.notion.com/v1/blocks/' + block_id
+          headers = {
+              'Authorization': 'Bearer ' + token,
+              'Notion-Version': '2022-06-28',
+              'Content-Type': 'application/json',
+          }
+          req = urllib.request.Request(url, headers=headers)
+          try:
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                  row = json.loads(resp.read())
+          except Exception as e:
+              print('Failed to GET Notion block: %s' % e)
+              exit(0)
+
+          row_type = row.get('type', 'table_row')
+          cells = row.get(row_type, {}).get('cells', [])
+
+          def _txt_cell(content):
+              return [{'type': 'text', 'text': {'content': content},
+                       'plain_text': content,
+                       'annotations': {'bold': False, 'italic': False,
+                                       'strikethrough': False, 'underline': False,
+                                       'code': False, 'color': 'default'}}]
+
+          # Table columns (0-indexed):
+          # 0:Projet 1:Statut 2:Phase 3:Progress% 4:Tâche actuelle
+          # 5:Tâche suivante 6:Blocage 7:Dernière MAJ 8:Liens GitHub
+          if len(cells) > 4:
+              cells[4] = _txt_cell(task)
+          if len(cells) > 7:
+              cells[7] = _txt_cell(today)
+
+          body = json.dumps({'table_row': {'cells': cells}}).encode()
+          req = urllib.request.Request(url, data=body, method='PATCH', headers=headers)
+          try:
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                  json.loads(resp.read())
+              print('Notion updated: %s → %s' % (block_id[:8], task))
+          except Exception as e:
+              print('Failed to PATCH Notion: %s' % e)
+          PYEOF

@@ -1,0 +1,149 @@
+---
+# Reusable GitHub Pages deploy workflow
+# Supports two modes:
+#   - peaceiris (default): Push directly to gh-pages branch (simpler, widely used)
+#   - official: GitHub's native pages deploy via actions/upload-pages-artifact +
+#               actions/deploy-pages (OIDC, no token stored, recommended for new setups)
+#
+# Marketplace references:
+#   - https://github.com/marketplace/actions/github-pages-action (peaceiris)
+#   - https://github.com/marketplace/actions/deploy-github-pages-site (official)
+#
+# Usage example (MkDocs project):
+#
+#   on:
+#     push:
+#       branches: [main]
+#       paths: [docs/**]
+#   jobs:
+#     pages:
+#       uses: shared-standards/.github/workflows/pages.yml@main
+#       with:
+#         build-command: 'pip install mkdocs-material && mkdocs build'
+#         publish-dir: site
+#       secrets: inherit
+#
+# Required repo settings (official mode):
+#   Settings → Pages → Source: "GitHub Actions"
+
+name: Deploy GitHub Pages
+
+on:
+    push:
+        branches: [main, master]
+    workflow_call:
+        inputs:
+            mode:
+                description: >
+                    Deploy mode: "peaceiris" (push to gh-pages branch) or
+                    "official" (GitHub native OIDC deploy).
+                required: false
+                type: string
+                default: peaceiris
+            build-command:
+                description: Shell command to build the static site (e.g. 'mkdocs build')
+                required: false
+                type: string
+                default: ''
+            publish-dir:
+                description: Directory containing the built static files
+                required: false
+                type: string
+                default: site
+            python-version:
+                description: Python version to use when build-command uses Python
+                required: false
+                type: string
+                default: '3.14'
+            node-version:
+                description: Node version to use when build-command uses Node
+                required: false
+                type: string
+                default: '22'
+
+permissions:
+    contents: write
+    pages: write
+    id-token: write
+
+jobs:
+    # ──────────────────────────────────────────────
+    # Mode A: peaceiris/actions-gh-pages@v4
+    # Push built site directly to the gh-pages branch.
+    # Simpler setup; compatible with existing repos already using gh-pages.
+    # ──────────────────────────────────────────────
+    deploy-peaceiris:
+        if: ${{ inputs.mode == 'peaceiris' || inputs.mode == '' }}
+        runs-on: ubuntu-latest
+        name: Deploy (peaceiris)
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'pip') }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ inputs.python-version }}
+
+            - name: Set up Node
+              if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'npm') }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node-version }}
+
+            - name: Build site
+              if: ${{ inputs.build-command != '' }}
+              run: ${{ inputs.build-command }}
+
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ${{ inputs.publish-dir || 'site' }}
+
+    # ──────────────────────────────────────────────
+    # Mode B: Official GitHub Pages deploy
+    # Uses actions/upload-pages-artifact + actions/deploy-pages@v4
+    # OIDC-based — no long-lived token required.
+    # Requires Pages source set to "GitHub Actions" in repo settings.
+    # ──────────────────────────────────────────────
+    build-official:
+        if: ${{ inputs.mode == 'official' }}
+        runs-on: ubuntu-latest
+        name: Build site (official)
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'pip') }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ inputs.python-version }}
+
+            - name: Set up Node
+              if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'npm') }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ inputs.node-version }}
+
+            - name: Build site
+              if: ${{ inputs.build-command != '' }}
+              run: ${{ inputs.build-command }}
+
+            - name: Upload pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ${{ inputs.publish-dir || 'site' }}
+
+    deploy-official:
+        if: ${{ inputs.mode == 'official' }}
+        needs: build-official
+        runs-on: ubuntu-latest
+        name: Deploy (official)
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
