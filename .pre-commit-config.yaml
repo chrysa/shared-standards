@@ -15,7 +15,7 @@ repos:
     - main
     id: no-commit-to-branch
   repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: f1dff44d3a9ae852957f34def96390f28719c232
+  rev: v6.0.0
 - hooks:
   - args:
     - --fix
@@ -23,7 +23,7 @@ repos:
     stages:
     - manual
   repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: 70466ee0aa1d9bca1fd4ce54bfbba370431ecced
+  rev: v0.48.0
 - hooks:
   - exclude: ^(\.github/|workflows/|templates/)
     id: yaml-sorter
@@ -31,11 +31,11 @@ repos:
   - id: env-file-check
   - id: env-example-sync
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-57
+  rev: v0.1.1-58
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
-  rev: v8.30.1
+  rev: v8.30.0
 - hooks:
   - id: conventional-pre-commit
     stages: [commit-msg]
