@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.1 — 2026-04-30**
+**Version 1.2 — 2026-05-03**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -103,7 +103,13 @@ description: imperative, lowercase, no period
 ```
 push (any branch)
   ↓
+secret-scan.yml: gitleaks — blocks on detected secrets (ALL repos, ALL branches)
+  ↓
+enforce-feature-branch.yml: validate branch naming (PRs only)
+  ↓
 ci-*.yml: lint + typecheck + test-cov
+  ↓
+sonar.yml: SonarCloud quality gate (Python + JS/TS projects)
   ↓
 PR created: labeler assigns size + content labels
   ↓
@@ -115,6 +121,28 @@ release.yml (tag push): cliff CHANGELOG + GitHub Release
   ↓
 pages.yml (main push): MkDocs deploy to GitHub Pages
 ```
+
+**Weekly (cron):**
+```
+mutation-testing.yml: mutmut mutation score — minimum 70% threshold
+```
+
+### Required workflows (every repo)
+
+| Workflow | File | Trigger |
+|---|---|---|
+| Secret scan | `secret-scan.yml` | push + PR (all branches) |
+| Branch policy | `enforce-feature-branch.yml` | PR opened/updated |
+| CI | `ci-*.yml` | push + PR to main/develop |
+| Mutation testing | `mutation-testing.yml` | weekly cron (Sunday 02:00) |
+
+### Conditional workflows
+
+| Workflow | Condition |
+|---|---|
+| `sonar.yml` | Python or JS/TS projects |
+| `release.yml` | All versioned projects |
+| `pages.yml` | Projects with MkDocs docs |
 
 All reusable workflows are sourced from `chrysa/shared-standards`.
 
@@ -144,9 +172,32 @@ All reusable workflows are sourced from `chrysa/shared-standards`.
 
 - OWASP Top 10 check on every PR via PR Review Skill
 - No hardcoded secrets — use env vars + `.env.example`
+- **Secret scanning (mandatory):** `gitleaks` pre-commit hook + `secret-scan.yml` CI workflow on every repo
 - Dependabot enabled for all repos (`.github/dependabot.yml`)
 - SonarQube scan for Python and JS/TS projects (via `sonar.yml`)
-- Regular `pre-commit run --all-files` before pushing
+- `pre-commit run --all-files` before pushing (enforced via `pre-commit.yml` CI on every PR)
+
+### Pre-commit hooks (mandatory baseline)
+
+Every repo **must** include these hooks in `.pre-commit-config.yaml`:
+
+| Hook | Repo | Purpose |
+|---|---|---|
+| `no-commit-to-branch` | `pre-commit-hooks` | Prevent direct push to main/develop |
+| `trailing-whitespace`, `end-of-file-fixer` | `pre-commit-hooks` | File hygiene |
+| `gitleaks` | `gitleaks/gitleaks` | Secret detection |
+| `conventional-pre-commit` | `compilerla/conventional-pre-commit` | Commit message lint |
+
+Additional hooks by stack:
+
+| Hook | Stack | Purpose |
+|---|---|---|
+| `ruff` + `ruff-format` | Python | Lint + format |
+| `mypy` | Python (typed) | Static type checking |
+| `hadolint` | Any with Dockerfile | Dockerfile lint |
+| `debugger-detection`, `python-print-detection` | Python | Code quality |
+
+Reference config: `chrysa/shared-standards/.pre-commit-config.yaml`
 
 ---
 
