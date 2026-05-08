@@ -280,3 +280,101 @@ ignore_missing_imports = true
 - `setup.cfg` is permitted only for non-Python tooling (e.g. uwsgi); never for Python packaging.
 - Library packages use `src/` layout with `[tool.hatch.build.targets.wheel] packages = ["src/<pkg>"]`.
 - Applications without distribution do not need `[build-system]`; only `[tool.*]` sections are required.
+
+---
+
+## 12. Local Test Procedure (all projects)
+
+**NON-NEGOTIABLE**: never invoke `ruff`, `pytest`, `mypy`, `tsc`, `eslint`, `vitest` or `npm test` directly
+on the host. Always delegate to `make` targets which handle the correct environment (Docker or venv).
+
+### Universal sequence (every project, every stack)
+
+```bash
+# 1. Install dependencies
+make install            # or: make install-dev for dev extras
+
+# 2. Lint (zero warnings required)
+make lint
+
+# 3. Tests
+make test               # unit tests, fast feedback loop
+make test-cov           # with coverage — must stay >= 85%
+
+# 4. Type check (typed projects only)
+make typecheck
+
+# 5. Pre-commit hooks on all files
+make pre-commit
+
+# 6. Validate GitHub Actions workflows (no host actionlint required)
+docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest
+
+# 7. Quality gate
+make quality-gate-verify
+```
+
+### Regression gate (mandatory before every PR)
+
+Run the full sequence above and verify:
+
+| Check | Threshold |
+|---|---|
+| Tests passing | ≥ baseline count (never decrease) |
+| Line coverage | ≥ 85% on new code; ≥ 80% on any file |
+| Lint warnings | exactly 0 |
+| Type errors | 0 new errors vs baseline |
+| Build (`make build`) | exit 0 when applicable |
+
+Do **not** open a PR if any gate is red. Fix first, then re-run.
+
+### Docker-backed projects (FastAPI, Node services)
+
+```bash
+make docker-up          # start DB + services
+make docker-test        # pytest / vitest inside Docker (isolated from host)
+make docker-down        # tear down
+```
+
+Unit-only fallback (no DB):
+```bash
+# Python FastAPI example
+DATABASE_URL="" make test
+```
+
+### Infrastructure projects (Helm / k8s / Terraform)
+
+```bash
+# Helm chart lint + dry-run render
+helm lint apps/<namespace>/<service>/
+helm template <name> apps/<namespace>/<service>/ \
+  -f apps/<namespace>/<service>/values/kimsufi.yaml \
+  | kubectl apply --dry-run=client -f -
+
+# Terraform
+cd terraform/ && terraform fmt -check && terraform validate
+
+# YAML lint
+yamllint -d relaxed apps/ k8s/ secrets/
+```
+
+### n8n workflow projects (Node / automations)
+
+```bash
+make lint && make pre-commit
+
+# Import test — requires running n8n:
+#   Option A: kubectl port-forward svc/n8n 5678:5678 -n automation
+#   Option B: docker run -it --rm -p 5678:5678 n8nio/n8n
+# Then: n8n UI → Settings → Import workflow → select JSON
+```
+
+### Reporting format (after every task)
+
+```
+Tests   : <N> passed (baseline <N>) ✓/✗
+Coverage: <X>% (baseline <X>%) ✓/✗
+Lint    : 0 warnings ✓/✗
+Types   : 0 errors ✓/✗
+Build   : ok ✓/✗
+```
