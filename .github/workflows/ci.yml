@@ -5,18 +5,26 @@ on:
     push:
         branches:
             - main
-            - master
+            - develop
+            - "feat/**"
+            - "fix/**"
+            - "ci/**"
+            - "chore/**"
     pull_request:
-        branches:
-            - main
-            - master
+        branches: [main, develop]
+    workflow_dispatch:
 
 permissions:
     contents: read
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     lint:
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         name: Lint & validate
 
         steps:
@@ -31,6 +39,7 @@ jobs:
 
     validate-templates:
         runs-on: ubuntu-latest
+        timeout-minutes: 10
         name: Validate template YAML/JSON
 
         steps:
