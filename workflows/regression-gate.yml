@@ -1,0 +1,205 @@
+---
+# Reusable regression gate workflow (chrysa ecosystem)
+#
+# Detects coverage and test-count regressions between the current branch and
+# the last baseline stored from `main`.
+#
+# Usage (call from a project CI workflow):
+#
+#   jobs:
+#     regression-gate:
+#       uses: chrysa/shared-standards/.github/workflows/regression-gate.yml@main
+#       with:
+#         coverage-report: reports/coverage.xml     # default
+#         test-report:     reports/test-results.xml  # default
+#         python-version:  "3.14"                   # default
+#         install-command: "pip install -e .[dev]"  # default
+#         test-command:    "make ci-test"            # default
+#
+# Behavior:
+#   - On pushes to main/develop: runs tests and uploads a `quality-baseline`
+#     artifact (90-day retention) so future PRs can compare against it.
+#   - On pull_request: downloads the latest baseline from main, compares
+#     metrics, and fails if coverage or passing-test count has regressed.
+#   - First run (no prior artifact): comparison is skipped — only the baseline
+#     upload step runs.
+
+name: Regression Gate (reusable)
+
+on:
+    workflow_call:
+        inputs:
+            python-version:
+                description: Python version to use
+                required: false
+                type: string
+                default: "3.14"
+            install-command:
+                description: Command to install project + dev dependencies
+                required: false
+                type: string
+                default: "pip install -e .[dev]"
+            test-command:
+                description: Command that runs tests and produces coverage.xml + test-results.xml
+                required: false
+                type: string
+                default: "make ci-test"
+            coverage-report:
+                description: Path to coverage.xml produced by the test command
+                required: false
+                type: string
+                default: reports/coverage.xml
+            test-report:
+                description: Path to JUnit XML produced by the test command
+                required: false
+                type: string
+                default: reports/test-results.xml
+            baseline-artifact-name:
+                description: Name of the artifact that stores the quality baseline
+                required: false
+                type: string
+                default: quality-baseline
+
+permissions:
+    contents: read
+    pull-requests: write   # needed to post coverage-delta comments on PRs
+
+jobs:
+    regression-gate:
+        runs-on: ubuntu-latest
+        name: Regression Gate
+
+        steps:
+            # ── Checkout ──────────────────────────────────────────────────
+            - uses: actions/checkout@v5
+
+            # ── Python setup ──────────────────────────────────────────────
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ inputs.python-version }}
+
+            # ── Install project ───────────────────────────────────────────
+            - name: Install dependencies
+              run: ${{ inputs.install-command }}
+
+            # ── Install regression-gate CLI ───────────────────────────────
+            - name: Install regression-gate
+              run: pip install "git+https://github.com/chrysa/pre-commit-tools.git@main"
+
+            # ── Download main-branch baseline (PRs only) ──────────────────
+            - name: Download quality baseline from main
+              if: github.event_name == 'pull_request'
+              id: download-baseline
+              uses: dawidd6/action-download-artifact@v9
+              with:
+                  workflow: ${{ github.workflow }}
+                  branch: ${{ github.event.pull_request.base.ref }}
+                  name: ${{ inputs.baseline-artifact-name }}
+                  path: .baseline/
+                  if_no_artifact_found: warn
+              continue-on-error: true
+
+            # ── Run tests ─────────────────────────────────────────────────
+            - name: Run tests
+              run: ${{ inputs.test-command }}
+
+            # ── Compare metrics vs baseline (PRs only) ────────────────────
+            - name: Check for regressions
+              if: github.event_name == 'pull_request'
+              id: regression-check
+              run: |
+                  if [ -f ".baseline/.quality-baseline.json" ]; then
+                    cp .baseline/.quality-baseline.json .quality-baseline.json
+                    regression-gate \
+                      --coverage-report "${{ inputs.coverage-report }}" \
+                      --test-report     "${{ inputs.test-report }}" \
+                      --baseline        .quality-baseline.json
+                  else
+                    echo "No baseline artifact found — skipping comparison (first run)."
+                  fi
+
+            # ── Post coverage delta comment on PRs ────────────────────────
+            - name: Post coverage comment
+              if: github.event_name == 'pull_request' && always()
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+
+                      // Parse current coverage
+                      let currentCov = null;
+                      try {
+                        const xml = fs.readFileSync('${{ inputs.coverage-report }}', 'utf8');
+                        const match = xml.match(/line-rate="([0-9.]+)"/);
+                        if (match) currentCov = Math.round(parseFloat(match[1]) * 10000) / 100;
+                      } catch {}
+
+                      // Parse baseline coverage
+                      let baselineCov = null;
+                      try {
+                        const baseline = JSON.parse(fs.readFileSync('.quality-baseline.json', 'utf8'));
+                        baselineCov = baseline.metrics?.coverage_pct ?? null;
+                      } catch {}
+
+                      if (currentCov === null) {
+                        console.log('No coverage report found — skipping comment.');
+                        return;
+                      }
+
+                      let delta = '';
+                      let status = '✅';
+                      if (baselineCov !== null) {
+                        const diff = Math.round((currentCov - baselineCov) * 100) / 100;
+                        const sign = diff >= 0 ? '+' : '';
+                        delta = ` (${sign}${diff}% vs main)`;
+                        if (diff < 0) status = '⚠️';
+                      }
+
+                      const body = `### ${status} Coverage: **${currentCov}%**${delta}\n\n` +
+                        `| Metric | Value | Baseline |\n` +
+                        `|--------|-------|----------|\n` +
+                        `| Coverage | ${currentCov}% | ${baselineCov !== null ? baselineCov + '%' : 'N/A'} |`;
+
+                      // Find and update existing comment, or create a new one
+                      const marker = '<!-- regression-gate-comment -->';
+                      const { data: comments } = await github.rest.issues.listComments({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                      });
+                      const existing = comments.find(c => c.body?.includes(marker));
+                      const fullBody = marker + '\n' + body;
+                      if (existing) {
+                        await github.rest.issues.updateComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          comment_id: existing.id,
+                          body: fullBody,
+                        });
+                      } else {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: context.issue.number,
+                          body: fullBody,
+                        });
+                      }
+
+            # ── Capture new baseline (main/develop pushes only) ───────────
+            - name: Write quality baseline
+              if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+              run: |
+                  regression-gate \
+                    --write-baseline \
+                    --coverage-report "${{ inputs.coverage-report }}" \
+                    --test-report     "${{ inputs.test-report }}" \
+                    --baseline        .quality-baseline.json
+
+            - name: Upload quality baseline artifact
+              if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ inputs.baseline-artifact-name }}
+                  path: .quality-baseline.json
+                  retention-days: 90
+                  overwrite: true
