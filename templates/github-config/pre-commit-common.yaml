@@ -61,3 +61,7 @@ repos:
     id: actionlint
   repo: https://github.com/rhysd/actionlint
   rev: v1.7.7
+- hooks:
+  - id: regression-gate
+  repo: https://github.com/chrysa/pre-commit-tools
+  rev: v0.1.1-73
