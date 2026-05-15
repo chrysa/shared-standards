@@ -3,6 +3,8 @@
 > Replace [PROJECT_NAME] and all [PLACEHOLDER] values before committing.
 > @[claude-sonnet-4-6]
 
+> **Claude Code**: also read `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` for code specifications.
+
 ## Project
 
 **Name:** [PROJECT_NAME]
