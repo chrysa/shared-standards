@@ -28,7 +28,7 @@ src/
 
 - Use React Compiler if enabled — avoid manual `useMemo`/`useCallback` unless profiling proves need.
 - Prefer React 19 `use()` hook for promise resolution over manual `useState`/`useEffect` combos.
-- Server Actions: use for form mutations when using Next.js; keep pure for reusability.
+- Server Actions: keep mutations pure and framework-agnostic for reusability.
 - Avoid legacy patterns: class components, `React.FC`, `defaultProps`, string refs.
 
 ## State management
