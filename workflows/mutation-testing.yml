@@ -1,8 +1,11 @@
 ---
-# Reusable mutation testing workflow (chrysa ecosystem)
+# Mutation testing workflow template (chrysa ecosystem)
 #
-# Usage:
-#   uses: chrysa/shared-standards/.github/workflows/mutation-testing.yml@main
+# Usage: copy to .github/workflows/mutation-testing.yml and adapt.
+# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
+#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
+#
+# Parameters when used as a standalone workflow:
 #   with:
 #     python-version: "3.12"            # optional, default 3.12
 #     paths-to-mutate: "src/engine/"    # required

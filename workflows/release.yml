@@ -1,9 +1,10 @@
 ---
-# Reusable semantic release workflow (chrysa ecosystem)
+# Semantic release workflow template (chrysa ecosystem)
 # Uses: GitVersion + cliff (git-cliff) for changelog generation
 #
-# Usage:
-#   uses: chrysa/shared-standards/.github/workflows/release.yml@main
+# Usage: copy to .github/workflows/release.yml and adapt.
+# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
+#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
 #
 # Required secrets: GITHUB_TOKEN (automatic), RELEASE_TOKEN (for protected branches)
 #
