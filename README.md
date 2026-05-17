@@ -21,16 +21,21 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
 copilot-instructions/
   base.md                       # Base GitHub Copilot instructions
 
-workflows/
-  ci-python.yml                 # Reusable CI workflow for Python projects
-  ci-node.yml                   # Reusable CI workflow for Node/React projects
-  sonar.yml                     # SonarQube analysis workflow
-  release.yml                   # Semantic release workflow (softprops/action-gh-release)
-  labeler.yml                   # PR auto-labeler workflow (actions/labeler@v6)
-  pr-size.yml                   # PR size label workflow (codelytv/pr-size-labeler)
-  pages.yml                     # GitHub Pages deploy (peaceiris or official actions/deploy-pages)
-  notion-roadmap-sync.yml       # Notion roadmap sync (issues/PR events → Notion table row)
-  notion-branch-sync.yml        # Per-branch Notion docs (every push → Branch Activity DB)
+workflows/                        # ⚠️ COPY-TO-USE templates — NOT callable via `uses: chrysa/shared-standards/...`
+  ci-python.yml                 # Full CI pipeline template for Python projects (copy to .github/workflows/ci.yml)
+  ci-node.yml                   # Full CI pipeline template for Node/React projects
+  sonar.yml                     # SonarCloud workflow template (workflow_call-compatible after copy)
+  release.yml                   # Semantic release template (GitVersion + cliff)
+  labeler.yml                   # PR auto-labeler template (actions/labeler@v6)
+  pr-size.yml                   # PR size label template (codelytv/pr-size-labeler)
+  pages.yml                     # GitHub Pages deploy template
+  notion-roadmap-sync.yml       # Notion roadmap sync template
+  notion-branch-sync.yml        # Per-branch Notion docs template
+  regression-gate.yml           # Regression gate (coverage + test count delta)
+  mutation-testing.yml          # Mutation testing template (mutmut)
+  contract-testing.yml          # Consumer-driven contract testing template
+  enforce-feature-branch.yml    # Block PRs from non-conventional branch names
+  secret-scan.yml               # Secret scanning with gitleaks
 
 templates/
   CLAUDE.md                     # Bootstrap CLAUDE.md template
@@ -67,7 +72,15 @@ Copy `copilot-instructions/base.md` to `.github/copilot-instructions.md` in your
 
 ### Workflows
 
-Reference the generic workflows from `.github/workflows/` in your repo CIs.
+Copy the relevant template from `workflows/` to `.github/workflows/` in your repo and adapt.
+These are **copy-to-use templates**, not reusable workflows callable via `uses:`.
+Composite actions (atomic steps) live in [`chrysa/github-actions`](https://github.com/chrysa/github-actions) — use them from inside your copied workflows.
+
+```bash
+# Example: add SonarCloud CI to your project
+cp path/to/shared-standards/workflows/sonar.yml .github/workflows/sonar.yml
+# Then edit to set your project key and secrets
+```
 
 ### Templates
 
