@@ -1,8 +1,9 @@
 ---
-# Reusable CI workflow for Python projects (chrysa ecosystem)
-# Usage: uses: chrysa/shared-standards/.github/workflows/ci-python.yml@main
+# CI workflow template for Python projects (chrysa ecosystem)
+# Usage: copy to .github/workflows/ci.yml and adapt.
 #
-# Or copy this file to .github/workflows/ci.yml and adapt.
+# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
+#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
 
 name: CI Python
 
