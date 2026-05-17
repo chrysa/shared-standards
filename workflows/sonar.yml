@@ -1,8 +1,9 @@
 ---
-# Reusable SonarCloud analysis workflow (chrysa ecosystem)
-# Usage:
-#   uses: chrysa/shared-standards/.github/workflows/sonar.yml@main
-#   (or copy to .github/workflows/sonar.yml and adapt)
+# SonarCloud analysis workflow template (chrysa ecosystem)
+# Usage: copy to .github/workflows/sonar.yml and adapt.
+#
+# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
+#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
 #
 # Required secrets: SONAR_TOKEN, SONAR_HOST_URL (defaults to sonarcloud.io)
 #
