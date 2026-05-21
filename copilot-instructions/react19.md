@@ -58,6 +58,31 @@ src/
 - All fetch calls live in `src/api/`; never call `fetch` directly from components.
 - Use React Query's `useQuery`/`useMutation` for data fetching — no `useEffect` + `fetch`.
 - Handle loading, error, and empty states explicitly in every data-driven component.
+- **HATEOAS**: backend responses include a `links` field. Never hardcode API paths in components — resolve URLs from `links[rel]` via a `getLinkHref()` helper in `src/api/`.
+- **Problem Details (RFC 7807)**: errors arrive as `application/problem+json`. Wrap `fetch` in a typed `apiFetch()` that throws an `ApiError(problem)` on non-OK responses. Display `problem.detail` to the user via React Query `onError`.
+- Validate all API responses with a Zod schema before use.
+
+## Error Boundaries
+
+- Every route-level component **MUST** be wrapped in an `ErrorBoundary`.
+- Map `ApiError.problem.status` → 401 redirect, 403 forbidden page, 404 not-found page, 5xx generic error.
+- Wrap individual widgets for isolated failure (don't let one widget crash the whole page).
+
+## Optimistic updates
+
+- Use React Query `useMutation` with `onMutate` (cache snapshot), `onError` (rollback), `onSettled` (re-validate) for all mutations that change visible state.
+- Never leave the UI in an inconsistent state — always provide `onError` rollback.
+
+## Form validation
+
+- Use **react-hook-form** + **Zod** for all forms; never build custom validation logic.
+- Zod schemas live in `src/schemas/` and are shared with API response validation.
+- Disable the submit button while `isSubmitting`. Associate errors with `role="alert"`.
+
+## Code splitting & Suspense
+
+- All page-level components loaded via `React.lazy()`, wrapped in `<Suspense fallback={<PageSkeleton />}>` at the router level.
+- Use skeleton loaders (`<Skeleton />` from shadcn/ui) — never raw spinners for full-page loads.
 
 ## Routing
 
