@@ -79,16 +79,43 @@ src/
 - Zod schemas live in `src/schemas/` and are shared with API response validation.
 - Disable the submit button while `isSubmitting`. Associate errors with `role="alert"`.
 
-## Code splitting & Suspense
+## Code splitting, Suspense & loading states
 
-- All page-level components loaded via `React.lazy()`, wrapped in `<Suspense fallback={<PageSkeleton />}>` at the router level.
-- Use skeleton loaders (`<Skeleton />` from shadcn/ui) — never raw spinners for full-page loads.
+### General loading rule
+- Every waiting state > 200 ms **must** be materialised without layout shift (CLS = 0).
+- Loading hierarchy: **skeleton → progress bar → spinner**. Never a full-screen spinner on a page with known structure.
+
+### Lazy components
+- Load routes, charts, modals, editors via `React.lazy()` + `<Suspense fallback={<SkeletonComponent />}>` — never use a spinner as `fallback`.
+- Lazy boundary = critical bundle split. Apply at route level minimum.
+
+### Skeletons
+- Use `<Skeleton />` from shadcn/ui shaped like the actual content (match width/height).
+- Centralise skeletons per entity (e.g. `components/skeletons/UserCardSkeleton.tsx`).
+- Add `aria-busy="true"` on the container while loading. Respect `prefers-reduced-motion` (no animation when set).
+- Show skeleton on `isPending` — **never hide existing content** during a background refetch (`isFetching`).
+
+### Progress bar
+- Use a **determinate** progress bar (`<Progress value={n} />`) whenever a real percentage exists (upload, export, batch job).
+- Use a top-of-page indeterminate loader for route transitions only.
+
+### Images
+- Every image **must** have `loading="lazy" decoding="async"` plus explicit `width` + `height` (or `aspect-ratio`) to prevent CLS.
+- Use a LQIP/blur placeholder for images above the fold.
+- Reserve `loading="eager"` only for the LCP image.
 
 ## Routing
 
-- Use React Router v6+ with `createBrowserRouter`.
-- Route definitions in one file; components loaded lazily with `React.lazy`.
-- Guard protected routes with an `AuthGuard` wrapper.
+- Use **TanStack Router** (`@tanstack/react-router`). No React Router.
+- Configure anti-flash thresholds: `defaultPendingMs: 200`, `defaultPendingMinMs: 400`, `defaultPendingComponent: <RouteSpinner />`.
+- Route definitions in a typed route tree (`src/routes/`); components loaded lazily with `React.lazy`.
+- Guard protected routes with an `AuthGuard` loader or `beforeLoad` hook.
+
+## i18n
+
+- All user-facing strings **must** go through `react-i18next` (`useTranslation` hook).
+- No hardcoded UI text in components. Translation keys in `src/i18n/locales/`.
+- Supported locales from V1: `fr`, `en`.
 
 ## Styling
 
