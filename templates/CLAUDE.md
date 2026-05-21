@@ -29,10 +29,11 @@
 ## Setup
 
 ```bash
-make install   # Install dependencies
-make lint      # Run linter
-make test      # Run tests
-make build     # Build (if applicable)
+make install             # Install dependencies
+make lint                # Run linter
+make test                # Run tests
+make build               # Build (if applicable)
+codegraph init --index . # Build CodeGraph index (run once, never commit .codegraph/)
 ```
 
 ## CI

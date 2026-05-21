@@ -1,3 +1,6 @@
+# CodeGraph
+.codegraph/
+
 # Python
 __pycache__/
 *.py[cod]
