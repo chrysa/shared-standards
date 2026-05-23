@@ -21,8 +21,8 @@ cd chrysa/shared-standards
 ./scripts/setup-branch-protection.sh <owner/repo>
 
 # Example
-./scripts/setup-branch-protection.sh anthony/padam-av
-./scripts/setup-branch-protection.sh anthony/padam-av-backoffice
+./scripts/setup-branch-protection.sh anthony/av-platform
+./scripts/setup-branch-protection.sh anthony/av-backoffice
 ```
 
 ### Manual Configuration
@@ -67,8 +67,8 @@ After applying branch protection:
 ## Rollout Plan
 
 ### Phase 1 (Immediate - OPS-188)
-- [ ] padam-av
-- [ ] padam-av-backoffice
+- [ ] av-platform
+- [ ] av-backoffice
 
 ### Phase 2 (Week 1)
 - [ ] chrysa/lifeos

@@ -7,7 +7,7 @@ This task ensures all development repositories have consistent quality gate setu
 
 | Status | Count | Action |
 |--------|-------|--------|
-| ✅ Complete | 2 | None (padam-av, padam-av-backoffice) |
+| ✅ Complete | 2 | None (av-platform, av-backoffice) |
 | ⚠️ Partial | 32 | Apply normalization script |
 | ❌ Missing | 14 | Not applicable (archived/non-dev repos) |
 | **Total Scanned** | **48** | — |

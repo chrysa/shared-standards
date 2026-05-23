@@ -22,8 +22,8 @@ Implemented a comprehensive **no-regression quality gate system** across 26+ rep
 
 **Deliverables:**
 - `quality-gate-check.yml` deployed to:
-  - `/padam-av-backoffice/.github/workflows/` ✅
-  - `/padam-av/.github/workflows/` ✅
+  - `/av-backoffice/.github/workflows/` ✅
+  - `/av-platform/.github/workflows/` ✅
   - `/chrysa/shared-standards/.github/workflows/` (template) ✅
 - All workflows validated (YAML syntax) ✅
 - Scripts + configs created for all repos ✅
@@ -47,7 +47,7 @@ Implemented a comprehensive **no-regression quality gate system** across 26+ rep
 
 **Audit Results:**
 - 48 repos scanned
-- 2 complete (padam-av, padam-av-backoffice)
+- 2 complete (av-platform, av-backoffice)
 - 32 partial (Makefile exists, missing quality-gate files)
 - 14 missing (archived/non-dev)
 
@@ -174,12 +174,12 @@ makefiles/quality-gate.Makefile            (Make targets, 6 lines)
 ## Next Steps
 
 ### Immediate (Today)
-1. [ ] Test OPS-187: Create test PR in padam-av, verify workflow runs
+1. [ ] Test OPS-187: Create test PR in av-platform, verify workflow runs
 2. [ ] Document workflow execution success
 3. [ ] Approve OPS-187 as validated
 
 ### Week 1
-1. [ ] Apply OPS-188: `./setup-branch-protection.sh padam-av`
+1. [ ] Apply OPS-188: `./setup-branch-protection.sh av-platform`
 2. [ ] Verify branch protection blocks failed checks
 3. [ ] Deploy Phase 1 repos (mediavault, chrysa-lib, container-webview)
 4. [ ] Test first PR in each Phase 1 repo

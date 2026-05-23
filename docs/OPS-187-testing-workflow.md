@@ -4,7 +4,7 @@
 
 ### Step 1: Create test branch
 ```bash
-cd /path/to/repo  # e.g., padam-av or padam-av-backoffice
+cd /path/to/repo  # e.g., av-platform or av-backoffice
 git checkout -b test/quality-gate-workflow
 ```
 
