@@ -18,8 +18,8 @@ jobs:
         runs-on: ubuntu-latest
         name: Lint & pre-commit
         steps:
-            - uses: actions/checkout@v5
-            - uses: actions/setup-node@v4
+            - uses: actions/checkout@v6
+            - uses: actions/setup-node@v6
               with:
                   node-version: '22'
                   cache: 'npm'
@@ -32,8 +32,8 @@ jobs:
         name: Tests
         needs: lint
         steps:
-            - uses: actions/checkout@v5
-            - uses: actions/setup-node@v4
+            - uses: actions/checkout@v6
+            - uses: actions/setup-node@v6
               with:
                   node-version: '22'
                   cache: 'npm'

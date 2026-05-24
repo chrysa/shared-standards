@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     if: vars.NOTION_BRANCHES_DB_ID != ''
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # full history needed for CHANGELOG diff
 

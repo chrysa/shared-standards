@@ -77,17 +77,17 @@ jobs:
         runs-on: ubuntu-latest
         name: Deploy (peaceiris)
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
 
             - name: Set up Python
               if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'pip') }}
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@v6
               with:
                   python-version: ${{ inputs.python-version }}
 
             - name: Set up Node
               if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'npm') }}
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: ${{ inputs.node-version }}
 
@@ -112,17 +112,17 @@ jobs:
         runs-on: ubuntu-latest
         name: Build site (official)
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
 
             - name: Set up Python
               if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'pip') }}
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@v6
               with:
                   python-version: ${{ inputs.python-version }}
 
             - name: Set up Node
               if: ${{ inputs.build-command != '' && contains(inputs.build-command, 'npm') }}
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: ${{ inputs.node-version }}
 
