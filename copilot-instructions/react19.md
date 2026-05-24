@@ -123,6 +123,17 @@ src/
 - No inline `style` props except for dynamic computed values.
 - Component-scoped CSS modules are acceptable for complex animations.
 
+## Mobile / Responsive
+
+- All React UIs must be **fully usable on mobile** (see base.md Mobile / Responsive rules).
+- Use Tailwind responsive prefixes (`sm:`, `md:`, `lg:`) — never write separate media query blocks manually.
+- Navigation: use a collapsible drawer (`Sheet` / `Drawer` component) or a bottom tab bar on mobile; never leave a full desktop sidebar visible on small screens.
+- Typography: `text-sm` minimum on mobile; never use font sizes below 14px for body copy.
+- Forms: inputs must be at least 44px tall on mobile; stack labels above inputs (not inline).
+- Modals and panels should be full-screen (`inset-0`) on screens < 540px.
+- Touch interactions: add `touch-action: manipulation` on all button/link elements to eliminate 300ms delay.
+- **Playwright E2E tests must include at least one viewport test at 390×844** (iPhone 14 size) for each critical flow.
+
 ## Security
 
 - Sanitise all user-generated HTML before rendering (use DOMPurify).

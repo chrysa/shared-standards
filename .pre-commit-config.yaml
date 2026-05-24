@@ -30,8 +30,10 @@ repos:
   - id: json-sorter
   - id: env-file-check
   - id: env-example-sync
+  # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
+  # TODO: add regression-gate after chrysa/pre-commit-tools#164 is released
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-73
+  rev: v0.1.1-76
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
@@ -42,7 +44,3 @@ repos:
     args: [feat, fix, docs, style, refactor, test, chore, perf, revert, ci]
   repo: https://github.com/compilerla/conventional-pre-commit
   rev: v4.4.0
-- hooks:
-  - id: regression-gate
-  repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-73
