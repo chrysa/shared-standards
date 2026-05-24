@@ -15,6 +15,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Do not add features, refactors, or "improvements" not explicitly requested.
 - Do not add docstrings, comments, or type annotations to code you did not change.
 - Do not over-engineer. Prefer simple, readable solutions over clever abstractions.
+- **Performance:** Do not chase maximum optimization. Only apply optimizations that deliver a measurable significant performance gain or enable cost savings (infra, API calls, compute). Premature micro-optimizations are considered unnecessary complexity.
 
 ### Python
 - Target Python 3.14.
@@ -81,3 +82,14 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Do not recap what was already said.
 - Do not explain obvious things.
 - If uncertain, say so in one sentence and give the most likely answer.
+
+## Mobile / Responsive
+- **Every project with a UI must be usable on mobile devices** — this is non-negotiable.
+- Design mobile-first: define styles for small screens first, then enhance for larger ones.
+- Minimum breakpoints to support: 320px (small phones), 540px (large phones), 768px (tablets).
+- All interactive elements (buttons, links, inputs) must meet the **44×44 px minimum touch target** (WCAG 2.5.5).
+- No horizontal scroll on any screen width.
+- `<meta name="viewport" content="width=device-width, initial-scale=1.0" />` is mandatory on every HTML page.
+- Sidebar / navigation panels must collapse or convert to a drawer/bottom-sheet on mobile.
+- Fixed headers must not exceed 56px height on mobile to preserve content space.
+- Test responsiveness at 360px, 540px, 768px, and 1280px before marking a UI task done.
