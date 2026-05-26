@@ -33,7 +33,7 @@ repos:
   # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
   # TODO: add regression-gate after chrysa/pre-commit-tools#164 is released
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-76
+  rev: v0.1.1-92
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
