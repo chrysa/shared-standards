@@ -1,6 +1,9 @@
 # CodeGraph
 .codegraph/
 
+# graphify (local knowledge graph — never commit)
+graphify-out/
+
 # Python
 __pycache__/
 *.py[cod]
