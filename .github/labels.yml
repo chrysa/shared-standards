@@ -1,0 +1,76 @@
+---
+# GitHub Labels — chrysa standard label set
+# Used by: sync-labels.yml workflow
+
+# --- Type labels ---
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "feature"
+  color: "0075ca"
+  description: "New feature or request"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "Improvement to existing functionality"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "chore"
+  color: "e4e669"
+  description: "Routine task, no production code change"
+
+# --- Workflow labels (used by labeler.yml auto-labeling) ---
+- name: "ci"
+  color: "e99695"
+  description: "CI/CD workflow changes"
+
+- name: "pre-commit"
+  color: "f9d0c4"
+  description: "Pre-commit hook changes"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency updates"
+
+- name: "configuration"
+  color: "bfd4f2"
+  description: "Configuration file changes"
+
+- name: "templates"
+  color: "d4c5f9"
+  description: "Template file changes"
+
+# --- Status labels ---
+- name: "deferred"
+  color: "ededed"
+  description: "Intentionally postponed"
+
+- name: "research"
+  color: "fef2c0"
+  description: "Requires investigation or research"
+
+- name: "blocked"
+  color: "e11d48"
+  description: "Blocked by another issue or PR"
+
+- name: "wip"
+  color: "fbca04"
+  description: "Work in progress"
+
+# --- Priority labels ---
+- name: "priority: high"
+  color: "b60205"
+  description: "High priority"
+
+- name: "priority: medium"
+  color: "fbca04"
+  description: "Medium priority"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "Low priority"
+
