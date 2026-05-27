@@ -25,13 +25,44 @@ repos:
   repo: https://github.com/igorshubovych/markdownlint-cli
   rev: v0.48.0
 - hooks:
+  # --- generic (all repos) ---
   - exclude: ^(\.github/|workflows/|templates/)
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check
   - id: env-example-sync
+  - id: adr-gate
   # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
-  # TODO: add regression-gate after chrysa/pre-commit-tools#164 is released
+  # --- python (all Python repos) ---
+  - id: debugger-detection
+  - id: python-print-detection
+  - id: python-pprint-detection
+    exclude: 'tests?/'
+  - id: no-bare-except
+  - id: python-logger-detection
+  - id: python-unreachable-code
+  - id: no-hardcoded-localhost
+    exclude: 'tests?/|\.test\.|\.spec\.'
+  - id: regression-gate
+    stages: [pre-push]
+  # --- fastapi (FastAPI repos only — remove if not applicable) ---
+  - id: fastapi-missing-response-model
+    exclude: '^tests/'
+  - id: fastapi-missing-links
+    exclude: '^tests/'
+  - id: no-sync-in-async
+  # --- docker (repos with Dockerfiles — remove if not applicable) ---
+  - id: dockerfile-no-latest
+  # --- js/ts (JS/TS repos — remove if not applicable) ---
+  - id: console-log-detection
+  - id: console-debug-detection
+  - id: react-console-error-detection
+  - id: no-console-warn
+  - id: ts-unreachable-code
+  - id: import-no-relative-parent
+  # --- react (React repos only — remove if not applicable) ---
+  - id: react-no-async-in-useeffect
+  - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
   rev: v0.1.1-92
 - hooks:

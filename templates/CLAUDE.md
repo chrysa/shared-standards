@@ -3,7 +3,8 @@
 > Replace [PROJECT_NAME] and all [PLACEHOLDER] values before committing.
 > @[claude-sonnet-4-6]
 
-> **Claude Code**: also read `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` for code specifications.
+> **Claude Code**: at session start, read `primer.md` FIRST (current state), then this file (conventions).
+> Also read `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` for code specifications.
 
 ## Project
 
@@ -26,14 +27,29 @@
 - Lint warnings: 0
 - Test coverage: [X]%
 
+## Session Workflow
+
+| Step | Command | When |
+|------|---------|------|
+| Start session | `make prepare` or `/prepare` | Always — loads primer + git context |
+| End session | `make hindsight` or `/hindsight` | Always — updates primer + memory |
+| Init memory | `make memory-init` | Once per repo |
+| Export to Obsidian | `make hindsight OBSIDIAN=<path>` | Optional |
+
+**Files:**
+- `primer.md` — current state, next actions, blockers (read before CLAUDE.md)
+- `.claude/memory/` — session, decisions, known-issues, progress (not committed except progress/decisions)
+
 ## Setup
 
 ```bash
 make install             # Install dependencies
+make memory-init         # Initialize primer.md + .claude/memory/
 make lint                # Run linter
 make test                # Run tests
 make build               # Build (if applicable)
 codegraph init --index . # Build CodeGraph index (run once, never commit .codegraph/)
+/graphify                # Build knowledge graph (run once or /graphify --update; never commit graphify-out/)
 ```
 
 ## CI
@@ -59,3 +75,17 @@ Shared skills from `shared-standards/.claude/skills/`:
 - `testing-pytest/SKILL.md` — pytest DDD + pytest-mock + constants (load when writing tests)
 - `dockerfile-multistage/SKILL.md` — 4-stage Python 3.14 containers (load when editing Dockerfile)
 - `api-design/SKILL.md` — REST standards + FastAPI patterns (load when designing endpoints)
+
+## graphify
+
+For any question about this repo's architecture, structure, components, or how to add/modify/find
+code, your **first tool call must be** to read `graphify-out/GRAPH_REPORT.md` (if it exists).
+
+Triggers: "how do I…", "where is…", "what does … do", "add/modify a <component>",
+"explain the architecture", or anything that depends on how files or classes relate.
+
+After reading the report (and `graphify-out/wiki/index.md` for deep questions), answer from the
+graph. Only read source files when (a) modifying/debugging specific code, (b) the graph lacks
+the needed detail, or (c) the graph is missing or stale.
+
+Type `/graphify` in Copilot Chat to build or update the graph.
