@@ -29,4 +29,3 @@ permissions:
   contents: read
   issues: write
 run-name: "🏷️ Sync labels from config"
-
