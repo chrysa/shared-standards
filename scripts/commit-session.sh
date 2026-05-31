@@ -1,83 +1,140 @@
 #!/usr/bin/env bash
-# commit-session.sh — branch + commit this session's changes, one repo at a time. NEVER pushes.
+# commit-session.sh — branch + commit (+ optional push + PR) this session's changes, one repo
+# at a time. Safe-by-default: NOTHING happens without --apply. Run from the chrysa root.
 #
-# Respects "1 PR per issue": each repo gets its own branch + conventional commit, left local for
-# you to push and open a PR. Dry-run by default. Run from the chrysa root.
+# Lifecycle per repo: ensure session branch (from base) -> commit pending paths -> push -> open PR.
+# Base branch = develop || main || master (chrysa convention: PRs target develop).
 #
-# Categories handled:
-#   ui-ux repos       any repo with a dirty CLAUDE.md  -> branch chore/ui-ux-skill-ref
-#                                                         commit CLAUDE.md only
-#   shared-standards  docs/ scripts/ workflows/ template/ skill module
-#                                                       -> branch feat/ui-ux-standard
-#   claude-config     claude/agents/*                   -> branch feat/deploy-validated-agents
+# Categories:
+#   ui-ux repos       any repo with the ui-ux CLAUDE.md change -> chore/ui-ux-skill-ref
+#   shared-standards  docs/ scripts/ workflows/ template/ skill -> feat/ui-ux-standard
+#   claude-config     claude/agents/*                           -> feat/deploy-validated-agents
 #
 # Usage:
-#   ./commit-session.sh                 # dry-run plan
-#   ./commit-session.sh --apply         # create branches + commit (no push)
-#   ./commit-session.sh --push          # DRY-RUN preview of commit+push (no mutation)
-#   ./commit-session.sh --apply --push  # commit AND push each branch (requires --apply)
-#   ./commit-session.sh --apply --push --remote upstream   # push to a non-default remote
-#   ./commit-session.sh --apply --issue 123   # add "Refs #123" trailer to each commit
-#   ./commit-session.sh --exclude '*_archived*'
+#   ./commit-session.sh                       # dry-run plan
+#   ./commit-session.sh --apply               # commit only (no push, no PR)
+#   ./commit-session.sh --apply --push        # commit + push
+#   ./commit-session.sh --apply --pr ...      # commit + push + open PR (needs gh auth + issue strategy)
 #
-# WARNING: --push fires CI on every repo and triggers notion-branch-sync (push-on-every-branch).
-# It still does NOT open PRs — push only. Open one PR per repo and link the issue yourself.
+# PR issue strategy (pick ONE with --pr; enforce-issue-link blocks PRs otherwise):
+#   --issue N        link every PR to one umbrella issue   (body: "Refs #N")
+#   --new-issues     create one issue per repo             (body: "Closes #<n>")
+#   --hotfix         add the "hotfix" label (documented enforce-issue-link exemption)
 #
-# Exit: 0 ok, 2 usage.
+#   --remote NAME    push remote (default: origin)
+#   --exclude GLOB   skip repos matching glob (repeatable)
+#
+# WARNING: --push/--pr fire CI on every repo and trigger notion-branch-sync. --pr can also create
+# issues and PRs in bulk. Requires `gh` authenticated (gh auth login). Exit: 0 ok, 2 usage.
 
 set -uo pipefail
 
-APPLY=0; ISSUE=""; EXCLUDES=(); PUSH=0; REMOTE="origin"
+APPLY=0; PUSH=0; PR=0; MK_ISSUE=0; HOTFIX=0; ISSUE=""; REMOTE="origin"; EXCLUDES=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=1; shift ;;
-    --push)  PUSH=1; shift ;;            # push after commit; REQUIRES --apply to actually run
-    --remote) shift; REMOTE="${1:?--remote needs a name}"; shift ;;
+    --push)  PUSH=1; shift ;;
+    --pr)    PR=1; shift ;;
+    --new-issues) MK_ISSUE=1; shift ;;
+    --hotfix) HOTFIX=1; shift ;;
     --issue) shift; ISSUE="${1:?--issue needs a number}"; shift ;;
+    --remote) shift; REMOTE="${1:?--remote needs a name}"; shift ;;
     --exclude) shift; EXCLUDES+=("${1:?}"); shift ;;
-    -h|--help) sed -n '2,32p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,33p' "$0"; exit 0 ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
-trailer() { [ -n "$ISSUE" ] && printf '\n\nRefs #%s' "$ISSUE" || true; }
-is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; esac; done; return 1; }
+# --pr/--push do nothing without --apply (safe-by-default preview)
+[ $PR -eq 1 ] && PUSH=1   # opening a PR requires the branch to be pushed first
 
-# commit_repo <repo> <branch> <commit-msg> <path...>
-commit_repo() {
-  local repo="$1" br="$2" msg="$3"; shift 3
-  local paths=( "$@" )
-  [ -d "$repo/.git" ] || { echo "--  skip ${repo#./} (not a git repo)"; return; }
-  # is there anything to commit among the given paths?
-  local dirty; dirty="$(git -C "$repo" status --porcelain -- "${paths[@]}" 2>/dev/null)"
-  if [ -z "$dirty" ]; then echo "==  ${repo#./}: nothing to commit"; return; fi
+is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; esac; done; return 1; }
+trailer() { [ -n "$ISSUE" ] && printf 'Refs #%s' "$ISSUE" || true; }
+base_branch() { local r="$1" b; for b in develop main master; do git -C "$r" show-ref --verify --quiet "refs/heads/$b" && { echo "$b"; return; }; done; }
+
+# Pre-flight: if PR requested for real, gh must be authenticated, and an issue strategy chosen.
+if [ $APPLY -eq 1 ] && [ $PR -eq 1 ]; then
+  command -v gh >/dev/null 2>&1 || { echo "❌ --pr needs the GitHub CLI (gh). Install it first." >&2; exit 2; }
+  gh auth status >/dev/null 2>&1 || { echo "❌ --pr needs gh authenticated. Run: gh auth login" >&2; exit 2; }
+  if [ -z "$ISSUE" ] && [ $MK_ISSUE -eq 0 ] && [ $HOTFIX -eq 0 ]; then
+    echo "❌ --pr needs an issue strategy: --issue N | --new-issues | --hotfix" >&2; exit 2
+  fi
+fi
+
+# do_repo <repo> <branch> <commit-msg> <issue-title> <path...>
+do_repo() {
+  local repo="$1" br="$2" msg="$3" ititle="$4"; shift 4
+  local paths=( "$@" ) rel="${repo#./}"
+  [ -d "$repo/.git" ] || { echo "--  skip $rel (not a git repo)"; return; }
+  local base; base="$(base_branch "$repo")"
+  [ -z "$base" ] && { echo "!!  $rel: no develop/main/master base — skip"; return; }
+
+  local pending; pending="$(git -C "$repo" status --porcelain -- "${paths[@]}" 2>/dev/null)"
+  local exists=0 ahead=0
+  if git -C "$repo" show-ref --verify --quiet "refs/heads/$br"; then
+    exists=1; ahead="$(git -C "$repo" rev-list --count "$base..$br" 2>/dev/null || echo 0)"
+  fi
+  if [ -z "$pending" ] && [ "$ahead" = "0" ] && [ "$exists" = "0" ]; then echo "==  $rel: nothing to do"; return; fi
+
   if [ $APPLY -eq 0 ]; then
-    echo "DRY ${repo#./}: branch '$br' + commit $(echo "$dirty" | wc -l | tr -d ' ') path(s): ${paths[*]}$([ $PUSH -eq 1 ] && echo " + push $REMOTE")"
+    printf "DRY %s: base=%s branch=%s pending=%s ahead=%s%s%s\n" "$rel" "$base" "$br" \
+      "$([ -n "$pending" ] && echo yes || echo no)" "$ahead" \
+      "$([ $PUSH -eq 1 ] && echo ' +push')" "$([ $PR -eq 1 ] && echo ' +PR')"
     return
   fi
-  git -C "$repo" switch -c "$br" 2>/dev/null || git -C "$repo" switch "$br" 2>/dev/null || {
-    echo "!!  ${repo#./}: could not switch to '$br'"; return; }
-  git -C "$repo" add -- "${paths[@]}" 2>/dev/null
-  if git -C "$repo" diff --cached --quiet; then echo "==  ${repo#./}: nothing staged"; return; fi
-  git -C "$repo" commit -q -m "$msg$(trailer)" || { echo "!!  ${repo#./}: commit failed"; return; }
-  echo "++  ${repo#./}: committed on '$br'"
+
+  git -C "$repo" switch -c "$br" 2>/dev/null || git -C "$repo" switch "$br" 2>/dev/null \
+    || { echo "!!  $rel: cannot switch to $br"; return; }
+  if [ -n "$pending" ]; then
+    git -C "$repo" add -- "${paths[@]}" 2>/dev/null
+    git -C "$repo" diff --cached --quiet || { local t; t="$(trailer)"; git -C "$repo" commit -q -m "$msg${t:+
+
+$t}"; }
+  fi
+  ahead="$(git -C "$repo" rev-list --count "$base..$br" 2>/dev/null || echo 0)"
+  [ "$ahead" = "0" ] && { echo "==  $rel: no commits ahead of $base — skip push/PR"; return; }
+  echo "++  $rel: $ahead commit(s) on '$br' (base $base)"
+
   if [ $PUSH -eq 1 ]; then
-    if git -C "$repo" push -u "$REMOTE" "$br" 2>/dev/null; then echo "↑   ${repo#./}: pushed '$br' to $REMOTE"; else echo "!!  ${repo#./}: push to $REMOTE failed (check remote/auth)"; fi
+    git -C "$repo" push -u "$REMOTE" "$br" >/dev/null 2>&1 \
+      && echo "↑   $rel: pushed '$br' -> $REMOTE" || { echo "!!  $rel: push failed (remote/auth)"; return; }
+  fi
+
+  if [ $PR -eq 1 ]; then
+    if ( cd "$repo" && gh pr view "$br" >/dev/null 2>&1 ); then echo "==  $rel: PR already open"; return; fi
+    local iref="" label_args=()
+    if [ -n "$ISSUE" ]; then iref="Refs #$ISSUE"
+    elif [ $MK_ISSUE -eq 1 ]; then
+      local iurl; iurl="$( cd "$repo" && gh issue create --title "$ititle" --body "$msg" 2>/dev/null )"
+      local inum="${iurl##*/}"; [ -n "$inum" ] && iref="Closes #$inum" && echo "•   $rel: issue #$inum created"
+    fi
+    [ $HOTFIX -eq 1 ] && label_args=(--label hotfix)
+    if ( cd "$repo" && gh pr create --base "$base" --head "$br" --title "$msg" \
+           --body "${msg}${iref:+
+
+$iref}" "${label_args[@]}" >/dev/null 2>&1 ); then
+      echo "PR  $rel: opened ($br -> $base)${iref:+, $iref}"
+    else
+      echo "!!  $rel: gh pr create failed"
+    fi
   fi
 }
 
-echo "APPLY=$APPLY  PUSH=$PUSH  REMOTE=$REMOTE  ISSUE=${ISSUE:-none}"
+echo "APPLY=$APPLY PUSH=$PUSH PR=$PR  issue=${ISSUE:-$([ $MK_ISSUE -eq 1 ] && echo per-repo || ([ $HOTFIX -eq 1 ] && echo hotfix-label || echo none))}  remote=$REMOTE"
 echo "── ui-ux repos (CLAUDE.md) ─────────────────────────────"
 while IFS= read -r g; do
   repo="$(dirname "$g")"; rel="${repo#./}"
   case "$rel" in shared-standards|claude-config) continue;; esac
   is_excluded "$rel" && continue
-  commit_repo "$repo" "chore/ui-ux-skill-ref" "chore(ui-ux): reference ui-ux skill in CLAUDE.md" "CLAUDE.md"
+  do_repo "$repo" "chore/ui-ux-skill-ref" \
+    "chore(ui-ux): reference ui-ux skill in CLAUDE.md" \
+    "Reference the ui-ux skill in CLAUDE.md" "CLAUDE.md"
 done < <(find . -mindepth 2 -maxdepth 2 -name .git ! -path '*_archived*' | sort)
 
 echo "── shared-standards ────────────────────────────────────"
-commit_repo "./shared-standards" "feat/ui-ux-standard" \
+do_repo "./shared-standards" "feat/ui-ux-standard" \
   "feat(ui-ux): UX/UI ergonomics standard, skill module + audit tooling" \
+  "Add UX/UI standard, ui-ux skill module and audit tooling" \
   "docs/UX-UI-GUIDELINES.md" "docs/UX-UI-SKILLS-AUDIT.md" "docs/ui-ux.SKILL.md" \
   "docs/wire-ui-ux-skill.sh" ".claude/skills/ui-ux" "templates/CLAUDE.md" \
   "scripts/check-ui-ux-skill.sh" "scripts/check-skills-agents.sh" \
@@ -85,9 +142,11 @@ commit_repo "./shared-standards" "feat/ui-ux-standard" \
   "workflows/ui-ux-skill-check.yml" "workflows/skills-agents-audit.yml"
 
 echo "── claude-config (deployed agents) ─────────────────────"
-commit_repo "./claude-config" "feat/deploy-validated-agents" \
+do_repo "./claude-config" "feat/deploy-validated-agents" \
   "feat(agents): deploy 12 validated agents from agent-config" \
+  "Deploy 12 validated agents from agent-config" \
   "claude/agents"
 
 echo "────────────────────────────────────────────────────────"
-echo "done. Push each branch and open one PR per repo (link the issue in the PR)."
+echo "done."
+[ $PR -eq 0 ] && echo "No PRs opened (pass --apply --pr with an issue strategy to open them)."
