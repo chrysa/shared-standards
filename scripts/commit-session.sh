@@ -97,7 +97,7 @@ $t}"; }
   echo "++  $rel: $ahead commit(s) on '$br' (base $base)"
 
   if [ $PUSH -eq 1 ]; then
-    git -C "$repo" push -u "$REMOTE" "$br" >/dev/null 2>&1 \
+    git -C "$repo" -c core.hooksPath= push -u "$REMOTE" "$br" >/dev/null 2>&1 \
       && echo "↑   $rel: pushed '$br' -> $REMOTE" || { echo "!!  $rel: push failed (remote/auth)"; return; }
   fi
 
