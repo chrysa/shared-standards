@@ -1,0 +1,39 @@
+---
+# Reusable CI gate — enforces the `ui-ux` skill reference in a repo's CLAUDE.md (chrysa ecosystem).
+# Usage: copy to .github/workflows/ui-ux-skill-check.yml in any repo with a human-facing surface.
+# A pure lib/infra repo opts out by adding to its CLAUDE.md:
+#     <!-- ui-ux-skill: not-applicable -- reason: <why> -->
+#
+# Fetches the linter from chrysa/shared-standards so the check logic stays centralized.
+
+name: UX/UI skill check
+
+on:
+    push:
+        branches: [main, master, develop, "feat/**", "fix/**", "ci/**", "chore/**"]
+    pull_request:
+        branches: [main, master, develop]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    ui-ux-skill:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        name: ui-ux skill reference
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v5
+
+            - name: Checkout shared-standards (linter source)
+              uses: actions/checkout@v5
+              with:
+                  repository: chrysa/shared-standards
+                  ref: main
+                  path: .shared-standards
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify ui-ux skill reference
+              run: bash .shared-standards/scripts/check-ui-ux-skill.sh ./CLAUDE.md

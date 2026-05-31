@@ -42,6 +42,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - **`components/`** — generic reusable UI (no business logic).
 - **`pages/`** — one file per route. Orchestrates features, no direct API calls.
 - Tool stack: Vite + React + TypeScript. Use React Query for server state. Use `useQuery`/`useMutation` — never `useEffect` for data fetching.
+- **Focus revalidation:** Frontends must refresh stale data as soon as the page regains focus (tab switch, alt-tab back). With React Query, keep `refetchOnWindowFocus: true` (the default). For other data sources, listen to `visibilitychange` and re-fetch when `document.visibilityState === 'visible'`. Never disable this behaviour without a documented reason.
 
 ### Docker
 - **Always use multi-stage builds** (`AS deps`, `AS builder`, `AS production` or equivalent). Never ship build tools in the final image.
@@ -52,11 +53,19 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 
 ## Architecture
 
+### Backoffice
+- **Any project that manages users, content, or structured data MUST include a backoffice** (admin interface) when the project scope requires it.
+- Use Django Admin for Django projects, or a dedicated React admin frontend (e.g. `react-admin`) for FastAPI projects.
+- The backoffice must be protected by authentication — never exposed publicly without auth.
+- Backoffice routes must be under a dedicated path (e.g. `/admin/`) and never overlap with the public API.
+- **Criteria for requiring a backoffice:** the project has ≥1 of: user management, content moderation, configuration management, manual data correction workflows.
+
 ### Platform / tool systems
 - **Provider-agnostic by design.** Platforms (dashboard, live monitor, automation tools) must not embed provider-specific logic directly. All external integrations go through a `connector/` layer.
 - **Connector pattern:** Each external service (GitHub, Notion, Sonar, Jira…) gets its own isolated connector module (e.g. `connectors/github/client.py`). The platform only knows about connector interfaces, not API details.
 - **Swappable providers:** Business logic (services/) must depend on connector interfaces, not concrete implementations. A GitHub connector can be replaced by a GitLab connector without touching the service layer.
 - **Config-driven activation:** Connectors are enabled/disabled via environment variables or settings (e.g. `SONAR_TOKEN`, `GITHUB_TOKEN`). If a connector's token is absent, it degrades gracefully rather than crashing.
+- **Setup wizard on misconfiguration:** Deployable platforms (web apps, services with a UI) must detect misconfiguration at startup and redirect the user to a setup wizard rather than displaying a generic error or crashing. If required env vars are missing, DB is unreachable, or initial setup was never completed, the app must route to `/setup` (or equivalent) and guide the user through the fix. The wizard must be idempotent and skippable in CI (`SETUP_NON_INTERACTIVE=1`).
 
 ## Security
 - Never commit secrets, tokens, or credentials.

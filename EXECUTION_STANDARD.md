@@ -417,3 +417,86 @@ Lint    : 0 warnings ✓/✗
 Types   : 0 errors ✓/✗
 Build   : ok ✓/✗
 ```
+
+---
+
+## 13. Session Workflow (primer + memory + hindsight)
+
+Every chrysa repo ships with a **session lifecycle** to maintain AI agent context across sessions.
+
+### Files
+
+| File | Role | Committed |
+|------|------|-----------|
+| `primer.md` | Current state — what to do NOW (read before CLAUDE.md) | ✅ yes |
+| `.claude/memory/session.md` | Volatile session notes (reset each session) | ❌ no |
+| `.claude/memory/decisions.md` | Pending decisions not yet in DECISIONS.md | ✅ yes |
+| `.claude/memory/known-issues.md` | Persistent quirks and gotchas | ✅ yes |
+| `.claude/memory/progress.md` | Append-only session history | ✅ yes |
+
+### Session protocol
+
+```
+┌─ SESSION START ─────────────────────────────────────────────┐
+│  make prepare          (or: /prepare in Claude Code)         │
+│  → displays primer.md + git context + open PRs              │
+└─────────────────────────────────────────────────────────────┘
+              ↓ (work happens)
+┌─ SESSION END ───────────────────────────────────────────────┐
+│  make hindsight        (or: /hindsight in Claude Code)       │
+│  → updates primer.md + progress.md + clears session.md      │
+│  → optionally exports to Obsidian vault                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Makefile targets (add to every project Makefile)
+
+```makefile
+SCRIPTS_DIR ?= $(shell \
+  find $(CURDIR)/.. -maxdepth 4 -path "*/shared-standards/scripts" 2>/dev/null | head -1)
+
+memory-init:  ## Initialize primer.md and .claude/memory/
+	@bash $(SCRIPTS_DIR)/memory.sh init
+
+prepare:  ## Pre-session context loader (reads primer + git + PRs)
+	@bash $(SCRIPTS_DIR)/prepare.sh
+
+hindsight:  ## Post-session retrospective (updates primer + memory)
+	@bash $(SCRIPTS_DIR)/hindsight.sh $(if $(OBSIDIAN),--obsidian $(OBSIDIAN),)
+
+memory-status:  ## Show current memory state
+	@bash $(SCRIPTS_DIR)/memory.sh status
+
+memory-obsidian:  ## Export memory to Obsidian vault (OBSIDIAN=<path> required)
+	@bash $(SCRIPTS_DIR)/memory.sh obsidian $(OBSIDIAN)
+```
+
+### Initial setup for a repo
+
+```bash
+make memory-init        # creates primer.md + .claude/memory/
+# Fill in primer.md with initial state
+git add primer.md .claude/memory/decisions.md .claude/memory/known-issues.md \
+        .claude/memory/progress.md
+git commit -m "chore: initialize session memory and primer"
+```
+
+### Obsidian export
+
+```bash
+# Export to an Obsidian vault
+make hindsight OBSIDIAN=~/Documents/obsidian/chrysa
+# or directly:
+./scripts/memory.sh obsidian ~/Documents/obsidian/chrysa
+```
+
+Vault structure documented in `shared-standards/templates/obsidian/vault-structure.md`.
+
+### Claude Code slash commands
+
+| Command | Purpose |
+|---------|---------|
+| `/prepare` | Load primer + git context at session start |
+| `/hindsight` | Update primer + memory at session end |
+
+Both are defined in `claude-config/claude/commands/`.
