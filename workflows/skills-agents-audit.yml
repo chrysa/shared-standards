@@ -1,0 +1,58 @@
+---
+# Scheduled ecosystem audit — agent registry drift between source and deployed copy (chrysa).
+# Usage: copy to .github/workflows/ in agent-config (or any repo), set schedule as desired.
+# Checks the agents drift only (needs both registries side by side); the per-repo ui-ux/skill
+# reference check lives in ui-ux-skill-check.yml. --strict makes any drift fail the run.
+
+name: Skills & agents audit
+
+on:
+    schedule:
+        - cron: "0 7 * * 1"   # Mondays 07:00 UTC
+    workflow_dispatch:
+        inputs:
+            sync:
+                description: "Deploy drifting agents (source -> mirror) instead of just reporting"
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+jobs:
+    audit:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        name: agent registry drift
+        steps:
+            - name: Checkout shared-standards (linter source)
+              uses: actions/checkout@v5
+              with:
+                  repository: chrysa/shared-standards
+                  ref: main
+                  path: shared-standards
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Checkout agent-config (source of truth)
+              uses: actions/checkout@v5
+              with:
+                  repository: chrysa/agent-config
+                  ref: main
+                  path: agent-config
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Checkout claude-config (deployed copy)
+              uses: actions/checkout@v5
+              with:
+                  repository: chrysa/claude-config
+                  ref: main
+                  path: claude-config
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Audit agent registry drift
+              run: |
+                  bash shared-standards/scripts/check-skills-agents.sh . \
+                      --agents-only --strict \
+                      --agent-source agent-config/agents \
+                      --agents-dir agent-config/agents \
+                      --agents-dir claude-config/claude/agents

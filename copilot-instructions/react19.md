@@ -58,6 +58,8 @@ src/
 - All fetch calls live in `src/api/`; never call `fetch` directly from components.
 - Use React Query's `useQuery`/`useMutation` for data fetching — no `useEffect` + `fetch`.
 - Handle loading, error, and empty states explicitly in every data-driven component.
+- **Refetch on window focus:** `refetchOnWindowFocus: true` must be enabled on every `useQuery` that displays live or collaborative data (default in React Query — do NOT override it to `false` unless there is an explicit performance justification documented in a comment). Configure globally in `QueryClient` defaults and only disable per-query when the data is truly static.
+- **Visibility change:** For non-React-Query data (WebSocket state, polling), subscribe to `document.addEventListener('visibilitychange')` and trigger a refresh when `document.visibilityState === 'visible'`.
 - **HATEOAS**: backend responses include a `links` field. Never hardcode API paths in components — resolve URLs from `links[rel]` via a `getLinkHref()` helper in `src/api/`.
 - **Problem Details (RFC 7807)**: errors arrive as `application/problem+json`. Wrap `fetch` in a typed `apiFetch()` that throws an `ApiError(problem)` on non-OK responses. Display `problem.detail` to the user via React Query `onError`.
 - Validate all API responses with a Zod schema before use.

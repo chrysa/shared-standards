@@ -203,13 +203,14 @@ volumes:
 > **Scope** : applicable aux **apps web/services déployables**.
 > Non applicable aux libs pures, CLI agents, ou utilities.
 
-### 4.1 Setup wizard (première exécution)
+### 4.1 Setup wizard (première exécution ou mauvaise configuration)
 
 - Assistant interactif (CLI ou web) au premier démarrage
 - Couvre : DB connection, admin user, intégrations tiers, secrets, locale
 - **Idempotent** — rejouable sans casse
 - Détection prérequis manquants avec messages explicites + suggestion fix
 - Skip mode pour CI : `make setup-ci` ou env `SETUP_NON_INTERACTIVE=1`
+- **Redirection automatique sur mauvaise configuration** — si l'app détecte au démarrage ou à runtime qu'une configuration requise est manquante ou invalide (env vars absentes, DB injoignable, setup jamais complété), elle doit rediriger vers `/setup` (ou équivalent CLI) plutôt que d'afficher une erreur générique ou crasher. Le wizard guide l'utilisateur pour corriger le problème.
 
 ### 4.2 Configuration panel (UI admin)
 
