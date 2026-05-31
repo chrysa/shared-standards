@@ -83,7 +83,8 @@ do_repo() {
     return
   fi
 
-  git -C "$repo" switch -c "$br" 2>/dev/null || git -C "$repo" switch "$br" 2>/dev/null \
+  git -C "$repo" -c core.hooksPath= switch -c "$br" 2>/dev/null \
+    || git -C "$repo" -c core.hooksPath= switch "$br" 2>/dev/null \
     || { echo "!!  $rel: cannot switch to $br"; return; }
   if [ -n "$pending" ]; then
     git -C "$repo" add -- "${paths[@]}" 2>/dev/null
@@ -101,21 +102,26 @@ $t}"; }
   fi
 
   if [ $PR -eq 1 ]; then
-    if ( cd "$repo" && gh pr view "$br" >/dev/null 2>&1 ); then echo "==  $rel: PR already open"; return; fi
+    local existing_pr; existing_pr="$( cd "$repo" && timeout 30 gh pr list --head "$br" --state open --json number --jq 'length' 2>/dev/null )"
+    if [ "${existing_pr:-0}" -gt 0 ] 2>/dev/null; then echo "==  $rel: PR already open"; return; fi
     local iref="" label_args=()
     if [ -n "$ISSUE" ]; then iref="Refs #$ISSUE"
     elif [ $MK_ISSUE -eq 1 ]; then
-      local iurl; iurl="$( cd "$repo" && gh issue create --title "$ititle" --body "$msg" 2>/dev/null )"
+      local iurl; iurl="$( cd "$repo" && timeout 30 gh issue create --title "$ititle" --body "$msg" 2>/dev/null )"
       local inum="${iurl##*/}"; [ -n "$inum" ] && iref="Closes #$inum" && echo "•   $rel: issue #$inum created"
     fi
-    [ $HOTFIX -eq 1 ] && label_args=(--label hotfix)
-    if ( cd "$repo" && gh pr create --base "$base" --head "$br" --title "$msg" \
+    if [ $HOTFIX -eq 1 ]; then
+      ( cd "$repo" && timeout 20 gh label create hotfix --color E4E669 --description "Hotfix — no issue required" >/dev/null 2>&1 ) || true
+      label_args=(--label hotfix)
+    fi
+    local pr_err
+    if pr_err="$( cd "$repo" && timeout 60 gh pr create --base "$base" --head "$br" --title "$msg" \
            --body "${msg}${iref:+
 
-$iref}" "${label_args[@]}" >/dev/null 2>&1 ); then
+$iref}" ${label_args[@]+"${label_args[@]}"} 2>&1 )"; then
       echo "PR  $rel: opened ($br -> $base)${iref:+, $iref}"
     else
-      echo "!!  $rel: gh pr create failed"
+      echo "!!  $rel: gh pr create failed: ${pr_err%%$'\n'*}"
     fi
   fi
 }
