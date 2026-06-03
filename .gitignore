@@ -40,3 +40,8 @@ Thumbs.db
 # graphify (local knowledge graph — never commit)
 graphify-out/
 graphify-out/
+/graphify
+/sys
+.graphify_version
+graphify
+sys
