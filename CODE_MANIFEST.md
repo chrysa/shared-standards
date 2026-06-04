@@ -1,6 +1,6 @@
 # CODE MANIFEST — chrysa portfolio
 
-**Version 1.0 — 2026-04-28**
+**Version 1.1 — 2026-06-04**
 **Source de vérité unique** pour les standards transverses du portefeuille.
 Complémente `EXECUTION_STANDARD.md` (procédural Makefile/CI) avec les standards architecturaux.
 
@@ -292,6 +292,10 @@ CI matrix : tests sur 3 OS minimum pour les libs publiques. Pour les apps, Linux
 - Mock DB en unit (sauf `@pytest.mark.integration`)
 - Tests parallèles obligatoires si runtime > 30s
 - Snapshot tests pour les composants UI critiques
+- **E2E Playwright intégral (toute app à UI)** : la suite couvre **tous les parcours utilisateur**
+  (authentification, erreurs, parcours métier nominaux **et** dégradés) — pas seulement le happy-path.
+  Pyramide indicative 70/20/10, mais l'E2E n'est plus un échantillon : aucun parcours utilisateur
+  livré sans test E2E. Suite **CI-bloquante sur PR** (workflow `e2e.yml`).
 
 ---
 
@@ -306,6 +310,16 @@ CI matrix : tests sur 3 OS minimum pour les libs publiques. Pour les apps, Linux
 | `LICENSE`          | Texte de licence intégral                                 | ✅          |
 | `CONTRIBUTING.md`  | Setup dev, conventions, process PR                       | si public   |
 | `docs/`            | Architecture, API, deployment, runbooks                  | si app      |
+| `docs/screenshots/`| Captures à jour de l'UI (rafraîchies à chaque release)   | si app UI   |
+
+### 7.x Landing page (toute app à UI web)
+
+- Toute app exposant une UI web maintient une **landing page** : a minima un **hero `README.md`**
+  (pitch + captures), et une **page publique** si l'app est déployée.
+- La landing **inclut des screenshots à jour** de l'app dans `docs/screenshots/`, rafraîchis
+  **à chaque release**. Idéalement **générés par la suite Playwright** (`page.screenshot()` sur les
+  écrans clés) pour rester synchrones avec l'UI réelle.
+- Une landing avec captures périmées (UI obsolète) = écart à corriger, au même titre qu'un test cassé.
 
 ### Generated docs
 
@@ -405,7 +419,7 @@ CI matrix : tests sur 3 OS minimum pour les libs publiques. Pour les apps, Linux
 
 ## 13. Compliance check — Gate Ready-to-Dev
 
-Un projet est **Ready-to-Dev** quand les 10 critères suivants sont validés :
+Un projet est **Ready-to-Dev** quand les 12 critères suivants sont validés :
 
 ```
 [ ] 1.  Repo créé via `project-init` CLI (shared-standards)
@@ -418,6 +432,8 @@ Un projet est **Ready-to-Dev** quand les 10 critères suivants sont validés :
 [ ] 8.  CI workflows shared-standards installés et verts
 [ ] 9.  pre-commit configuré (detect-secrets + ruff/eslint + commitlint)
 [ ] 10. i18n FR+EN + dark mode + a11y baseline configurés
+[ ] 11. Landing page + screenshots à jour (docs/screenshots/) — si app UI (§7.x)
+[ ] 12. Suite E2E Playwright intégrale + CI-bloquante sur PR — si app UI (§6.4)
 ```
 
 Le gate est tracé dans la propriété `Ready to Dev Gate ✓` de la database `📦 Projets chrysa` (Notion).
@@ -436,6 +452,7 @@ Le gate est tracé dans la propriété `Ready to Dev Gate ✓` de la database `�
 **Références**
 - ADR-0027 — Consolidation `claude-config` (2026-04-28)
 - ADR-0028 — Code manifest + standards transverses (2026-04-28)
+- D-0002 — Landing page + screenshots & E2E Playwright intégral (2026-06-04)
 - `EXECUTION_STANDARD.md` — Conventions Makefile + structure
 - `AGENTS.md` — Standards spécifiques aux agents IA
 - Notion `📘 DECISIONS` — Source de vérité ADR cross-repo
