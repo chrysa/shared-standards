@@ -1,4 +1,6 @@
-# docs-structure — standardized project documentation skeleton
+# STRUCTURE — standardized project documentation skeleton
+
+> This file (`STRUCTURE.md`) is copied to the repo root by `/chrysa-init` and documents the layout below.
 
 Canonical documentation tree copied into every new repo by `/chrysa-init`
 (`chrysa/claude-config/claude/commands/chrysa-init.md`). Existing repos are
