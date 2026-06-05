@@ -19,6 +19,7 @@ and standards for the ecosystem.
   api-design/           # REST standards + FastAPI patterns + status codes
 copilot-instructions/   # GitHub Copilot instruction templates (base.md = ecosystem-wide)
 templates/              # Bootstrap file templates (CLAUDE.md, opencode.json, settings.json, copilot-instructions.md, .gitignore, dependabot.yml, etc.)
+templates/docs-structure/ # Standardized project documentation skeleton (docs, ai, prompts, schemas, workflows, decisions, postmortems, tests, examples/{python,node}) — copied by /chrysa-init
 workflows/              # Reusable GitHub Actions workflow templates
 ```
 
