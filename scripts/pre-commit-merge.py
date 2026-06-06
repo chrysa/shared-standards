@@ -20,6 +20,7 @@ Exit: 0 ok / 1 drift (with --check) or error.
 from __future__ import annotations
 
 import io
+import re
 import sys
 from pathlib import Path
 
@@ -30,6 +31,7 @@ try:
 
     _RUAMEL = YAML()
     _RUAMEL.preserve_quotes = True
+    _RUAMEL.width = 4096  # never wrap long flow scalars (e.g. conventional-commit args)
     _RUAMEL.indent(mapping=2, sequence=4, offset=2)  # yamllint-default friendly
     _BACKEND = "ruamel"
 except ImportError:
@@ -46,6 +48,39 @@ def _load_text(text: str) -> dict:
     if _BACKEND == "ruamel":
         return _RUAMEL.load(text) or {"repos": []}
     return yaml.safe_load(text) or {"repos": []}
+
+
+_TOP_SEQ_RE = re.compile(r"^(\s*)-\s", re.MULTILINE)
+
+
+def detect_offset(text: str) -> int:
+    """Detect the repo's top-level sequence offset (dash indent) under `repos:`.
+
+    Repos may indent their pre-commit list at 2 (default) or 4 spaces. Re-dumping
+    with the wrong offset reindents the whole file and breaks a repo's own yamllint
+    (e.g. `wrong indentation: expected N`). We mirror the target's style instead.
+    Returns 2 when the file has no list yet (new/empty config).
+    """
+    in_repos = False
+    for line in text.splitlines():
+        if re.match(r"^repos:\s*$", line):
+            in_repos = True
+            continue
+        if in_repos:
+            m = re.match(r"^(\s*)-\s", line)
+            if m:
+                return len(m.group(1))
+            if line.strip() and not line.lstrip().startswith("#"):
+                # a non-list, non-comment line at column 0 ends the repos block
+                if not line.startswith(" "):
+                    break
+    return 2
+
+
+def configure_indent(offset: int) -> None:
+    if _BACKEND == "ruamel":
+        # ruamel: content column = sequence; dash column = offset (offset < sequence).
+        _RUAMEL.indent(mapping=2, sequence=offset + 2, offset=offset)
 
 
 def _dump(data: dict) -> str:
@@ -79,6 +114,12 @@ HOOK_GROUPS = {
     },
 }
 GOVERNED = set().union(*HOOK_GROUPS.values())
+
+# Repos whose pinned rev must track the canonical baseline (not "existing wins"):
+# the hook *implementation* carries fixes the campaign depends on. Example: the
+# adr-gate index-fallback (#177) lands only at chrysa/pre-commit-tools >= v0.1.1-93;
+# older pins false-positive when an earlier auto-fixing hook reorders staged files.
+REV_ALIGNED_REPOS = {"https://github.com/chrysa/pre-commit-tools"}
 
 
 def enforced_ids(stacks: set[str]) -> set[str]:
@@ -118,8 +159,11 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
         if url not in target_by_url:
             gaps.append(url)
             continue
-        have = index_hooks(target_by_url[url])
+        existing = target_by_url[url]
+        have = index_hooks(existing)
         gaps.extend(f"{url}#{hid}" for hid in wanted if hid not in have)
+        if url in REV_ALIGNED_REPOS and existing.get("rev") != brepo.get("rev"):
+            gaps.append(f"{url}@{brepo.get('rev')}")
     return gaps
 
 
@@ -141,6 +185,8 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
         for hid, hook in wanted.items():
             if hid not in have:
                 existing.setdefault("hooks", []).append(hook)
+        if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
+            existing["rev"] = brepo["rev"]
     return target
 
 
@@ -173,6 +219,10 @@ def main() -> int:
         return 2
     allowed = enforced_ids(parse_stacks(sys.argv[1:]))
     baseline_path, target_path = Path(positional[0]), Path(positional[1])
+    # Mirror the target's own sequence indentation before any round-trip dump so a
+    # repo with a non-default offset keeps passing its own yamllint.
+    if target_path.exists():
+        configure_indent(detect_offset(target_path.read_text()))
     baseline, target = load(baseline_path), load(target_path)
 
     gaps = missing_items(baseline, target, allowed)

@@ -143,6 +143,15 @@ generate_dependabot() {
     local dest="$repo/.github/dependabot.yml"
     local tpl="$CFG_TEMPLATES/dependabot.yml.tpl"
 
+    # Gap-aware: a repo's existing dependabot.yml carries hand-tuned ecosystems,
+    # groups, cooldown and directories the stack-detected template cannot rebuild.
+    # Regenerating would silently drop dependency coverage, so only generate when
+    # the file is absent. Existing configs are left untouched.
+    if [[ -f "$dest" ]]; then
+        info "dependabot.yml exists -> preserved (no clobber)"
+        return 0
+    fi
+
     # Start fresh : copie le tpl et retire les blocs non pertinents
     local tmp; tmp=$(mktemp)
     cp "$tpl" "$tmp"
