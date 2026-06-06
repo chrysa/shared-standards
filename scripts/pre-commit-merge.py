@@ -19,14 +19,41 @@ Exit: 0 ok / 1 drift (with --check) or error.
 
 from __future__ import annotations
 
+import io
 import sys
 from pathlib import Path
 
+# Prefer ruamel round-trip: keeps existing lines byte-identical (so a file that
+# already passes the repo's yamllint still does) and indents only appended nodes.
 try:
-    import yaml
+    from ruamel.yaml import YAML
+
+    _RUAMEL = YAML()
+    _RUAMEL.preserve_quotes = True
+    _RUAMEL.indent(mapping=2, sequence=4, offset=2)  # yamllint-default friendly
+    _BACKEND = "ruamel"
 except ImportError:
-    sys.stderr.write("pyyaml not available — manual pre-commit merge required\n")
-    sys.exit(2)
+    _RUAMEL = None
+    try:
+        import yaml
+    except ImportError:
+        sys.stderr.write("neither ruamel.yaml nor pyyaml available — manual merge required\n")
+        sys.exit(2)
+    _BACKEND = "pyyaml"
+
+
+def _load_text(text: str) -> dict:
+    if _BACKEND == "ruamel":
+        return _RUAMEL.load(text) or {"repos": []}
+    return yaml.safe_load(text) or {"repos": []}
+
+
+def _dump(data: dict) -> str:
+    if _BACKEND == "ruamel":
+        buf = io.StringIO()
+        _RUAMEL.dump(data, buf)
+        return buf.getvalue()
+    return yaml.safe_dump(data, sort_keys=False, default_flow_style=False)
 
 # chrysa/pre-commit-tools hook ids grouped by stack. Ids not listed here belong to
 # other repos (pre-commit-hooks, gitleaks, conventional, markdownlint) and are always
@@ -69,7 +96,7 @@ def hook_enforced(hook_id: str, allowed: set[str]) -> bool:
 def load(path: Path) -> dict:
     if not path.exists():
         return {"repos": []}
-    return yaml.safe_load(path.read_text()) or {"repos": []}
+    return _load_text(path.read_text())
 
 
 def index_hooks(repo: dict) -> dict:
@@ -158,7 +185,7 @@ def main() -> int:
     if not gaps:
         return 0
     merged = merge(baseline, target, allowed)
-    target_path.write_text(yaml.safe_dump(merged, sort_keys=False, default_flow_style=False))
+    target_path.write_text(_dump(merged))
     sys.stderr.write(f"added {len(gaps)} baseline item(s)\n")
     return 0
 

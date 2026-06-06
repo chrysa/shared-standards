@@ -31,6 +31,7 @@ YEAR="${YEAR:-2026}"
 DRY_RUN=false
 CHECK=false
 TARGET_ALL=false
+NO_CI=false
 TARGET_REPO=""
 
 for arg in "$@"; do
@@ -38,6 +39,7 @@ for arg in "$@"; do
         --dry-run) DRY_RUN=true ;;
         --check)   CHECK=true ;;
         --all)     TARGET_ALL=true ;;
+        --no-ci)   NO_CI=true ;;
         -h|--help) sed -n '2,30p' "$0" | sed 's/^# \?//'; exit 0 ;;
         *)         [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
     esac
@@ -191,7 +193,7 @@ apply_one() {
     log "═══ $name ═══"
     if $CHECK; then merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"
-    deploy_stack_ci "$repo"
+    if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"
     if [[ -x "$proc" || -f "$proc" ]]; then
