@@ -29,7 +29,9 @@ set -uo pipefail
 # ─── Paths & config ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHRYSA_ROOT="${CHRYSA_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-TEMPLATES_DIR="$CHRYSA_ROOT/shared-standards/templates"
+# Resolve templates from this script's own repo (works in main checkout AND worktree),
+# not via CHRYSA_ROOT — otherwise a worktree run reads the main checkout's templates.
+TEMPLATES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/templates"
 WF_TEMPLATES="$TEMPLATES_DIR/workflows-process"
 CFG_TEMPLATES="$TEMPLATES_DIR/github-config"
 
