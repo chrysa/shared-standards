@@ -4,6 +4,11 @@
 #
 # ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
 #    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
+#
+# NOTE: Lint (ruff/mypy/pre-commit) does NOT run here. It lives in pre-commit
+#       (local) and is replayed in CI only at release time via release.yml's
+#       lint gate (chrysa/github-actions/.github/workflows/lint-python.yml).
+#       This CI keeps only tests, to gate PRs without per-push lint billing.
 
 name: CI Python
 
@@ -17,21 +22,9 @@ permissions:
     contents: read
 
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        name: Lint & pre-commit
-        steps:
-            - uses: actions/checkout@v5
-            - uses: actions/setup-python@v5
-              with:
-                  python-version: '3.12'
-            - name: Run pre-commit
-              uses: pre-commit/action@v3.0.1
-
     test:
         runs-on: ubuntu-latest
         name: Tests
-        needs: lint
         steps:
             - uses: actions/checkout@v5
             - uses: actions/setup-python@v5
