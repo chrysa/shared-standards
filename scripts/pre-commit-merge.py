@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+"""Idempotently merge the canonical .pre-commit-config.yaml baseline into a repo's.
+
+Union by repo URL, then by hook id. Existing repo entries win (rev, args, excludes
+are preserved); only missing repos / hook ids from the baseline are added. This keeps
+repo-specific tuning while guaranteeing the §8 mandatory hooks are present.
+
+The baseline carries stack-conditional hooks (fastapi/docker/js-ts/react). Pass
+--stacks to enforce only the relevant subset; chrysa/pre-commit-tools hooks outside
+the selected groups (and ALWAYS) are ignored for both --check and merge. Hooks from
+repos not governed by HOOK_GROUPS (pre-commit-hooks, gitleaks, conventional,
+markdownlint) are always enforced.
+
+Usage: pre-commit-merge.py <baseline.yaml> <target.yaml> [--check] [--stacks python,docker]
+  --check  : exit 1 if the target is missing any enforced baseline repo/hook (no write).
+  --stacks : comma list of python,docker,jsts,react,fastapi (default: all).
+Exit: 0 ok / 1 drift (with --check) or error.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    sys.stderr.write("pyyaml not available — manual pre-commit merge required\n")
+    sys.exit(2)
+
+# chrysa/pre-commit-tools hook ids grouped by stack. Ids not listed here belong to
+# other repos (pre-commit-hooks, gitleaks, conventional, markdownlint) and are always
+# enforced. "always" applies to every repo.
+HOOK_GROUPS = {
+    "always": {
+        "yaml-sorter", "json-sorter", "env-file-check", "env-example-sync", "adr-gate",
+    },
+    "python": {
+        "debugger-detection", "python-print-detection", "python-pprint-detection",
+        "no-bare-except", "python-logger-detection", "python-unreachable-code",
+        "no-hardcoded-localhost", "regression-gate",
+    },
+    "docker": {"dockerfile-no-latest"},
+    "jsts": {
+        "console-log-detection", "console-debug-detection",
+        "react-console-error-detection", "no-console-warn", "ts-unreachable-code",
+        "import-no-relative-parent",
+    },
+    "react": {"react-no-async-in-useeffect", "react-direct-dom"},
+    "fastapi": {
+        "fastapi-missing-response-model", "fastapi-missing-links", "no-sync-in-async",
+    },
+}
+GOVERNED = set().union(*HOOK_GROUPS.values())
+
+
+def enforced_ids(stacks: set[str]) -> set[str]:
+    selected = set(HOOK_GROUPS["always"])
+    for stack in stacks:
+        selected |= HOOK_GROUPS.get(stack, set())
+    return selected
+
+
+def hook_enforced(hook_id: str, allowed: set[str]) -> bool:
+    # Hooks from non-stack repos aren't in GOVERNED -> always enforce.
+    return hook_id not in GOVERNED or hook_id in allowed
+
+
+def load(path: Path) -> dict:
+    if not path.exists():
+        return {"repos": []}
+    return yaml.safe_load(path.read_text()) or {"repos": []}
+
+
+def index_hooks(repo: dict) -> dict:
+    return {h.get("id"): h for h in repo.get("hooks", []) if h.get("id")}
+
+
+def enforced_hooks(brepo: dict, allowed: set[str]) -> dict:
+    return {hid: h for hid, h in index_hooks(brepo).items() if hook_enforced(hid, allowed)}
+
+
+def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
+    target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
+    gaps: list[str] = []
+    for brepo in baseline.get("repos", []):
+        url = brepo.get("repo")
+        wanted = enforced_hooks(brepo, allowed)
+        if not wanted:
+            continue
+        if url not in target_by_url:
+            gaps.append(url)
+            continue
+        have = index_hooks(target_by_url[url])
+        gaps.extend(f"{url}#{hid}" for hid in wanted if hid not in have)
+    return gaps
+
+
+def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
+    target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
+    for brepo in baseline.get("repos", []):
+        url = brepo.get("repo")
+        wanted = enforced_hooks(brepo, allowed)
+        if not wanted:
+            continue
+        if url not in target_by_url:
+            new_repo = {k: v for k, v in brepo.items() if k != "hooks"}
+            new_repo["hooks"] = list(wanted.values())
+            target.setdefault("repos", []).append(new_repo)
+            target_by_url[url] = new_repo
+            continue
+        existing = target_by_url[url]
+        have = index_hooks(existing)
+        for hid, hook in wanted.items():
+            if hid not in have:
+                existing.setdefault("hooks", []).append(hook)
+    return target
+
+
+def parse_stacks(argv: list[str]) -> set[str]:
+    for i, a in enumerate(argv):
+        if a == "--stacks" and i + 1 < len(argv):
+            return {s.strip() for s in argv[i + 1].split(",") if s.strip()}
+        if a.startswith("--stacks="):
+            return {s.strip() for s in a.split("=", 1)[1].split(",") if s.strip()}
+    return set(HOOK_GROUPS)  # default: enforce everything (back-compat)
+
+
+def main() -> int:
+    flag_vals = {"--stacks"}
+    positional: list[str] = []
+    skip = False
+    for i, a in enumerate(sys.argv[1:]):
+        if skip:
+            skip = False
+            continue
+        if a in flag_vals:
+            skip = True
+            continue
+        if a.startswith("--"):
+            continue
+        positional.append(a)
+    check = "--check" in sys.argv
+    if len(positional) != 2:
+        sys.stderr.write(__doc__ or "")
+        return 2
+    allowed = enforced_ids(parse_stacks(sys.argv[1:]))
+    baseline_path, target_path = Path(positional[0]), Path(positional[1])
+    baseline, target = load(baseline_path), load(target_path)
+
+    gaps = missing_items(baseline, target, allowed)
+    if check:
+        if gaps:
+            sys.stderr.write("missing: " + ", ".join(gaps) + "\n")
+            return 1
+        return 0
+
+    if not gaps:
+        return 0
+    merged = merge(baseline, target, allowed)
+    target_path.write_text(yaml.safe_dump(merged, sort_keys=False, default_flow_style=False))
+    sys.stderr.write(f"added {len(gaps)} baseline item(s)\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,43 +1,122 @@
 ---
-# CI workflow template for Python projects (chrysa ecosystem)
-# Usage: copy to .github/workflows/ci.yml and adapt.
+# Canonical CI workflow for Python projects (chrysa ecosystem).
 #
-# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
-#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
+# Usage: copy to .github/workflows/ci.yml. The applier
+# (scripts/apply-repo-standard.sh) substitutes the ${...} placeholders:
+#   ${PACKAGE}      import package / source dir       (e.g. django_pytest)
+#   ${SOURCES}      ruff sources, space-separated     (e.g. "django_pytest tests")
+#   ${TESTS}        test dir                          (e.g. tests)
+#   ${REPO_NAME}    repo name                         (e.g. django-pytest)
+#   ${PROJECT_KEY}  SonarCloud project key            (e.g. chrysa_django-pytest)
+#
+# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it is a copy-to-use
+#    template, not a reusable `uses:` workflow.
+#
+# Job names (pre-commit / lint / test / sonar) are the branch-protection
+# required status checks — keep them stable across repos.
 
-name: CI Python
+name: CI
 
 on:
-    push:
-        branches: [main, master, develop]
     pull_request:
-        branches: [main, master, develop]
+        branches: [main]
+    push:
+        branches:
+            - main
+            - "feat/**"
+            - "fix/**"
+            - "chore/**"
+            - "ci/**"
+    workflow_dispatch:
 
 permissions:
+    checks: write
     contents: read
+    pull-requests: write
+    statuses: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-    lint:
+    pre-commit:
+        name: Pre-commit checks
         runs-on: ubuntu-latest
-        name: Lint & pre-commit
+        timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v5
-            - uses: actions/setup-python@v5
+            - uses: actions/checkout@v6.0.2
+
+            - uses: chrysa/github-actions/python-setup@v1.0.12
               with:
-                  python-version: '3.12'
-            - name: Run pre-commit
-              uses: pre-commit/action@v3.0.1
+                  python-version: "3.14"
+                  cache: pip
+
+            - uses: pre-commit/action@v3.0.1
+              env:
+                  SKIP: no-commit-to-branch
+
+    lint:
+        name: Ruff + Mypy
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v6.0.2
+
+            - name: Setup environment
+              uses: chrysa/github-actions/tool-setup@v1.0.12
+              with:
+                  python-version: "3.14"
+                  extras: "dev"
+
+            - name: Ruff checks
+              uses: chrysa/github-actions/ruff-check@v1.0.12
+              with:
+                  python-version: "3.14"
+                  latest-python: "3.14"
+                  sources: "${SOURCES}"
+
+            - name: Mypy checks
+              uses: chrysa/github-actions/mypy-check@v1.0.12
+              with:
+                  python-version: "3.14"
+                  latest-python: "3.14"
+                  config-file: "pyproject.toml"
+                  sources: "${PACKAGE}"
 
     test:
-        runs-on: ubuntu-latest
-        name: Tests
+        name: Docker tests
         needs: lint
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
         steps:
-            - uses: actions/checkout@v5
-            - uses: actions/setup-python@v5
+            - uses: actions/checkout@v6.0.2
+
+            - name: Run tests via Docker
+              run: make docker-test
+
+    sonar:
+        name: SonarCloud
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        needs: test
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        permissions:
+            contents: read
+            pull-requests: read
+        steps:
+            - uses: actions/checkout@v6.0.2
               with:
-                  python-version: '3.12'
-            - name: Install dependencies
-              run: pip install -e ".[dev]"
-            - name: Run pytest
-              run: pytest --tb=short
+                  fetch-depth: 0
+
+            - uses: chrysa/github-actions/sonar-scan-python@v1.0.12
+              with:
+                  python-version: "3.14"
+                  sonar-token: ${{ secrets.SONAR_TOKEN }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  project-key: ${PROJECT_KEY}
+                  organization: chrysa
+                  project-name: ${REPO_NAME}
+                  sources: .
+                  tests: ${TESTS}
+                  coverage-report: coverage.xml
