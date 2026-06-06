@@ -102,10 +102,22 @@ deploy_hygiene() {
     fi
 }
 
+ci_is_canonical() {
+    local f="$1"
+    [[ -f "$f" ]] || return 1
+    grep -q 'chrysa/github-actions' "$f" \
+        && grep -q 'name: Pre-commit checks' "$f" \
+        && grep -q 'name: SonarCloud' "$f"
+}
+
 deploy_stack_ci() {
     local repo="$1" name; name="$(basename "$repo")"
     local tpl dest="$repo/.github/workflows/ci.yml"
     local pkg sources tests project_key
+    if ci_is_canonical "$dest"; then
+        info "ci.yml already canonical · skip (edit manually to re-template)"
+        return
+    fi
     if [[ -f "$repo/pyproject.toml" ]] || ls "$repo"/requirements*.txt &>/dev/null; then
         tpl="$WF/ci-python.yml"
         pkg="$(detect_package "$repo")"
