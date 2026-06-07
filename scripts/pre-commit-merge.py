@@ -189,7 +189,18 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
         gaps.extend(f"{url}#{hid}" for hid in wanted if hid not in have)
         if url in REV_ALIGNED_REPOS and existing.get("rev") != brepo.get("rev"):
             gaps.append(f"{url}@{brepo.get('rev')}")
+    canon_py = canonical_python(baseline)
+    if canon_py and target_python(target) not in (None, canon_py):
+        gaps.append(f"default_language_version.python={canon_py}")
     return gaps
+
+
+def canonical_python(baseline: dict) -> str | None:
+    return (baseline.get("default_language_version") or {}).get("python")
+
+
+def target_python(target: dict) -> str | None:
+    return (target.get("default_language_version") or {}).get("python")
 
 
 def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
@@ -212,6 +223,12 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
                 existing.setdefault("hooks", []).append(hook)
         if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
             existing["rev"] = brepo["rev"]
+    # Align the python pin to canonical: chrysa/pre-commit-tools requires >=3.14,
+    # so a repo pinned to an older interpreter (e.g. python3.13) fails to build the
+    # hook env. Only adjust when the target already declares a python version.
+    canon_py = canonical_python(baseline)
+    if canon_py and target_python(target) not in (None, canon_py):
+        target["default_language_version"]["python"] = canon_py
     return target
 
 
