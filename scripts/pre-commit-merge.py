@@ -101,6 +101,13 @@ def configure_indent(offset: int) -> None:
         _RUAMEL.indent(mapping=2, sequence=offset + 2, offset=offset)
 
 
+def configure_document_start(text: str) -> None:
+    # Preserve a leading `---`: ruamel drops it on re-dump, which fails yamllint's
+    # document-start rule (error-level in strict repos like diy-stream-deck).
+    if _BACKEND == "ruamel":
+        _RUAMEL.explicit_start = bool(re.match(r"^---\s*$", text.splitlines()[0])) if text.strip() else False
+
+
 def _dump(data: dict) -> str:
     if _BACKEND == "ruamel":
         buf = io.StringIO()
@@ -240,7 +247,9 @@ def main() -> int:
     # Mirror the target's own sequence indentation before any round-trip dump so a
     # repo with a non-default offset keeps passing its own yamllint.
     if target_path.exists():
-        configure_indent(decide_offset(target_path.read_text()))
+        target_text = target_path.read_text()
+        configure_indent(decide_offset(target_text))
+        configure_document_start(target_text)
     baseline, target = load(baseline_path), load(target_path)
 
     gaps = missing_items(baseline, target, allowed)
