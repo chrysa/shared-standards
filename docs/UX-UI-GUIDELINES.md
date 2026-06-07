@@ -10,6 +10,8 @@
 >
 > Companion skill module: `.claude/skills/ui-ux/SKILL.md` (auto-invoked when building any UI/UX).
 > Audit of adoption per project: `docs/UX-UI-SKILLS-AUDIT.md`.
+> **Visual layer (the *look*): `docs/DESIGN-SYSTEM.md`** — the "Neon Brutalist" token
+> contract + aesthetic DNA all web frontends adopt. This file owns ergonomics; that one owns visuals.
 
 ---
 
