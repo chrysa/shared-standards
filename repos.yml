@@ -127,8 +127,9 @@ repos:
     status: dev
     public: false
   - name: my-assistant
-    status: dev
+    status: alias
     public: false
+    alias_of: lifeos
   - name: my-resume
     status: dev
     public: false
