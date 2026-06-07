@@ -1,102 +1,85 @@
-#!/bin/bash
-# Setup branch protection for quality gate enforcement
-# Usage: ./scripts/setup-branch-protection.sh <owner/repo> <github_token>
-
+#!/usr/bin/env bash
+# setup-branch-protection.sh · Require the CI checks before merge (OPS-188).
+# Source: chrysa/shared-standards/scripts/setup-branch-protection.sh
+#
+# Required status check CONTEXTS = the check-run names GitHub reports, which equal
+# the workflow job `name:` values (NOT the job ids) and differ per stack
+# (python: "Pre-commit checks","Ruff + Mypy","Docker tests","SonarCloud";
+#  node:   "Pre-commit checks","Lint + Typecheck","Tests","SonarCloud").
+# To avoid the name-vs-id footgun, by default we AUTO-DETECT contexts from the
+# latest check-runs on the default branch — so CI must have run there at least once.
+#
+# Usage:
+#   ./setup-branch-protection.sh <repo>                 # owner defaults to chrysa, auto contexts
+#   ./setup-branch-protection.sh chrysa/<repo>          # explicit owner
+#   ./setup-branch-protection.sh <repo> --contexts "Pre-commit checks,Ruff + Mypy,Docker tests,SonarCloud"
+#   ./setup-branch-protection.sh <repo> --dry-run
+#
+# Exit: 0 ok · 1 failure
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <owner/repo> [token_env_var]"
-    echo "Example: $0 anthony/av-platform GH_TOKEN"
+    echo "Usage: $0 <[owner/]repo> [--contexts \"A,B,C\"] [--dry-run]"
+    echo "Example: $0 django-pytest"
     exit 1
 fi
 
-REPO=$1
-TOKEN_VAR=${2:-"GH_TOKEN"}
-TOKEN=${!TOKEN_VAR:-}
-
-if [ -z "$TOKEN" ]; then
-    echo "❌ Token not found in environment variable: $TOKEN_VAR"
-    echo "Set it: export $TOKEN_VAR=github_pat_..."
-    exit 1
-fi
-
-export GH_TOKEN="$TOKEN"
-
-echo "🔐 Configuring branch protection for $REPO"
-echo ""
-
-# Extract owner and repo name
-IFS='/' read -r OWNER REPO_NAME <<< "$REPO"
-
-# Target branches
-BRANCHES=("main" "master" "develop")
-SUCCESS_COUNT=0
-SKIPPED_COUNT=0
-FAILED_COUNT=0
-
-for branch in "${BRANCHES[@]}"; do
-    echo "📌 Processing branch: $branch"
-
-    # Check if branch exists
-    if ! gh api repos/$OWNER/$REPO_NAME/branches/$branch --silent 2>/dev/null; then
-        echo "   ⏭️  Branch does not exist, skipping"
-      SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
-        continue
-    fi
-
-    echo "   ➕ Updating protection rules..."
-
-    # Apply branch protection
-    set +e
-    API_OUTPUT=$(gh api repos/$OWNER/$REPO_NAME/branches/$branch/protection \
-        -X PUT \
-        --input - <<'EOF' 2>&1 >/dev/null
-{
-  "required_status_checks": {
-    "strict": true,
-    "contexts": ["quality-gate"]
-  },
-  "required_pull_request_reviews": {
-    "dismiss_stale_reviews": true,
-    "require_code_owner_reviews": false,
-    "required_approving_review_count": 1
-  },
-  "restrictions": null,
-  "enforce_admins": true
-}
-EOF
-  )
-  API_EXIT=$?
-  set -e
-
-  if [ "$API_EXIT" -eq 0 ]; then
-      echo "   ✅ Branch protection configured"
-      SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-    elif echo "$API_OUTPUT" | grep -q "Branch not found"; then
-      echo "   ⏭️  Branch not found, skipping"
-      SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
-    else
-      echo "   ❌ Failed to configure branch protection"
-      echo "      $API_OUTPUT"
-      FAILED_COUNT=$((FAILED_COUNT + 1))
-    fi
+REPO_ARG=""
+CONTEXTS_CSV=""
+DRY_RUN=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --contexts) CONTEXTS_CSV="$2"; shift 2 ;;
+        --dry-run)  DRY_RUN=true; shift ;;
+        *)          [ -z "$REPO_ARG" ] && REPO_ARG="$1"; shift ;;
+    esac
 done
 
-echo ""
-echo "✅ Branch protection setup complete!"
-echo ""
-echo "Summary:"
-echo "  • Success: $SUCCESS_COUNT"
-echo "  • Skipped: $SKIPPED_COUNT"
-echo "  • Failed : $FAILED_COUNT"
-echo ""
-echo "Configuration requested:"
-echo "  • Required status check: quality-gate workflow"
-echo "  • Strict mode: enabled (only merged commits count)"
-echo "  • Pull request reviews: 1 approval required"
-echo "  • Stale review dismissal: enabled"
-echo "  • Admin enforcement: enabled"
-
-if [ "$FAILED_COUNT" -gt 0 ]; then
-  exit 1
+# Normalize to owner/repo (default owner: chrysa)
+if [[ "$REPO_ARG" == */* ]]; then
+    OWNER="${REPO_ARG%%/*}"; REPO_NAME="${REPO_ARG##*/}"
+else
+    OWNER="chrysa"; REPO_NAME="$REPO_ARG"
 fi
+FULL="$OWNER/$REPO_NAME"
+
+gh auth switch -u chrysa >/dev/null 2>&1 || true
+
+DEFAULT_BRANCH="$(gh api "repos/$FULL" --jq .default_branch 2>/dev/null || echo main)"
+
+# Build contexts JSON array
+if [ -n "$CONTEXTS_CSV" ]; then
+    CONTEXTS_JSON="$(printf '%s' "$CONTEXTS_CSV" | tr ',' '\n' | jq -R . | jq -s .)"
+else
+    echo "🔎 Auto-detecting check contexts from $FULL@$DEFAULT_BRANCH ..."
+    CONTEXTS_JSON="$(gh api "repos/$FULL/commits/$DEFAULT_BRANCH/check-runs" \
+        --jq '[.check_runs[].name] | unique' 2>/dev/null || echo '[]')"
+fi
+
+if [ "$CONTEXTS_JSON" = "[]" ] || [ -z "$CONTEXTS_JSON" ]; then
+    echo "❌ No status check contexts found. Run CI on $DEFAULT_BRANCH first, or pass --contexts."
+    exit 1
+fi
+
+echo "🔐 $FULL · branch=$DEFAULT_BRANCH"
+echo "   required checks: $(echo "$CONTEXTS_JSON" | jq -c .)"
+
+PAYLOAD="$(jq -n --argjson ctx "$CONTEXTS_JSON" '{
+  required_status_checks: { strict: true, contexts: $ctx },
+  required_pull_request_reviews: {
+    dismiss_stale_reviews: true,
+    require_code_owner_reviews: false,
+    required_approving_review_count: 1
+  },
+  restrictions: null,
+  enforce_admins: true
+}')"
+
+if $DRY_RUN; then
+    echo "[dry-run] would PUT branches/$DEFAULT_BRANCH/protection with:"
+    echo "$PAYLOAD" | jq .
+    exit 0
+fi
+
+echo "$PAYLOAD" | gh api "repos/$FULL/branches/$DEFAULT_BRANCH/protection" -X PUT --input - >/dev/null
+echo "✅ Branch protection applied to $FULL@$DEFAULT_BRANCH"

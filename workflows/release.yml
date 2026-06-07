@@ -11,6 +11,10 @@
 # Expects:
 #   - GitVersion.yml at repo root
 #   - cliff.toml at repo root (or pass changelog-config input)
+#
+# Lint gate: the `lint` job replays the full pre-commit suite (ruff + mypy at
+# pre-push stage) once per release. Lint no longer runs on every PR/push — it
+# lives in pre-commit (local) and is gated here. `release` needs `lint`.
 
 name: Release
 
@@ -49,9 +53,17 @@ permissions:
     pull-requests: read
 
 jobs:
+    lint:
+        name: Lint gate (pre-commit replay)
+        uses: chrysa/github-actions/.github/workflows/lint-python.yml@main
+        with:
+            python-version: '3.14'
+            extras: dev
+
     release:
         runs-on: ubuntu-latest
         name: Semantic Release
+        needs: lint
 
         steps:
             - uses: actions/checkout@v5

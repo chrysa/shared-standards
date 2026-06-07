@@ -1,0 +1,75 @@
+/*
+ * chrysa Design System — "Neon Brutalist" token contract.
+ * Spec: docs/DESIGN-SYSTEM.md
+ *
+ * Drop this into a frontend's global stylesheet. Override ONLY --accent
+ * (and it propagates to --ring) with the app's hue from DESIGN-SYSTEM.md §3.
+ * SCSS/Bootstrap repos: import as-is. Tailwind v4 repos: also add the
+ * `@theme inline` block below so utilities are generated.
+ */
+
+:root {
+  /* dark — canonical */
+  --bg: #0e0e10;
+  --surface: #18181b;
+  --surface-2: #242428;
+  --fg: #fafafa;
+  --muted: #a1a1aa;
+  --border: #fafafa;
+  --accent: #c8ff00; /* PER-APP OVERRIDE */
+  --accent-ink: #0e0e10;
+  --signal: #22c55e;
+  --warning: #fbbf24;
+  --danger: #ff4d4d;
+  --ring: var(--accent);
+  --radius: 0px;
+  --shadow: 4px 4px 0 #000000;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+:root.light {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f0f0f0;
+  --fg: #0e0e10;
+  --muted: #52525b;
+  --border: #0e0e10;
+  --accent: #a3e000; /* PER-APP OVERRIDE (darker variant for fill contrast) */
+  --accent-ink: #0e0e10;
+  --signal: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --shadow: 4px 4px 0 #0e0e10;
+}
+
+/* --- Tailwind v4 only: generate semantic utilities (bg-surface, text-fg, …) ---
+@import "tailwindcss";
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-signal: var(--signal);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --radius-card: var(--radius);
+  --shadow-brutal: var(--shadow);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
