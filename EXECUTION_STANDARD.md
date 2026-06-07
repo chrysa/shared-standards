@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.3 — 2026-06-06**
+**Version 1.4 — 2026-06-07**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -9,25 +9,110 @@ All repos scaffolded with `project-init` must comply. Deviations require a docum
 
 ## 1. Makefile Required Targets
 
-Every chrysa project **must** expose these Makefile targets. Names are invariant.
+Every chrysa project **must** expose a uniform Makefile contract. Target **names are
+invariant** (no `fmt`/`type-check`/`tests` variants — see §1.4). The required set is
+**tiered by repo archetype**: a small core that every repo has, plus additions per tier.
 
-| Target | Description | Required |
-|--------|-------------|----------|
-| `help` | Print all available targets with descriptions | ✅ |
-| `install` | Install all dev dependencies (venv, node_modules…) | ✅ |
-| `dev` | Start development server / watch mode | ✅ |
-| `test` | Run unit tests | ✅ |
-| `test-cov` | Run tests with coverage report (generates coverage.xml) | ✅ |
-| `lint` | Run linter (ruff / eslint / golangci-lint…) | ✅ |
-| `format` | Auto-format code (ruff format / prettier…) | ✅ |
-| `typecheck` | Run static type checker | ✅ for typed projects |
-| `build` | Build production artefact (Docker image / dist bundle) | ✅ |
-| `docker-up` | Start docker-compose services | if docker-compose.yml |
-| `docker-down` | Stop docker-compose services | if docker-compose.yml |
-| `clean` | Remove generated artefacts and caches | ✅ |
-| `pre-commit` | Run pre-commit hooks on all files | ✅ |
+### 1.1 Tier declaration
+
+Every Makefile **must** declare its tier on the first line as a marker comment, so the
+conformance checker (chrysa/pre-commit-tools `makefile-check`) knows which target set to
+require:
+
+```makefile
+# makefile-tier: lib        # one of: lib | python-app | fullstack | infra
+```
+
+### 1.2 Core targets (all tiers)
+
+| Target | Description |
+|--------|-------------|
+| `help` | Print all targets with descriptions (self-documenting, see §1.5) |
+| `install` | Install all dev dependencies (venv, node_modules…) |
+| `lint` | Run linter (ruff / eslint…) |
+| `format` | Auto-format code (ruff format / prettier…) |
+| `test` | Run unit tests |
+| `build` | Build production artefact (Docker image / dist bundle) |
+| `clean` | Remove generated artefacts and caches |
+| `pre-commit` | Run pre-commit hooks on all files |
+
+### 1.3 Required targets by tier
+
+These extend §1.2 and must always be definable correctly without extra
+infrastructure, so they are **mandatory** (the `makefile-check` hook fails when
+one is missing).
+
+| Target | `lib` | `python-app` | `fullstack` | `infra` | Description |
+|--------|:---:|:---:|:---:|:---:|-------------|
+| `dev` | ✅ | ✅ | ✅ | ✅ | Start dev server / watch mode (may be a no-op stub for libs) |
+| `typecheck` | ✅ | ✅ | ✅ | — | Static type checker (mypy / tsc) — typed projects |
+| `test-cov` | ✅ | ✅ | ✅ | — | Tests with coverage (writes `coverage.xml`); floor 80% |
+| `docker-up` | — | ✅ | ✅ | — | Start docker compose services |
+| `docker-down` | — | ✅ | ✅ | — | Stop docker compose services |
+| `ci` | — | ✅ | ✅ | — | Aggregate gate: `lint typecheck test` |
+
+### 1.3b Recommended targets by tier
+
+These depend on supporting infrastructure (a `Dockerfile.test`,
+`scripts/quality_gate.py`, a wired frontend build). They are **recommended**:
+the hook emits a warning, not an error, when absent — adopt each one as its
+infrastructure lands.
+
+| Target | `lib` | `python-app` | `fullstack` | `infra` | Description |
+|--------|:---:|:---:|:---:|:---:|-------------|
+| `docker-test` | ✅ | ✅ | ✅ | — | Run the test suite in Docker (CI-compatible, host-isolated) |
+| `quality-gate-baseline` | — | ✅ | ✅ | — | Capture quality baseline (`scripts/quality_gate.py baseline`) |
+| `quality-gate-verify` | — | ✅ | ✅ | — | Verify against baseline (`scripts/quality_gate.py verify`) |
+| `web-build` | — | — | ✅ | — | Build the frontend bundle |
+| `web-lint` | — | — | ✅ | — | Lint the frontend |
+| `web-typecheck` | — | — | ✅ | — | Type-check the frontend |
+| `e2e` | — | — | ✅ | — | Run end-to-end tests (Playwright) |
+
+**Tier definitions:**
+- **`lib`** — pure package, no `docker-compose.yml`. `lint/format/typecheck/test/test-cov`
+  run the tool directly via the venv created by `make install`; the recommended
+  `docker-test` builds `Dockerfile.test`. Reference: `chrysa/django-pytest`.
+- **`python-app`** — backend service with `docker-compose.yml`. Tests/lint run via
+  compose; `ci` chains `lint typecheck test`. The recommended `docker-test` and
+  `quality-gate-*` targets activate once `Dockerfile.test` / `scripts/quality_gate.py` exist.
+- **`fullstack`** — backend + frontend. Uses `COMPOSE`/`COMPOSE_TEST` + `BACKEND_DIR`/
+  `FRONTEND_DIR` vars and `web-*`/`e2e`. Reference: `chrysa/discordium`, `chrysa/sport-intelligence-hub`.
+- **`infra`** — helm / k8s / vscode-ext / GAS / compose-only. Core targets plus domain
+  targets (`deploy`, `render`, `package`…). No forced Python targets where they make no sense.
+
+### 1.4 Naming policy (invariant)
+
+Canonical names only. Forbidden variants and their replacements:
+
+| Forbidden | Canonical |
+|---|---|
+| `fmt` | `format` |
+| `type-check`, `typecheck-frontend` (alone) | `typecheck` |
+| `tests` | `test` |
+| `docker-compose …` (legacy v1 CLI) | `docker compose …` |
+
+Optional extras (allowed, not required): `format-check`, `test-fast`, `test-local`,
+`logs`, `ps`, `shell`, `seed`, migration targets (`alembic-*`, `db-*`), `docs-*`.
+Redundant aliases (e.g. `type-check` kept *alongside* `typecheck`) must be removed.
+
+`.PHONY` must list **every** non-file target.
+
+### 1.5 Self-documenting `help` (standard)
+
+`help` is the default goal and is generated from `## ` comments — no hand-maintained echo
+list:
+
+```makefile
+.DEFAULT_GOAL := help
+help: ## Show available targets
+	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
+		awk 'BEGIN{FS=":.*##"}{ printf "  %-20s %s\n", $$1, $$2 }'
+```
 
 > **Convention**: `make dev` must be idempotent and exit cleanly with Ctrl+C.
+> Enforcement: `makefile-check` (chrysa/pre-commit-tools) fails CI if the tier's required
+> targets are missing, a forbidden name is used, `help` is non-conforming, or a rule
+> references a directory/service/script that does not exist.
 
 ---
 
