@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3
+  python: python3.14
 fail_fast: false
 minimum_pre_commit_version: 4.1.0
 repos:
@@ -64,7 +64,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-92
+  rev: v0.1.1-93
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks

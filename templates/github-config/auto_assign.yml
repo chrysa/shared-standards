@@ -2,9 +2,9 @@ addAssignees: author
 addReviewers: true
 numberOfReviewers: 1
 reviewers:
-- anthony-greau
-- chrysa
+  - anthony-greau
+  - chrysa
 skipKeywords:
-- '[SKIP CI]'
-- draft
-- wip
+  - '[SKIP CI]'
+  - draft
+  - wip
