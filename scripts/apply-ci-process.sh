@@ -29,7 +29,9 @@ set -uo pipefail
 # ─── Paths & config ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHRYSA_ROOT="${CHRYSA_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-TEMPLATES_DIR="$CHRYSA_ROOT/shared-standards/templates"
+# Resolve templates from this script's own repo (works in main checkout AND worktree),
+# not via CHRYSA_ROOT — otherwise a worktree run reads the main checkout's templates.
+TEMPLATES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/templates"
 WF_TEMPLATES="$TEMPLATES_DIR/workflows-process"
 CFG_TEMPLATES="$TEMPLATES_DIR/github-config"
 
@@ -141,6 +143,15 @@ generate_dependabot() {
     local dest="$repo/.github/dependabot.yml"
     local tpl="$CFG_TEMPLATES/dependabot.yml.tpl"
 
+    # Gap-aware: a repo's existing dependabot.yml carries hand-tuned ecosystems,
+    # groups, cooldown and directories the stack-detected template cannot rebuild.
+    # Regenerating would silently drop dependency coverage, so only generate when
+    # the file is absent. Existing configs are left untouched.
+    if [[ -f "$dest" ]]; then
+        info "dependabot.yml exists -> preserved (no clobber)"
+        return 0
+    fi
+
     # Start fresh : copie le tpl et retire les blocs non pertinents
     local tmp; tmp=$(mktemp)
     cp "$tpl" "$tmp"
@@ -228,6 +239,14 @@ deploy_one() {
         name=$(basename "$wf")
         local dest="$wf_dest/$name"
 
+        # Gap-aware: never clobber a repo's existing workflow. The template carries
+        # collapsed long-line script scalars that fail strict yamllint, and repos
+        # commonly tune these workflows. Deploy only the ones a repo is missing.
+        if [[ -f "$dest" ]]; then
+            info "workflow $name exists → preserved"
+            continue
+        fi
+
         if $DRY_RUN; then
             info "[dry-run] Copierait $name → $wf_dest/"
             continue
@@ -236,13 +255,20 @@ deploy_one() {
         cp "$wf" "$dest"
         copied=$((copied + 1))
     done
-    ok "Workflows copiés : $copied/11"
+    ok "Workflows copiés (manquants seulement) : $copied/11"
 
     # ─── Tier 3 : github-config ─────────────
     mkdir -p "$repo/.github"
     for cfg in labeler.yml labels.yml auto_assign.yml actionlint.yaml; do
         local src="$CFG_TEMPLATES/$cfg"
         local dest="$repo/.github/$cfg"
+
+        # Gap-aware: a repo's labels/labeler/auto-assign config is hand-tuned;
+        # only deploy when missing.
+        if [[ -f "$dest" ]]; then
+            info ".github/$cfg exists → preserved"
+            continue
+        fi
 
         if $DRY_RUN; then
             info "[dry-run] Copierait .github/$cfg"
@@ -251,7 +277,7 @@ deploy_one() {
 
         cp "$src" "$dest"
     done
-    ok "github-config copié (4 fichiers)"
+    ok "github-config copié (manquants seulement)"
 
     # ─── Tier 2 : dependabot ────────────────
     generate_dependabot "$repo" "$stacks"

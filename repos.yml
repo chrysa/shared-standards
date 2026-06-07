@@ -1,0 +1,183 @@
+# repos.yml — chrysa repo classification for config normalization (OPS-190).
+# Generated 2026-06-06 from gh repo list chrysa + local checkout. Hand-tune as needed.
+# status: dev (apply full standard) | non-dev (config/static, skip CI+Docker) | archived (skip).
+# public: true emits LICENSE (MIT); false skips it.
+repos:
+  - name: agent-config
+    status: dev
+    public: false
+  - name: ai-aggregator
+    status: dev
+    public: false
+  - name: audit-platform
+    status: dev
+    public: false
+  - name: automations
+    status: dev
+    public: false
+  - name: catalog
+    status: dev
+    public: false
+  - name: cdn-explorer
+    status: dev
+    public: true
+  - name: chrysa-lib
+    status: dev
+    public: false
+  - name: chrysa-portfolio-viz
+    status: dev
+    public: false
+  - name: chrysa-skills
+    status: dev
+    public: false
+  - name: claude-config
+    status: dev
+    public: false
+  - name: coach
+    status: dev
+    public: false
+  - name: container-webview
+    status: dev
+    public: true
+  - name: D-D
+    status: dev
+    public: false
+  - name: dev-nexus
+    status: dev
+    public: false
+  - name: devtool
+    status: dev
+    public: false
+  - name: discord-bot-back
+    status: dev
+    public: false
+  - name: discordium
+    status: dev
+    public: false
+  - name: diy-stream-deck
+    status: dev
+    public: true
+  - name: django-app-forge
+    status: dev
+    public: false
+  - name: django-autoload
+    status: dev
+    public: true
+  - name: django-pytest
+    status: dev
+    public: false
+  - name: django-query-optimizer
+    status: dev
+    public: true
+  - name: django-query-optimizer-vscode
+    status: dev
+    public: true
+  - name: django-traceid
+    status: dev
+    public: false
+  - name: doc-gen
+    status: dev
+    public: false
+  - name: dotfiles
+    status: non-dev
+    public: false
+  - name: epub-sorter
+    status: dev
+    public: true
+  - name: feedback-gateway
+    status: dev
+    public: false
+  - name: floating-agent
+    status: dev
+    public: true
+  - name: game-solver-platform
+    status: dev
+    public: false
+  - name: gaming-os
+    status: dev
+    public: false
+  - name: genealogy-validator
+    status: dev
+    public: false
+  - name: gestureOS
+    status: dev
+    public: true
+  - name: github-actions
+    status: dev
+    public: true
+  - name: guideline-checker
+    status: dev
+    public: true
+  - name: homeassistant-config
+    status: non-dev
+    public: false
+  - name: lifeos
+    status: dev
+    public: true
+  - name: linkendin-resume
+    status: dev
+    public: true
+  - name: link-reader-bot
+    status: dev
+    public: false
+  - name: mediavault
+    status: dev
+    public: false
+  - name: mirrador
+    status: dev
+    public: false
+  - name: my-assistant
+    status: alias
+    public: false
+    alias_of: lifeos
+  - name: my-resume
+    status: dev
+    public: false
+  - name: orchestrator
+    status: dev
+    public: false
+  - name: paperclip
+    status: dev
+    public: false
+  - name: PO-GO-DEX
+    status: dev
+    public: false
+  - name: pre-commit-hooks-changelog
+    status: dev
+    public: true
+  - name: pre-commit-tools
+    status: dev
+    public: true
+  - name: project-init
+    status: dev
+    public: true
+  - name: quality-gatekeeper
+    status: dev
+    public: false
+  - name: satisfactory-automated_calculator
+    status: dev
+    public: true
+  - name: satisfactory-factory-manager
+    status: dev
+    public: false
+  - name: server
+    status: dev
+    public: false
+  - name: shared-standards
+    status: dev
+    public: true
+  - name: sport-intelligence-hub
+    status: dev
+    public: false
+  - name: studioverse
+    status: dev
+    public: false
+  - name: usefull-containers
+    status: dev
+    public: true
+  - name: windows-autonome
+    status: dev
+    public: false
+  - name: windows-docker-state-notification
+    status: dev
+    public: false
