@@ -239,6 +239,14 @@ deploy_one() {
         name=$(basename "$wf")
         local dest="$wf_dest/$name"
 
+        # Gap-aware: never clobber a repo's existing workflow. The template carries
+        # collapsed long-line script scalars that fail strict yamllint, and repos
+        # commonly tune these workflows. Deploy only the ones a repo is missing.
+        if [[ -f "$dest" ]]; then
+            info "workflow $name exists → preserved"
+            continue
+        fi
+
         if $DRY_RUN; then
             info "[dry-run] Copierait $name → $wf_dest/"
             continue
@@ -247,13 +255,20 @@ deploy_one() {
         cp "$wf" "$dest"
         copied=$((copied + 1))
     done
-    ok "Workflows copiés : $copied/11"
+    ok "Workflows copiés (manquants seulement) : $copied/11"
 
     # ─── Tier 3 : github-config ─────────────
     mkdir -p "$repo/.github"
     for cfg in labeler.yml labels.yml auto_assign.yml actionlint.yaml; do
         local src="$CFG_TEMPLATES/$cfg"
         local dest="$repo/.github/$cfg"
+
+        # Gap-aware: a repo's labels/labeler/auto-assign config is hand-tuned;
+        # only deploy when missing.
+        if [[ -f "$dest" ]]; then
+            info ".github/$cfg exists → preserved"
+            continue
+        fi
 
         if $DRY_RUN; then
             info "[dry-run] Copierait .github/$cfg"
@@ -262,7 +277,7 @@ deploy_one() {
 
         cp "$src" "$dest"
     done
-    ok "github-config copié (4 fichiers)"
+    ok "github-config copié (manquants seulement)"
 
     # ─── Tier 2 : dependabot ────────────────
     generate_dependabot "$repo" "$stacks"

@@ -77,6 +77,24 @@ def detect_offset(text: str) -> int:
     return 2
 
 
+def decide_offset(text: str) -> int:
+    """Pick the dump offset that keeps the repo's yamllint green.
+
+    Mirror an explicit indent (>= 2) so a repo using offset 4 (e.g. paperclip) is
+    not reindented. But offset 0 (root-level sequences) only passes yamllint when
+    `indent-sequences` is disabled; the default rule is `true` and requires
+    sequences indented >= 1. Many repos carry an offset-0 config that predates
+    their yamllint hook (never linted until we touch the file), so bump 0 -> 2
+    unless the repo explicitly disabled the rule.
+    """
+    off = detect_offset(text)
+    if off >= 2:
+        return off
+    if re.search(r"indent-sequences:\s*(false|disable)", text):
+        return 0
+    return 2
+
+
 def configure_indent(offset: int) -> None:
     if _BACKEND == "ruamel":
         # ruamel: content column = sequence; dash column = offset (offset < sequence).
@@ -222,7 +240,7 @@ def main() -> int:
     # Mirror the target's own sequence indentation before any round-trip dump so a
     # repo with a non-default offset keeps passing its own yamllint.
     if target_path.exists():
-        configure_indent(detect_offset(target_path.read_text()))
+        configure_indent(decide_offset(target_path.read_text()))
     baseline, target = load(baseline_path), load(target_path)
 
     gaps = missing_items(baseline, target, allowed)
