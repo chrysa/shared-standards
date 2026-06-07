@@ -10,8 +10,13 @@
 # ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it is a copy-to-use
 #    template, not a reusable `uses:` workflow.
 #
-# Job names (pre-commit / lint / test / sonar) are the branch-protection
-# required status checks — keep them stable across repos (parity with ci-python.yml).
+# NOTE: Lint (eslint/tsc/pre-commit) does NOT run here. It lives in pre-commit
+#       (local) and is replayed in CI only at release time. This CI keeps only
+#       tests + sonar, to gate PRs without per-push lint billing (parity with
+#       ci-python.yml).
+#
+# Job names (test / sonar) are the branch-protection required status checks —
+# keep them stable across repos.
 #
 # The test job must produce coverage/lcov.info and upload it as the
 # `coverage-lcov` artifact, which sonar-scan-node consumes.
@@ -41,43 +46,8 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    pre-commit:
-        name: Pre-commit checks
-        runs-on: ubuntu-latest
-        timeout-minutes: 15
-        steps:
-            - uses: actions/checkout@v6.0.2
-            - uses: actions/setup-python@v5
-              with:
-                  python-version: "3.14"
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: npm
-            - run: npm ci
-            - uses: pre-commit/action@v3.0.1
-              env:
-                  SKIP: no-commit-to-branch
-
-    lint:
-        name: Lint + Typecheck
-        runs-on: ubuntu-latest
-        timeout-minutes: 15
-        steps:
-            - uses: actions/checkout@v6.0.2
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: npm
-            - run: npm ci
-            - name: Lint
-              run: npm run lint
-            - name: Typecheck
-              run: npm run type-check
-
     test:
         name: Tests
-        needs: lint
         runs-on: ubuntu-latest
         timeout-minutes: 20
         steps:
