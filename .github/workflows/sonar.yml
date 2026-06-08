@@ -36,4 +36,4 @@ jobs:
           organization: chrysa
           project-name: shared-standards
           sources: .
-          tests: tests
+          tests: ""

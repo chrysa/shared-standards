@@ -1,0 +1,6 @@
+# Configuration for kentaro-m/auto-assign-action (referenced by auto-assign.yml).
+# Solo-dev repo: there is no second reviewer to assign, so reviewer assignment
+# is disabled to avoid the action failing with "Not Found". The PR author is
+# assigned as the assignee instead.
+addReviewers: false
+addAssignees: author
