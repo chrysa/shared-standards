@@ -33,3 +33,22 @@ Two cross-cutting standards are added to `CODE_MANIFEST.md` for every app exposi
 
 Both criteria are added to the Ready-to-Dev gate (§13, now 12 criteria). Existing projects migrate via a
 per-project compliance task (tracked in Notion `📦 Projets chrysa`). Manifest bumped to v1.1.
+
+---
+
+## D-0003 — Artifact distribution: public PyPI (packages) + private GHCR (images)
+
+**Date**: 2026-06-08
+**Status**: accepted
+
+Portfolio-wide standard formalizing how build artifacts are distributed:
+
+1. **Python-installable projects** (libraries / distributable packages) are published to **public PyPI**,
+   triggered by CI on a git tag `v*.*.*`, via Trusted Publishing (PyPI OIDC) — no API token in plaintext.
+   Applications without distribution are not published to PyPI.
+2. **Docker images** are pushed to a **private registry** — **GHCR** under the chrysa org
+   (`ghcr.io/chrysa/<repo>`, package visibility **private**, never public). CI auth via `GITHUB_TOKEN`.
+
+Codified in `EXECUTION_STANDARD.md` §6 (Registry) and §11 (Distribution), and reflected in
+`CODE_MANIFEST.md` §8.1 (`build-image.yml`, `release.yml`). Workflow implementation lives in
+`chrysa/github-actions`. Execution Standard bumped to v1.5.
