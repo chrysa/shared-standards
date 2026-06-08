@@ -335,8 +335,8 @@ CI matrix : tests sur 3 OS minimum pour les libs publiques. Pour les apps, Linux
 
 - `quality-checks.yml` — lint + type + test + coverage
 - `security.yml` — `detect-secrets` + Trivy + bandit/audit
-- `build-image.yml` — Docker build + scan + push registry
-- `release.yml` — GitVersion + CHANGELOG + GitHub Release
+- `build-image.yml` — Docker build + scan + push to **private GHCR** (`ghcr.io/chrysa/<repo>`, private)
+- `release.yml` — GitVersion + CHANGELOG + GitHub Release; publishes distributable libraries to **public PyPI** on tag `v*.*.*`
 - `enforce-issue-link.yml` — toute PR doit référencer une issue (status check bloquant)
 
 ### 8.2 Quality gates
