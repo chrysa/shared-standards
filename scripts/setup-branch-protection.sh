@@ -4,10 +4,14 @@
 #
 # Two modes:
 #   --review-only (DEFAULT): protect WITHOUT required status checks. This is the
-#     fleet baseline applied during OPS-190 — 1 approving review + enforce_admins +
-#     no force-push/deletion. Use this while CI is billing-red (see chrysa-ci-billing):
-#     requiring checks that never run would deadlock every merge. `gh pr merge --admin`
-#     still overrides for solo merges.
+#     fleet baseline applied during OPS-190 — 1 approving review + no force-push/
+#     deletion. Use this while CI is billing-red (see chrysa-ci-billing): requiring
+#     checks that never run would deadlock every merge.
+#     NOTE: enforce_admins is FALSE on purpose. With a solo owner account you cannot
+#     approve your own PR, and enforce_admins=true also disables the `gh pr merge
+#     --admin` override — so enforce_admins=true + 1 review = no merge is ever
+#     possible. enforce_admins=false keeps the review gate for the UI / non-admins
+#     while letting the owner merge via --admin (the chrysa-pr-merge-policy workflow).
 #   --checks: also require status checks. CONTEXTS = the check-run names GitHub
 #     reports, which equal the workflow job `name:` values (NOT the job ids). The
 #     canonical release-gated CI (ci-python.yml / ci-node.yml) exposes only:
@@ -87,7 +91,7 @@ PAYLOAD="$(jq -n --argjson checks "$CHECKS_JSON" '{
     required_approving_review_count: 1
   },
   restrictions: null,
-  enforce_admins: true,
+  enforce_admins: false,
   allow_force_pushes: false,
   allow_deletions: false
 }')"
