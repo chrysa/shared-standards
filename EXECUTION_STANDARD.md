@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.4 — 2026-06-07**
+**Version 1.5 — 2026-06-08**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -243,6 +243,15 @@ All reusable workflows are sourced from `chrysa/shared-standards`.
 - No secrets in image layers
 - `docker-compose.yml` must define `healthcheck` + `restart: unless-stopped`
 
+### Registry (mandatory)
+
+- Docker images are pushed to a **private registry** — **GHCR** under the chrysa org:
+  `ghcr.io/chrysa/{repo}`, package visibility **private** (never public).
+- Published tags mirror the git tag: `ghcr.io/chrysa/{repo}:{version}` (semver) **and** `:latest`.
+- CI authenticates to `ghcr.io` via `docker/login-action` using the workflow `GITHUB_TOKEN`
+  (or a least-privilege `packages:write` token) — **no PAT in plaintext**, no long-lived secret in image layers.
+- The build + scan + push is carried by the reusable `build-image.yml` workflow (see `chrysa/github-actions`).
+
 ---
 
 ## 7. Documentation
@@ -366,6 +375,16 @@ ignore_missing_imports = true
 - `setup.cfg` is permitted only for non-Python tooling (e.g. uwsgi); never for Python packaging.
 - Library packages use `src/` layout with `[tool.hatch.build.targets.wheel] packages = ["src/<pkg>"]`.
 - Applications without distribution do not need `[build-system]`; only `[tool.*]` sections are required.
+
+### Distribution
+
+Distribution is driven by the project type declared in the **Build backend** table above:
+
+- **Library / package (distributable)** → published to **public PyPI**, triggered by CI on a git tag
+  matching `v*.*.*`. Build with `hatchling`, upload via Trusted Publishing (PyPI OIDC) — **no PyPI API
+  token in plaintext**. Include `CHANGELOG.md`, `LICENSE`, and `README.md` in the sdist.
+- **Application (no distribution)** → **not** published to PyPI; shipped as a **private GHCR image** (see §6).
+- Publication is carried by the reusable `release.yml` workflow (tag → publish; see `chrysa/github-actions`).
 
 ---
 
