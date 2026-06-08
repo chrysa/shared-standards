@@ -1,3 +1,4 @@
+# makefile-tier: lib
 .PHONY: help install dev test test-cov lint format typecheck build clean pre-commit
 
 help:
