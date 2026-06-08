@@ -25,6 +25,7 @@ repos:
   repo: https://github.com/igorshubovych/markdownlint-cli
   rev: v0.48.0
 - hooks:
+  - id: makefile-check
   # --- generic (all repos) ---
   - exclude: ^(\.github/|workflows/|templates/)
     id: yaml-sorter
@@ -64,7 +65,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-93
+  rev: v0.1.1-94
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
