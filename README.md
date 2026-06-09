@@ -69,6 +69,8 @@ cp -r path/to/shared-standards/.claude/hooks/ .claude/hooks/
 ### Copilot instructions
 
 Copy `copilot-instructions/base.md` to `.github/copilot-instructions.md` in your repo and adjust.
+Then append the per-stack guide that matches the repo: `fastapi.md`, `django.md`, `react19.md`,
+`python-library.md`, `monorepo.md`, or `gas.md`. Each extends `base.md` and overrides it on conflict.
 
 ### Workflows
 
