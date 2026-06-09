@@ -1,118 +1,86 @@
 # shared-standards
 
-Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the ecosystem.
+The single source of truth for cross-cutting standards, templates, CI workflows, and Claude Code / Copilot tooling shared across every repo in the chrysa ecosystem. It exists so a new project can be scaffolded — and stay consistent — without re-deciding architecture, CI, quality gates, or agent configuration each time.
 
-## Structure
+## Who this is for
 
-```
-.claude/
-  hooks/
-    circuit-breaker.cjs         # Circuit breaker for API calls
-    secret-scanner.cjs          # Secret detection before git commit
-    frustration-detection.cjs   # Prompt context injection
-    verifiable-thresholds.cjs   # Code quality threshold warnings
-    memory-consolidation.cjs    # Context hygiene CLI tool
-    model-debt-inventory.cjs    # Model-specific rule inventory CLI
-  settings.json                 # Claude Code hook configuration
-  thresholds.json               # Configurable quality thresholds
-  secret-scanner-allowlist.json # Allowlist for secret scanner
-  HOOKS_README.md               # Full hooks documentation
+- **Developers** starting or maintaining a chrysa project who need the canonical conventions (containers, API design, code quality, i18n, a11y, observability).
+- **Anyone copying CI/CD, Copilot, or Claude Code setup** into a repo and wanting it to match the rest of the portfolio.
+- This is a **documentation + templates repo**: there is no app to run, no build artefact. `make help` lists the few available targets (pre-commit only).
 
-copilot-instructions/
-  base.md                       # Base GitHub Copilot instructions
+## What it provides
 
-workflows/                        # ⚠️ COPY-TO-USE templates — NOT callable via `uses: chrysa/shared-standards/...`
-  ci-python.yml                 # Full CI pipeline template for Python projects (copy to .github/workflows/ci.yml)
-  ci-node.yml                   # Full CI pipeline template for Node/React projects
-  sonar.yml                     # SonarCloud workflow template (workflow_call-compatible after copy)
-  release.yml                   # Semantic release template (GitVersion + cliff)
-  labeler.yml                   # PR auto-labeler template (actions/labeler@v6)
-  pr-size.yml                   # PR size label template (codelytv/pr-size-labeler)
-  pages.yml                     # GitHub Pages deploy template
-  notion-roadmap-sync.yml       # Notion roadmap sync template
-  notion-branch-sync.yml        # Per-branch Notion docs template
-  regression-gate.yml           # Regression gate (coverage + test count delta)
-  mutation-testing.yml          # Mutation testing template (mutmut)
-  contract-testing.yml          # Consumer-driven contract testing template
-  enforce-feature-branch.yml    # Block PRs from non-conventional branch names
-  secret-scan.yml               # Secret scanning with gitleaks
+### Standards (read these first)
 
-templates/
-  CLAUDE.md                     # Bootstrap CLAUDE.md template
-  CODEOWNERS                    # CODEOWNERS template (copy and adapt)
-  .gitignore.python             # Python .gitignore
-  .gitignore.node               # Node .gitignore
-  dependabot.yml                # Dependabot config template
-  pr-template.md                # Pull request template
-  vscode/
-    tasks.python.json           # VS Code tasks template for Python projects
-    tasks.fullstack.json        # VS Code tasks template for full-stack projects (Python + TS)
-    README.md                   # Documentation and keyboard shortcuts
-  issue-templates/
-    bug.md
-    feature.md
-    chore.md
-```
+| File | What it defines |
+| --- | --- |
+| [CODE_MANIFEST.md](CODE_MANIFEST.md) | Architectural source of truth: containers, API design, security, code quality limits, tests, docs, CI/CD, observability, i18n, a11y, versioning, and the **Ready-to-Dev gate**. |
+| [EXECUTION_STANDARD.md](EXECUTION_STANDARD.md) | Mandatory execution conventions: Makefile targets, repo structure, the `git clone && make install && make dev` contract. |
+| [AGENTS.md](AGENTS.md) | Standards specific to AI agents and code-intelligence tooling. |
+| [DECISIONS.md](DECISIONS.md) | Repo-local ADRs (`D-XXXX`). Any deviation from the manifest is recorded here. |
+| [docs/UX-UI-GUIDELINES.md](docs/UX-UI-GUIDELINES.md) | UX/UI/ergonomics source of truth for every human-facing surface (web, CLI/TUI, bots, desktop, game UI). |
+| [docs/QUALITY-GATES-SUMMARY.md](docs/QUALITY-GATES-SUMMARY.md) | Quality-gate framework and rollout status. |
 
-## Usage
+### Templates (`templates/`)
 
-### Claude Code hooks
+Bootstrap files to copy into a consuming repo and adapt: `CLAUDE.md`, `CODEOWNERS`, `pr-template.md`, `settings.json`, `dependabot.yml`, `labeler.yml`, `.gitignore.python`, `.gitignore.node`, `copilot-instructions.md`, `opencode.json`, plus `issue-templates/` (bug/feature/chore), `vscode/` (Python + full-stack `tasks.json`, see [templates/vscode/README.md](templates/vscode/README.md)), and `claude/`, `docs-structure/`, `github-config/`, `workflows-process/`.
 
-See [.claude/HOOKS_README.md](.claude/HOOKS_README.md) for full documentation.
+### CI workflow templates (`workflows/`)
 
-Quick install in any repo:
+> ⚠️ **Copy-to-use templates — NOT reusable workflows.** They cannot be called via `uses: chrysa/shared-standards/...`. Composite actions (atomic steps) live in [`chrysa/github-actions`](https://github.com/chrysa/github-actions); call those from inside your copied workflow.
+
+`ci-python.yml`, `ci-node.yml`, `sonar.yml`, `release.yml` (GitVersion + cliff), `labeler.yml`, `pr-size.yml`, `pages.yml`, `secret-scan.yml`, `regression-gate.yml`, `mutation-testing.yml`, `contract-testing.yml`, `enforce-feature-branch.yml`, `notion-roadmap-sync.yml`, `notion-branch-sync.yml`, and more.
+
+### Copilot instructions (`copilot-instructions/`)
+
+Per-stack GitHub Copilot guidance: `base.md`, `fastapi.md`, `react19.md`, `python-library.md`, `monorepo.md`, `gas.md`.
+
+### Claude Code tooling (`.claude/`)
+
+Hooks (`.claude/hooks/*.cjs`: secret scanner, circuit breaker, frustration detection, verifiable thresholds, memory consolidation, model-debt inventory), `settings.json`, `thresholds.json`, and the secret-scanner allowlist. Full reference: [.claude/HOOKS_README.md](.claude/HOOKS_README.md).
+
+### Scripts (`scripts/`)
+
+Maintenance and rollout helpers, e.g. `apply-ci-process.sh`, `setup-branch-protection.sh`, `audit-quality-gate-repos.sh`, `normalize-quality-gate.sh`, `check-skills-agents.sh`, and dev-tools installers under `scripts/setup/`.
+
+## How to apply it
+
+Standards are applied by **copying** the relevant files into your repo and adapting them — these are templates, not a package dependency. Replace `path/to/shared-standards` with your local clone path.
+
 ```bash
+# CI: add SonarCloud / Python / Node pipelines
+cp path/to/shared-standards/workflows/sonar.yml     .github/workflows/sonar.yml
+cp path/to/shared-standards/workflows/ci-python.yml .github/workflows/ci.yml
+# then edit project key, secrets, and version pins
+
+# Copilot instructions
+cp path/to/shared-standards/copilot-instructions/base.md .github/copilot-instructions.md
+
+# Claude Code hooks (merge settings.json manually)
 cp -r path/to/shared-standards/.claude/hooks/ .claude/hooks/
-# Merge .claude/settings.json manually
+
+# Bootstrap docs
+cp path/to/shared-standards/templates/CLAUDE.md ./CLAUDE.md
+
+# VS Code tasks (then drop tasks with no matching make target)
+cp path/to/shared-standards/templates/vscode/tasks.python.json    .vscode/tasks.json   # Python
+cp path/to/shared-standards/templates/vscode/tasks.fullstack.json .vscode/tasks.json   # Python + TS
 ```
 
-### Copilot instructions
+New repos are normally scaffolded via the `project-init` CLI, which consumes this repo (see CODE_MANIFEST §13, *Ready-to-Dev gate*).
 
-Copy `copilot-instructions/base.md` to `.github/copilot-instructions.md` in your repo and adjust.
+### Model tagging
 
-### Workflows
+Model-specific rules/prompts are tagged `@[MODEL_NAME]`. Inventory them:
 
-Copy the relevant template from `workflows/` to `.github/workflows/` in your repo and adapt.
-These are **copy-to-use templates**, not reusable workflows callable via `uses:`.
-Composite actions (atomic steps) live in [`chrysa/github-actions`](https://github.com/chrysa/github-actions) — use them from inside your copied workflows.
-
-```bash
-# Example: add SonarCloud CI to your project
-cp path/to/shared-standards/workflows/sonar.yml .github/workflows/sonar.yml
-# Then edit to set your project key and secrets
-```
-
-### Templates
-
-Use `templates/CLAUDE.md` as a starting point for repo-specific `CLAUDE.md` files.
-
-### VS Code Tasks
-
-Copy the appropriate `tasks.json` template to `.vscode/tasks.json` in your project.
-See [templates/vscode/README.md](templates/vscode/README.md) for the full task catalog and keyboard shortcut setup.
-
-```bash
-# Python project
-cp path/to/shared-standards/templates/vscode/tasks.python.json .vscode/tasks.json
-
-# Full-stack project (Python backend + TS frontend)
-cp path/to/shared-standards/templates/vscode/tasks.fullstack.json .vscode/tasks.json
-```
-
-Then remove tasks that do not have a corresponding `make` target.
-
-## Model tagging
-
-Rules and prompts that are model-specific are tagged with `@[MODEL_NAME]`.
-Run the inventory tool to find them:
 ```bash
 node .claude/hooks/model-debt-inventory.cjs --dir .
 ```
 
-## Local LLM Stack Reference
+## Evolving the standards
 
-This standard repository hosts ecosystem-wide guidelines and can reference the **Local LLM Stack for Software + Data Engineering** for projects requiring local LLM infrastructure.
+Changes go through a PR on `shared-standards`; every change adds an ADR to [DECISIONS.md](DECISIONS.md). Consumer repos pick up changes via release tags (`manifest-vX.Y`). See CODE_MANIFEST §14.
 
-📖 **Reference:** [Local LLM Stack (Notion)](https://www.notion.so/Local-LLM-Stack-for-Software-Data-Engineering-34459293e35e81c2b5b0f8283640b338)
+## Reference
 
-**Purpose:** Central knowledge base for fully local, containerized LLM workflows (code generation, documentation, API connectors, ETL pipelines) to be adopted across the chrysa ecosystem.
+[Local LLM Stack for Software + Data Engineering (Notion)](https://www.notion.so/Local-LLM-Stack-for-Software-Data-Engineering-34459293e35e81c2b5b0f8283640b338) — central knowledge base for fully local, containerized LLM workflows to adopt across the ecosystem.
