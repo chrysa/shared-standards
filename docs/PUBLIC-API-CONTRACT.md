@@ -41,7 +41,7 @@ is enforced uniformly across mirror families so that
 
 - `__init__.py` **must** expose `__version__`.
 - The value is read at runtime from installed metadata — **never**
-  hardcoded and never duplicated in a `_internal/version.py`:
+  hardcoded:
 
   ```python
   from importlib.metadata import PackageNotFoundError, version
@@ -53,7 +53,15 @@ is enforced uniformly across mirror families so that
   ```
 
 - `pyproject.toml [project].version` is the **only** declared version.
-  Remove any second source (`_internal/version.py`, `__about__.py`).
+  No hardcoded copy anywhere (delete any `__about__.py` or
+  `_internal/version.py` that holds a literal string).
+- When other modules also need the version (SARIF/report headers, user
+  agents), **centralize** the `importlib.metadata` read in a single
+  internal accessor (e.g. `_internal/version.py` that itself reads
+  metadata) and import `__version__` from there — both in `__init__` and
+  in those modules. This avoids importing the package root from a
+  submodule and creating an import cycle. The rule is *no hardcoded
+  second value*, not *no internal module*.
 
 ## C5 — Installation / wiring entrypoint, uniform name
 
