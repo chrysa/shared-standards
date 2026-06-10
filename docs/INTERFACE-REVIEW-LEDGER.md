@@ -18,10 +18,10 @@
 
 | Repo | Status | PR | P0/P1/P2 | Notes |
 |---|---|---|---|---|
-| django-traceid | fix | — | — | ✅ src/ migration + importlib.metadata; Docker 29 pass cov 98.7% (branch `chore/src-layout-and-version`) |
-| fastapi-traceid | fix | — | — | ✅ importlib.metadata; Docker 27 pass cov 97.9% (branch `chore/version-metadata`) |
-| django-query-optimizer | todo | — | — | importlib.metadata, relative imports, export `Severity` |
-| fastapi-query-optimizer | todo | — | — | importlib.metadata, review `__getattr__` |
+| django-traceid | PR-open | #23 | — | ✅ src/ migration + importlib.metadata; Docker 29 pass cov 98.7% |
+| fastapi-traceid | PR-open | #4 | — | ✅ importlib.metadata; Docker 27 pass cov 97.9% |
+| django-query-optimizer | PR-open | #57 | — | ✅ metadata, relative imports, export `Severity`, sorted `__all__`; Docker 288 pass cov 95% |
+| fastapi-query-optimizer | PR-open | #4 | — | ✅ metadata, relative imports; `__getattr__` kept (justified); Docker 179 pass |
 | django-pytest | todo | — | — | flat→src/, add `__version__` |
 | fastapi-pytest | todo | — | — | verify `__all__` sorted |
 | django-autoload | todo | — | — | add `__version__` |
