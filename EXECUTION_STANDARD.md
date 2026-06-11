@@ -331,15 +331,19 @@ Never commit `.env`. Always commit `.env.example` with placeholder values.
 
 | Project type | Backend | `requires` |
 |---|---|---|
-| Library / package | `hatchling` | `["hatchling"]` |
+| Library / package | `setuptools` | `["setuptools>=70", "wheel"]` |
 | Application (no distribution) | `setuptools` | `["setuptools>=72", "wheel"]` |
+
+> Backend rationale (2026-06-10): the portfolio standardised on
+> `setuptools` (7/8 libs already use it). `hatchling` is **not** used;
+> migrate any stray `hatchling` lib (e.g. `django-autoload`) to setuptools.
 
 ### Mandatory sections
 
 ```toml
 [build-system]
-requires = ["hatchling"]           # or setuptools for apps
-build-backend = "hatchling.build"
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "..."
@@ -373,7 +377,8 @@ ignore_missing_imports = true
 - All tool config (`ruff`, `mypy`, `pytest`, `coverage`) lives in `[tool.*]` sections of `pyproject.toml`.
 - External config files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.mypy.ini`) are **forbidden**.
 - `setup.cfg` is permitted only for non-Python tooling (e.g. uwsgi); never for Python packaging.
-- Library packages use `src/` layout with `[tool.hatch.build.targets.wheel] packages = ["src/<pkg>"]`.
+- Library packages use `src/` layout with `[tool.setuptools.packages.find] where = ["src"]`.
+- Library packages follow the **Public API Contract** (`docs/PUBLIC-API-CONTRACT.md`): sorted `__all__`, relative imports in `__init__`, `__version__` via `importlib.metadata`, uniform `install()` entrypoint, shared types in `chrysa-lib`.
 - Applications without distribution do not need `[build-system]`; only `[tool.*]` sections are required.
 
 ### Distribution
@@ -381,7 +386,7 @@ ignore_missing_imports = true
 Distribution is driven by the project type declared in the **Build backend** table above:
 
 - **Library / package (distributable)** → published to **public PyPI**, triggered by CI on a git tag
-  matching `v*.*.*`. Build with `hatchling`, upload via Trusted Publishing (PyPI OIDC) — **no PyPI API
+  matching `v*.*.*`. Build with `setuptools`, upload via Trusted Publishing (PyPI OIDC) — **no PyPI API
   token in plaintext**. Include `CHANGELOG.md`, `LICENSE`, and `README.md` in the sdist.
 - **Application (no distribution)** → **not** published to PyPI; shipped as a **private GHCR image** (see §6).
 - Publication is carried by the reusable `release.yml` workflow (tag → publish; see `chrysa/github-actions`).
