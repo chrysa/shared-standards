@@ -26,8 +26,8 @@
 | fastapi-pytest | PR-open | #4 | — | ✅ importlib.metadata + relative imports + RUF022 `__all__`; Docker 135 pass cov 97% |
 | django-autoload | PR-open | #17 | — | ✅ hatchling→setuptools backend + importlib.metadata; Docker 19 pass |
 | fastapi-autoload | PR-open | #4 | — | ✅ importlib.metadata; Docker 21 pass cov 96.7% |
-| django-app-forge | todo | — | — | flat→src/, add `__version__` (PR #4 open — coordinate) |
-| fastapi-app-forge | todo | — | — | reference |
+| django-app-forge | PR-open | #29 | — | ✅ src/ migration + importlib.metadata; Docker 32 pass cov 93% |
+| fastapi-app-forge | PR-open | #4 | — | ✅ importlib.metadata; Docker 95 pass cov 96.2% |
 
 ## Phase 2 — Other libs (chrysa-lib first: extract shared enums)
 
