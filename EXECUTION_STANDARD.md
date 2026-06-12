@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.5 — 2026-06-08**
+**Version 1.6 — 2026-06-12**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -113,6 +113,37 @@ help: ## Show available targets
 > Enforcement: `makefile-check` (chrysa/pre-commit-tools) fails CI if the tier's required
 > targets are missing, a forbidden name is used, `help` is non-conforming, or a rule
 > references a directory/service/script that does not exist.
+
+### 1.6 Derivation from `base-makefile`
+
+Every Makefile **must derive from a `Forge-Stack-Workshop/base-makefile` template** —
+never hand-rolled from scratch. The template carries the derivation markers the contract
+expects: `.DEFAULT_GOAL := help`, the `$(MAKEFILE_LIST)`-driven self-documenting `help`
+recipe (§1.5), and `@`-prefixed recipe lines. Pick the template by archetype:
+
+| Repo archetype                         | §1 tier      | base-makefile template       |
+|----------------------------------------|--------------|------------------------------|
+| py / django **library**                | `lib`        | `Makefile.python`            |
+| node **library**                       | `lib`        | `Makefile.basic`             |
+| backend service (compose, no frontend) | `python-app` | `Makefile.python`            |
+| backend + frontend monorepo            | `fullstack`  | `Makefile.with-sub-folder`   |
+| infra / helm / GAS / vscode-ext / config | `infra`    | `Makefile.basic`             |
+
+**Tooling** (in `shared-standards/scripts/`):
+
+- `audit-makefile-conformance.sh` — read-only fleet audit (classifies each repo, runs
+  `makefile-check`, reports hook wiring + CI coverage). Persists a ledger at
+  `compliance/makefile-conformance.json`.
+- `sync-makefile.sh` — scaffolds a per-tier Makefile from base-makefile (repos with none)
+  or, for existing Makefiles, reports missing §1 pieces without overwriting (`--write`
+  drops a `Makefile.base-suggested` for manual merge). Dry-run by default.
+- Enforcement stays `makefile-check` (chrysa/pre-commit-tools) — the tooling above audits
+  and generates; it does not replace the gate.
+
+> **Open prerequisite:** no released/`main` ref of base-makefile yet passes `makefile-check`
+> (the tier marker + `dev`/`test-cov` targets live on the unmerged `feat/docs-drift-targets`
+> branch). Merge it and cut a gate-conformant release, then pin `BASE_MAKEFILE_REF` in
+> `sync-makefile.sh` to that tag.
 
 ---
 
