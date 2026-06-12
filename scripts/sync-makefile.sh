@@ -22,16 +22,12 @@
 # Env: CHRYSA_ROOT (default: parent of shared-standards)
 set -uo pipefail
 
-# PREREQUISITE (blocker for clean scaffolds): no released/main ref of
-# base-makefile currently passes its own §1 gate. The tier marker + lib-tier
-# targets (dev/test-cov/docker-test) live only on the unmerged branch
-# 'feat/docs-drift-targets'; 'main' and tag v0.1.0-25 predate them, so a lib
-# scaffold from them fails makefile-check on missing dev/test-cov.
-# FOLLOW-UP (base-makefile repo): merge that branch to main and cut a
-# gate-conformant release, then pin BASE_MAKEFILE_REF to that tag. Until then
-# 'main' scaffolds are a starting point the repo author completes by hand.
-# (Audit + reconcile modes are unaffected — they don't depend on the ref.)
-BASE_MAKEFILE_REF="${BASE_MAKEFILE_REF:-main}"
+# Pinned to the first gate-conformant base-makefile release (v0.1.0-29,
+# Forge-Stack-Workshop/base-makefile#29): every template carries a
+# '# makefile-tier:' marker + its tier's required targets, so scaffolds pass
+# chrysa/pre-commit-tools makefile-check out of the box. Bump this when a newer
+# conformant release lands.
+BASE_MAKEFILE_REF="${BASE_MAKEFILE_REF:-v0.1.0-29}"
 BASE_MAKEFILE_REMOTE="https://github.com/Forge-Stack-Workshop/base-makefile.git"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -140,10 +140,9 @@ recipe (§1.5), and `@`-prefixed recipe lines. Pick the template by archetype:
 - Enforcement stays `makefile-check` (chrysa/pre-commit-tools) — the tooling above audits
   and generates; it does not replace the gate.
 
-> **Open prerequisite:** no released/`main` ref of base-makefile yet passes `makefile-check`
-> (the tier marker + `dev`/`test-cov` targets live on the unmerged `feat/docs-drift-targets`
-> branch). Merge it and cut a gate-conformant release, then pin `BASE_MAKEFILE_REF` in
-> `sync-makefile.sh` to that tag.
+> **Template baseline:** base-makefile release **`v0.1.0-29`** is the first where every
+> template passes `makefile-check` (marker + tier targets). `sync-makefile.sh` pins
+> `BASE_MAKEFILE_REF` to it; bump when a newer conformant release lands.
 
 ---
 
