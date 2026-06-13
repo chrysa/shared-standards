@@ -27,7 +27,10 @@ is enforced uniformly across mirror families so that
 ## C2 — `__all__` is mandatory and sorted
 
 - Every public `__init__.py` declares `__all__`.
-- `__all__` is **alphabetically sorted** and contains **only** the
+- `__all__` is **sorted per ruff `RUF022`** (isort-style: PascalCase
+  names first A–Z, then dunders like `__version__`, then lowercase
+  callables). Run `ruff check --fix` to canonicalise — do not hand-sort,
+  the tool's order is the standard. `__all__` contains **only** the
   stable public surface (no private helpers, no re-exported stdlib).
 - Anything not in `__all__` is private and may change without a major bump.
 
