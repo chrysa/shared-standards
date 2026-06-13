@@ -58,6 +58,29 @@ fits. The other three genres get type/density/depth tuned to how they're read.
 Persona rules are **RULE** (binding); deviations need a documented reason in
 `<repo>/DECISIONS.md`.
 
+### 1.1 Persona is the surface — the layout serves the project
+
+A persona governs the **surface only**: typography, density, radius, depth, motion,
+and accent. It deliberately makes same-genre apps *feel related*. It does **not**
+prescribe a layout. Eleven apps share the Console persona; that is correct — and it
+is also why surface conformance alone is not done.
+
+> **RULE** Persona ≠ interface. Each app's **information architecture** — its primary
+> view, the object it puts at the center, the primary action, and the right density —
+> is **designed for that app's job**, not inherited. Same-genre apps share the token
+> contract; **they never share the layout.** A log-proxy inspector, a content feed and
+> a tree browser are all Console, and must not be the same screen in three accents.
+
+> **RULE** "Stat-cards on top + one flat table" is **not** a default. Reaching for it
+> without a reason is the smell this rule exists to catch. The right primary view comes
+> from the app's job-to-be-done (`mirrador` → a request inspector; a reader → a reading
+> column; a browser → a tree/detail split).
+
+The IA layer lives in `docs/UX-UI-GUIDELINES.md` (§1 core principles, §3 layout) and
+is captured per repo as a short **IA brief** in `<repo>/DESIGN.md` (§7). Surface
+migration (the persona token sweep) and the IA pass are **two distinct steps**: a repo
+is not done when it merely wears the right tokens.
+
 ---
 
 ## 2. App → persona map
@@ -287,6 +310,8 @@ A frontend conforms when:
 - [ ] One per-app accent from §4, used per persona's accent rule
 - [ ] Primitives per §5; four states still handled (UX-UI-GUIDELINES §5)
 - [ ] WCAG AA verified both themes; accent fill + text/bg ratios stated — §6
+- [ ] **IA brief in `DESIGN.md`** — names the job-to-be-done, the primary view, and the
+      primary action; the layout serves the job, not a generic stat-cards + table shell — §1.1
 - [ ] `DESIGN.md` in the repo names its persona + accent and links this system
 
 ---

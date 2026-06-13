@@ -10,8 +10,10 @@
 >
 > Companion skill module: `.claude/skills/ui-ux/SKILL.md` (auto-invoked when building any UI/UX).
 > Audit of adoption per project: `docs/UX-UI-SKILLS-AUDIT.md`.
-> **Visual layer (the *look*): `docs/DESIGN-SYSTEM.md`** — the "Neon Brutalist" token
-> contract + aesthetic DNA all web frontends adopt. This file owns ergonomics; that one owns visuals.
+> **Visual layer (the *look*): `docs/DESIGN-SYSTEM.md`** — the four-persona token
+> contract (Console / Arcade / Editorial / Signal) + per-app accent all web frontends adopt.
+> That file owns the **surface**; this file owns **ergonomics and information architecture**.
+> Persona ≠ interface: the persona is shared, the layout is designed per app (§3.0, DESIGN-SYSTEM §1.1).
 
 ---
 
@@ -119,6 +121,24 @@ Use shadcn/ui's semantic CSS-variable convention. Components reference roles, ne
 ---
 
 ## 3. Layout & responsive
+
+### 3.0 Information architecture — the layout serves the project
+
+The persona (DESIGN-SYSTEM §1.1) sets the surface; **the layout is designed for what the
+app does.** Same-genre apps (e.g. the eleven Console apps) share tokens, never the screen.
+
+- **RULE** Before building, write a one-paragraph **IA brief** in `<repo>/DESIGN.md`:
+  - **Job-to-be-done** — what the user came to do (one sentence).
+  - **Primary object** — the thing the screen is *about* (a request, an article, a file tree…).
+  - **Primary view** — the layout that puts that object at the center (inspector, reading
+    column, tree+detail, board…), derived from the job — not a default.
+  - **Primary action** — the one action the view optimizes for (§1.2: one primary action per view).
+  - **Density** — chosen for the data (scannable log vs. comfortable reading), within the persona.
+- **RULE** "Stat-cards row + one flat table" is **not** a default layout. Use it only when the
+  job genuinely is a metrics overview; otherwise it is the smell this rule catches.
+- **PREFER** a layout metaphor the domain already owns (a proxy → a network/request inspector;
+  a content aggregator → a feed/reader; a CDN browser → a file tree). Distinctiveness should
+  come from *serving the job*, not from decoration.
 
 - **RULE** Mobile-first. Design the 360px viewport first, enhance upward with `sm md lg xl 2xl`.
 - **RULE** No horizontal scroll at any breakpoint ≥ 320px.
