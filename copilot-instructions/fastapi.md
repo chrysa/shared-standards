@@ -4,6 +4,13 @@
 
 Extends [base.md](base.md). Read base rules first; rules here take precedence where they conflict.
 
+## Scaffolding
+
+New FastAPI modules (router / schemas / models / service / dependencies + Alembic stub)
+**must** be generated from a YAML spec with `Forge-Stack-Workshop/fastapi-app-generator`
+(`fastapi-app-generator` CLI). Never hand-copy a module from a sibling service or
+hand-roll the boilerplate. Keep generated modules consistent with the layout below.
+
 ## Project layout
 
 ```

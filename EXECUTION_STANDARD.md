@@ -17,6 +17,7 @@ sources — they never fork them or hand-roll an equivalent.
 |---|---|---|---|
 | Makefile contract | [`Forge-Stack-Workshop/base-makefile`](https://github.com/Forge-Stack-Workshop/base-makefile) | every repo (all tiers) | §1.6 |
 | React / Vite frontend | [`Forge-Stack-Workshop/react-app-generator`](https://github.com/Forge-Stack-Workshop/react-app-generator) | `fullstack` repos + standalone web apps | `copilot-instructions/react19.md` |
+| FastAPI backend modules | [`Forge-Stack-Workshop/fastapi-app-generator`](https://github.com/Forge-Stack-Workshop/fastapi-app-generator) | FastAPI services | `copilot-instructions/fastapi.md` |
 
 - **base-makefile** owns the §1 Makefile contract; every repo's `Makefile` is generated
   from the matching tiered template — see §1.6 for template selection, tooling, and the
@@ -25,6 +26,10 @@ sources — they never fork them or hand-roll an equivalent.
   non-negotiable baseline already wired (i18n FR+EN, dark mode, WCAG 2.1 AA). New
   frontends are produced by the generator, never copied from a sibling repo or
   bootstrapped with `create-react-app` / bare `vite`.
+- **fastapi-app-generator** scaffolds FastAPI modules (router / schemas / models /
+  service / dependencies + Alembic stub) from a YAML spec via its `fastapi-app-generator`
+  CLI. New backend modules are generated from a spec, not hand-copied from a sibling
+  service. (Sibling of the Django-side `chrysa/django-app-forge`.)
 
 Conformance is checked by `makefile-check` (chrysa/pre-commit-tools) for the Makefile
 contract; frontend origin is asserted at scaffold time by `project-init`. Deviations from
