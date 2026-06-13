@@ -1,0 +1,554 @@
+{
+  "rows": [
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "agent-config",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": false,
+      "repo": "ai-aggregator",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": false
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": false,
+      "repo": "audit-platform",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": false
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "automations",
+      "template": "Makefile.basic",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "catalog",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "cdn-explorer",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "chrysa-lib",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": false
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "chrysa-portfolio-viz",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "chrysa-skills",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "claude-config",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "coach",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "container-webview",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "D-D",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": false,
+      "repo": "dev-nexus",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "devtool",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "discord-bot-back",
+      "template": "Makefile.python",
+      "tier": "python-app",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "discordium",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "diy-stream-deck",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "django-app-forge",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "-",
+      "has_makefile": false,
+      "hook_wired": false,
+      "repo": "django-autoload",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": false
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": false,
+      "repo": "django-pytest",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "django-query-optimizer",
+      "template": "Makefile.python",
+      "tier": "python-app",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "django-query-optimizer-vscode",
+      "template": "Makefile.basic",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "django-traceid",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "doc-gen",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": false,
+      "repo": "feedback-gateway",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "floating-agent",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "game-solver-platform",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "gaming-os",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "genealogy-validator",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "gestureOS",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "github-actions",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "guideline-checker",
+      "template": "Makefile.python",
+      "tier": "python-app",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "lifeos",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "linkendin-resume",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "link-reader-bot",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "mediavault",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "mirrador",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "my-resume",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "orchestrator",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "paperclip",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "PO-GO-DEX",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "pre-commit-hooks-changelog",
+      "template": "Makefile.python",
+      "tier": "python-app",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "pre-commit-tools",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "project-init",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "quality-gatekeeper",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "satisfactory-automated_calculator",
+      "template": "Makefile.basic",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "satisfactory-factory-manager",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "FAIL",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "server",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "shared-standards",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "sport-intelligence-hub",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "studioverse",
+      "template": "Makefile.with-sub-folder",
+      "tier": "fullstack",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "usefull-containers",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "windows-autonome",
+      "template": "Makefile.basic",
+      "tier": "infra",
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "ok",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "windows-docker-state-notification",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
+    }
+  ]
+}
