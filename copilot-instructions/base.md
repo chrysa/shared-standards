@@ -51,6 +51,11 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - Pin image versions explicitly (e.g. `python:3.14-slim`, not `python:latest`).
 - Non-root user in the final stage (`USER nonroot` or equivalent).
 
+### Build / Makefile
+- **Canonical source: `Forge-Stack-Workshop/base-makefile`** — every repo's `Makefile` is generated from its tiered templates (`Makefile.basic` / `Makefile.python` / `Makefile.with-sub-folder`). Extend with project-specific targets; never fork the contract or hand-roll equivalents.
+- Target names are invariant (`install`, `lint`, `format`, `test`, `build`, `clean`, `pre-commit`, …). No `fmt`/`tests`/`type-check` variants.
+- Declare the tier on line 1: `# makefile-tier: lib | python-app | fullstack | infra`.
+
 ## Architecture
 
 ### Backoffice
