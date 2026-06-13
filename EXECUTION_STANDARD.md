@@ -1,6 +1,6 @@
 # Chrysa — Execution Standard
 
-**Version 1.6 — 2026-06-13**
+**Version 1.7 — 2026-06-14**
 
 This document defines the **mandatory execution conventions** for every chrysa project.
 All repos scaffolded with `project-init` must comply. Deviations require a documented ADR.
@@ -249,21 +249,15 @@ description: imperative, lowercase, no period
 ```
 push (any branch)
   ↓
-secret-scan.yml: gitleaks — blocks on detected secrets (ALL repos, ALL branches)
-  ↓
-enforce-feature-branch.yml: validate branch naming (PRs only)
-  ↓
-ci-*.yml: lint + typecheck + test-cov
-  ↓
-sonar.yml: SonarCloud quality gate (Python + JS/TS projects)
-  ↓
-PR created: labeler assigns size + content labels
+ci.yml (thin caller → chrysa/github-actions ci-python.yml@main):
+  lint (pre-commit GATE: ruff + format + mypy + gitleaks + actionlint + pre-commit-tools)
+    ↓ reports (ruff.json + mypy.txt for Sonar) ↓ test-cov (matrix) ↓ sonar
   ↓
 PR review: 1 approval required
   ↓
 Merge to main
   ↓
-release.yml (tag push): cliff CHANGELOG + GitHub Release
+release.yml (main push): GitVersion auto-version + cliff CHANGELOG + GitHub Release
   ↓
 pages.yml (main push): MkDocs deploy to GitHub Pages
 ```
@@ -273,25 +267,54 @@ pages.yml (main push): MkDocs deploy to GitHub Pages
 mutation-testing.yml: mutmut mutation score — minimum 70% threshold
 ```
 
+### Canonical CI (mandatory, Python repos)
+
+Every Python repo's `.github/workflows/ci.yml` is a **thin caller** of the reusable
+lean pipeline — it does **not** inline jobs:
+
+```yaml
+jobs:
+  ci:
+    uses: chrysa/github-actions/.github/workflows/ci-python.yml@main
+    with:
+      package: my_pkg                 # import / coverage module
+      sources: "src/my_pkg tests"     # ruff sources
+      project-key: chrysa_my-repo
+      project-name: my-repo
+      # src layout : sonar-sources: src · typecheck-paths: src/my_pkg
+      # flat layout: sonar-sources: "." · typecheck-paths: my_pkg
+    secrets: inherit
+```
+
+The reusable workflow runs four jobs: **lint** (pre-commit replay — the single quality
+GATE: ruff, format, mypy, gitleaks, actionlint, `chrysa/pre-commit-tools`), **reports**
+(ruff.json + mypy.txt artifacts for Sonar), **test** (coverage matrix), **sonar**.
+Everything that can be a pre-commit hook *is* one — there is **no** standalone
+`secret-scan.yml` / `lint` / `action-check` workflow (gitleaks + actionlint run in
+pre-commit). Node repos use `ci-node`; infra/GAS use domain-appropriate checks.
+
 ### Required workflows (every repo)
 
-| Workflow | File | Trigger |
-|---|---|---|
-| Secret scan | `secret-scan.yml` | push + PR (all branches) |
-| Branch policy | `enforce-feature-branch.yml` | PR opened/updated |
-| CI | `ci-*.yml` | push + PR to main/develop |
-| Mutation testing | `mutation-testing.yml` | weekly cron (Sunday 02:00) |
+| Workflow | File | Source | Trigger |
+|---|---|---|---|
+| CI | `ci.yml` (thin caller) | `chrysa/github-actions/.github/workflows/ci-python.yml@main` | push + PR |
+| Release (auto-version) | `release.yml` | GitVersion + git-cliff | push to main |
+
+`dependabot.yml` + `auto-update-pre-commit.yml` keep deps and hooks current. The
+**auto-version calculation (GitVersion) is preserved in every repo's `release.yml`** and
+is never folded into CI. PR-cosmetic automations (labeler, size, auto-assign…) are
+optional, not required.
 
 ### Conditional workflows
 
 | Workflow | Condition |
 |---|---|
-| `sonar.yml` | Python or JS/TS projects |
-| `release.yml` | All versioned projects |
 | `pages.yml` | Projects with MkDocs docs |
-| `regression-gate.yml` | All projects with `make test` (recommended) |
+| `mutation-testing.yml` | Opt-in (weekly cron) |
+| `regression-gate` (pre-commit, pre-push stage) | Projects with `make test` |
 
-All reusable workflows are sourced from `chrysa/shared-standards`.
+Reusable `workflow_call` workflows live in **`chrysa/github-actions/.github/workflows/`**
+(callable via `uses:`). Copy-to-use templates live in `chrysa/shared-standards/workflows/`.
 
 ---
 
