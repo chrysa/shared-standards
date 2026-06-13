@@ -22,12 +22,12 @@
 | fastapi-traceid | PR-open | #4 | — | ✅ importlib.metadata; Docker 27 pass cov 97.9% |
 | django-query-optimizer | PR-open | #57 | — | ✅ metadata, relative imports, export `Severity`, sorted `__all__`; Docker 288 pass cov 95% |
 | fastapi-query-optimizer | PR-open | #4 | — | ✅ metadata, relative imports; `__getattr__` kept (justified); Docker 179 pass |
-| django-pytest | todo | — | — | flat→src/, add `__version__` |
-| fastapi-pytest | todo | — | — | verify `__all__` sorted |
-| django-autoload | todo | — | — | add `__version__` |
-| fastapi-autoload | todo | — | — | reference |
-| django-app-forge | todo | — | — | flat→src/, add `__version__` (PR #4 open — coordinate) |
-| fastapi-app-forge | todo | — | — | reference |
+| django-pytest | PR-open | #28 | — | ✅ src/ migration + importlib.metadata + `__all__`; Docker 45 pass cov 85% |
+| fastapi-pytest | PR-open | #4 | — | ✅ importlib.metadata + relative imports + RUF022 `__all__`; Docker 135 pass cov 97% |
+| django-autoload | PR-open | #17 | — | ✅ hatchling→setuptools backend + importlib.metadata; Docker 19 pass |
+| fastapi-autoload | PR-open | #4 | — | ✅ importlib.metadata; Docker 21 pass cov 96.7% |
+| django-app-forge | PR-open | #29 | — | ✅ src/ migration + importlib.metadata; Docker 32 pass cov 93% |
+| fastapi-app-forge | PR-open | #4 | — | ✅ importlib.metadata; Docker 95 pass cov 96.2% |
 
 ## Phase 2 — Other libs (chrysa-lib first: extract shared enums)
 
