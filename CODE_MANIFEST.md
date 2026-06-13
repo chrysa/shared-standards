@@ -90,9 +90,10 @@ claude-config/
 ### 2.4 Compose patterns
 
 ```yaml
-# docker-compose.yml — pattern minimal app+db
+# docker-compose.yml — minimal api+db pattern
+name: <repo>            # project name → Compose derives container names as <repo>-<service>-N
 services:
-  app:
+  api:
     build: .
     env_file: .env
     depends_on:
@@ -102,7 +103,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -112,6 +113,17 @@ services:
 volumes:
   db_data:
 ```
+
+**Service & container naming (ecosystem standard):**
+
+- **Canonical service names**: `api` (backend), `frontend` (web UI), `db` (PostgreSQL),
+  `redis` (cache). Variants suffix the role: `-test`, `-dev`, `-e2e`, `-ci`
+  (e.g. `api-test`, `frontend-e2e`). Other roles keep a semantic name
+  (`migrate`, `qdrant`, `lint`, …).
+- **No explicit `container_name`.** Declare a top-level `name: <repo>` and let Compose
+  derive `<repo>-<service>-N`. Hand-pinned container names drift and collide.
+- Reference a service by its **service name** as the network hostname
+  (`postgresql://…@db:5432`, `http://api:8000`) — never by a container name.
 
 > **Reverse proxy** (Nginx, Traefik, Caddy) est exclusivement géré par le repo `infra-server`.
 > Les apps exposent un port HTTP interne et déclarent leur nom de service Docker — le proxy fait le routing.
