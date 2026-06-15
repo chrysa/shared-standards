@@ -34,6 +34,7 @@
 #   check-skills-agents.sh --skills-dir DIR        # canonical shared skills dir (else auto-detect)
 #   check-skills-agents.sh --agents-dir DIR        # an agent registry dir (repeatable; else auto)
 #   check-skills-agents.sh --agent-source DIR      # source-of-truth registry (else auto agent-config)
+#   check-skills-agents.sh --full-mirror DIR        # treat DIR as FULL mirror (warn missing agents; default: subset summary)
 #
 # Env: SKILL_GLOB (default '*/.claude/skills'), known-token allowlist via AGENT_REF_ALLOW (space-sep).
 # Exit: 0 ok, 1 error (broken ref, or any warn under --strict), 2 usage.
@@ -46,6 +47,8 @@ EXCLUDES=()
 SKILLS_DIR=""
 AGENT_DIRS=()
 AGENT_SOURCE=""
+FULL_MIRRORS=()
+read -r -a FULL_MIRRORS <<< "${AGENT_FULL_MIRRORS:-}"  # space-sep paths: registries to drift-check for MISSING agents
 DO_SKILLS=1; DO_AGENTS=1; DO_AGENT_REFS=0; DO_PAIRING=0; DO_SYNC=0; STRICT=0
 ERR=0; WARN=0
 PRUNE=(node_modules .venv venv dist build out vendor target .next .cache worktrees)
@@ -58,6 +61,10 @@ warn() { printf '⚠️  %s\n' "$*"; WARN=$((WARN+1)); }
 ok()   { printf '✅ %s\n' "$*"; }
 
 is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do [ -n "$pat" ] || continue; case "$p" in $pat) return 0;; esac; done; return 1; }
+# A registry is a FULL mirror (drift-checked for missing agents) only if opted-in via a
+# .full-mirror sentinel file or --full-mirror/AGENT_FULL_MIRRORS. Others are subsets (10-agent
+# templates) and their "not deployed" gaps are summarized, not warned per-agent.
+is_full_mirror() { local d="$1" m; [ -e "$d/.full-mirror" ] && return 0; for m in "${FULL_MIRRORS[@]:-}"; do [ -n "$m" ] || continue; case "$d" in *"$m"*) return 0;; esac; done; return 1; }
 
 prune_find() { # $1=root, rest=find predicates after the prune block
   local root="$1"; shift
@@ -173,22 +180,28 @@ check_agents() {
   # drift: compare every other (mirror) registry against the source, both directions.
   # With --sync, "not deployed" agents are COPIED from source into the mirror (additive only,
   # never deletes "extra"). Mirror repos become dirty — commit them via your normal PR flow.
-  local dl sl only
+  local dl sl missing extra mc ec tot
   sl="$(reg_label "$SOURCE")"
+  tot="$(reg_names "$SOURCE" | grep -c .)"
   for dir in "${AGENT_DIRS[@]}"; do
     [ "$dir" = "$SOURCE" ] && continue
     dl="$(reg_label "$dir")"
-    only="$(comm -23 <(reg_names "$SOURCE") <(reg_names "$dir"))"
-    if [ -n "$only" ]; then while IFS= read -r n; do
-      [ -z "$n" ] && continue
-      if [ $DO_SYNC -eq 1 ]; then
-        if cp "$SOURCE/$n".* "$dir/" 2>/dev/null; then log "↪ synced '$n' → $dl"; else warn "failed to sync '$n' → $dl"; fi
-      else
-        warn "drift: '$n' in source $sl but NOT deployed to $dl  (run --sync to deploy)"
-      fi
-    done <<< "$only"; fi
-    only="$(comm -13 <(reg_names "$SOURCE") <(reg_names "$dir"))"
-    [ -n "$only" ] && while IFS= read -r n; do warn "drift: '$n' in $dl but NOT in source $sl (untracked / extra — left untouched)"; done <<< "$only"
+    missing="$(comm -23 <(reg_names "$SOURCE") <(reg_names "$dir"))"
+    extra="$(comm -13 <(reg_names "$SOURCE") <(reg_names "$dir"))"
+    if is_full_mirror "$dir" || [ $DO_SYNC -eq 1 ]; then
+      if [ -n "$missing" ]; then while IFS= read -r n; do
+        [ -z "$n" ] && continue
+        if [ $DO_SYNC -eq 1 ]; then
+          if cp "$SOURCE/$n".* "$dir/" 2>/dev/null; then log "↪ synced '$n' → $dl"; else warn "failed to sync '$n' → $dl"; fi
+        else
+          warn "drift: '$n' in source $sl but NOT deployed to full-mirror $dl  (run --sync to deploy)"
+        fi
+      done <<< "$missing"; fi
+      [ -n "$extra" ] && while IFS= read -r n; do [ -z "$n" ] && continue; warn "drift: '$n' in $dl but NOT in source $sl (untracked / extra — left untouched)"; done <<< "$extra"
+    else
+      mc="$(printf '%s' "$missing" | grep -c .)"; ec="$(printf '%s' "$extra" | grep -c .)"
+      [ $((mc+ec)) -gt 0 ] && log "ℹ️  subset registry $dl: $ec extra (not in source), $mc/$tot source agents absent — subset by design; add .full-mirror or pass --full-mirror to drift-check"
+    fi
   done
 
   # optional: unknown @agent references
@@ -224,6 +237,7 @@ while [ $# -gt 0 ]; do
     --skills-dir)  shift; SKILLS_DIR="${1:?}"; shift ;;
     --agents-dir)  shift; AGENT_DIRS+=("${1:?}"); shift ;;
     --agent-source) shift; AGENT_SOURCE="${1:?}"; shift ;;
+    --full-mirror) shift; FULL_MIRRORS+=("${1:?--full-mirror needs path}"); shift ;;
     -h|--help)     sed -n '2,40p' "$0"; exit 0 ;;
     --*)           echo "unknown flag: $1" >&2; exit 2 ;;
     *)             ROOT="$1"; shift ;;
