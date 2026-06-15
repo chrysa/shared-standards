@@ -1,0 +1,49 @@
+---
+# Enforce issue link on PRs (chrysa ecosystem)
+#
+# Copy to .github/workflows/enforce-issue-link.yml. Distributed by distribute-standards.
+# Blocking status check: every PR must reference an issue in its body via
+#   Closes #N · Fixes #N · Resolves #N · Refs #N   (also org/repo#N and full URLs)
+#
+# Exemptions (skip the check):
+#   - Dependabot PRs
+#   - PRs labeled: hotfix, standards-sync, automated
+#
+# Make it required: Settings → Branches → branch protection → require "Issue link".
+
+name: Enforce Issue Link
+
+on:
+    pull_request:
+        types: [opened, edited, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+permissions:
+    contents: read
+    pull-requests: read
+
+jobs:
+    issue-link:
+        name: Issue link
+        runs-on: ubuntu-latest
+        if: >-
+            github.actor != 'dependabot[bot]'
+            && !contains(github.event.pull_request.labels.*.name, 'hotfix')
+            && !contains(github.event.pull_request.labels.*.name, 'standards-sync')
+            && !contains(github.event.pull_request.labels.*.name, 'automated')
+        steps:
+            - name: Require an issue reference in the PR body
+              shell: bash
+              env:
+                  PR_BODY: ${{ github.event.pull_request.body }}
+              run: |
+                  body="${PR_BODY:-}"
+                  # Closing/refs keyword + #N, org/repo#N, or a github issues URL.
+                  pattern='((close[sd]?|fix(e[sd])?|resolve[sd]?|ref[s]?)[[:space:]]*:?[[:space:]]*(([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+))|(https?://github\.com/[^[:space:]]+/issues/[0-9]+)'
+                  if echo "$body" | grep -iqE "$pattern"; then
+                    echo "✅ PR references an issue."
+                    exit 0
+                  fi
+                  echo "❌ No issue link found in the PR description."
+                  echo "Add one of: 'Closes #123', 'Fixes org/repo#123', or a full issue URL."
+                  echo "Exempt paths: label the PR 'hotfix' (or 'standards-sync' / 'automated' for bots)."
+                  exit 1

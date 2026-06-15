@@ -104,6 +104,29 @@ deploy_hygiene() {
     fi
 }
 
+# Release tooling + repo meta. Create-if-absent only — never clobber an existing
+# CHANGELOG (real history), opencode.json, AGENTS.md, etc.
+deploy_release_tooling() {
+    local repo="$1" name; name="$(basename "$repo")"
+    local pairs=(
+        "CHANGELOG.md:CHANGELOG.md"
+        "cliff.toml:cliff.toml"
+        "GitVersion.yml:GitVersion.yml"
+        "opencode.json:opencode.json"
+        "AGENTS.md:AGENTS.md"
+    )
+    local p src dest
+    for p in "${pairs[@]}"; do
+        src="$TPL/${p%%:*}"; dest="$repo/${p##*:}"
+        [[ -f "$src" ]] || { warn "template missing: $(basename "$src")"; continue; }
+        [[ -e "$dest" ]] && continue                       # no clobber
+        if $DRY_RUN; then info "[dry-run] would create $dest"; continue; fi
+        mkdir -p "$(dirname "$dest")"
+        sed "s/\${REPO_NAME}/$name/g" "$src" > "$dest"
+        ok "$(basename "$dest") (created)"
+    done
+}
+
 ci_is_canonical() {
     local f="$1"
     [[ -f "$f" ]] || return 1
@@ -193,6 +216,7 @@ apply_one() {
     log "═══ $name ═══"
     if $CHECK; then merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"
+    deploy_release_tooling "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"

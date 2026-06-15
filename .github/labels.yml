@@ -61,6 +61,19 @@
   color: "fbca04"
   description: "Work in progress"
 
+# --- Automation labels ---
+- name: "sentry"
+  color: "362d59"
+  description: "Auto-created from a Sentry issue"
+
+- name: "standards-sync"
+  color: "5319e7"
+  description: "Automated chrysa shared-standards distribution"
+
+- name: "automated"
+  color: "ededed"
+  description: "Opened by an automation, not a human"
+
 # --- Priority labels ---
 - name: "priority: high"
   color: "b60205"
