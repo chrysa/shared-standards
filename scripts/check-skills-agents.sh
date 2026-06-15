@@ -64,7 +64,7 @@ is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do [ -n "$pat" 
 # A registry is a FULL mirror (drift-checked for missing agents) only if opted-in via a
 # .full-mirror sentinel file or --full-mirror/AGENT_FULL_MIRRORS. Others are subsets (10-agent
 # templates) and their "not deployed" gaps are summarized, not warned per-agent.
-is_full_mirror() { local d="$1" m; [ -e "$d/.full-mirror" ] && return 0; for m in "${FULL_MIRRORS[@]:-}"; do [ -n "$m" ] || continue; case "$d" in *"$m"*) return 0;; esac; done; return 1; }
+is_full_mirror() { local d="$1" m; [ -e "$d/.full-mirror" ] && return 0; for m in "${FULL_MIRRORS[@]:-}"; do [ -n "$m" ] || continue; case "$d" in "$m"|*/"$m"|"$m"/*|*/"$m"/*) return 0;; esac; done; return 1; }
 
 prune_find() { # $1=root, rest=find predicates after the prune block
   local root="$1"; shift

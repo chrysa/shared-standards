@@ -52,3 +52,27 @@ Portfolio-wide standard formalizing how build artifacts are distributed:
 Codified in `EXECUTION_STANDARD.md` §6 (Registry) and §11 (Distribution), and reflected in
 `CODE_MANIFEST.md` §8.1 (`build-image.yml`, `release.yml`). Workflow implementation lives in
 `chrysa/github-actions`. Execution Standard bumped to v1.5.
+
+
+---
+
+## D-0004 — Skills/agents audit: subset vs full-mirror registries
+
+**Date**: 2026-06-15
+**Status**: accepted
+
+`scripts/check-skills-agents.sh` distinguishes two registry kinds when reporting agent drift
+against the `agent-config` source of truth:
+
+1. **Full mirrors** — registries expected to hold the complete agent set. Opted-in via a
+   `.full-mirror` sentinel file, `--full-mirror DIR`, or `AGENT_FULL_MIRRORS`. These get
+   per-agent `missing` warnings (and `--sync` deployment) plus per-agent `extra` warnings.
+2. **Subsets** (default) — e.g. each repo's `.claude/agents` 10-agent generic template.
+   Their `missing` and `extra` agents collapse to a single `ℹ️` info line per registry.
+
+**Accepted tradeoff**: a rogue/extra agent in a *subset* registry is surfaced as a count in
+the info line, not a per-agent `⚠️` warning. This is deliberate — without it, the generic
+10-agent template (× ~50 repos) produced ~4500 false drift warnings that buried real signal
+(fleet audit dropped 9019 → 7 warnings). Reviewers needing per-agent detail on a specific
+registry run it with `--full-mirror`. Broken skill refs and source↔full-mirror drift remain
+hard `❌`/`⚠️`. Shipped in shared-standards PR #110.
