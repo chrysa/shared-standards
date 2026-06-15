@@ -1,0 +1,107 @@
+---
+name: Distribute standards
+
+# Fan-out the chrysa shared standards to every status:dev repo and open a PR per repo.
+# Source of truth = this repo. Triggered on release, or manually.
+#
+# Requires secret RELEASE_TOKEN: a PAT (or GitHub App token) with `repo` + `workflow`
+# scope across the chrysa org, so it can push branches and open PRs on the target repos.
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            only:
+                description: 'Comma-separated subset of repos (blank = all status:dev)'
+                required: false
+                default: ''
+            dry_run:
+                description: 'Preview only, do not open PRs'
+                type: boolean
+                required: false
+                default: false
+
+permissions:
+    contents: read
+
+concurrency:
+    group: distribute-standards
+    cancel-in-progress: false
+
+jobs:
+    discover:
+        runs-on: ubuntu-latest
+        name: Resolve target repos
+        outputs:
+            matrix: ${{ steps.list.outputs.matrix }}
+            count: ${{ steps.list.outputs.count }}
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Build repo matrix from repos.yml
+              id: list
+              run: |
+                  chmod +x scripts/list-dev-repos.sh
+                  repos="$(scripts/list-dev-repos.sh --json --only '${{ github.event.inputs.only }}')"
+                  count="$(echo "$repos" | tr ',' '\n' | grep -c '"' || true)"
+                  echo "matrix={\"repo\":$repos}" >> "$GITHUB_OUTPUT"
+                  echo "count=$count" >> "$GITHUB_OUTPUT"
+                  echo "Targeting $count repo(s): $repos"
+
+    distribute:
+        needs: discover
+        if: ${{ needs.discover.outputs.count != '0' }}
+        runs-on: ubuntu-latest
+        name: ${{ matrix.repo }}
+        strategy:
+            fail-fast: false
+            max-parallel: 4
+            matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+        steps:
+            - name: Checkout shared-standards (source)
+              uses: actions/checkout@v6
+              with:
+                  path: shared-standards
+
+            - name: Checkout ${{ matrix.repo }} (target)
+              uses: actions/checkout@v6
+              with:
+                  repository: chrysa/${{ matrix.repo }}
+                  path: target
+                  token: ${{ secrets.RELEASE_TOKEN }}
+                  fetch-depth: 0
+
+            - name: Apply standards
+              run: |
+                  chmod +x shared-standards/scripts/*.sh
+                  flags=""
+                  if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then flags="--dry-run"; fi
+                  bash shared-standards/scripts/distribute-standards.sh $flags "$GITHUB_WORKSPACE/target"
+
+            - name: Open sync PR
+              if: ${{ github.event.inputs.dry_run != 'true' }}
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  path: target
+                  token: ${{ secrets.RELEASE_TOKEN }}
+                  branch: chore/sync-shared-standards
+                  base: develop
+                  commit-message: 'chore: sync chrysa shared standards'
+                  title: 'chore: sync chrysa shared standards'
+                  labels: |
+                      standards-sync
+                      automated
+                  delete-branch: true
+                  body: |
+                      Automated distribution of chrysa shared standards.
+
+                      **Source:** `chrysa/shared-standards@${{ github.sha }}`
+                      Managed files (transverse `CLAUDE.md` import, `.chrysa/STANDARDS.md`,
+                      shared skills/agents/commands, CI workflows, lint/quality, pre-commit)
+                      were refreshed by `scripts/distribute-standards.sh`.
+
+                      Review the diff: repo-specific content is preserved; only managed,
+                      delimited blocks and shared files are updated.
+
+                      Refs: chrysa/shared-standards
