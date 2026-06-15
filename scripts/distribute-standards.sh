@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+# distribute-standards.sh · Push the chrysa shared standards into ONE target repo.
+# Source: chrysa/shared-standards/scripts/distribute-standards.sh
+#
+# This is the single entry point used by the distribute-standards GitHub Action
+# (one matrix job per repo) and runnable locally against any repo checkout.
+#
+# Composes, idempotently:
+#   1. Transverse standards   standards/STANDARDS.chrysa.md -> <repo>/.chrysa/STANDARDS.md
+#   2. CLAUDE.md import        inject a managed `@.chrysa/STANDARDS.md` block (create file if absent)
+#   3. Shared skills           .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
+#   4. Shared agents+commands  templates/claude/{agents,commands}/* -> <repo>/.claude/
+#   5. Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
+#
+# Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md is preserved;
+# only the delimited import block is touched.
+#
+# Usage:
+#   distribute-standards.sh <repo_path>              # apply
+#   distribute-standards.sh --dry-run <repo_path>    # preview, no writes
+#   distribute-standards.sh --check <repo_path>      # report drift, exit 1 if any
+#   distribute-standards.sh --no-apply <repo_path>   # skip apply-repo-standard.sh delegation
+#
+# Exit: 0 ok (or no drift) · 1 drift found (--check) / error · 2 repo absent
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+STANDARDS_SRC="$STD_ROOT/standards/STANDARDS.chrysa.md"
+SKILLS_SRC="$STD_ROOT/.claude/skills"
+AGENTS_SRC="$STD_ROOT/templates/claude/agents"
+COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
+CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
+
+IMPORT_LINE='@.chrysa/STANDARDS.md'
+MARK_START='<!-- chrysa:standards-import:start -->'
+MARK_END='<!-- chrysa:standards-import:end -->'
+
+DRY_RUN=false
+CHECK=false
+NO_APPLY=false
+TARGET_REPO=""
+
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run)  DRY_RUN=true ;;
+        --check)    CHECK=true ;;
+        --no-apply) NO_APPLY=true ;;
+        -h|--help)  sed -n '2,30p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        *)          [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
+    esac
+done
+
+log()  { echo "[$(date +%H:%M:%S)] $*"; }
+ok()   { echo -e "  \033[32m✓\033[0m $*"; }
+warn() { echo -e "  \033[33m⚠\033[0m $*"; }
+err()  { echo -e "  \033[31m✗\033[0m $*" >&2; }
+info() { echo -e "  \033[34m→\033[0m $*"; }
+
+DRIFT=0
+mark_drift() { DRIFT=1; }
+
+# Copy src -> dest if content differs. Honors --dry-run / --check.
+deploy_file() {
+    local src="$1" dest="$2"
+    [[ -f "$src" ]] || { warn "source missing: $src · skip"; return 0; }
+    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+        return 0
+    fi
+    if $CHECK;   then warn "drift: $dest"; mark_drift; return 0; fi
+    if $DRY_RUN; then info "[dry-run] would write $dest"; mark_drift; return 0; fi
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest" && ok "wrote $dest"
+}
+
+# Mirror every file under a source dir into a dest dir (managed copies).
+deploy_dir() {
+    local src="$1" dest="$2"
+    [[ -d "$src" ]] || { warn "source dir missing: $src · skip"; return 0; }
+    local f rel
+    while IFS= read -r -d '' f; do
+        rel="${f#"$src"/}"
+        deploy_file "$f" "$dest/$rel"
+    done < <(find "$src" -type f -print0)
+}
+
+# Ensure the managed import block exists in <repo>/CLAUDE.md, idempotently.
+inject_import() {
+    local repo="$1"
+    local claude="$repo/CLAUDE.md"
+    local block="$MARK_START
+$IMPORT_LINE
+$MARK_END"
+
+    # Create CLAUDE.md from template (or a minimal stub) if absent.
+    if [[ ! -f "$claude" ]]; then
+        if $CHECK;   then warn "drift: $claude absent (would be created)"; mark_drift; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would create $claude with import block"; mark_drift; return 0; fi
+        if [[ -f "$CLAUDE_TPL" ]]; then
+            cp "$CLAUDE_TPL" "$claude"
+        else
+            printf '# CLAUDE.md — %s\n' "$(basename "$repo")" > "$claude"
+        fi
+        printf '\n%s\n' "$block" >> "$claude"
+        ok "created $claude with import block"
+        return 0
+    fi
+
+    # Already present and correct?
+    if grep -qF "$MARK_START" "$claude"; then
+        if awk -v s="$MARK_START" -v e="$MARK_END" -v l="$IMPORT_LINE" '
+            $0==s {inb=1; next} $0==e {inb=0; next}
+            inb && $0==l {found=1}
+            END {exit found?0:1}' "$claude"; then
+            return 0
+        fi
+        if $CHECK;   then warn "drift: $claude import block stale"; mark_drift; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would refresh import block in $claude"; mark_drift; return 0; fi
+        # Replace existing block in place.
+        local tmp; tmp="$(mktemp)"
+        awk -v s="$MARK_START" -v e="$MARK_END" -v repl="$block" '
+            $0==s {print repl; skip=1; next}
+            $0==e {skip=0; next}
+            !skip {print}' "$claude" > "$tmp"
+        mv "$tmp" "$claude"
+        ok "refreshed import block in $claude"
+        return 0
+    fi
+
+    # Block missing entirely — append it.
+    if $CHECK;   then warn "drift: $claude missing import block"; mark_drift; return 0; fi
+    if $DRY_RUN; then info "[dry-run] would append import block to $claude"; mark_drift; return 0; fi
+    printf '\n%s\n' "$block" >> "$claude"
+    ok "appended import block to $claude"
+}
+
+main() {
+    local repo="$TARGET_REPO"
+    [[ -n "$repo" ]]   || { err "Usage: $0 [--dry-run|--check|--no-apply] <repo_path>"; exit 1; }
+    repo="$(cd "$repo" 2>/dev/null && pwd)" || { err "$TARGET_REPO absent"; exit 2; }
+    [[ -d "$repo/.git" ]] || warn "$(basename "$repo"): not a git repo (continuing)"
+
+    log "═══ distribute-standards · $(basename "$repo") ═══"
+
+    # 1. Transverse standards file.
+    deploy_file "$STANDARDS_SRC" "$repo/.chrysa/STANDARDS.md"
+
+    # 2. CLAUDE.md import block.
+    inject_import "$repo"
+
+    # 3. Shared skills (managed copies).
+    deploy_dir "$SKILLS_SRC" "$repo/.claude/skills"
+
+    # 4. Shared agents + commands (managed copies).
+    deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
+    deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
+
+    # 5. Workflows + lint/quality + pre-commit — reuse the existing apply layer.
+    if $NO_APPLY; then
+        info "apply-repo-standard.sh · skipped (--no-apply)"
+    else
+        local apply="$SCRIPT_DIR/apply-repo-standard.sh" flags=""
+        $DRY_RUN && flags="--dry-run"
+        $CHECK   && flags="--check"
+        if [[ -f "$apply" ]]; then
+            bash "$apply" $flags "$repo" || { warn "apply-repo-standard returned non-zero"; mark_drift; }
+        else
+            warn "apply-repo-standard.sh missing · workflows/config layer skipped"
+        fi
+    fi
+
+    if $CHECK; then
+        [[ "$DRIFT" -eq 0 ]] && { ok "no drift"; exit 0; } || { warn "drift detected"; exit 1; }
+    fi
+    log "done"
+}
+
+main

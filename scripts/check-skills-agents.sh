@@ -75,7 +75,7 @@ prune_find() { # $1=root, rest=find predicates after the prune block
   find "$root" \( "${pe[@]}" \) -prune -o "$@" 2>/dev/null
 }
 
-discover_repos() { prune_find "$ROOT" -name .git -print | while IFS= read -r g; do dirname "$g"; done | sort -u; }
+discover_repos() { prune_find "$ROOT" -type d -name .git -print | while IFS= read -r g; do dirname "$g"; done | sort -u; }
 
 detect_skills_dir() {
   local cands; cands="$(prune_find "$ROOT" -type d -path "${SKILL_GLOB:-*/.claude/skills}" -print)"

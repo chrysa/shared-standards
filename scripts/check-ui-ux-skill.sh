@@ -81,9 +81,9 @@ discover_repos() {
     else prune_expr+=( -o -name "$d" ); fi
   done
   if [ ${#prune_expr[@]} -gt 0 ]; then
-    find "$root" \( "${prune_expr[@]}" \) -prune -o -name .git -print 2>/dev/null
+    find "$root" \( "${prune_expr[@]}" \) -prune -o -type d -name .git -print 2>/dev/null
   else
-    find "$root" -name .git -print 2>/dev/null
+    find "$root" -type d -name .git -print 2>/dev/null
   fi | while IFS= read -r g; do dirname "$g"; done | sort -u
 }
 
