@@ -48,7 +48,7 @@ AGENT_DIRS=()
 AGENT_SOURCE=""
 DO_SKILLS=1; DO_AGENTS=1; DO_AGENT_REFS=0; DO_PAIRING=0; DO_SYNC=0; STRICT=0
 ERR=0; WARN=0
-PRUNE=(node_modules .venv venv dist build out vendor target .next .cache)
+PRUNE=(node_modules .venv venv dist build out vendor target .next .cache worktrees)
 # tokens that look like @agent but are routing/frameworks/models, not agents:
 ALLOW="fast code best judge clean loop strict compact CAGEERF ReACT DEVIL DECIDE chrysa ${AGENT_REF_ALLOW:-}"
 
