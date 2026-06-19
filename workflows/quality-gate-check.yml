@@ -10,4 +10,4 @@ on:
 
 jobs:
     call:
-        uses: chrysa/github-actions/.github/workflows/quality-gate-check.yml@main
+        uses: chrysa/github-actions/.github/workflows/quality-gate-check.yml@v1.2.1
