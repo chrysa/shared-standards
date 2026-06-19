@@ -81,7 +81,7 @@ jobs:
 
             - name: Open sync PR
               if: ${{ github.event.inputs.dry_run != 'true' }}
-              uses: peter-evans/create-pull-request@v7
+              uses: peter-evans/create-pull-request@v8
               with:
                   path: target
                   token: ${{ secrets.RELEASE_TOKEN }}
