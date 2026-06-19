@@ -336,6 +336,32 @@ Reusable `workflow_call` workflows live in **`chrysa/github-actions/.github/work
   (or a least-privilege `packages:write` token) — **no PAT in plaintext**, no long-lived secret in image layers.
 - The build + scan + push is carried by the reusable `build-image.yml` workflow (see `chrysa/github-actions`).
 
+### 6.1 Container-runtime policy & nature exemptions
+
+**Rule: a project runs ONLY in a container — unless its nature forbids it.** No project's runtime
+may depend on host-installed interpreters or tooling; if it executes as a service, it executes in a
+container. Tests, lint, and type-checks always go through `make` Docker targets, never the host
+(§12).
+
+Every repo is classified by a `runtime:` field in [`repos.yml`](repos.yml). The "nature forbids"
+exemptions are explicit and finite:
+
+| `runtime` | What it means | Must provide |
+|---|---|---|
+| `container` | Runs as a service. | Dockerfile(s) + `docker-compose*` + `HEALTHCHECK` + `docker-up`/`docker-down`/`docker-test` targets. |
+| `exempt:lib` | Distributed/imported — library, plugin, pre-commit hook, GitHub Action, CLI tool. Runs inside the **consumer's** environment, not as our service. | `docker-test` target (CI runs the suite in a container). |
+| `exempt:config` | No executable runtime — config, knowledge base (Obsidian), deployment manifests, reusable container-definition collections. | Nothing (nothing to run). |
+| `exempt:native` | Bound to a host OS, physical device, cloud platform, or editor — Windows desktop integration, webcam/gesture control, hardware controllers, Google Apps Script, VS Code extensions, infra/Helm/GitOps. A container cannot provide the required host access. | Optional `Dockerfile.test` for CI; runtime stays native by necessity. |
+| `pending` | Pre-code scaffold (no app code yet). | Flips to `container` at first code — `project-init`/`chrysa-init` scaffold the container so new repos start compliant. |
+
+A repo is exempt **only** when its nature genuinely forbids containerized execution. Convenience,
+"it's easier on the host", or "it's just a script" are **not** exemptions. When in doubt, classify
+`container`.
+
+Conformance is machine-checked by [`audit-docker-compliance.sh`](audit-docker-compliance.sh), which
+reads `repos.yml` and verifies each repo provides what its class requires (output:
+`compliance/docker-conformance.json`).
+
 ---
 
 ## 7. Documentation
