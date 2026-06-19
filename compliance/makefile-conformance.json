@@ -12,33 +12,33 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "FAIL",
+      "gate": "warn",
       "has_makefile": true,
-      "hook_wired": false,
+      "hook_wired": true,
       "repo": "ai-aggregator",
       "template": "Makefile.with-sub-folder",
       "tier": "fullstack",
-      "tier_marker": false
+      "tier_marker": true
+    },
+    {
+      "ci_runs_precommit": true,
+      "gate": "warn",
+      "has_makefile": true,
+      "hook_wired": true,
+      "repo": "audit-platform",
+      "template": "Makefile.python",
+      "tier": "lib",
+      "tier_marker": true
     },
     {
       "ci_runs_precommit": true,
       "gate": "FAIL",
       "has_makefile": true,
       "hook_wired": false,
-      "repo": "audit-platform",
-      "template": "Makefile.python",
-      "tier": "lib",
-      "tier_marker": false
-    },
-    {
-      "ci_runs_precommit": true,
-      "gate": "ok",
-      "has_makefile": true,
-      "hook_wired": true,
       "repo": "automations",
       "template": "Makefile.basic",
       "tier": "lib",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
@@ -72,7 +72,7 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "warn",
+      "gate": "FAIL",
       "has_makefile": true,
       "hook_wired": true,
       "repo": "chrysa-portfolio-viz",
@@ -134,7 +134,7 @@
       "ci_runs_precommit": true,
       "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": false,
+      "hook_wired": true,
       "repo": "dev-nexus",
       "template": "Makefile.with-sub-folder",
       "tier": "fullstack",
@@ -192,19 +192,19 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "-",
-      "has_makefile": false,
+      "gate": "warn",
+      "has_makefile": true,
       "hook_wired": false,
       "repo": "django-autoload",
       "template": "Makefile.python",
       "tier": "lib",
-      "tier_marker": false
+      "tier_marker": true
     },
     {
       "ci_runs_precommit": true,
       "gate": "ok",
       "has_makefile": true,
-      "hook_wired": false,
+      "hook_wired": true,
       "repo": "django-pytest",
       "template": "Makefile.python",
       "tier": "lib",
@@ -254,7 +254,7 @@
       "ci_runs_precommit": true,
       "gate": "ok",
       "has_makefile": true,
-      "hook_wired": false,
+      "hook_wired": true,
       "repo": "feedback-gateway",
       "template": "Makefile.python",
       "tier": "lib",
@@ -297,7 +297,7 @@
       "hook_wired": true,
       "repo": "genealogy-validator",
       "template": "Makefile.python",
-      "tier": "lib",
+      "tier": "python-app",
       "tier_marker": true
     },
     {
@@ -364,7 +364,7 @@
       "ci_runs_precommit": true,
       "gate": "warn",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "mediavault",
       "template": "Makefile.with-sub-folder",
       "tier": "fullstack",
@@ -382,33 +382,33 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "ok",
+      "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "my-resume",
       "template": "Makefile.basic",
       "tier": "infra",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
-      "gate": "warn",
+      "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "orchestrator",
       "template": "Makefile.basic",
       "tier": "infra",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
-      "gate": "warn",
+      "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "paperclip",
       "template": "Makefile.basic",
       "tier": "infra",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
@@ -422,13 +422,13 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "warn",
+      "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "pre-commit-hooks-changelog",
       "template": "Makefile.python",
       "tier": "python-app",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
@@ -452,13 +452,13 @@
     },
     {
       "ci_runs_precommit": true,
-      "gate": "ok",
+      "gate": "FAIL",
       "has_makefile": true,
-      "hook_wired": true,
+      "hook_wired": false,
       "repo": "quality-gatekeeper",
       "template": "Makefile.python",
       "tier": "lib",
-      "tier_marker": true
+      "tier_marker": false
     },
     {
       "ci_runs_precommit": true,
