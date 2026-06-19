@@ -55,7 +55,7 @@ permissions:
 jobs:
     lint:
         name: Lint gate (pre-commit replay)
-        uses: chrysa/github-actions/.github/workflows/lint-python.yml@main
+        uses: chrysa/github-actions/.github/workflows/lint-python.yml@v1.2.1
         with:
             python-version: '3.14'
             extras: dev
