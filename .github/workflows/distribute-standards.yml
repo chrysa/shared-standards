@@ -72,6 +72,19 @@ jobs:
                   token: ${{ secrets.RELEASE_TOKEN }}
                   fetch-depth: 0
 
+            - name: Resolve target default branch
+              id: base
+              env:
+                  GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+              run: |
+                  branch="$(gh api "repos/chrysa/${{ matrix.repo }}" --jq .default_branch)"
+                  if [ -z "$branch" ]; then
+                      echo "::error::could not resolve default branch for ${{ matrix.repo }}"
+                      exit 1
+                  fi
+                  echo "Target ${{ matrix.repo }} default branch: $branch"
+                  echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
             - name: Apply standards
               run: |
                   chmod +x shared-standards/scripts/*.sh
@@ -86,7 +99,7 @@ jobs:
                   path: target
                   token: ${{ secrets.RELEASE_TOKEN }}
                   branch: chore/sync-shared-standards
-                  base: develop
+                  base: ${{ steps.base.outputs.branch }}
                   commit-message: 'chore: sync chrysa shared standards'
                   title: 'chore: sync chrysa shared standards'
                   labels: |
