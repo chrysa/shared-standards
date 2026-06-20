@@ -58,3 +58,6 @@ jobs:
                   find templates/ -name "*.json" 2>/dev/null | \
                     while read f; do python3 -m json.tool "$f" > /dev/null || exit 1; done
                   echo "All JSON templates valid"
+
+            - name: Validate repos.yml runtime classification
+              run: bash scripts/validate-repos-runtime.sh

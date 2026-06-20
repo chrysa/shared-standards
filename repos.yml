@@ -2,182 +2,248 @@
 # Generated 2026-06-06 from gh repo list chrysa + local checkout. Hand-tune as needed.
 # status: dev (apply full standard) | non-dev (config/static, skip CI+Docker) | archived (skip).
 # public: true emits LICENSE (MIT); false skips it.
+# runtime: container-runtime policy — "projects run ONLY in containers unless nature forbids".
+#   container       — runs as a service; MUST ship Dockerfile(s) + compose + HEALTHCHECK + docker-up/down/test.
+#   exempt:lib      — distributed/imported (lib, plugin, pre-commit hook, GitHub Action, CLI tool); keep docker-test only.
+#   exempt:config   — no executable runtime (config, knowledge/Obsidian, deployment manifests, container-def collections).
+#   exempt:native   — bound to host OS / device / cloud platform / editor (Windows, webcam, GAS, VS Code ext, infra/Helm).
+#   pending         — pre-code scaffold; flips to `container` once app code lands (enforced at first code via project-init).
+#   Audited by audit-docker-compliance.sh. See EXECUTION_STANDARD.md §6.1.
 repos:
   - name: agent-config
     status: dev
     public: false
+    runtime: exempt:config
   - name: ai-aggregator
     status: dev
     public: false
+    runtime: container
   - name: audit-platform
     status: dev
     public: false
+    runtime: container
   - name: automations
     status: dev
     public: false
+    runtime: exempt:native
   - name: catalog
     status: dev
     public: false
+    runtime: exempt:config
   - name: cdn-explorer
     status: dev
     public: true
+    runtime: container
   - name: chrysa-lib
     status: dev
     public: false
+    runtime: exempt:lib
   - name: chrysa-portfolio-viz
     status: dev
     public: false
+    runtime: container
   - name: chrysa-skills
     status: dev
     public: false
+    runtime: exempt:config
   - name: claude-config
     status: dev
     public: false
+    runtime: exempt:config
   - name: coach
     status: dev
     public: false
+    runtime: pending
   - name: container-webview
     status: dev
     public: true
+    runtime: container
   - name: D-D
     status: dev
     public: false
+    runtime: container
   - name: dev-nexus
     status: dev
     public: false
+    runtime: container
   - name: devtool
     status: dev
     public: false
+    runtime: container
   - name: discord-bot-back
     status: dev
     public: false
+    runtime: container
   - name: discordium
     status: dev
     public: false
+    runtime: container
   - name: diy-stream-deck
     status: dev
     public: true
+    runtime: exempt:native
   - name: django-app-forge
     status: dev
     public: false
+    runtime: exempt:lib
   - name: django-autoload
     status: dev
     public: true
+    runtime: exempt:lib
   - name: django-pytest
     status: dev
     public: false
+    runtime: exempt:lib
   - name: django-query-optimizer
     status: dev
     public: true
+    runtime: exempt:lib
   - name: django-query-optimizer-vscode
     status: dev
     public: true
+    runtime: exempt:native
   - name: django-traceid
     status: dev
     public: false
+    runtime: exempt:lib
   - name: doc-gen
     status: dev
     public: false
+    runtime: container
   - name: dotfiles
     status: non-dev
     public: false
+    runtime: exempt:config
   - name: epub-sorter
     status: dev
     public: true
+    runtime: exempt:lib
   - name: feedback-gateway
     status: dev
     public: false
+    runtime: container
   - name: floating-agent
     status: dev
     public: true
+    runtime: exempt:native
   - name: game-solver-platform
     status: dev
     public: false
+    runtime: pending
   - name: gaming-os
     status: dev
     public: false
+    runtime: container
   - name: genealogy-validator
     status: dev
     public: false
+    runtime: container
   - name: gestureOS
     status: dev
     public: true
+    runtime: exempt:native
   - name: github-actions
     status: dev
     public: true
+    runtime: exempt:lib
   - name: guideline-checker
     status: dev
     public: true
+    runtime: exempt:lib
   - name: homeassistant-config
     status: non-dev
     public: false
+    runtime: exempt:config
   - name: lifeos
     status: dev
     public: true
+    runtime: exempt:native
   - name: linkendin-resume
     status: dev
     public: true
+    runtime: container
   - name: link-reader-bot
     status: dev
     public: false
+    runtime: container
   - name: mediavault
     status: dev
     public: false
+    runtime: pending
   - name: mirrador
     status: dev
     public: false
+    runtime: container
   - name: my-assistant
     status: alias
     public: false
     alias_of: lifeos
+    runtime: exempt:native
   - name: my-resume
     status: dev
     public: false
+    runtime: container
   - name: orchestrator
     status: dev
     public: false
+    runtime: exempt:config
   - name: paperclip
     status: dev
     public: false
+    runtime: exempt:config
   - name: PO-GO-DEX
     status: dev
     public: false
+    runtime: container
   - name: pre-commit-hooks-changelog
     status: dev
     public: true
+    runtime: exempt:lib
   - name: pre-commit-tools
     status: dev
     public: true
+    runtime: exempt:lib
   - name: project-init
     status: dev
     public: true
+    runtime: exempt:lib
   - name: quality-gatekeeper
     status: dev
     public: false
+    runtime: pending
   - name: satisfactory-automated_calculator
     status: dev
     public: true
+    runtime: exempt:native
   - name: satisfactory-factory-manager
     status: dev
     public: false
+    runtime: container
   - name: server
     status: dev
     public: false
+    runtime: exempt:native
   - name: shared-standards
     status: dev
     public: true
+    runtime: exempt:config
   - name: sport-intelligence-hub
     status: dev
     public: false
+    runtime: container
   - name: studioverse
     status: dev
     public: false
+    runtime: container
   - name: usefull-containers
     status: dev
     public: true
+    runtime: exempt:config
   - name: windows-autonome
     status: dev
     public: false
+    runtime: exempt:native
   - name: windows-docker-state-notification
     status: dev
     public: false
+    runtime: exempt:native
