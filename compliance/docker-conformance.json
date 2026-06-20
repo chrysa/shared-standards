@@ -1,0 +1,361 @@
+{
+  "policy": "EXECUTION_STANDARD.md §6.1 — container-runtime",
+  "repos": [
+    {
+      "detail": "no executable runtime",
+      "repo": "agent-config",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "ai-aggregator",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "audit-platform",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "automations",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "catalog",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "cdn-explorer",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "chrysa-lib",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "chrysa-portfolio-viz",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "chrysa-skills",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "claude-config",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "pre-code — container scaffold due before first code",
+      "repo": "coach",
+      "runtime": "pending",
+      "verdict": "PENDING"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "container-webview",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "D-D",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down docker-test",
+      "repo": "dev-nexus",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "runs in container; §6 gaps: HEALTHCHECK docker-test",
+      "repo": "devtool",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "discord-bot-back",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "discordium",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "diy-stream-deck",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "django-app-forge",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — no docker-test / Dockerfile.test (tests would run on host)",
+      "repo": "django-autoload",
+      "runtime": "exempt:lib",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "django-pytest",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "django-query-optimizer",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "django-query-optimizer-vscode",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "django-traceid",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "doc-gen",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "dotfiles",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "not checked out locally",
+      "repo": "epub-sorter",
+      "runtime": "exempt:lib",
+      "verdict": "ABSENT"
+    },
+    {
+      "detail": "runs in container; §6 gaps: compose docker-up docker-down",
+      "repo": "feedback-gateway",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "floating-agent",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "pre-code — container scaffold due before first code",
+      "repo": "game-solver-platform",
+      "runtime": "pending",
+      "verdict": "PENDING"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "gaming-os",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "genealogy-validator",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "gestureOS",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "github-actions",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "guideline-checker",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "homeassistant-config",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "lifeos",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down docker-test",
+      "repo": "linkendin-resume",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "link-reader-bot",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "pre-code — container scaffold due before first code",
+      "repo": "mediavault",
+      "runtime": "pending",
+      "verdict": "PENDING"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "mirrador",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "my-resume",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "orchestrator",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "paperclip",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "PO-GO-DEX",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "lib — no docker-test / Dockerfile.test (tests would run on host)",
+      "repo": "pre-commit-hooks-changelog",
+      "runtime": "exempt:lib",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "pre-commit-tools",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "project-init",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "pre-code — container scaffold due before first code",
+      "repo": "quality-gatekeeper",
+      "runtime": "pending",
+      "verdict": "PENDING"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "satisfactory-automated_calculator",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "satisfactory-factory-manager",
+      "runtime": "container",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "server",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "shared-standards",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "sport-intelligence-hub",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "container runtime complete",
+      "repo": "studioverse",
+      "runtime": "container",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "no executable runtime",
+      "repo": "usefull-containers",
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "windows-autonome",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "windows-docker-state-notification",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    }
+  ],
+  "summary": {
+    "absent": 1,
+    "exempt": 20,
+    "fail": 0,
+    "pass": 22,
+    "pending": 4,
+    "warn": 11
+  }
+}
