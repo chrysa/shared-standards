@@ -34,6 +34,10 @@ repos:
     status: dev
     public: true
     runtime: container
+  - name: chrysa-knowledge
+    status: non-dev
+    public: false
+    runtime: exempt:config
   - name: chrysa-lib
     status: dev
     public: false
@@ -117,6 +121,22 @@ repos:
   - name: epub-sorter
     status: dev
     public: true
+    runtime: exempt:lib
+  - name: fastapi-autoload
+    status: dev
+    public: false
+    runtime: exempt:lib
+  - name: fastapi-pytest
+    status: dev
+    public: false
+    runtime: exempt:lib
+  - name: fastapi-query-optimizer
+    status: dev
+    public: false
+    runtime: exempt:lib
+  - name: fastapi-traceid
+    status: dev
+    public: false
     runtime: exempt:lib
   - name: feedback-gateway
     status: dev
@@ -247,3 +267,7 @@ repos:
     status: dev
     public: false
     runtime: exempt:native
+  - name: wsmqtt-monitor
+    status: dev
+    public: false
+    runtime: container
