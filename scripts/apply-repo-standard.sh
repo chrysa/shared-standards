@@ -4,6 +4,7 @@
 #
 # Composes, idempotently:
 #   1. Hygiene files   .editorconfig, .gitattributes, CONTRIBUTING.md, LICENSE (public only)
+#   1b. Governance     .github/CODEOWNERS (create-if-absent)
 #   2. Stack CI        .github/workflows/ci.yml from workflows/ci-{python,node}.yml (+ token sub)
 #   3. Pre-commit      merge Full §8 baseline into .pre-commit-config.yaml (scripts/pre-commit-merge.py)
 #   4. Process layer   delegates to apply-ci-process.sh (process workflows + dependabot + github-config)
@@ -127,6 +128,17 @@ deploy_release_tooling() {
     done
 }
 
+# Governance files (create-if-absent): CODEOWNERS. Never clobber a hand-tuned one.
+deploy_governance() {
+    local repo="$1" dest="$repo/.github/CODEOWNERS" src="$TPL/CODEOWNERS"
+    [[ -f "$src" ]] || { warn "template missing: CODEOWNERS"; return; }
+    [[ -e "$dest" ]] && { info "CODEOWNERS exists · preserved"; return; }
+    if $DRY_RUN; then info "[dry-run] would create $dest"; return; fi
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+    ok "CODEOWNERS (created)"
+}
+
 ci_is_canonical() {
     local f="$1"
     [[ -f "$f" ]] || return 1
@@ -217,6 +229,7 @@ apply_one() {
     if $CHECK; then merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
+    deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"
