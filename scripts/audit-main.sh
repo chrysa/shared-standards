@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AUDIT_DIR="/home/anthony/.claude/jobs/4c5579d6/tmp"
+AUDIT_DIR="${AUDIT_DIR:-$(mktemp -d)}"
 REPOS_FILE="$AUDIT_DIR/repos.txt"
 RESULTS_FILE="$AUDIT_DIR/audit_results.json"
 
@@ -10,6 +10,15 @@ gh repo list chrysa --limit 200 --json name,defaultBranchRef,visibility,isArchiv
 
 total_repos=$(wc -l < "$REPOS_FILE")
 echo "Total repos: $total_repos" >&2
+
+# Archetype classification from shared-standards/repos.yml (source of truth, main branch).
+# No-package archetypes (runtime exempt:config | status non-dev) ship no pip/npm package
+# and have nothing to release, so pyproject/tests/release.yml are NOT required for them
+# (EXECUTION_STANDARD §2 archetype exemption).
+REPOS_YML="$AUDIT_DIR/repos_main.yml"
+gh api repos/chrysa/shared-standards/contents/repos.yml --jq '.content' 2>/dev/null | base64 -d > "$REPOS_YML"
+repo_runtime() { awk -v R="$1" '$1=="-"&&$2=="name:"{c=$3} c==R&&$1=="runtime:"{print $2;exit}' "$REPOS_YML"; }
+repo_status()  { awk -v R="$1" '$1=="-"&&$2=="name:"{c=$3} c==R&&$1=="status:"{print $2;exit}'  "$REPOS_YML"; }
 
 # Initialize results as array
 echo "[]" > "$RESULTS_FILE"
@@ -43,21 +52,53 @@ while IFS='|' read -r repo_name default_branch visibility; do
     [[ "$path" =~ ^\.github/workflows/(ci|.*ci.*\.yml)$ ]] && has_ci=1
   done <<< "$tree_output"
   
+  # Archetype: no-package repos (config/meta or non-dev) are exempt from
+  # pyproject/tests/release.yml (EXECUTION_STANDARD §2 archetype exemption).
+  runtime=$(repo_runtime "$repo_name")
+  status=$(repo_status "$repo_name")
+  has_manifest=false
+  [[ "$found" =~ (\||/)pyproject\.toml || "$found" =~ (\||/)package\.json ]] && has_manifest=true
+  no_package=false
+  # config/meta repos + non-dev ship no package. exempt:native repos are package-optional
+  # (a native script bundle has no manifest; a native CLI may); only exempt the manifest-less ones.
+  [[ "$runtime" == "exempt:config" || "$status" == "non-dev" ]] && no_package=true
+  [[ "$runtime" == "exempt:native" ]] && ! $has_manifest && no_package=true
+
+  # non-dev (config/static, skip CI+Docker): require ONLY README + .gitignore
+  # (+ LICENSE for public). The full dev toolchain (CLAUDE/Makefile/cliff/CI/...) is N/A.
+  if [[ "$status" == "non-dev" ]]; then
+    gaps=()
+    [[ ! "$found" =~ \|README\.md ]] && gaps+=("README.md")
+    [[ ! "$found" =~ \|\.gitignore ]] && gaps+=(".gitignore")
+    [[ "$visibility" == "PUBLIC" && ! "$found" =~ \|LICENSE ]] && gaps+=("LICENSE")
+    gap_count=${#gaps[@]}
+    [[ $gap_count -eq 0 ]] && ((conformant_count++))
+    gap_json=$(printf '%s\n' "${gaps[@]}" | jq -Rs . | jq -s . | tr -d '\n')
+    result="{\"name\":\"$repo_name\",\"branch\":\"$default_branch\",\"visibility\":\"$visibility\",\"gap_count\":$gap_count,\"gaps\":$gap_json}"
+    current=$(cat "$RESULTS_FILE")
+    echo "$current" | jq --argjson r "$result" '. += [$r]' > "$RESULTS_FILE"
+    continue
+  fi
+
   # Check required files
   gaps=()
-  
+
   # CORE requirements
   [[ ! "$found" =~ \|CLAUDE\.md ]] && gaps+=("CLAUDE.md")
   [[ ! "$found" =~ \|README\.md ]] && gaps+=("README.md")
   [[ ! "$found" =~ \|Makefile ]] && gaps+=("Makefile")
-  [[ ! "$found" =~ (\||/)pyproject\.toml ]] && [[ ! "$found" =~ (\||/)package\.json ]] && gaps+=("(pyproject.toml|package.json)")
+  if ! $no_package; then
+    [[ ! "$found" =~ (\||/)pyproject\.toml ]] && [[ ! "$found" =~ (\||/)package\.json ]] && gaps+=("(pyproject.toml|package.json)")
+  fi
   [[ ! "$found" =~ \|CHANGELOG\.md ]] && gaps+=("CHANGELOG.md")
   [[ ! "$found" =~ \|cliff\.toml ]] && gaps+=("cliff.toml")
   [[ ! "$found" =~ \|GitVersion\.yml ]] && gaps+=("GitVersion.yml")
   [[ ! "$found" =~ \|opencode\.json ]] && gaps+=("opencode.json")
   [[ ! "$found" =~ \|\.pre-commit-config\.yaml ]] && gaps+=(".pre-commit-config.yaml")
   [[ $has_workflows -eq 0 ]] && gaps+=(".github/workflows/*.yml")
-  [[ $has_tests -eq 0 ]] && gaps+=("tests/")
+  if ! $no_package; then
+    [[ $has_tests -eq 0 ]] && gaps+=("tests/")
+  fi
   
   # PUBLIC repos need LICENSE
   if [[ "$visibility" == "PUBLIC" ]]; then
@@ -76,8 +117,10 @@ while IFS='|' read -r repo_name default_branch visibility; do
   # CANONICAL
   [[ ! "$found" =~ \.chrysa/STANDARDS\.md ]] && gaps+=(".chrysa/STANDARDS.md")
   
-  # WORKFLOW-specific
-  [[ ! "$found" =~ \|\.github/workflows/release\.yml ]] && gaps+=("workflows/release.yml")
+  # WORKFLOW-specific (no-package archetypes have nothing to release)
+  if ! $no_package; then
+    [[ ! "$found" =~ \|\.github/workflows/release\.yml ]] && gaps+=("workflows/release.yml")
+  fi
   
   gap_count=${#gaps[@]}
   [[ $gap_count -eq 0 ]] && ((conformant_count++))

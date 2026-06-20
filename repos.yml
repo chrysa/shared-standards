@@ -57,7 +57,7 @@ repos:
   - name: coach
     status: dev
     public: false
-    runtime: pending
+    runtime: exempt:lib
   - name: container-webview
     status: dev
     public: true
@@ -149,7 +149,7 @@ repos:
   - name: game-solver-platform
     status: dev
     public: false
-    runtime: pending
+    runtime: exempt:config
   - name: gaming-os
     status: dev
     public: false
@@ -165,7 +165,7 @@ repos:
   - name: github-actions
     status: dev
     public: true
-    runtime: exempt:lib
+    runtime: exempt:config
   - name: guideline-checker
     status: dev
     public: true
@@ -189,7 +189,7 @@ repos:
   - name: mediavault
     status: dev
     public: false
-    runtime: pending
+    runtime: exempt:config
   - name: mirrador
     status: dev
     public: false
