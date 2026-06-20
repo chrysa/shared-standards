@@ -204,6 +204,25 @@ recipe (§1.5), and `@`-prefixed recipe lines. Pick the template by archetype:
 
 ---
 
+### 2.1 Archetype exemptions (required-file scope)
+
+The required-file set above is scoped by **archetype**, declared via the `runtime`
+field in `shared-standards/repos.yml`. Not every file applies to every repo:
+
+| Archetype (`runtime`) | `pyproject/package.json` | `tests/` | `release.yml` |
+|---|:--:|:--:|:--:|
+| `container` (app) | required | required | required |
+| `exempt:lib` (pip/npm package) | required | required | required (publish) |
+| `exempt:native` (runs natively) | required **iff** it ships a manifest | iff manifest | iff manifest |
+| `exempt:config` (config / meta / tooling — no package) | exempt | exempt | exempt |
+| `status: non-dev` (config/static, skip CI+Docker) | exempt | exempt | exempt — needs only `README` + `.gitignore` (+ `LICENSE` if public) |
+
+A repo that ships **no distributable package** (reusable-workflows repo, dotfiles,
+an Obsidian vault, a compose-only collection) is conformant without a `pyproject.toml`,
+`tests/`, or `release.yml` — adding token manifests to satisfy a checklist is forbidden
+(it is cargo-cult). Classify the repo correctly in `repos.yml` instead. The conformance
+auditor `scripts/audit-main.sh` enforces this table against the live `repos.yml`.
+
 ## 3. Branching & Commit Rules
 
 ### Branch naming
