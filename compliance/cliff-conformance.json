@@ -1,0 +1,372 @@
+{
+  "canonical": "cliff.toml",
+  "canonical_sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+  "rows": [
+    {
+      "note": "cluster:7f25ddb2",
+      "repo": "agent-config",
+      "sha": "7f25ddb2d316eeb2963b818a13c1739d1f1e91c5",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ae958672",
+      "repo": "ai-aggregator",
+      "sha": "ae958672248e48625795cdd193176b8fcedb174f",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "audit-platform",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "automations",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ae958672",
+      "repo": "catalog",
+      "sha": "ae958672248e48625795cdd193176b8fcedb174f",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:efae6e8b",
+      "repo": "cdn-explorer",
+      "sha": "efae6e8b80474af235859838df883006de126496",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:dad52a93",
+      "repo": "chrysa-lib",
+      "sha": "dad52a93b6a777df951b0a15c342010d75119b84",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "chrysa-portfolio-viz",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:7f25ddb2",
+      "repo": "chrysa-skills",
+      "sha": "7f25ddb2d316eeb2963b818a13c1739d1f1e91c5",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:7f25ddb2",
+      "repo": "claude-config",
+      "sha": "7f25ddb2d316eeb2963b818a13c1739d1f1e91c5",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "coach",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "cluster:bd3fa5a7",
+      "repo": "container-webview",
+      "sha": "bd3fa5a70c4fd1666b82ac4a24e5d5bd50cfeb60",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "D-D",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:dad52a93",
+      "repo": "dev-nexus",
+      "sha": "dad52a93b6a777df951b0a15c342010d75119b84",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "devtool",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "discord-bot-back",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:fef0de10",
+      "repo": "discordium",
+      "sha": "fef0de1043b8ad16a82c2167cf87c97fec55eff3",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ae958672",
+      "repo": "diy-stream-deck",
+      "sha": "ae958672248e48625795cdd193176b8fcedb174f",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:9f4111a8",
+      "repo": "django-app-forge",
+      "sha": "9f4111a8d9d0d0817baf99e784fbc39018b4485e",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "django-autoload",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "django-pytest",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "cluster:53002a29",
+      "repo": "django-query-optimizer",
+      "sha": "53002a2908721c2b9d97a5c2dae5f137b7b679d1",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "django-query-optimizer-vscode",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "django-traceid",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "cluster:7c58ea1d",
+      "repo": "doc-gen",
+      "sha": "7c58ea1d6fe391c9660b0dbf860aae6eac1b6e96",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "epub-sorter",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-autoload",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-pytest",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-query-optimizer",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-traceid",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "cluster:8198437c",
+      "repo": "feedback-gateway",
+      "sha": "8198437c05ba09365bad0bceb41f2c1b04f24adb",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:312aa423",
+      "repo": "floating-agent",
+      "sha": "312aa423935c155b943aa1b77832a0988fa6ba27",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:d33333b6",
+      "repo": "game-solver-platform",
+      "sha": "d33333b69fccf7e5850c85ac972ddc477d409636",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:a0f7796d",
+      "repo": "gaming-os",
+      "sha": "a0f7796d7af04cb71dc3f0ec7d643d4c47f64117",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ae958672",
+      "repo": "genealogy-validator",
+      "sha": "ae958672248e48625795cdd193176b8fcedb174f",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "gestureOS",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "github-actions",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:0b80b91d",
+      "repo": "guideline-checker",
+      "sha": "0b80b91d8262373397c36e0a94e3d41865c3f66e",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ae958672",
+      "repo": "lifeos",
+      "sha": "ae958672248e48625795cdd193176b8fcedb174f",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "linkendin-resume",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "link-reader-bot",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:e080c5e4",
+      "repo": "mediavault",
+      "sha": "e080c5e439f4586ed773f49d70388fb1430712d5",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:63f080e7",
+      "repo": "mirrador",
+      "sha": "63f080e7423afaecf41fd835950d27dc5b52a90b",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "my-resume",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:737fcf53",
+      "repo": "orchestrator",
+      "sha": "737fcf538b7085d9f356eb24a09f5fedbed948c2",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "paperclip",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "PO-GO-DEX",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:04dba1b5",
+      "repo": "pre-commit-hooks-changelog",
+      "sha": "04dba1b59d6a7d9d901071995a28939b4ee7e4b1",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:8d89ec29",
+      "repo": "pre-commit-tools",
+      "sha": "8d89ec29d96ce6acb6799b4c83fff1daf7c9460c",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:ec45836e",
+      "repo": "project-init",
+      "sha": "ec45836e59d2989bc4890cea854917cdc6091211",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:7f25ddb2",
+      "repo": "quality-gatekeeper",
+      "sha": "7f25ddb2d316eeb2963b818a13c1739d1f1e91c5",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:1226a50c",
+      "repo": "satisfactory-automated_calculator",
+      "sha": "1226a50c24df1d7b5edc40bdfb4f3d38482c6add",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:da9d50eb",
+      "repo": "satisfactory-factory-manager",
+      "sha": "da9d50eb1a837235ef68cfd150860ae6ff75581d",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:1249a5b1",
+      "repo": "server",
+      "sha": "1249a5b10e1440f8ecbd190b8be5e4b9fe6f143f",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "shared-standards",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    },
+    {
+      "note": "cluster:7f832b27",
+      "repo": "sport-intelligence-hub",
+      "sha": "7f832b27cb299a9af27367adf3c52a1166345b6a",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:8d772a27",
+      "repo": "studioverse",
+      "sha": "8d772a27bc092302d3ea2808caca897284c0ac29",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "usefull-containers",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:363bf921",
+      "repo": "windows-autonome",
+      "sha": "363bf921e2cd6f2138640d87be35d57702a68ce0",
+      "status": "drift"
+    },
+    {
+      "note": "cluster:a947ecc8",
+      "repo": "windows-docker-state-notification",
+      "sha": "a947ecc8506ff376ec4d10229810bd5209b34569",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "wsmqtt-monitor",
+      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
+      "status": "ok"
+    }
+  ]
+}

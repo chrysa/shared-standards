@@ -305,6 +305,32 @@ pre-commit). Node repos use `ci-node`; infra/GAS use domain-appropriate checks.
 is never folded into CI. PR-cosmetic automations (labeler, size, auto-assign…) are
 optional, not required.
 
+#### Canonical release config (`GitVersion.yml`, `cliff.toml`)
+
+The semantic-versioning config (`GitVersion.yml`, flat `mode: ContinuousDeployment`)
+and the changelog config (`cliff.toml`) are **canonical files**: a single source of
+truth lives in `chrysa/shared-standards` (repo root **and** byte-identical `templates/`
+copy), and every active repo's copy must match it. Legacy v5 GitVersion schemas
+(`GitHubFlow`, no top-level `mode:`) are **incompatible** with chrysa branching and
+must be replaced, not version-bumped.
+
+Tooling (mirrors the Makefile-conformance trio, §1.6):
+
+- `scripts/audit-canonical-conformance.sh <file>` — read-only fleet audit over
+  `repos.yml` via the GitHub API; classifies each repo `ok | drift | incompatible |
+  missing` by git blob SHA and persists `compliance/<file>-conformance.json`.
+- `scripts/check-canonical-drift.sh <a> <b> …` — wired as a `repo: local` pre-commit
+  hook (`gitversion-canonical-drift`, `cliff-canonical-drift`); fails if the repo-root
+  source of truth diverges from its `templates/` copy, so the canonical can never
+  silently drift before distribution.
+- `scripts/sync-canonical.sh <file> --repo <path> [--write]` — single-repo
+  propagation of the canonical into one checkout. **Never a fleet fan-out** — migrate
+  one repo per session, commit, open one PR.
+
+**Rollout cadence:** re-run the audit when the canonical changes or monthly; migrate
+incompatible/drift repos one-per-session via `sync-canonical.sh` (respecting Rule 1+2),
+refreshing the `compliance/` ledger as repos converge.
+
 ### Conditional workflows
 
 | Workflow | Condition |

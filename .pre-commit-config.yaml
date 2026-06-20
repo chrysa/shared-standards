@@ -76,3 +76,20 @@ repos:
     args: [feat, fix, docs, style, refactor, test, chore, perf, revert, ci]
   repo: https://github.com/compilerla/conventional-pre-commit
   rev: v4.4.0
+- hooks:
+  # Canonical-file drift gate (dedup-campaign #108 GitVersion, #109 cliff): the
+  # repo-root source of truth must stay byte-identical to its templates/ copy
+  # that the distribution machinery hands the fleet.
+  - id: gitversion-canonical-drift
+    name: GitVersion.yml canonical drift
+    entry: scripts/check-canonical-drift.sh GitVersion.yml templates/GitVersion.yml
+    language: system
+    pass_filenames: false
+    files: ^(GitVersion\.yml|templates/GitVersion\.yml)$
+  - id: cliff-canonical-drift
+    name: cliff.toml canonical drift
+    entry: scripts/check-canonical-drift.sh cliff.toml templates/cliff.toml
+    language: system
+    pass_filenames: false
+    files: ^(cliff\.toml|templates/cliff\.toml)$
+  repo: local

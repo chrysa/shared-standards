@@ -1,0 +1,372 @@
+{
+  "canonical": "GitVersion.yml",
+  "canonical_sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+  "rows": [
+    {
+      "note": "-",
+      "repo": "agent-config",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "ai-aggregator",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "audit-platform",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "automations",
+      "sha": "71cf1ea5b3851ace17d49579010eee58d9f927a5",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "catalog",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "cdn-explorer",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "chrysa-lib",
+      "sha": "4bdf94c8550213115b134bb469b3c8881e40253c",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "chrysa-portfolio-viz",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "chrysa-skills",
+      "sha": "298b00bc29361c8b2b0153b2d0693e29ddd583be",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "claude-config",
+      "sha": "59741bd2248f307290acdc3317a2b7335c44df8b",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "coach",
+      "sha": "298b00bc29361c8b2b0153b2d0693e29ddd583be",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDelivery",
+      "repo": "container-webview",
+      "sha": "427dbaffba48d92f2b281b696e90fb014d2dc2b6",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "D-D",
+      "sha": "0f8f787fca0ec866716f2bc3e5852adb29080b8c",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "dev-nexus",
+      "sha": "dadad3b54d4eeb90fd48543b9b92cc0e693e837e",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "devtool",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "discord-bot-back",
+      "sha": "123aca9216beba0e57cc5081b97a555452a0ec05",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "discordium",
+      "sha": "b533ffbf13d9cfb5b5535790cefdff802fa27c8c",
+      "status": "drift"
+    },
+    {
+      "note": "mode:semantic",
+      "repo": "diy-stream-deck",
+      "sha": "017bfed96b8a9750715b7326eb1ae140438f01de",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "django-app-forge",
+      "sha": "8357c1478429a850f8403cb7ce307287ec4507fe",
+      "status": "drift"
+    },
+    {
+      "note": "-",
+      "repo": "django-autoload",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "django-pytest",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "django-query-optimizer",
+      "sha": "7a76dfcbe05104ebac859d048f829446b7287e98",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "django-query-optimizer-vscode",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "django-traceid",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "doc-gen",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "epub-sorter",
+      "sha": "74d2c3ca3ff4dcc1ae033d6c8160077ac0a75d39",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-autoload",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-pytest",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-query-optimizer",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "-",
+      "repo": "fastapi-traceid",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "feedback-gateway",
+      "sha": "90e4eb76e113e2188300528e782c8c9302574d61",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDelivery",
+      "repo": "floating-agent",
+      "sha": "0f6bb885b8cecea43c80c7934630c4c939ea66f8",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "game-solver-platform",
+      "sha": "90e4eb76e113e2188300528e782c8c9302574d61",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "gaming-os",
+      "sha": "9527fc5a20d0fbf32929ef7f03f8b14cdb6b8f70",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDelivery",
+      "repo": "genealogy-validator",
+      "sha": "6103cc3b0429502725d736522b7dead07fd7d48d",
+      "status": "drift"
+    },
+    {
+      "note": "mode:semantic",
+      "repo": "gestureOS",
+      "sha": "914250d0a8029b03e7c2bb2003275dbe3c098051",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "github-actions",
+      "sha": "4bdf94c8550213115b134bb469b3c8881e40253c",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "guideline-checker",
+      "sha": "8357c1478429a850f8403cb7ce307287ec4507fe",
+      "status": "drift"
+    },
+    {
+      "note": "mode:semantic",
+      "repo": "lifeos",
+      "sha": "914250d0a8029b03e7c2bb2003275dbe3c098051",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "linkendin-resume",
+      "sha": "9a3f2d8b3a336fc699b51e0628dfc04b63e29cf2",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "link-reader-bot",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "mediavault",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "mirrador",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "my-resume",
+      "sha": "c07002308333ef9a084101df8a0fd94b4aa63547",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "orchestrator",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "paperclip",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "PO-GO-DEX",
+      "sha": "f9c25b5080a830ff59d0038f513405440a146e80",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "pre-commit-hooks-changelog",
+      "sha": "90e4eb76e113e2188300528e782c8c9302574d61",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "pre-commit-tools",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "project-init",
+      "sha": "ee2f932d51b3be1db4b7d4d30d787e53d88e4f78",
+      "status": "drift"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "quality-gatekeeper",
+      "sha": "298b00bc29361c8b2b0153b2d0693e29ddd583be",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "satisfactory-automated_calculator",
+      "sha": "dade0ac4efb9e1a3a54eb0f2d790f0cd1727768c",
+      "status": "incompatible"
+    },
+    {
+      "note": "mode:ContinuousDeployment",
+      "repo": "satisfactory-factory-manager",
+      "sha": "299024f2957d22ce16823feec2e2ee5e2dab5b45",
+      "status": "drift"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "server",
+      "sha": "a7291c041468fbf9a915ff2c4d4ff4ddf8be4e18",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "shared-standards",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "sport-intelligence-hub",
+      "sha": "08575b4cc67066b4c692eae3ded7b4f485c336fd",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "studioverse",
+      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "usefull-containers",
+      "sha": "85a7762dd669892be10ff4fc04bd4397864d3c52",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "windows-autonome",
+      "sha": "92f46bf524a482388278559592d3ff60c0b03722",
+      "status": "incompatible"
+    },
+    {
+      "note": "schema:GitHubFlow-v5",
+      "repo": "windows-docker-state-notification",
+      "sha": "6417937bfbe40307894d19239c24cba55ef9fe18",
+      "status": "incompatible"
+    },
+    {
+      "note": "-",
+      "repo": "wsmqtt-monitor",
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
+    }
+  ]
+}
