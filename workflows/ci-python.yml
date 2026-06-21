@@ -77,6 +77,6 @@ jobs:
                   project-key: ${PROJECT_KEY}
                   organization: chrysa
                   project-name: ${REPO_NAME}
-                  sources: .
+                  sources: ${PACKAGE}
                   tests: ${TESTS}
                   coverage-report: coverage.xml
