@@ -65,7 +65,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-94
+  rev: v0.1.1-95
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
