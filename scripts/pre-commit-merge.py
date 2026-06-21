@@ -146,6 +146,12 @@ GOVERNED = set().union(*HOOK_GROUPS.values())
 # older pins false-positive when an earlier auto-fixing hook reorders staged files.
 REV_ALIGNED_REPOS = {"https://github.com/chrysa/pre-commit-tools"}
 
+# `repo: local` hooks reference repo-relative scripts/files (e.g. the canonical-drift
+# gate runs scripts/check-canonical-drift.sh against templates/ copies that only exist
+# in shared-standards itself). They are self-only and must never be fanned out to the
+# fleet, or every consumer's pre-commit fails with "executable not found".
+NON_DISTRIBUTED_REPOS = {"local"}
+
 
 def enforced_ids(stacks: set[str]) -> set[str]:
     selected = set(HOOK_GROUPS["always"])
@@ -178,6 +184,8 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     gaps: list[str] = []
     for brepo in baseline.get("repos", []):
         url = brepo.get("repo")
+        if url in NON_DISTRIBUTED_REPOS:
+            continue
         wanted = enforced_hooks(brepo, allowed)
         if not wanted:
             continue
@@ -207,6 +215,8 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
     for brepo in baseline.get("repos", []):
         url = brepo.get("repo")
+        if url in NON_DISTRIBUTED_REPOS:
+            continue
         wanted = enforced_hooks(brepo, allowed)
         if not wanted:
             continue
