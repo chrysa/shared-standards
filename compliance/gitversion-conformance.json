@@ -15,16 +15,16 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "audit-platform",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "automations",
-      "sha": "71cf1ea5b3851ace17d49579010eee58d9f927a5",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -39,10 +39,10 @@
       "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "chrysa-lib",
-      "sha": "4bdf94c8550213115b134bb469b3c8881e40253c",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
@@ -75,16 +75,16 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "D-D",
-      "sha": "0f8f787fca0ec866716f2bc3e5852adb29080b8c",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "dev-nexus",
-      "sha": "dadad3b54d4eeb90fd48543b9b92cc0e693e837e",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -93,10 +93,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "discord-bot-back",
-      "sha": "123aca9216beba0e57cc5081b97a555452a0ec05",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -135,10 +135,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "django-query-optimizer-vscode",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
@@ -147,16 +147,16 @@
       "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "doc-gen",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "epub-sorter",
-      "sha": "74d2c3ca3ff4dcc1ae033d6c8160077ac0a75d39",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
@@ -219,10 +219,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "github-actions",
-      "sha": "4bdf94c8550213115b134bb469b3c8881e40253c",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -237,10 +237,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "linkendin-resume",
-      "sha": "9a3f2d8b3a336fc699b51e0628dfc04b63e29cf2",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
@@ -261,28 +261,28 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "my-resume",
-      "sha": "c07002308333ef9a084101df8a0fd94b4aa63547",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "orchestrator",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "paperclip",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "PO-GO-DEX",
-      "sha": "f9c25b5080a830ff59d0038f513405440a146e80",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -291,10 +291,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "pre-commit-tools",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -309,10 +309,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "satisfactory-automated_calculator",
-      "sha": "dade0ac4efb9e1a3a54eb0f2d790f0cd1727768c",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "mode:ContinuousDeployment",
@@ -321,10 +321,10 @@
       "status": "drift"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "server",
-      "sha": "a7291c041468fbf9a915ff2c4d4ff4ddf8be4e18",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
@@ -333,34 +333,34 @@
       "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "sport-intelligence-hub",
-      "sha": "08575b4cc67066b4c692eae3ded7b4f485c336fd",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "studioverse",
-      "sha": "57f84f7cabc1fdffcd7e688cfb7b8632b8a93f15",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "usefull-containers",
-      "sha": "85a7762dd669892be10ff4fc04bd4397864d3c52",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "windows-autonome",
-      "sha": "92f46bf524a482388278559592d3ff60c0b03722",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
-      "note": "schema:GitHubFlow-v5",
+      "note": "-",
       "repo": "windows-docker-state-notification",
-      "sha": "6417937bfbe40307894d19239c24cba55ef9fe18",
-      "status": "incompatible"
+      "sha": "d810ff11d38af0dc9ceddc03cc8e587eab553cd2",
+      "status": "ok"
     },
     {
       "note": "-",
