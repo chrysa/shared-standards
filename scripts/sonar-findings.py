@@ -7,7 +7,7 @@ Queries the SonarCloud REST API (sonarcloud.io, org `chrysa`) for unresolved iss
 given severities, grouped into ONE consolidated entry per active dev repo. Output matches the
 shape consumed by file-compliance-issues.sh:
 
-    { "<repo>": { "title": str, "body": markdown, "counts": {critical,high,med,low} }, ... }
+    { "<repo>": { "title": str, "body": markdown, "counts": {critical,high,medium,low} }, ... }
 
 Pipe the output into file-compliance-issues.sh to open one idempotent issue per repo:
 
