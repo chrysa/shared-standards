@@ -1,0 +1,312 @@
+{
+  "agent-config": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **18** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_agent-config`](https://sonarcloud.io/project/issues?id=chrysa_agent-config&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 11 | `scripts/notion_roadmap_sync.py:269` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 6 | `skills/read/scripts/fetch_feishu.py:99` |\n| `pythonsecurity:S2083` | VULNERABILITY | BLOCKER | 1 | `scripts/generate_agents_md.py:135` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_agent-config&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 17,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "ai-aggregator": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_ai-aggregator`](https://sonarcloud.io/project/issues?id=chrysa_ai-aggregator&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S8409` | CODE_SMELL | BLOCKER | 2 | `api/routers/health.py:14` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_ai-aggregator&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 2,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "cdn-explorer": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_cdn-explorer`](https://sonarcloud.io/project/issues?id=chrysa_cdn-explorer&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `api/crawler.py:104` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_cdn-explorer&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "chrysa-lib": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_chrysa-lib`](https://sonarcloud.io/project/issues?id=chrysa_chrysa-lib&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S6418` | VULNERABILITY | BLOCKER | 1 | `packages/python/auth/tests/test_jwt.py:9` |\n| `typescript:S3776` | CODE_SMELL | CRITICAL | 1 | `packages/typescript/api/src/client.ts:24` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_chrysa-lib&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "claude-config": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **12** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_claude-config`](https://sonarcloud.io/project/issues?id=chrysa_claude-config&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `shelldre:S131` | CODE_SMELL | CRITICAL | 4 | `multi-machine/snapshot/configure.sh:247` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 4 | `claude/hooks/prompt-validator.py:513` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 3 | `claude/hooks/prompt-validator.py:65` |\n| `pythonsecurity:S2083` | VULNERABILITY | BLOCKER | 1 | `claude/hooks/error-tracker.py:71` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_claude-config&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 11,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "coach": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_coach`](https://sonarcloud.io/project/issues?id=chrysa_coach&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:216` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:222` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_coach&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "container-webview": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_container-webview`](https://sonarcloud.io/project/issues?id=chrysa_container-webview&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `typescript:S3776` | CODE_SMELL | CRITICAL | 1 | `code/src/domain/health/deriveHealth.ts:30` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `api/app/routers/metrics.py:51` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_container-webview&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "D-D": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_D-D`](https://sonarcloud.io/project/issues?id=chrysa_D-D&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `css:S4657` | BUG | CRITICAL | 1 | `code/src/app.css:33` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_D-D&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "dev-nexus": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **26** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_dev-nexus`](https://sonarcloud.io/project/issues?id=chrysa_dev-nexus&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S8410` | CODE_SMELL | BLOCKER | 14 | `backend/src/app/api/v1/auth.py:21` |\n| `python:S8409` | CODE_SMELL | BLOCKER | 8 | `backend/src/app/api/v1/auth.py:28` |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 2 | `docker-compose.yml:9` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `backend/src/app/api/v1/projects.py:50` |\n| `python:S2208` | CODE_SMELL | CRITICAL | 1 | `backend/alembic/env.py:13` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_dev-nexus&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 24,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "discord-bot-back": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_discord-bot-back`](https://sonarcloud.io/project/issues?id=chrysa_discord-bot-back&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `githubactions:S7630` | VULNERABILITY | BLOCKER | 1 | `.github/workflows/enforce-feature-branch.yml:16` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_discord-bot-back&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "discordium": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **10** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_discordium`](https://sonarcloud.io/project/issues?id=chrysa_discordium&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 4 | `backend/app/db/base.py:19` |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 3 | `.github/workflows/ci.yml:83` |\n| `typescript:S3735` | CODE_SMELL | CRITICAL | 2 | `frontend/src/domain/queries.ts:52` |\n| `typescript:S2004` | CODE_SMELL | CRITICAL | 1 | `frontend/src/game/scenes/CombatScene.ts:93` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_discordium&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 3,
+      "high": 7,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "django-autoload": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_django-autoload`](https://sonarcloud.io/project/issues?id=chrysa_django-autoload&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `secrets:S6687` | VULNERABILITY | BLOCKER | 1 | `examples/demo/demo_project/settings.py:16` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_django-autoload&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "epub-sorter": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **3** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_epub-sorter`](https://sonarcloud.io/project/issues?id=chrysa_epub-sorter&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S2638` | CODE_SMELL | CRITICAL | 2 | `cli.py:23` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `gui.py:152` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_epub-sorter&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 3,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "floating-agent": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_floating-agent`](https://sonarcloud.io/project/issues?id=chrysa_floating-agent&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `floating_agent/plugins/notion.py:76` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_floating-agent&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "gaming-os": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **4** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_gaming-os`](https://sonarcloud.io/project/issues?id=chrysa_gaming-os&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 3 | `.github/workflows/ci.yml:94` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `backend/app/routers/sessions.py:61` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_gaming-os&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 3,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "genealogy-validator": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **13** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_genealogy-validator`](https://sonarcloud.io/project/issues?id=chrysa_genealogy-validator&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S3776` | CODE_SMELL | CRITICAL | 11 | `scripts/quality_gate.py:217` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:213` |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 1 | `.vscode/PythonImportHelper-v2-Completion.json:1001` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_genealogy-validator&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 12,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "github-actions": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **3** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_github-actions`](https://sonarcloud.io/project/issues?id=chrysa_github-actions&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `githubactions:S7630` | VULNERABILITY | BLOCKER | 3 | `.github/workflows/ci-fullstack.yml:107` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_github-actions&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 3,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "guideline-checker": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **13** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_guideline-checker`](https://sonarcloud.io/project/issues?id=chrysa_guideline-checker&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S3776` | CODE_SMELL | CRITICAL | 10 | `guideline_checker/guidelines.py:191` |\n| `pythonsecurity:S2083` | VULNERABILITY | BLOCKER | 2 | `guideline_checker/web/central.py:158` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `guideline_checker/reporters/html.py:371` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_guideline-checker&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 2,
+      "high": 11,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "linkendin-resume": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_linkendin-resume`](https://sonarcloud.io/project/issues?id=chrysa_linkendin-resume&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `typescript:S3776` | CODE_SMELL | CRITICAL | 1 | `app/src/components/contact/ContactModal.tsx:35` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_linkendin-resume&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "link-reader-bot": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_link-reader-bot`](https://sonarcloud.io/project/issues?id=chrysa_link-reader-bot&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `typescript:S3735` | CODE_SMELL | CRITICAL | 1 | `ui/src/pages/RecapPage.tsx:23` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `api/routers/webhooks.py:33` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_link-reader-bot&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "mediavault": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **3** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_mediavault`](https://sonarcloud.io/project/issues?id=chrysa_mediavault&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:202` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:206` |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 1 | `.github/workflows/ci.yml:144` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_mediavault&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "mirrador": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **8** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_mirrador`](https://sonarcloud.io/project/issues?id=chrysa_mirrador&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `typescript:S3735` | CODE_SMELL | CRITICAL | 3 | `frontend/src/App.tsx:77` |\n| `secrets:S6698` | VULNERABILITY | BLOCKER | 3 | `.github/workflows/e2e.yml:27` |\n| `python:S6418` | VULNERABILITY | BLOCKER | 2 | `api/config.py:12` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_mirrador&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 5,
+      "high": 3,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "my-resume": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **1** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_my-resume`](https://sonarcloud.io/project/issues?id=chrysa_my-resume&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `css:S4657` | BUG | CRITICAL | 1 | `code/src/app.css:23` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_my-resume&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "PO-GO-DEX": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **3** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_PO-GO-DEX`](https://sonarcloud.io/project/issues?id=chrysa_PO-GO-DEX&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:202` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:206` |\n| `css:S4657` | BUG | CRITICAL | 1 | `code/src/app.css:33` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_PO-GO-DEX&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 3,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "pre-commit-hooks-changelog": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_pre-commit-hooks-changelog`](https://sonarcloud.io/project/issues?id=chrysa_pre-commit-hooks-changelog&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S3516` | CODE_SMELL | BLOCKER | 1 | `pre_commit_hook/generate_changelog.py:81` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `formater.py:95` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_pre-commit-hooks-changelog&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "pre-commit-tools": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **7** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_pre-commit-tools`](https://sonarcloud.io/project/issues?id=chrysa_pre-commit-tools&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S3776` | CODE_SMELL | CRITICAL | 5 | `pre_commit_hooks/makefile_check.py:178` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `pre_commit_hooks/makefile_check.py:152` |\n| `pythonsecurity:S2083` | VULNERABILITY | BLOCKER | 1 | `pre_commit_hooks/requirements_sort.py:163` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_pre-commit-tools&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 6,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "satisfactory-automated_calculator": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **5** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_satisfactory-automated_calculator`](https://sonarcloud.io/project/issues?id=chrysa_satisfactory-automated_calculator&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `javascript:S3776` | CODE_SMELL | CRITICAL | 5 | `scripts/bottleneck-analyzer.js:105` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_satisfactory-automated_calculator&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 5,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "shared-standards": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **13** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_shared-standards`](https://sonarcloud.io/project/issues?id=chrysa_shared-standards&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `shelldre:S131` | CODE_SMELL | CRITICAL | 9 | `scripts/audit-docker-compliance.sh:107` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 3 | `scripts/pre-commit-merge.py:214` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:216` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_shared-standards&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 13,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "usefull-containers": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **4** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_usefull-containers`](https://sonarcloud.io/project/issues?id=chrysa_usefull-containers&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `shelldre:S131` | CODE_SMELL | CRITICAL | 2 | `pytest/docker-cmd.sh:27` |\n| `python:S1192` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:202` |\n| `python:S3776` | CODE_SMELL | CRITICAL | 1 | `scripts/quality_gate.py:206` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_usefull-containers&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 0,
+      "high": 4,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "windows-autonome": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **8** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_windows-autonome`](https://sonarcloud.io/project/issues?id=chrysa_windows-autonome&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `shelldre:S131` | CODE_SMELL | CRITICAL | 3 | `scripts/scan/scan-debian.sh:60` |\n| `powershelldre:S8659` | CODE_SMELL | CRITICAL | 2 | `scripts/lib/software.ps1:12` |\n| `powershelldre:S3776` | CODE_SMELL | CRITICAL | 1 | `scripts/scan/scan-os.ps1:73` |\n| `json:S6418` | VULNERABILITY | BLOCKER | 1 | `annexes/vscode-settings.json:168` |\n| `secrets:S6690` | VULNERABILITY | BLOCKER | 1 | `annexes/vscode-settings.json:168` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_windows-autonome&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 2,
+      "high": 6,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "windows-docker-state-notification": {
+    "title": "SonarCloud: blocker & critical findings",
+    "body": "SonarCloud reports **2** unresolved `BLOCKER,CRITICAL` finding(s) for [`chrysa_windows-docker-state-notification`](https://sonarcloud.io/project/issues?id=chrysa_windows-docker-state-notification&resolved=false&severities=BLOCKER,CRITICAL).\n\n_Auto-filed from the SonarCloud API. One consolidated issue per repo; resolve findings in SonarCloud and they drop off on the next run._\n\n| Rule | Type | Severity | Count | Example |\n| --- | --- | --- | --- | --- |\n| `python:S2190` | BUG | BLOCKER | 1 | `src/docker_notification.py:24` |\n| `python:S6903` | CODE_SMELL | CRITICAL | 1 | `src/docker_notification.py:25` |\n\n**Triage in SonarCloud:** https://sonarcloud.io/project/issues?id=chrysa_windows-docker-state-notification&resolved=false&severities=BLOCKER,CRITICAL",
+    "counts": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  }
+}
