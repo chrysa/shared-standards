@@ -63,8 +63,8 @@ Build on `docs/UX-UI-GUIDELINES.md` + `DESIGN-SYSTEM.md` (do not reinvent).
 | ai-aggregator | ✓ done | #159 | |
 | studioverse | ✓ done | #65 | |
 | mirrador | ✓ done | #137 | Console persona + request-inspector IA (pilot); merged 2026-06-13 |
-| dev-nexus | todo | — | React 19 — resume here (5/16) |
-| devtool | todo | — | React |
+| dev-nexus | ✓ done | #327 | Console persona conformance (data-persona + IA brief); token migration was #279 |
+| devtool | todo | — | React — resume here (6/16) |
 | container-webview | todo | — | React |
 | satisfactory-factory-manager | todo | — | React 19 |
 | discordium | todo | — | React; CI red, PRs #89/#90 open |
