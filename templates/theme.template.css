@@ -1,0 +1,44 @@
+/*
+ * <APP_NAME> brand theme — VALUES only. Copy into the app, fill every value.
+ * Keep the token NAMES exactly as declared in contract.css. Import order:
+ *   @import "contract.css";   (or the app's vendored copy)
+ *   then this file.
+ * Every text/bg pair below MUST be WCAG AA verified in both themes.
+ */
+
+:root {
+  /* --- color: replace ALL of these with the brand palette --- */
+  --bg: /* TODO brand dark bg */;
+  --surface: /* TODO */;
+  --surface-2: /* TODO; >=4% L from --surface */;
+  --fg: /* TODO; >=4.5:1 on --bg */;
+  --muted: /* TODO; >=4.5:1 on --bg */;
+  --border: /* TODO */;
+  --accent: /* TODO brand accent */;
+  --accent-ink: /* TODO; >=4.5:1 on --accent fill */;
+
+  /* --- shape / depth --- */
+  --radius: /* TODO */;
+  --border-weight: /* TODO */;
+  --shadow: /* TODO brand shadow language */;
+
+  /* --- type: display must be a non-reflex face (not Inter/DM Sans as brand) --- */
+  --font-display: /* TODO */;
+  --font-body: /* TODO (Inter allowed here) */;
+  --font-mono: /* TODO */;
+
+  /* --- density / motion personality --- */
+  --density: /* TODO */;
+  --motion: /* TODO */;
+}
+
+:root.light {
+  --bg: /* TODO */;
+  --surface: /* TODO */;
+  --surface-2: /* TODO */;
+  --fg: /* TODO */;
+  --muted: /* TODO */;
+  --border: /* TODO */;
+  --accent: /* TODO light-mode accent (often darker for fill contrast) */;
+  --accent-ink: /* TODO */;
+}
