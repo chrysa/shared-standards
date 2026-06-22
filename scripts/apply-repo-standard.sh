@@ -65,7 +65,7 @@ repo_is_public() { [[ "$(repo_field "$1" public)" == "true" ]]; }
 
 # Detect the top-level python package dir (has __init__.py, not tests/build/venv).
 detect_package() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     local d
     for d in "$repo"/*/; do
         d="${d%/}"; local b; b="$(basename "$d")"
@@ -84,7 +84,7 @@ deploy_file() {
 }
 
 deploy_hygiene() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     deploy_file "$TPL/.editorconfig"  "$repo/.editorconfig"
     deploy_file "$TPL/.gitattributes" "$repo/.gitattributes"
     if $DRY_RUN; then
@@ -108,7 +108,7 @@ deploy_hygiene() {
 # Release tooling + repo meta. Create-if-absent only — never clobber an existing
 # CHANGELOG (real history), opencode.json, AGENTS.md, etc.
 deploy_release_tooling() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     local pairs=(
         "CHANGELOG.md:CHANGELOG.md"
         "cliff.toml:cliff.toml"
@@ -148,7 +148,7 @@ ci_is_canonical() {
 }
 
 deploy_stack_ci() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     local tpl dest="$repo/.github/workflows/ci.yml"
     local pkg sources tests project_key
     if ci_is_canonical "$dest"; then
@@ -167,7 +167,7 @@ deploy_stack_ci() {
         warn "no python/node stack detected · CI skipped"
         return
     fi
-    project_key="chrysa_${name}"
+    project_key="${PROJECT_KEY:-chrysa_${name}}"
     if $DRY_RUN; then
         info "[dry-run] would write ci.yml from $(basename "$tpl") (pkg=$pkg key=$project_key)"
         return
@@ -222,7 +222,7 @@ merge_precommit() {
 }
 
 apply_one() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     [[ -d "$repo" ]]      || { err "$repo absent"; return 2; }
     [[ -d "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
     log "═══ $name ═══"

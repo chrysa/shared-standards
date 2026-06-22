@@ -86,6 +86,8 @@ jobs:
                   echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
             - name: Apply standards
+              env:
+                  REPO_NAME: ${{ matrix.repo }}
               run: |
                   chmod +x shared-standards/scripts/*.sh
                   flags=""
