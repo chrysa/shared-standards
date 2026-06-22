@@ -66,6 +66,10 @@
   color: "362d59"
   description: "Auto-created from a Sentry issue"
 
+- name: "sonar"
+  color: "4c9bd6"
+  description: "Raised from a SonarCloud finding"
+
 - name: "standards-sync"
   color: "5319e7"
   description: "Automated chrysa shared-standards distribution"
