@@ -62,8 +62,8 @@ Build on `docs/UX-UI-GUIDELINES.md` + `DESIGN-SYSTEM.md` (do not reinvent).
 | gaming-os | ✓ done | #128 | |
 | ai-aggregator | ✓ done | #159 | |
 | studioverse | ✓ done | #65 | |
-| mirrador | todo | — | resume here (4/17) |
-| dev-nexus | todo | — | React 19 |
+| mirrador | ✓ done | #137 | Console persona + request-inspector IA (pilot); merged 2026-06-13 |
+| dev-nexus | todo | — | React 19 — resume here (5/16) |
 | devtool | todo | — | React |
 | container-webview | todo | — | React |
 | satisfactory-factory-manager | todo | — | React 19 |
