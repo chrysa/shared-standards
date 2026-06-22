@@ -1,0 +1,56 @@
+/*
+ * chrysa Design System — CONTRACT (shared by every app, do not edit per-app).
+ * Spec: docs/DESIGN-SYSTEM.md
+ *
+ * Declares the semantic token NAMES (the registry) with neutral fallback values,
+ * plus the a11y floor. Each app imports this, then overrides the VALUES in its own
+ * theme.css (see theme.template.css). Names are fixed; values are free.
+ */
+
+:root {
+  /* color roles — neutral fallbacks; apps override every one in theme.css */
+  --bg: #0e0e10;
+  --surface: #18181b;
+  --surface-2: #242428;   /* must differ >=4% L from --surface */
+  --fg: #fafafa;          /* >=4.5:1 on --bg */
+  --muted: #a1a1aa;       /* >=4.5:1 on --bg */
+  --border: #2e2e33;
+  --accent: #c8ff00;
+  --accent-ink: #0e0e10;  /* text/icon ON an --accent fill */
+  --signal: #22c55e;
+  --warning: #fbbf24;
+  --danger: #ff4d4d;
+  --ring: var(--accent);
+
+  /* shape / depth / type / density / motion roles — apps set these freely */
+  --radius: 6px;
+  --border-weight: 1px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.24);
+  --font-display: system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --density: 2.5rem;      /* control height */
+  --motion: 160ms;
+}
+
+:root.light {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f0f0f0;
+  --fg: #0e0e10;
+  --muted: #52525b;
+  --border: #d4d4d8;
+  --accent: #a3e000;
+  --accent-ink: #0e0e10;
+  --signal: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+}
+
+/* a11y floor — applies to every brand, do not remove */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

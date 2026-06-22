@@ -14,6 +14,23 @@
 >
 > Status legend: `todo → in-review → fix → PR-open → merged`
 
+> **Brand-theme tracking (ADR 0003).** As of 2026-06-22 the UI track no longer
+> tracks per-app *persona* — it tracks **brand-brief + signature + contract
+> conformance** per the per-app brand-theme model. Rollout is **one repo per
+> session** (Rule 1+2): brand-brief → theme tokens → signature → IA → a11y → PR.
+> Conformance is verified by `scripts/audit-design-conformance.sh` (the contract:
+> WCAG 2.1 AA + FR/EN i18n floor, semantic token names present, signature element
+> declared, IA not generic). The UI table columns below:
+> - **Brand brief** — ✓ (or link) once the app's `BRAND-BRIEF.md` exists.
+> - **Signature** — one-word name of the app's signature element + ✓ once declared.
+> - **Contract** — ✓ once the app imports `contract.css` **and** passes
+>   `scripts/audit-design-conformance.sh`.
+>
+> `gaming-os`, `studioverse`, `ai-aggregator` were persona-migrated under the
+> superseded ADR 0002; they fold into the brand-theme model retroactively (no
+> urgency) and show **persona-migrated; brand-brief + signature pending** until the
+> rollout reaches them.
+
 ## Phase 1 — Lib mirror families `django-*` / `fastapi-*`
 
 | Repo | Status | PR | P0/P1/P2 | Notes |
@@ -55,23 +72,29 @@
 
 ## Phase 4 — UI (= existing Design Campaign, epic 37759293e35e81e1973ce30839822b79)
 
-Build on `docs/UX-UI-GUIDELINES.md` + `DESIGN-SYSTEM.md` (do not reinvent).
+Build on `docs/DESIGN-SYSTEM.md` + ADR 0003 (brand themes). Conformance is
+verified by `scripts/audit-design-conformance.sh` (do not reinvent).
 
-| Repo | Status | PR | Notes |
-|---|---|---|---|
-| gaming-os | ✓ done | #128 | |
-| ai-aggregator | ✓ done | #159 | |
-| studioverse | ✓ done | #65 | |
-| mirrador | ✓ done | #137 | Console persona + request-inspector IA (pilot); merged 2026-06-13 |
-| dev-nexus | ✓ done | #327 | Console persona conformance (data-persona + IA brief); token migration was #279 |
-| devtool | todo | — | React — resume here (6/16) |
-| container-webview | todo | — | React |
-| satisfactory-factory-manager | todo | — | React 19 |
-| discordium | todo | — | React; CI red, PRs #89/#90 open |
-| D-D | todo | — | SvelteKit |
-| PO-GO-DEX | todo | — | SvelteKit |
-| my-resume | todo | — | SvelteKit (predecessor of linkendin-resume) |
-| linkendin-resume | todo | — | React 19 |
+Columns: **Brand brief** = `BRAND-BRIEF.md` exists (✓/link); **Signature** =
+one-word name of the app's signature element + ✓ once declared; **Contract** = ✓
+once the app imports `contract.css` AND passes
+`scripts/audit-design-conformance.sh`. Empty = pending (the rollout fills it).
+
+| Repo | Status | PR | Brand brief | Signature | Contract | Notes |
+|---|---|---|---|---|---|---|
+| gaming-os | ✓ done | #128 | pending | pending | pending | persona-migrated; brand-brief + signature pending |
+| ai-aggregator | ✓ done | #159 | pending | pending | pending | persona-migrated; brand-brief + signature pending |
+| studioverse | ✓ done | #65 | pending | pending | pending | persona-migrated; brand-brief + signature pending |
+| mirrador | ✓ done | #137 | pending | pending | pending | request-inspector IA (pilot); merged 2026-06-13 (was Console persona) |
+| dev-nexus | ✓ done | #327 | pending | pending | pending | IA brief; token migration was #279 (was Console persona, data-persona to drop) |
+| devtool | todo | — | pending | pending | pending | React — resume here (6/16) |
+| container-webview | todo | — | pending | pending | pending | React |
+| satisfactory-factory-manager | todo | — | pending | pending | pending | React 19 |
+| discordium | todo | — | pending | pending | pending | React; CI red, PRs #89/#90 open |
+| D-D | todo | — | pending | pending | pending | SvelteKit |
+| PO-GO-DEX | todo | — | pending | pending | pending | SvelteKit |
+| my-resume | todo | — | pending | pending | pending | SvelteKit (predecessor of linkendin-resume) |
+| linkendin-resume | todo | — | pending | pending | pending | React 19 |
 
 ## Phase 5 — CLI + VS Code extension
 
