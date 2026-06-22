@@ -1,6 +1,6 @@
 # ADR 0002 — Design personas replace the single "Neon Brutalist" DNA
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR 0003 (2026-06-22)
 - **Date:** 2026-06-12
 - **Context:** Design audit 2026-06 (`docs/audits/DESIGN-AUDIT-2026-06.md`),
   supersedes the visual layer of ADR-less campaign `design_campaign_2026_06`
