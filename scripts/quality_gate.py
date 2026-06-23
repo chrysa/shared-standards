@@ -16,6 +16,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+_OVERALL_PASS = _OVERALL_PASS
+_OVERALL_FAIL = _OVERALL_FAIL
+
 
 class QualityGate:
     CONFIG_FILE = ".quality-gate.json"
@@ -210,14 +213,33 @@ class QualityGate:
         self._write_report(report)
 
         if all_ok:
-            print("OVERALL_RESULT|PASS")
+            print(_OVERALL_PASS)
             return True
 
-        print("OVERALL_RESULT|FAIL")
+        print(_OVERALL_FAIL)
         print(
             "ERROR: baseline contains failing gates; fix quality checks before using this baseline"
         )
         return False
+
+    def _evaluate_gate_result(
+        self,
+        baseline_valid: bool,
+        current: dict[str, Any],
+        current_metric: Any,
+        target: Any,
+        operator: str,
+    ) -> tuple[bool, str]:
+        """Return (passed, reason) for a single gate evaluation."""
+        if not baseline_valid:
+            return False, "invalid_baseline"
+        if current.get("exit_code", 1) != 0:
+            return False, "command_failed"
+        try:
+            passed = self._compare(current_metric, target, operator)
+            return passed, "ok" if passed else "metric_regression"
+        except Exception:
+            return False, "comparison_error"
 
     def verify(self) -> bool:
         print("VERIFY|START")
@@ -229,7 +251,7 @@ class QualityGate:
                 "baseline_file": str(self.baseline_path),
             }
             self._write_report(report)
-            print("OVERALL_RESULT|FAIL")
+            print(_OVERALL_FAIL)
             print("ERROR: baseline file not found; run quality-gate-baseline first")
             return False
 
@@ -250,24 +272,9 @@ class QualityGate:
             target = threshold_cfg.get("value", baseline_metric)
             current_metric = current.get("metric", 0)
 
-            passed = True
-            reason = "ok"
-
-            if not baseline_valid:
-                passed = False
-                reason = "invalid_baseline"
-            elif current.get("exit_code", 1) != 0:
-                passed = False
-                reason = "command_failed"
-            else:
-                try:
-                    passed = self._compare(current_metric, target, operator)
-                    if not passed:
-                        reason = "metric_regression"
-                except Exception:
-                    passed = False
-                    reason = "comparison_error"
-
+            passed, reason = self._evaluate_gate_result(
+                baseline_valid, current, current_metric, target, operator
+            )
             if not passed:
                 all_passed = False
 
@@ -303,10 +310,10 @@ class QualityGate:
         self._write_report(report)
 
         if all_passed:
-            print("OVERALL_RESULT|PASS")
+            print(_OVERALL_PASS)
             return True
 
-        print("OVERALL_RESULT|FAIL")
+        print(_OVERALL_FAIL)
         return False
 
 

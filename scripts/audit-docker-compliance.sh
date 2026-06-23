@@ -108,6 +108,7 @@ mark() {
         PASS)    printf '✓ PASS   ' ;; WARN)    printf '! WARN   ' ;;
         FAIL)    printf '✗ FAIL   ' ;; EXEMPT)  printf '– EXEMPT ' ;;
         PENDING) printf '… PEND   ' ;; ABSENT)  printf '? ABSENT ' ;;
+        *)       printf '? UNKNWN ' ;;
     esac
 }
 
@@ -125,6 +126,7 @@ while read -r name status runtime; do
     case "$V_STATUS" in
         PASS) ((passes++)) ;; WARN) ((warns++)) ;; FAIL) ((fails++)) ;;
         EXEMPT) ((exempts++)) ;; PENDING) ((pendings++)) ;; ABSENT) ((absents++)) ;;
+        *) ;;
     esac
     [[ -n "$json_items" ]] && json_items+=","
     json_items+=$(printf '\n  {"repo":"%s","runtime":"%s","verdict":"%s","detail":"%s"}' \
