@@ -16,8 +16,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-_OVERALL_PASS = _OVERALL_PASS
-_OVERALL_FAIL = _OVERALL_FAIL
+_OVERALL_PASS = "OVERALL_RESULT|PASS"
+_OVERALL_FAIL = "OVERALL_RESULT|FAIL"
 
 
 class QualityGate:
