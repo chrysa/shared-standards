@@ -69,7 +69,7 @@ detect_package() {
     local d
     for d in "$repo"/*/; do
         d="${d%/}"; local b; b="$(basename "$d")"
-        case "$b" in tests|test|build|dist|docs|.*|venv|node_modules) continue ;; esac
+        case "$b" in tests|test|build|dist|docs|.*|venv|node_modules) continue ;; *) ;; esac
         [[ -f "$d/__init__.py" ]] && { basename "$d"; return; }
     done
     echo "${name//-/_}"

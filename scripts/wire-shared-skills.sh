@@ -20,7 +20,7 @@ while [ $# -gt 0 ]; do case "$1" in
   -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
   *) echo "unknown arg: $1" >&2; exit 2 ;;
 esac; done
-is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; esac; done; return 1; }
+is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; *) ;; esac; done; return 1; }
 
 # short description per shared skill (used when writing the reference line)
 desc() { case "$1" in

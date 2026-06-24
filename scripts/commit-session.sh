@@ -48,7 +48,7 @@ done
 # --pr/--push do nothing without --apply (safe-by-default preview)
 [ $PR -eq 1 ] && PUSH=1   # opening a PR requires the branch to be pushed first
 
-is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; esac; done; return 1; }
+is_excluded() { local p="$1" pat; for pat in "${EXCLUDES[@]:-}"; do case "$p" in $pat) return 0;; *) ;; esac; done; return 1; }
 trailer() { [ -n "$ISSUE" ] && printf 'Refs #%s' "$ISSUE" || true; }
 base_branch() { local r="$1" b; for b in develop main master; do git -C "$r" show-ref --verify --quiet "refs/heads/$b" && { echo "$b"; return; }; done; }
 
@@ -130,7 +130,7 @@ echo "APPLY=$APPLY PUSH=$PUSH PR=$PR  issue=${ISSUE:-$([ $MK_ISSUE -eq 1 ] && ec
 echo "── ui-ux repos (CLAUDE.md) ─────────────────────────────"
 while IFS= read -r g; do
   repo="$(dirname "$g")"; rel="${repo#./}"
-  case "$rel" in shared-standards|claude-config) continue;; esac
+  case "$rel" in shared-standards|claude-config) continue;; *) ;; esac
   is_excluded "$rel" && continue
   do_repo "$repo" "chore/ui-ux-skill-ref" \
     "chore(ui-ux): reference ui-ux skill in CLAUDE.md" \

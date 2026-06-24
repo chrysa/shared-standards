@@ -44,7 +44,7 @@ is_excluded() {
   for pat in "${EXCLUDES[@]:-}"; do
     [ -n "$pat" ] || continue
     # shellcheck disable=SC2053
-    case "$p" in $pat) return 0 ;; esac
+    case "$p" in $pat) return 0 ;; *) ;; esac
   done
   return 1
 }

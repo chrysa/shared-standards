@@ -34,6 +34,7 @@ for arg in "$@"; do
         --dry-run) DRY_RUN=true ;;
         --disable) DISABLE=true ;;
         -h|--help) sed -n '2,22p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        *) ;;
     esac
 done
 

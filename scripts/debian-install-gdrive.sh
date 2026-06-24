@@ -39,6 +39,7 @@ for arg in "$@"; do
             sed -n '2,22p' "$0" | sed 's/^# \?//'
             exit 0
             ;;
+        *) ;;
     esac
     shift 2>/dev/null || true
 done

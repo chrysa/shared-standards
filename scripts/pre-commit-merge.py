@@ -53,6 +53,23 @@ def _load_text(text: str) -> dict:
 _TOP_SEQ_RE = re.compile(r"^(\s*)-\s", re.MULTILINE)
 
 
+def _repos_block_offset(lines: list[str]) -> int | None:
+    """Scan lines after `repos:` and return the dash-indent, or None if not found."""
+    in_repos = False
+    for line in lines:
+        if re.match(r"^repos:\s*$", line):
+            in_repos = True
+            continue
+        if not in_repos:
+            continue
+        m = re.match(r"^(\s*)-\s", line)
+        if m:
+            return len(m.group(1))
+        if line.strip() and not line.lstrip().startswith("#") and not line.startswith(" "):
+            break
+    return None
+
+
 def detect_offset(text: str) -> int:
     """Detect the repo's top-level sequence offset (dash indent) under `repos:`.
 
@@ -61,20 +78,8 @@ def detect_offset(text: str) -> int:
     (e.g. `wrong indentation: expected N`). We mirror the target's style instead.
     Returns 2 when the file has no list yet (new/empty config).
     """
-    in_repos = False
-    for line in text.splitlines():
-        if re.match(r"^repos:\s*$", line):
-            in_repos = True
-            continue
-        if in_repos:
-            m = re.match(r"^(\s*)-\s", line)
-            if m:
-                return len(m.group(1))
-            if line.strip() and not line.lstrip().startswith("#"):
-                # a non-list, non-comment line at column 0 ends the repos block
-                if not line.startswith(" "):
-                    break
-    return 2
+    result = _repos_block_offset(text.splitlines())
+    return result if result is not None else 2
 
 
 def decide_offset(text: str) -> int:
@@ -211,6 +216,26 @@ def target_python(target: dict) -> str | None:
     return (target.get("default_language_version") or {}).get("python")
 
 
+def _merge_single_repo(
+    brepo: dict, target: dict, target_by_url: dict, wanted: dict
+) -> None:
+    """Merge one baseline repo entry into target (mutates target and target_by_url)."""
+    url = brepo.get("repo")
+    if url not in target_by_url:
+        new_repo = {k: v for k, v in brepo.items() if k != "hooks"}
+        new_repo["hooks"] = list(wanted.values())
+        target.setdefault("repos", []).append(new_repo)
+        target_by_url[url] = new_repo
+        return
+    existing = target_by_url[url]
+    have = index_hooks(existing)
+    for hid, hook in wanted.items():
+        if hid not in have:
+            existing.setdefault("hooks", []).append(hook)
+    if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
+        existing["rev"] = brepo["rev"]
+
+
 def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
     for brepo in baseline.get("repos", []):
@@ -220,19 +245,7 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
         wanted = enforced_hooks(brepo, allowed)
         if not wanted:
             continue
-        if url not in target_by_url:
-            new_repo = {k: v for k, v in brepo.items() if k != "hooks"}
-            new_repo["hooks"] = list(wanted.values())
-            target.setdefault("repos", []).append(new_repo)
-            target_by_url[url] = new_repo
-            continue
-        existing = target_by_url[url]
-        have = index_hooks(existing)
-        for hid, hook in wanted.items():
-            if hid not in have:
-                existing.setdefault("hooks", []).append(hook)
-        if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
-            existing["rev"] = brepo["rev"]
+        _merge_single_repo(brepo, target, target_by_url, wanted)
     # Align the python pin to canonical: chrysa/pre-commit-tools requires >=3.14,
     # so a repo pinned to an older interpreter (e.g. python3.13) fails to build the
     # hook env. Only adjust when the target already declares a python version.
