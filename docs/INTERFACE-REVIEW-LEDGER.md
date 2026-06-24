@@ -87,14 +87,22 @@ once the app imports `contract.css` AND passes
 | studioverse | ✓ done | #65 | pending | pending | pending | persona-migrated; brand-brief + signature pending |
 | mirrador | ✓ done | #137 | pending | pending | pending | request-inspector IA (pilot); merged 2026-06-13 (was Console persona) |
 | dev-nexus | ✓ done | #327 | pending | pending | pending | IA brief; token migration was #279 (was Console persona, data-persona to drop) |
-| devtool | todo | — | pending | pending | pending | React — resume here (6/16) |
-| container-webview | todo | — | pending | pending | pending | React |
-| satisfactory-factory-manager | todo | — | pending | pending | pending | React 19 |
-| discordium | todo | — | pending | pending | pending | React; CI red, PRs #89/#90 open |
-| D-D | todo | — | pending | pending | pending | SvelteKit |
-| PO-GO-DEX | todo | — | pending | pending | pending | SvelteKit |
-| my-resume | todo | — | pending | pending | pending | SvelteKit (predecessor of linkendin-resume) |
-| linkendin-resume | todo | — | pending | pending | pending | React 19 |
+| devtool | ✓ done | #120 | pending | pending | pending | trace_id-correlated incident Inspector IA (master/detail); merged 2026-06-22 |
+| container-webview | ✓ done | #203 | pending | pending | pending | Project Workspace master/detail + derived live health; merged 2026-06-22 |
+| satisfactory-factory-manager | frozen | — | pending | pending | pending | React 19; V1 gate (2026-06-24) journal empty → Fail/freeze (human call). IA excluded while frozen |
+| discordium | ✓ done | #155 | pending | pending | pending | Command-HUD + Build/Research queue IA (live countdowns); merged 2026-06-22. Arcade surface = #154 |
+| D-D | blocked | — | pending | pending | pending | SvelteKit — bare starter scaffold, zero domain. IA needs a JTBD/domain spec first |
+| PO-GO-DEX | blocked | — | pending | pending | pending | SvelteKit — bare starter scaffold, zero domain. IA needs a JTBD/domain spec first |
+| my-resume | n/a | — | pending | pending | pending | SvelteKit scaffold, DEPRECATED (superseded by linkendin-resume) → archive candidate |
+| linkendin-resume | ✓ done | #230 | ✓ #226 | logbook index-rail | ✓ #226 | React 19; IA already document-appropriate (monograph). #230 = surface skill tier in print |
+
+> **Phase 4 IA track is effectively complete (2026-06-24).** Every buildable
+> frontend has had its IA pass; the rest are not actionable as IA work:
+> `D-D` / `PO-GO-DEX` are bare SvelteKit scaffolds with no domain (need a JTBD
+> spec first), `my-resume` is a deprecated scaffold (archive), and
+> `satisfactory-factory-manager` is frozen pending its human V1 gate verdict.
+> Do **not** manufacture an IA pass for an app that already serves its job — the
+> doctrine is "surface the data the app already has," not invent new screens.
 
 ## Phase 5 — CLI + VS Code extension
 
