@@ -99,6 +99,25 @@ infrastructure lands.
 | `web-typecheck` | — | — | ✅ | — | Type-check the frontend |
 | `e2e` | — | — | ✅ | — | Run end-to-end tests (Playwright) |
 
+**`e2e` — canonical form (local dev, opt-in).** Playwright runs inside the
+official docker image (never on the host); the stack must be up first
+(`make docker-up`). It is **not** a CI gate. Scaffold to copy:
+`shared-standards/templates/e2e/` (`playwright.config.ts` + auth-free
+`smoke.spec.ts`; optional seeded-auth `fixtures.ts.example`). Reference
+implementation: `chrysa/discordium`.
+
+```makefile
+e2e: ## Run Playwright E2E tests (stack must be up: make docker-up)
+	docker run --rm --network host \
+		-v $(PWD)/$(FRONTEND_DIR):/app -w /app \
+		-e E2E_BASE_URL=http://localhost:$(E2E_PORT) \
+		mcr.microsoft.com/playwright:v1.60.0-noble \
+		sh -c "npm ci --silent && npx playwright test"
+
+e2e-headed: ## Run Playwright with browser UI (debug)
+	cd $(FRONTEND_DIR) && npx playwright test --headed
+```
+
 **Tier definitions:**
 - **`lib`** — pure package, no `docker-compose.yml`. `lint/format/typecheck/test/test-cov`
   run the tool directly via the venv created by `make install`; the recommended

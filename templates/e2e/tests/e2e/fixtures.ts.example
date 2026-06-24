@@ -1,0 +1,34 @@
+/**
+ * OPTIONAL — auth helpers for repos with seeded dev accounts.
+ *
+ * Drop the `.example` suffix and adjust selectors/creds if your app is
+ * auth-gated. Pattern proven in chrysa/discordium: the stack seeds default
+ * accounts on startup (e.g. SEED_DEFAULTS=1 in docker-compose), and specs log
+ * in through the real login form. Repos without auth (e.g. portfolio-viz) do
+ * not need this file.
+ */
+
+import { expect, type Page } from "@playwright/test";
+
+export const ADMIN_CREDS = {
+  username: process.env.E2E_ADMIN_USER ?? "admin",
+  password: process.env.E2E_ADMIN_PASS ?? "change-me",
+} as const;
+
+/** Log in via the username/password form and wait for the post-login nav. */
+export async function login(
+  page: Page,
+  creds: { username: string; password: string },
+): Promise<void> {
+  await page.goto("/login");
+  await page.getByPlaceholder(/identifiant|username|email/i).fill(creds.username);
+  await page.locator('input[type="password"]').fill(creds.password);
+  await page.getByRole("button", { name: /login|sign in|connexion|entrer/i }).click();
+  await expect(page).not.toHaveURL(/\/login$/, { timeout: 10_000 });
+}
+
+/** Reset auth state between tests. */
+export async function clearAuth(page: Page): Promise<void> {
+  await page.context().clearCookies();
+  await page.addInitScript(() => window.localStorage.clear());
+}
