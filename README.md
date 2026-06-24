@@ -48,6 +48,9 @@ templates/
     tasks.python.json           # VS Code tasks template for Python projects
     tasks.fullstack.json        # VS Code tasks template for full-stack projects (Python + TS)
     README.md                   # Documentation and keyboard shortcuts
+  e2e/                          # Playwright E2E scaffold for fullstack repos (local dev, see EXECUTION_STANDARD §1.3b)
+    playwright.config.ts
+    tests/e2e/smoke.spec.ts     # auth-free smoke + optional fixtures.ts.example
   issue-templates/
     bug.md
     feature.md
