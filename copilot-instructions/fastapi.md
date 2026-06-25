@@ -22,7 +22,8 @@ app/
   schemas/      # Pydantic request/response schemas
   services/     # business logic (no HTTP or ORM imports)
   dependencies/ # FastAPI Depends() factories
-  constants.py  # app-wide constants (Final)
+  constants.py  # typed loader exposing constants read from external YAML (Final)
+  config/       # external YAML files holding all constants & config values
 tests/
   unit/
   integration/
@@ -36,6 +37,9 @@ tests/
 - ORM models and Pydantic schemas are separate classes; never share them.
 - Use `Depends()` for DB sessions, auth, pagination — never pass them as plain args.
 - Settings come from `pydantic_settings.BaseSettings`; never use `os.environ` directly.
+- No hardcoded constants in code: thresholds, business rules, labels, URLs and magic
+  numbers live in external YAML under `config/`, loaded once via `constants.py`. Only
+  `status.HTTP_*` and language enums are exempt.
 
 ## API design
 

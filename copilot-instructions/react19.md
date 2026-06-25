@@ -19,7 +19,7 @@ src/
   hooks/        # global custom hooks
   pages/        # route-level components — thin wrappers over features
   store/        # Redux Toolkit store + root reducer
-  constants.ts  # app-wide constants (as const)
+  constants.ts  # typed module exposing constants generated from external YAML (as const)
   types/        # shared TypeScript types
   utils/        # pure utility functions
 ```
@@ -117,6 +117,8 @@ src/
 
 - All user-facing strings **must** go through `react-i18next` (`useTranslation` hook).
 - No hardcoded UI text in components. Translation keys in `src/i18n/locales/`.
+- No hardcoded constants in components: thresholds, business rules, labels, URLs and
+  magic numbers come from `constants.ts` (generated from external YAML), never inline.
 - Supported locales from V1: `fr`, `en`.
 
 ## Styling
