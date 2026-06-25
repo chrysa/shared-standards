@@ -12,7 +12,8 @@ src/
     __init__.py       # public API surface — explicit re-exports only
     _internal/        # private implementation (not part of public API)
     py.typed          # marker file for PEP 561
-    constants.py      # library-wide constants (Final)
+    constants.py      # typed loader exposing constants read from a bundled YAML (Final)
+    config/           # YAML data files holding constants & config values (no inline literals)
 tests/
   unit/
   integration/        # optional — only if the lib has external dependencies
