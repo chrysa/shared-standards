@@ -49,6 +49,12 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
   numbers) live in **external YAML files** and are loaded at runtime. Code reads them
   through a typed loader (Pydantic Settings backend · generated typed module frontend),
   never as inline literals. Only language-level enums (e.g. `status.HTTP_*`) are exempt.
+- **Semantic URLs & code** — URLs are resource-oriented and human-readable: lowercase,
+  hyphenated, plural-noun collections, no verbs or actions in the path (`GET /invoices/42`,
+  never `/getInvoice?id=42`); REST shapes follow the `api-design` skill. Code is
+  self-describing: intention-revealing names over comments, semantic HTML elements
+  (`<nav>`, `<button>`, `<main>`, `<header>`…) never a `<div>` wired as a control, and
+  ARIA used only to fill gaps native semantics cannot express.
 
 ## Quality gates
 
