@@ -21,3 +21,9 @@ def test_load_config_reads_threshold(tmp_path: Path) -> None:
 
 def test_load_allowlist_missing_is_empty(tmp_path: Path) -> None:
     assert load_allowlist(tmp_path / "nope.json") == set()
+
+
+def test_load_allowlist_returns_entries(tmp_path: Path) -> None:
+    allowlist_file = tmp_path / "allowlist.json"
+    allowlist_file.write_text('{"allow": ["abc123", "def456"]}', encoding="utf-8")
+    assert load_allowlist(allowlist_file) == {"abc123", "def456"}
