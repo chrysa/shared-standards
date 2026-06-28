@@ -106,6 +106,27 @@ cp path/to/shared-standards/templates/vscode/tasks.fullstack.json .vscode/tasks.
 
 Then remove tasks that do not have a corresponding `make` target.
 
+### PII (GDPR) detection
+
+Microsoft Presidio scans for personal data — emails, IBAN, phone numbers, credit
+cards, IP addresses, French NIR (with control-key validation) and CNI — as a
+blocking `pii-scan` pre-commit hook and in CI (`workflows/pii-scan.yml`).
+
+```bash
+python -m scripts.pii_scan --all          # scan the whole repo
+python -m scripts.pii_scan --selftest     # verify recognizers load
+python -m scripts.pii_scan --print-fingerprint path/to/file   # list fingerprints
+```
+
+- Config: `.pii-scan.toml` (entities, score threshold, excluded globs).
+- Allowlist a reviewed false positive by adding its `--print-fingerprint` value to
+  the `allow` array in `.pii-allowlist.json`.
+- `PERSON` is excluded by default (spaCy NER is too noisy on code/config — see
+  `DECISIONS.md` D-0006); re-add it in `.pii-scan.toml` for prose-heavy repos.
+- The pre-commit hook is hermetic: Presidio and the spaCy fr+en model wheels are
+  pinned in `additional_dependencies`. CI gates PR-changed files (fast) and runs a
+  weekly non-blocking full-repo audit.
+
 ## Model tagging
 
 Rules and prompts that are model-specific are tagged with `@[MODEL_NAME]`.
