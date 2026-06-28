@@ -13,8 +13,18 @@ SELFTEST_SAMPLE = "Email test.user@example.com"
 _MODELS = {"fr": "fr_core_news_sm", "en": "en_core_web_sm"}
 
 
+def _validate_languages(cfg: ScanConfig) -> None:
+    """Raise ValueError for empty or unsupported language lists."""
+    if not cfg.languages:
+        raise ValueError("ScanConfig.languages must not be empty")
+    for lang in cfg.languages:
+        if lang not in _MODELS:
+            raise ValueError(f"Unsupported language {lang!r}; supported: {sorted(_MODELS)}")
+
+
 def build_analyzer(cfg: ScanConfig) -> AnalyzerEngine:
     """Assemble an AnalyzerEngine for the configured languages + custom recognizers."""
+    _validate_languages(cfg)
     models = [{"lang_code": lang, "model_name": _MODELS[lang]} for lang in cfg.languages]
     provider = NlpEngineProvider(
         nlp_configuration={"nlp_engine_name": "spacy", "models": models}
