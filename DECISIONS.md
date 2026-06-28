@@ -76,3 +76,24 @@ the info line, not a per-agent `⚠️` warning. This is deliberate — without 
 (fleet audit dropped 9019 → 7 warnings). Reviewers needing per-agent detail on a specific
 registry run it with `--full-mirror`. Broken skill refs and source↔full-mirror drift remain
 hard `❌`/`⚠️`. Shipped in shared-standards PR #110.
+
+---
+
+## D-0005 — Standards management console (`console/`)
+
+**Date**: 2026-06-28
+**Status**: accepted
+
+A local, GitHub-API-backed management console is added under `console/` to operate the
+standards fleet from a UI: edit `repos.yml` classification (status → direct commit), trigger
+the `distribute-standards` workflow (check/apply), and edit `STANDARDS.chrysa.md` (→ PR).
+
+**Hybrid model**: compliance monitoring is read from the hosted guideline-checker central
+server; write actions run locally with the operator's own token (nothing stored). The console
+holds no fleet state — the fleet, manifest, standard, runs and PRs are read live via the API.
+
+**Stack** (follows `.chrysa/STANDARDS.md`): backend FastAPI JSON API (Pydantic v2, top-level
+handlers, all referential externalised to `constants.yaml`); frontend React 19 + Vite 6 +
+shadcn/ui + Tailwind + TanStack Query + react-i18next (FR/EN) + dark mode (WCAG 2.1 AA).
+No deviation from the manifest; this entry exists to satisfy the ADR gate on the new
+`pyproject.toml` / `web/package.json`.
