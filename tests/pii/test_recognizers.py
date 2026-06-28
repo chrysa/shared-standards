@@ -1,4 +1,4 @@
-from scripts.pii.recognizers import is_valid_nir
+from scripts.pii.recognizers import build_custom_recognizers, is_valid_nir
 
 VALID_NIR = "180127505200108"      # control key 08, valid
 INVALID_KEY_NIR = "180127505200199"  # wrong control key
@@ -19,3 +19,14 @@ def test_is_valid_nir_rejects_wrong_key() -> None:
 
 def test_is_valid_nir_rejects_wrong_length() -> None:
     assert is_valid_nir("12345") is False
+
+
+def test_build_custom_recognizers_covers_fr_entities() -> None:
+    entities = {r.supported_entities[0] for r in build_custom_recognizers()}
+    assert {"FR_NIR", "FR_CNI"} <= entities
+
+
+def test_nir_recognizer_invalidates_bad_key() -> None:
+    nir = next(r for r in build_custom_recognizers() if r.supported_entities[0] == "FR_NIR")
+    assert nir.validate_result("180127505200199") is False
+    assert nir.validate_result("180127505200108") is True

@@ -1,5 +1,6 @@
 """Custom Presidio recognizers for French personal identifiers."""
-# Pattern and PatternRecognizer will be used in later tasks (recognizer classes).
+
+from presidio_analyzer import Pattern, PatternRecognizer  # type: ignore[import-not-found]
 
 NIR_LENGTH = 15
 NIR_KEY_MODULO = 97
@@ -25,3 +26,31 @@ def _normalize_corsica(body: str) -> str:
     if dept in _CORSICA:
         return body[:5] + _CORSICA[dept] + body[7:]
     return body
+
+
+NIR_PATTERN = r"\b[12]\d{2}\d{2}(?:\d{2}|2[AB])\d{3}\d{3}\d{2}\b"
+CNI_PATTERN = r"\b\d{12}\b"
+
+
+class FrNirRecognizer(PatternRecognizer):
+    """French social-security number recognizer with control-key validation."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            supported_entity="FR_NIR",
+            patterns=[Pattern("FR_NIR", NIR_PATTERN, 0.6)],
+            supported_language="fr",
+        )
+
+    def validate_result(self, pattern_text: str) -> bool:
+        return is_valid_nir(pattern_text)
+
+
+def build_custom_recognizers() -> list[PatternRecognizer]:
+    """Return the custom French PII recognizers (NIR, CNI)."""
+    cni = PatternRecognizer(
+        supported_entity="FR_CNI",
+        patterns=[Pattern("FR_CNI", CNI_PATTERN, 0.3)],
+        supported_language="fr",
+    )
+    return [FrNirRecognizer(), cni]
