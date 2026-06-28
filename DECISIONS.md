@@ -98,7 +98,7 @@ hard `❌`/`⚠️`. Shipped in shared-standards PR #110.
 
 ---
 
-## D-0006 — PII scan default entities exclude PERSON
+## D-0006 — PII scan default entities exclude PERSON and FR_CNI
 
 **Date**: 2026-06-28
 **Status**: accepted
@@ -112,8 +112,12 @@ names, identifiers, URL fragments like `explosion`, `spacy`) as `PERSON` at ~0.8
 blocking gate over source and config files this produces pervasive false positives — it
 blocked the hook's own `.pre-commit-config.yaml` commit with 7 PERSON hits.
 
-**Accepted tradeoff**: real person names sitting in source/fixtures are not caught by the
-default config. High-precision recognizers (`EMAIL_ADDRESS`, `IBAN_CODE`, `PHONE_NUMBER`,
-`CREDIT_CARD`, `IP_ADDRESS`, `FR_NIR`, `FR_CNI`) remain on. Prose-heavy repos can re-add
-`PERSON` to `entities` in `.pii-scan.toml`. The recognizer itself stays available; only the
-default is changed.
+`FR_CNI` is excluded for the same reason: it is a bare `\b\d{12}\b` pattern with score 0.3,
+below the 0.5 gate, so it never fires by default — and raising it to fire would flag any
+12-digit number. Rather than ship a noisy or inert advertised entity, it is opt-in.
+
+**Accepted tradeoff**: real person names and French CNI numbers in source/fixtures are not
+caught by the default config. High-precision recognizers (`EMAIL_ADDRESS`, `IBAN_CODE`,
+`PHONE_NUMBER`, `CREDIT_CARD`, `IP_ADDRESS`, `FR_NIR`) remain on. Add `PERSON` / `FR_CNI` to
+`entities` in `.pii-scan.toml` to opt in. Both recognizers stay available; only the default
+set is changed.
