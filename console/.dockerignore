@@ -1,0 +1,10 @@
+**/__pycache__
+**/*.pyc
+.venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+web/node_modules
+web/dist
+standards_console/web_dist
