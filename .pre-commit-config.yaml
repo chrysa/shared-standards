@@ -92,4 +92,18 @@ repos:
     language: system
     pass_filenames: false
     files: ^(cliff\.toml|templates/cliff\.toml)$
+  - id: pii-scan
+    name: PII (GDPR) detection (Presidio)
+    entry: python -m scripts.pii_scan
+    language: python
+    pass_filenames: true
+    require_serial: true
+    exclude: ^(graphify|sys|seeds/|tests/pii/fixtures/)
+    additional_dependencies:
+    - presidio-analyzer==2.2.359
+    # spaCy's CLI imports click directly, but typer-slim (pulled by presidio) no
+    # longer depends on it — pin it explicitly so the isolated env is hermetic.
+    - click==8.4.2
+    - fr_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl
+    - en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
   repo: local
