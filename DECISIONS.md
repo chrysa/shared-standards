@@ -56,6 +56,25 @@ Codified in `EXECUTION_STANDARD.md` §6 (Registry) and §11 (Distribution), and 
 
 ---
 
+## D-0005 — pyproject.toml: pytest plugin exclusions for non-Django environment
+
+**Date**: 2026-06-28
+**Status**: accepted
+
+Added `pyproject.toml` with `[tool.pytest.ini_options]` to disable the `query_optimizer`
+and `django` pytest plugins that are installed globally on the development host (from
+unrelated projects that share the same Python environment). Without this config, these
+plugins inject a `query_collector` autouse fixture into every test, which fails immediately
+when Django settings are not configured — which they are not in this non-Django repo.
+
+`addopts = "-p no:query_optimizer -p no:django"` makes the standard
+`pytest tests/pii/test_recognizers.py -v` invocation work without any extra flags.
+
+This does not affect CI (which runs in an isolated environment) but is required for local
+development in a shared pyenv environment.
+
+---
+
 ## D-0004 — Skills/agents audit: subset vs full-mirror registries
 
 **Date**: 2026-06-15
