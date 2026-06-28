@@ -1,9 +1,56 @@
 ---
+# Dependabot configuration — chrysa standard template
+# Source: shared-standards/templates/dependabot.yml
+#
+# Schedule: Friday 04:00 UTC — avoids sprint mid-week noise
+# Cooldown 7d on noisy ecosystems — reduces PR churn
+# Groups: bundle related updates to reduce PR volume
 version: 2
-
 updates:
+    # ═══ GitHub Actions (all repos) ═══
     - package-ecosystem: github-actions
-      directory: /
+      directory: .github/workflows/
+      assignees:
+          - chrysa
+      reviewers:
+          - chrysa
+      open-pull-requests-limit: 8
+      commit-message:
+          prefix: "[SKIP CI] [GA] "
+      labels:
+          - skip-ci
+          - dependencies
+          - Ci
       schedule:
-          interval: weekly
-      open-pull-requests-limit: 5
+          interval: cron
+          cronjob: "0 4 * * 5"
+      groups:
+          actions-official:
+              patterns:
+                  - actions/*
+          peter-evans:
+              patterns:
+                  - peter-evans/*
+          community-actions:
+              patterns:
+                  - "*"
+      cooldown:
+          default-days: 7
+
+    # ═══ Pre-commit (repos with .pre-commit-config.yaml) ═══
+    - package-ecosystem: pre-commit
+      directory: /
+      assignees:
+          - chrysa
+      reviewers:
+          - chrysa
+      open-pull-requests-limit: 2
+      commit-message:
+          prefix: "[SKIP CI] [pre-commit] "
+      labels:
+          - skip-ci
+          - dependencies
+          - Pre-commit
+      schedule:
+          interval: cron
+          cronjob: "0 4 * * 5"

@@ -10,6 +10,14 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
     },
+    "graphify": {
+      "args": [
+        "-m",
+        "graphify.serve",
+        "/home/anthony/Documents/perso/projects/chrysa/shared-standards/graphify-out/graph.json"
+      ],
+      "command": "python3"
+    },
     "notion": {
       "args": [
         "-y",
