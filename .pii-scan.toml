@@ -1,0 +1,12 @@
+# PII (GDPR) scan configuration — see docs and scripts/pii_scan.py
+score_threshold = 0.5
+languages = ["fr", "en"]
+# "PERSON" and "FR_CNI" are excluded by default: PERSON (spaCy NER) flags ordinary
+# code/config tokens at ~0.85, and FR_CNI is a bare 12-digit pattern too imprecise
+# to gate on. Both recognizers stay available — add them here to opt in. See D-0006.
+entities = [
+  "EMAIL_ADDRESS", "IBAN_CODE", "PHONE_NUMBER", "CREDIT_CARD",
+  "IP_ADDRESS", "FR_NIR",
+]
+# Globs excluded from scanning (binary/generated/large artifacts).
+exclude_paths = ["graphify", "sys", "seeds/", "*.svg", "*.png", "*.lock"]

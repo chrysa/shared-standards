@@ -56,6 +56,25 @@ Codified in `EXECUTION_STANDARD.md` §6 (Registry) and §11 (Distribution), and 
 
 ---
 
+## D-0005 — pyproject.toml: pytest plugin exclusions for non-Django environment
+
+**Date**: 2026-06-28
+**Status**: accepted
+
+Added `pyproject.toml` with `[tool.pytest.ini_options]` to disable the `query_optimizer`
+and `django` pytest plugins that are installed globally on the development host (from
+unrelated projects that share the same Python environment). Without this config, these
+plugins inject a `query_collector` autouse fixture into every test, which fails immediately
+when Django settings are not configured — which they are not in this non-Django repo.
+
+`addopts = "-p no:query_optimizer -p no:django"` makes the standard
+`pytest tests/pii/test_recognizers.py -v` invocation work without any extra flags.
+
+This does not affect CI (which runs in an isolated environment) but is required for local
+development in a shared pyenv environment.
+
+---
+
 ## D-0004 — Skills/agents audit: subset vs full-mirror registries
 
 **Date**: 2026-06-15
@@ -97,3 +116,27 @@ handlers, all referential externalised to `constants.yaml`); frontend React 19 +
 shadcn/ui + Tailwind + TanStack Query + react-i18next (FR/EN) + dark mode (WCAG 2.1 AA).
 No deviation from the manifest; this entry exists to satisfy the ADR gate on the new
 `pyproject.toml` / `web/package.json`.
+
+## D-0006 — PII scan default entities exclude PERSON and FR_CNI
+
+**Date**: 2026-06-28
+**Status**: accepted
+
+The Presidio-based PII hook (`scripts/pii_scan.py`) and its CI workflow gate commits on
+detected personal data. The `PERSON` entity is **excluded from the default entity set**
+(`.pii-scan.toml` / `scripts/pii/config.py` `DEFAULT_ENTITIES`).
+
+**Why**: `PERSON` is detected by spaCy NER, which flags ordinary code/config tokens (tool
+names, identifiers, URL fragments like `explosion`, `spacy`) as `PERSON` at ~0.85. As a
+blocking gate over source and config files this produces pervasive false positives — it
+blocked the hook's own `.pre-commit-config.yaml` commit with 7 PERSON hits.
+
+`FR_CNI` is excluded for the same reason: it is a bare `\b\d{12}\b` pattern with score 0.3,
+below the 0.5 gate, so it never fires by default — and raising it to fire would flag any
+12-digit number. Rather than ship a noisy or inert advertised entity, it is opt-in.
+
+**Accepted tradeoff**: real person names and French CNI numbers in source/fixtures are not
+caught by the default config. High-precision recognizers (`EMAIL_ADDRESS`, `IBAN_CODE`,
+`PHONE_NUMBER`, `CREDIT_CARD`, `IP_ADDRESS`, `FR_NIR`) remain on. Add `PERSON` / `FR_CNI` to
+`entities` in `.pii-scan.toml` to opt in. Both recognizers stay available; only the default
+set is changed.
