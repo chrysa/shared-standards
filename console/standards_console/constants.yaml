@@ -1,0 +1,26 @@
+compliance:
+  repos_endpoint: /api/repos
+  request_timeout_seconds: 15.0
+distribution:
+  default_run_limit: 10
+  sync_pr_branch: chore/sync-shared-standards
+github:
+  api_base_url: https://api.github.com
+  api_version: '2022-11-28'
+  per_page: 100
+  request_timeout_seconds: 30.0
+manifest:
+  valid_runtime:
+  - container
+  - exempt:lib
+  - exempt:config
+  - exempt:native
+  - pending
+  valid_status:
+  - dev
+  - non-dev
+  - archived
+pull_request:
+  standards_labels:
+  - standards
+  - automated

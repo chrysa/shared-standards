@@ -1,0 +1,23 @@
+services:
+  console:
+    build:
+      context: .
+      target: production
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN:?set GITHUB_TOKEN to a PAT with repo scope}
+      GUIDELINE_CENTRAL_API_KEY: ${GUIDELINE_CENTRAL_API_KEY:-}
+      GUIDELINE_CENTRAL_URL: ${GUIDELINE_CENTRAL_URL:-}
+      STANDARDS_ORG: ${STANDARDS_ORG:-chrysa}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/api/health').status==200
+        else 1)
+      timeout: 5s
+    image: chrysa/standards-console:dev
+    ports:
+    - 8765:8765
