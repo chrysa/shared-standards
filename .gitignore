@@ -45,3 +45,9 @@ graphify-out/
 .graphify_version
 graphify
 sys
+
+# >>> chrysa local hygiene >>>
+.claude/*.local.md
+.claude/settings.local.json
+.vscode/
+# <<< chrysa local hygiene <<<
