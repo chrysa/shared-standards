@@ -7,9 +7,11 @@ from pathlib import Path
 
 DEFAULT_THRESHOLD = 0.5
 DEFAULT_LANGUAGES = ["fr", "en"]
+# PERSON is intentionally excluded: spaCy NER flags ordinary code/config tokens
+# as PERSON (~0.85), which is unusable as a blocking gate. Opt back in via config.
 DEFAULT_ENTITIES = [
     "EMAIL_ADDRESS", "IBAN_CODE", "PHONE_NUMBER", "CREDIT_CARD",
-    "IP_ADDRESS", "PERSON", "FR_NIR", "FR_CNI",
+    "IP_ADDRESS", "FR_NIR", "FR_CNI",
 ]
 
 

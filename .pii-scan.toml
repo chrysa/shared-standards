@@ -1,9 +1,12 @@
 # PII (GDPR) scan configuration — see docs and scripts/pii_scan.py
 score_threshold = 0.5
 languages = ["fr", "en"]
+# PERSON is intentionally excluded by default: spaCy NER flags ordinary code/
+# config tokens (tool names, identifiers) as PERSON at ~0.85, which is unusable
+# as a blocking gate. Re-add "PERSON" here for prose-heavy repos if wanted.
 entities = [
   "EMAIL_ADDRESS", "IBAN_CODE", "PHONE_NUMBER", "CREDIT_CARD",
-  "IP_ADDRESS", "PERSON", "FR_NIR", "FR_CNI",
+  "IP_ADDRESS", "FR_NIR", "FR_CNI",
 ]
 # Globs excluded from scanning (binary/generated/large artifacts).
 exclude_paths = ["graphify", "sys", "seeds/", "*.svg", "*.png", "*.lock"]

@@ -95,3 +95,25 @@ the info line, not a per-agent `⚠️` warning. This is deliberate — without 
 (fleet audit dropped 9019 → 7 warnings). Reviewers needing per-agent detail on a specific
 registry run it with `--full-mirror`. Broken skill refs and source↔full-mirror drift remain
 hard `❌`/`⚠️`. Shipped in shared-standards PR #110.
+
+---
+
+## D-0006 — PII scan default entities exclude PERSON
+
+**Date**: 2026-06-28
+**Status**: accepted
+
+The Presidio-based PII hook (`scripts/pii_scan.py`) and its CI workflow gate commits on
+detected personal data. The `PERSON` entity is **excluded from the default entity set**
+(`.pii-scan.toml` / `scripts/pii/config.py` `DEFAULT_ENTITIES`).
+
+**Why**: `PERSON` is detected by spaCy NER, which flags ordinary code/config tokens (tool
+names, identifiers, URL fragments like `explosion`, `spacy`) as `PERSON` at ~0.85. As a
+blocking gate over source and config files this produces pervasive false positives — it
+blocked the hook's own `.pre-commit-config.yaml` commit with 7 PERSON hits.
+
+**Accepted tradeoff**: real person names sitting in source/fixtures are not caught by the
+default config. High-precision recognizers (`EMAIL_ADDRESS`, `IBAN_CODE`, `PHONE_NUMBER`,
+`CREDIT_CARD`, `IP_ADDRESS`, `FR_NIR`, `FR_CNI`) remain on. Prose-heavy repos can re-add
+`PERSON` to `entities` in `.pii-scan.toml`. The recognizer itself stays available; only the
+default is changed.
