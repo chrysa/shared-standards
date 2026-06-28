@@ -1,0 +1,66 @@
+# PII (GDPR) detection — Presidio.
+# COPY-TO-USE template: copy to a consumer repo's .github/workflows/pii-scan.yml.
+#
+# Two jobs:
+#   - gate (pull_request): blocking. Scans only the files changed in the PR — fast,
+#     and avoids failing on pre-existing PII already in the repo.
+#   - audit (schedule + manual): non-blocking full-repo --all sweep, uploads a report.
+name: PII Scan (GDPR)
+on:
+  pull_request:
+  schedule:
+  - cron: '0 4 * * 1'  # Monday 04:00 UTC — weekly full audit
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+    - name: Install Presidio + models
+      run: |
+        pip install presidio-analyzer==2.2.359 click==8.4.2
+        pip install "fr_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl"
+        pip install "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+    - name: Selftest
+      run: python -m scripts.pii_scan --selftest
+    - name: Scan changed files
+      run: |
+        base="${{ github.event.pull_request.base.sha }}"
+        head="${{ github.sha }}"
+        mapfile -t changed < <(git diff --name-only --diff-filter=ACMR "$base" "$head")
+        if [ ${#changed[@]} -eq 0 ]; then
+          echo "No changed files to scan."
+          exit 0
+        fi
+        printf 'Scanning %s changed file(s)\n' "${#changed[@]}"
+        python -m scripts.pii_scan "${changed[@]}"
+  audit:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+    - name: Install Presidio + models
+      run: |
+        pip install presidio-analyzer==2.2.359 click==8.4.2
+        pip install "fr_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl"
+        pip install "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+    - name: Full repository audit (non-blocking)
+      continue-on-error: true
+      run: python -m scripts.pii_scan --all --report pii-report.json
+    - name: Upload report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pii-report
+        path: pii-report.json
