@@ -1,0 +1,4 @@
+{
+  "_comment": "sha256 fingerprints of reviewed false positives (synthetic fixtures). Add with: pii_scan.py --print-fingerprint <file>",
+  "allow": []
+}

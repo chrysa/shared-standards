@@ -1,0 +1,9 @@
+# PII (GDPR) scan configuration — see docs and scripts/pii_scan.py
+score_threshold = 0.5
+languages = ["fr", "en"]
+entities = [
+  "EMAIL_ADDRESS", "IBAN_CODE", "PHONE_NUMBER", "CREDIT_CARD",
+  "IP_ADDRESS", "PERSON", "FR_NIR", "FR_CNI",
+]
+# Globs excluded from scanning (binary/generated/large artifacts).
+exclude_paths = ["graphify", "sys", "seeds/", "*.svg", "*.png", "*.lock"]
