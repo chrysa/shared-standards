@@ -44,6 +44,11 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
 - **Dark mode** mandatory from V1. **Accessibility** WCAG 2.1 AA.
+- **Local hot reload** — in local development, code running inside containers MUST hot
+  reload on source change. Mount the source as a bind volume (not baked into the image)
+  and run with the framework reloader (`uvicorn --reload` backend · Vite HMR / dev server
+  frontend). A local `docker compose up` that requires a rebuild to pick up edits is a
+  bug, not the expected workflow.
 - **Notion logging**: every advancement and modification (progress, decisions, state
   changes) is logged in Notion — the single source of truth. Run `@notion-sync` after any
   state change; in case of conflict between local docs and Notion, Notion wins.
