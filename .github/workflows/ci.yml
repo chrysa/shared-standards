@@ -89,8 +89,8 @@ jobs:
                   project-key: chrysa_shared-standards
                   organization: chrysa
                   project-name: shared-standards
-                  sources: scripts
-                  tests: tests
+                  sources: console/standards_console
+                  tests: console/tests
                   # Downloaded from the test-results-3.14 artifact into reports/
                   # by the action; matches sonar-scan-python's default path.
                   coverage-report: reports/coverage.xml
