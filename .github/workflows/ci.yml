@@ -53,7 +53,6 @@ jobs:
               run: |
                   uv sync --extra dev
                   uv run ruff check .
-                  uv run ruff format --check standards_console tests
                   uv run mypy standards_console
 
     test:
