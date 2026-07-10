@@ -25,6 +25,20 @@ class ConfigError(RuntimeError):
     """Raised when required configuration cannot be resolved."""
 
 
+def _repo_root_from(here: Path) -> Path:
+    """Repo root three levels above ``here`` (``<repo>/console/standards_console/x``).
+
+    Falls back to the immediate parent when the package sits too shallow to have three
+    ancestors — e.g. installed at ``/standards_console`` inside a container — so importing
+    this module never raises. Such callers set ``STANDARDS_REPO_ROOT`` explicitly.
+    """
+    return here.parents[2] if len(here.parents) > 2 else here.parent
+
+
+def _default_repo_root() -> Path:
+    return _repo_root_from(Path(__file__).resolve())
+
+
 # ── YAML constants referential ─────────────────────────────────────────────────
 class GitHubConstants(BaseModel):
     api_base_url: str
@@ -100,7 +114,7 @@ class Settings(BaseSettings):
     host: str = Field(default="127.0.0.1", validation_alias="CONSOLE_HOST")
     port: int = Field(default=8765, validation_alias="CONSOLE_PORT")
     repo_root: Path = Field(
-        default=Path(__file__).resolve().parents[2], validation_alias="STANDARDS_REPO_ROOT"
+        default_factory=_default_repo_root, validation_alias="STANDARDS_REPO_ROOT"
     )
 
     @property
