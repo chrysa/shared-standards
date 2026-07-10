@@ -27,11 +27,26 @@ def rewrite(text: str, prefix: str) -> str:
     return re.sub(r'filename="(?!' + re.escape(prefix) + r"/)", f'filename="{prefix}/', text)
 
 
+def _validated_report(raw: str) -> Path:
+    """Resolve ``raw`` and confirm it is a regular file inside the working tree.
+
+    The report path comes from a CLI argument; validating it before any filesystem
+    access prevents a crafted argument from reading/writing outside the repository.
+    """
+    root = Path.cwd().resolve()
+    report = (root / raw).resolve()
+    if root != report and root not in report.parents:
+        raise ValueError(f"path {raw!r} escapes the working directory")
+    if not report.is_file():
+        raise ValueError(f"path {raw!r} is not a regular file")
+    return report
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__)
         return 2
-    report = Path(sys.argv[1])
+    report = _validated_report(sys.argv[1])
     report.write_text(rewrite(report.read_text(encoding="utf-8"), sys.argv[2]), encoding="utf-8")
     print(f"rewrote {report} for repo-root Sonar mapping (prefix: {sys.argv[2]})")
     return 0
