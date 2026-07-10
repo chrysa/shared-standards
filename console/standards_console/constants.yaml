@@ -24,3 +24,16 @@ pull_request:
   standards_labels:
   - standards
   - automated
+standards:
+  compliance_dir: compliance
+  compliance_glob: '*-conformance.json'
+  ok_signals:
+  - ok
+  - pass
+  signal_fields:
+  - gate
+  - status
+  standard_files:
+  - standards/STANDARDS.chrysa.md
+  - .chrysa/STANDARDS.md
+  thresholds_file: .claude/thresholds.json
