@@ -91,7 +91,7 @@ jobs:
                   project-name: shared-standards
                   # Analyse the real code so the console coverage.xml maps (was
                   # `scripts` only, which never covered console/ → 0% coverage).
-                  sources: console/standards_console,scripts,web/src
+                  sources: console/standards_console,scripts,console/web/src
                   tests: console/tests
                   # Downloaded from the test-results-3.14 artifact into reports/
                   # by the action; matches sonar-scan-python's default path.
