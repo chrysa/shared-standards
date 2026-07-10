@@ -65,6 +65,36 @@ The token is resolved from `GITHUB_TOKEN`/`GH_TOKEN`, falling back to
 | `GUIDELINE_CENTRAL_URL` | — | compliance server base URL |
 | `GUIDELINE_CENTRAL_API_KEY` | — | `X-Api-Key` for the server |
 | `CONSOLE_HOST` / `CONSOLE_PORT` | `127.0.0.1` / `8765` | bind address |
+| `STANDARDS_REPO_ROOT` | this checkout | root the MCP server reads standards/compliance from |
+
+## Standards MCP server (`standards-mcp`)
+
+A **read-only** MCP server (stdio) that exposes the fleet standards as query tools —
+the "norms" counterpart to CodeGraph/GitNexus. It never enforces or writes; gating stays
+in hooks + CI. It reads the source files this repo already holds (`.claude/thresholds.json`,
+`standards/STANDARDS.chrysa.md`, `.chrysa/STANDARDS.md`, `compliance/*-conformance.json`,
+`repos.yml`) — no data is duplicated.
+
+| Tool | Returns |
+|---|---|
+| `standards_get(section?)` | fleet rules — all, or one section (`thresholds`, or an H2 slug) |
+| `standards_audit_status(section?, min_severity?)` | cross-repo compliance, most-deviating first, with snapshot mtimes |
+| `standards_diff(repo)` | one repo's deviations + its `repos.yml` classification |
+| `standards_list_rules()` | catalogue of every queryable rule + compliance dimension |
+
+Wire it into a consumer repo's `.mcp.json` (stdio-local; point `STANDARDS_REPO_ROOT` at a
+`shared-standards` checkout):
+
+```json
+{
+  "mcpServers": {
+    "standards": {
+      "command": "standards-mcp",
+      "env": { "STANDARDS_REPO_ROOT": "/path/to/shared-standards" }
+    }
+  }
+}
+```
 
 ## Test
 
