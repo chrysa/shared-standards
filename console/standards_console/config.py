@@ -25,6 +25,20 @@ class ConfigError(RuntimeError):
     """Raised when required configuration cannot be resolved."""
 
 
+def _repo_root_from(here: Path) -> Path:
+    """Repo root three levels above ``here`` (``<repo>/console/standards_console/x``).
+
+    Falls back to the immediate parent when the package sits too shallow to have three
+    ancestors — e.g. installed at ``/standards_console`` inside a container — so importing
+    this module never raises. Such callers set ``STANDARDS_REPO_ROOT`` explicitly.
+    """
+    return here.parents[2] if len(here.parents) > 2 else here.parent
+
+
+def _default_repo_root() -> Path:
+    return _repo_root_from(Path(__file__).resolve())
+
+
 # ── YAML constants referential ─────────────────────────────────────────────────
 class GitHubConstants(BaseModel):
     api_base_url: str
@@ -52,12 +66,24 @@ class ComplianceConstants(BaseModel):
     repos_endpoint: str
 
 
+class StandardsConstants(BaseModel):
+    """Referential for the read-only standards MCP surface (paths relative to repo root)."""
+
+    thresholds_file: str
+    standard_files: tuple[str, ...]
+    compliance_dir: str
+    compliance_glob: str
+    ok_signals: tuple[str, ...]
+    signal_fields: tuple[str, ...]
+
+
 class Constants(BaseModel):
     github: GitHubConstants
     manifest: ManifestConstants
     distribution: DistributionConstants
     pull_request: PullRequestConstants
     compliance: ComplianceConstants
+    standards: StandardsConstants
 
 
 @lru_cache(maxsize=1)
@@ -84,15 +110,28 @@ class Settings(BaseSettings):
         default="distribute-standards.yml", validation_alias="STANDARDS_DISTRIBUTE_WORKFLOW"
     )
     central_base_url: str | None = Field(default=None, validation_alias="GUIDELINE_CENTRAL_URL")
-    central_api_key: str | None = Field(
-        default=None, validation_alias="GUIDELINE_CENTRAL_API_KEY"
-    )
+    central_api_key: str | None = Field(default=None, validation_alias="GUIDELINE_CENTRAL_API_KEY")
     host: str = Field(default="127.0.0.1", validation_alias="CONSOLE_HOST")
     port: int = Field(default=8765, validation_alias="CONSOLE_PORT")
+    repo_root: Path = Field(
+        default_factory=_default_repo_root, validation_alias="STANDARDS_REPO_ROOT"
+    )
+
+    @property
+    def compliance_dir_path(self) -> Path:
+        return self.repo_root / constants().standards.compliance_dir
+
+    @property
+    def standard_file_paths(self) -> tuple[Path, ...]:
+        return tuple(self.repo_root / f for f in constants().standards.standard_files)
 
     @property
     def standards_full_name(self) -> str:
         return f"{self.org}/{self.standards_repo}"
+
+    @property
+    def thresholds_path(self) -> Path:
+        return self.repo_root / constants().standards.thresholds_file
 
 
 def resolve_token() -> str:

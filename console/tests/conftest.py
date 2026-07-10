@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -9,6 +11,63 @@ import pytest
 from standards_console.config import Settings
 from standards_console.github_gateway import FileContent, Repo
 from standards_console.services import Services
+
+STD_MANIFEST = """\
+# repos.yml — fleet classification.
+repos:
+  - name: alpha
+    status: dev
+    public: true
+    runtime: container
+  - name: gamma
+    status: dev
+    public: false
+    runtime: exempt:native
+"""
+
+STD_STANDARD = (
+    "# Transverse standards\n\n"
+    "## Quality gates\n\nCoverage >= 85%.\n\n"
+    "### Not a section\n\nSub-heading text.\n\n"
+    "## Commits\n\nConventional Commits.\n"
+)
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+@pytest.fixture
+def std_settings(tmp_path: Path) -> Settings:
+    """A Settings pointing at a minimal on-disk standards repo (offline fixtures)."""
+    _write(
+        tmp_path / ".claude/thresholds.json",
+        json.dumps({"_notes": {"x": "doc"}, "max_file_lines": 500, "max_function_lines": 50}),
+    )
+    _write(tmp_path / "standards/STANDARDS.chrysa.md", STD_STANDARD)
+    _write(tmp_path / ".chrysa/STANDARDS.md", "## Stack\n\nPython 3.14 target.\n")
+    _write(
+        tmp_path / "compliance/makefile-conformance.json",
+        json.dumps(
+            {
+                "rows": [
+                    {"repo": "alpha", "gate": "ok"},
+                    {"repo": "beta", "gate": "warn"},
+                    {"repo": "gamma", "gate": "FAIL"},
+                ]
+            }
+        ),
+    )
+    _write(
+        tmp_path / "compliance/cliff-conformance.json",
+        json.dumps(
+            {"rows": [{"repo": "alpha", "status": "ok"}, {"repo": "gamma", "status": "ok"}]}
+        ),
+    )
+    _write(tmp_path / "repos.yml", STD_MANIFEST)
+    return Settings(repo_root=tmp_path)
+
 
 MANIFEST = """\
 # repos.yml — fleet classification. Header comment that MUST survive edits.
