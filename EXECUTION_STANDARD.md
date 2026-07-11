@@ -268,6 +268,10 @@ description: imperative, lowercase, no period
 - CI must pass (lint + test + typecheck)
 - Branch must be up to date with `main`
 - Squash merge for feature branches; merge commit for releases
+- Dependent/stacked PRs MUST declare their predecessor with a `Depends-On: <PR URL>` line
+  in the PR description; the `pr-dependencies` gate (powered by
+  [depends-on/depends-on-action](https://github.com/depends-on/depends-on-action)) enforces
+  merge order — a PR cannot merge until its declared dependencies are merged
 
 ---
 
