@@ -15,16 +15,22 @@
   workflow_call:
   workflow_dispatch:
 jobs:
-  check_dependencies:
-    name: Check Dependencies
+  extract_dependencies:
+    name: Extract dependent Pull Requests
     runs-on: ubuntu-latest
     steps:
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: gregsdennis/dependencies-action@v1.4.2
-      - uses: Levi-Lesches/blocking-issues@2eeffdc6b055341f635eb0f3e4aea671516a61dc
+      - uses: actions/checkout@v4
+      - uses: depends-on/depends-on-action@0.17.0
         with:
-          use-label: Blocked
+          token: ${{ secrets.GITHUB_TOKEN }}
+  check_dependencies_merged:
+    name: Check dependent Pull Requests are merged
+    runs-on: ubuntu-latest
+    steps:
+      - uses: depends-on/depends-on-action@0.17.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          check-unmerged-pr: true
 name: Check PR dependencies
 permissions:
   contents: read

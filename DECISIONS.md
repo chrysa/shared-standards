@@ -140,3 +140,31 @@ caught by the default config. High-precision recognizers (`EMAIL_ADDRESS`, `IBAN
 `PHONE_NUMBER`, `CREDIT_CARD`, `IP_ADDRESS`, `FR_NIR`) remain on. Add `PERSON` / `FR_CNI` to
 `entities` in `.pii-scan.toml` to opt in. Both recognizers stay available; only the default
 set is changed.
+
+---
+
+## D-0007 — Adopt depends-on/depends-on-action for PR merge ordering
+
+**Date**: 2026-07-11
+**Status**: accepted
+
+Stacked/dependent PRs across the fleet (e.g. engine → API → SPA changes split across
+repos or branches) need a deterministic, machine-enforced merge order. The previous
+`.github/workflows/pr-dependencies.yml` used `gregsdennis/dependencies-action@v1.4.2`
+plus `Levi-Lesches/blocking-issues` (label-based), which only tracked issue-level
+blocking and did not enforce PR merge order or cross-repo dependency injection.
+
+**Decision**: adopt [`depends-on/depends-on-action`](https://github.com/depends-on/depends-on-action)
+(pinned `@0.17.0`) as the standard mechanism. Contributors declare a dependency on a
+predecessor PR with a `Depends-On: <PR URL>` line in the PR description (see
+`EXECUTION_STANDARD.md` § Merge rules). `pr-dependencies.yml` now runs two jobs:
+1. `extract_dependencies` — injects the dependent change(s) for build/test.
+2. `check_dependencies_merged` — uses `check-unmerged-pr: true` to block the PR until
+   all declared `Depends-On:` targets are merged.
+
+**Consequences**: this supersedes the prior `gregsdennis/dependencies-action` +
+`Levi-Lesches/blocking-issues` setup, which is removed. Repos relying on the old
+`Blocked` label convention must migrate to the `Depends-On:` PR-body syntax. The action
+also supports Gerrit and GitLab dependency URLs and Go/Python/JS/Ansible/container
+dependency injection, which the fleet does not yet use but may adopt later without
+further ADR changes.
