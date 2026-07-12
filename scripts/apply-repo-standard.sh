@@ -139,20 +139,18 @@ deploy_governance() {
     ok "CODEOWNERS (created)"
 }
 
-ci_is_canonical() {
-    local f="$1"
-    [[ -f "$f" ]] || return 1
-    grep -q 'chrysa/github-actions' "$f" \
-        && grep -q 'name: Pre-commit checks' "$f" \
-        && grep -q 'name: SonarCloud' "$f"
-}
-
 deploy_stack_ci() {
     local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     local tpl dest="$repo/.github/workflows/ci.yml"
     local pkg sources tests project_key
-    if ci_is_canonical "$dest"; then
-        info "ci.yml already canonical · skip (edit manually to re-template)"
+    # Gap-aware, like deploy_governance (CODEOWNERS) and the Tier-1 process
+    # workflows: never clobber an existing ci.yml. Repos hand-tune their CI
+    # (extra jobs, deploy, quality gates, secret-scan); re-templating from the
+    # generic stack template silently reverts that hygiene on every fleet sync.
+    # Bootstrap the template only when a repo has no ci.yml; to intentionally
+    # re-template, delete the file first.
+    if [[ -e "$dest" ]]; then
+        info "ci.yml exists · preserved (never clobber hand-tuned CI)"
         return
     fi
     if [[ -f "$repo/pyproject.toml" ]] || ls "$repo"/requirements*.txt &>/dev/null; then
