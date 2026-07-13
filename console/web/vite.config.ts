@@ -12,5 +12,19 @@ export default defineConfig({
     proxy: { "/api": "http://127.0.0.1:8765" },
   },
   build: { outDir: path.resolve(__dirname, "../standards_console/web_dist"), emptyOutDir: true },
-  test: { environment: "jsdom", globals: true, setupFiles: "./src/test/setup.ts" },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: "./src/test/setup.ts",
+    // Coverage for SonarCloud (Phase 2, #183): `npm run test:cov` emits lcov at
+    // coverage/lcov.info — feed it to Sonar via sonar.javascript.lcov.reportPaths
+    // once sonar-scan-python accepts a JS lcov input.
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      reportsDirectory: "coverage",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**", "src/**/*.d.ts"],
+    },
+  },
 });
