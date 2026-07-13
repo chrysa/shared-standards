@@ -45,3 +45,6 @@ graphify-out/
 .graphify_version
 graphify
 sys
+
+# web vitest coverage
+console/web/coverage/
