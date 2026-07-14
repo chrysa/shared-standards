@@ -36,11 +36,14 @@ repos:
   # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
   # --- python (all Python repos) ---
   - id: debugger-detection
+    exclude: '^(tests?/|README\.md|docs/)'
   - id: python-print-detection
+    exclude: '^(tests?/|README\.md|docs/)'
   - id: python-pprint-detection
-    exclude: 'tests?/'
+    exclude: '^(tests?/|README\.md|docs/)'
   - id: no-bare-except
   - id: python-logger-detection
+    exclude: '^(tests?/|README\.md|docs/)'
   - id: python-unreachable-code
   - id: no-hardcoded-localhost
     exclude: 'tests?/|\.test\.|\.spec\.'
