@@ -267,6 +267,18 @@ repos:
     status: dev
     public: false
     runtime: exempt:native
+  - name: debian-guardian
+    status: dev
+    public: false
+    runtime: exempt:native
+  - name: django-migration-analyzer
+    status: dev
+    public: false
+    runtime: exempt:lib
+  - name: windows-guardian
+    status: dev
+    public: false
+    runtime: exempt:native
   - name: wsmqtt-monitor
     status: dev
     public: false
