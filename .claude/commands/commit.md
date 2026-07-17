@@ -15,7 +15,7 @@ Create well-formatted commits following the chrysa Conventional Commits standard
 ## What This Command Does
 
 1. Runs `git status` to see which files are staged.
-2. If nothing is staged, stages all modified and new files with `git add`.
+2. If nothing is staged, stages tracked modifications with `git add -u` (never untracked files, to avoid committing secrets).
 3. Runs `git diff` to understand the changes.
 4. Analyzes the diff for multiple logical concerns; if found, proposes splitting into
    several atomic commits and stages them separately.
