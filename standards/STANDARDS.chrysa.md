@@ -1,9 +1,9 @@
 <!--
   CHRYSA TRANSVERSE STANDARDS — MANAGED FILE, DO NOT EDIT HERE.
   Source of truth: chrysa/shared-standards/standards/STANDARDS.chrysa.md
-  Distributed to each repo as .chrysa/STANDARDS.md by the distribute-standards workflow.
-  Local CLAUDE.md imports it via `@.chrysa/STANDARDS.md`. Any manual edit will be
-  overwritten on the next sync — change the source repo and let the PR flow back.
+  Inlined into each repo's CLAUDE.md (managed chrysa:standards block) by the
+  distribute-standards workflow — no vendored copy, no import. Any manual edit to the block
+  will be overwritten on the next sync — change this source and let the PR flow back.
 -->
 
 # chrysa — Transverse Standards
@@ -17,7 +17,7 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
 |------------------|----------------------------------------------------------------|
 | Python           | 3.14 target (CI matrix 3.12 + 3.14)                            |
 | FastAPI          | >= 0.115 + Pydantic v2                                          |
-| Frontend         | React 19 + TypeScript + Vite 6                                  |
+| Frontend         | React 19 + TypeScript 7 + Vite 8                                |
 | UI               | shadcn/ui + Tailwind CSS                                        |
 | State            | TanStack Query + Zustand                                        |
 | DB               | PostgreSQL 16 + Redis 7                                         |
@@ -44,6 +44,15 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
 - **Dark mode** mandatory from V1. **Accessibility** WCAG 2.1 AA.
+- **UI state survives reload & focus** — human-facing surfaces persist their navigation
+  and view state (active tab/section, selected sub-view, active context/filters) so a
+  **manual reload keeps the current page** — the user lands exactly where they were, never
+  reset to a default. Persist to `localStorage` (or the URL for shareable state), guarded
+  by a validator that discards stale/removed values. Interface or state changes must
+  **propagate across the app's own tabs/windows and on refocus/reload**: listen to the
+  browser `storage` event and re-read on `window` `focus`, so a view opened while hidden
+  never shows stale state after the user comes back. A reload that loses the user's place,
+  or a change that fails to propagate on focus/reload, is a bug.
 - **Notion logging**: every advancement and modification (progress, decisions, state
   changes) is logged in Notion — the single source of truth. Run `@notion-sync` after any
   state change; in case of conflict between local docs and Notion, Notion wins.
