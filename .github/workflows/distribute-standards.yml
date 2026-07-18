@@ -37,7 +37,7 @@ jobs:
             matrix: ${{ steps.list.outputs.matrix }}
             count: ${{ steps.list.outputs.count }}
         steps:
-            - uses: actions/checkout@v7.0.0
+            - uses: actions/checkout@v7
 
             - name: Build repo matrix from repos.yml
               id: list
@@ -60,12 +60,12 @@ jobs:
             matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
         steps:
             - name: Checkout shared-standards (source)
-              uses: actions/checkout@v7.0.0
+              uses: actions/checkout@v7
               with:
                   path: shared-standards
 
             - name: Checkout ${{ matrix.repo }} (target)
-              uses: actions/checkout@v7.0.0
+              uses: actions/checkout@v7
               with:
                   repository: chrysa/${{ matrix.repo }}
                   path: target
