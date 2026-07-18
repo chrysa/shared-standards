@@ -43,6 +43,10 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
 - **Merge**: squash merge only · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
+- **Tests: pytest only** — assert-style test functions and `pytest-mock` (`mocker`
+  fixture: `mocker.patch`, `mocker.AsyncMock`) for all mocking. The stdlib **`unittest`
+  framework (`unittest.TestCase`) and `unittest.mock` imports are forbidden** — no
+  `import unittest`, no `from unittest.mock import …`. See the `testing-pytest` skill.
 - **Dark mode** mandatory from V1. **Accessibility** WCAG 2.1 AA.
 - **UI state survives reload & focus** — human-facing surfaces persist their navigation
   and view state (active tab/section, selected sub-view, active context/filters) so a
