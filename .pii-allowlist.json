@@ -1,4 +1,9 @@
 {
   "_comment": "sha256 fingerprints of reviewed false positives (synthetic fixtures). Add with: pii_scan.py --print-fingerprint <file>",
-  "allow": []
+  "allow": [
+    "3ee1a1e18b74a7b3d6002f9dd7b0e270f111ecd4e7857ea26de891190c408da0",
+    "ae3020162377614f728d477f801ebbe61e8056b3c89d0578a6a85a2ade418639",
+    "210ef7d104d6981f6f3f02c8b1fb9b5f4c2b44b6e5ae5ef4576e87d5b3229c54",
+    "ee7e53f65f3399fa48925405daaf4dffcf4a3c285db917ddc677bc44c3005f96"
+  ]
 }

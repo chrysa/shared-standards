@@ -114,8 +114,9 @@ while IFS='|' read -r repo_name default_branch visibility; do
   [[ ! "$found" =~ \|CONTRIBUTING\.md ]] && gaps+=("CONTRIBUTING.md")
   [[ ! "$found" =~ \|AGENTS\.md ]] && gaps+=("AGENTS.md")
 
-  # CANONICAL
-  [[ ! "$found" =~ \.chrysa/STANDARDS\.md ]] && gaps+=(".chrysa/STANDARDS.md")
+  # CANONICAL — transverse standards are inlined into CLAUDE.md (managed
+  # chrysa:standards block); freshness is verified by `distribute-standards --check`,
+  # not by a file path here (this remote audit only sees the file tree).
 
   # WORKFLOW-specific (no-package archetypes have nothing to release)
   if ! $no_package; then
