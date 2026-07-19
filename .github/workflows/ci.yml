@@ -99,11 +99,14 @@ jobs:
                   cache: pnpm
                   cache-dependency-path: console/web/pnpm-lock.yaml
 
+            # console/web ships a stub pnpm-workspace.yaml with no `packages:`
+            # field; it is a single-package project (lockfile has `importers: .`),
+            # so --ignore-workspace lets pnpm install it standalone.
             - name: Install deps
-              run: pnpm install --frozen-lockfile
+              run: pnpm install --frozen-lockfile --ignore-workspace
 
             - name: Vitest coverage (lcov)
-              run: pnpm test:cov
+              run: pnpm run --ignore-workspace test:cov
 
             # vitest emits SF paths relative to console/web (e.g. src/…). Sonar
             # matches lcov SF against files under sonar.sources (console/web/src),
