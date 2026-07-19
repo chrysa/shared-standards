@@ -816,3 +816,39 @@ templates (copy-to-use, NOT reusable `uses:` workflows). Job names
 branch-protection required status checks (see OPS-188). Python CI runs on
 Python 3.14 via `chrysa/github-actions/*@v1.0.12` reusable actions with
 Docker-based tests (`make docker-test`).
+
+## 15. Governance — Strategic Pillars & ADR Format (Mandatory)
+
+Every project complies with the five chrysa strategic pillars and records structural
+decisions as **refutable ADRs**. Full text: the distributed baseline
+`.chrysa/STANDARDS.md` (section "Governance — strategic pillars & ADR format"),
+imported by every `CLAUDE.md` via `@.chrysa/STANDARDS.md`.
+
+### 15.1 The five pillars (non-negotiable)
+
+1. **LLM-provider independence** — no vendor SDK in business code; inference through a
+   local port with ≥2 real, tested adapters.
+2. **GAFAM independence** — every managed-cloud dependency has a documented self-hosted
+   exit path; the cloud SDK stays confined to an adapter.
+3. **Portable personalisation data** — exportable to an open format (JSON/SQLite) by a
+   documented, round-trip-tested command.
+4. **k8s config in-project** — manifests live in `deploy/k8s/`; nothing exists only in a
+   running cluster.
+5. **Adaptation layer** — a third-party lib/API/service reaches the domain only through
+   an adapter whose port is written in the domain's language.
+
+Any exception to a pillar requires an ADR (§15.2).
+
+### 15.2 Refutable ADR (mandatory fields)
+
+Structural decisions — new external dependency, LLM/cloud provider choice, breaking
+public-API change, data-model change, or a pillar exception — get one ADR under
+`docs/adr/`. Beyond the classic fields, three are **required**:
+
+- **Fatal hypothesis** — the single falsifiable belief whose falsity invalidates the decision.
+- **Kill-test** — the observable, dated signal that proves it wrong (what to measure,
+  threshold, cadence, action on breach); mechanised as a test where possible.
+- **Validation gate** — the pre-agreed condition that unlocks the next step, written
+  before building.
+
+`Killed` is a valid ADR status (the kill-test fired). Scaffold a new record with `/adr-new`.
