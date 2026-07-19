@@ -21,6 +21,14 @@ on:
                 type: boolean
                 required: false
                 default: false
+    push:
+        branches: [main]
+        paths:
+            - 'standards/**'
+            - '.claude/skills/**'
+            - 'templates/claude/**'
+            - 'scripts/distribute-standards.sh'
+            - 'scripts/apply-repo-standard.sh'
 
 permissions:
     contents: read
