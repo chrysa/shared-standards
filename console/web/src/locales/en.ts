@@ -36,6 +36,7 @@ export const en = {
       summary: "Commit summary (e.g. tighten coverage gate)",
       openPr: "Open PR",
       prOpened: "PR #{{number}} opened on branch {{branch}}.",
+      loadError: "Could not load the standard — the editor is disabled so a PR cannot be opened from a state that was never loaded.",
     },
   },
 };
