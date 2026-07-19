@@ -112,7 +112,7 @@ jobs:
                       Automated distribution of chrysa shared standards.
 
                       **Source:** `chrysa/shared-standards@${{ github.sha }}`
-                      Managed files (transverse `CLAUDE.md` import, `.chrysa/STANDARDS.md`,
+                      Managed files (inline transverse standards block in `CLAUDE.md`,
                       shared skills/agents/commands, CI workflows, lint/quality, pre-commit)
                       were refreshed by `scripts/distribute-standards.sh`.
 

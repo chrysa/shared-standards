@@ -6,20 +6,24 @@
 # (one matrix job per repo) and runnable locally against any repo checkout.
 #
 # Composes, idempotently:
-#   1. Transverse standards   standards/STANDARDS.chrysa.md -> <repo>/.chrysa/STANDARDS.md
-#   2. CLAUDE.md import        inject a managed `@.chrysa/STANDARDS.md` block (create file if absent)
+#   1. CLAUDE.md standards      inline the transverse standards CONTENT into a managed
+#                              `<!-- chrysa:standards:start/end -->` block (create file if absent).
+#                              The block is self-contained — NO `.chrysa/` copy, no `@import`.
+#   2. Legacy migration        remove any old `.chrysa/standards-import` block + the vendored
+#                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
 #   3. Shared skills           .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
 #   4. Shared agents+commands  templates/claude/{agents,commands}/* -> <repo>/.claude/
 #   5. Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
 # Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md is preserved;
-# only the delimited import block is touched.
+# only the delimited standards block is touched.
 #
 # Usage:
 #   distribute-standards.sh <repo_path>              # apply
 #   distribute-standards.sh --dry-run <repo_path>    # preview, no writes
 #   distribute-standards.sh --check <repo_path>      # report drift, exit 1 if any
 #   distribute-standards.sh --no-apply <repo_path>   # skip apply-repo-standard.sh delegation
+#   distribute-standards.sh --standards-only <repo>  # only the CLAUDE.md block + legacy purge
 #
 # Exit: 0 ok (or no drift) · 1 drift found (--check) / error · 2 repo absent
 set -uo pipefail
@@ -33,20 +37,26 @@ AGENTS_SRC="$STD_ROOT/templates/claude/agents"
 COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
 CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
 
-IMPORT_LINE='@.chrysa/STANDARDS.md'
-MARK_START='<!-- chrysa:standards-import:start -->'
-MARK_END='<!-- chrysa:standards-import:end -->'
+MARK_START='<!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->'
+MARK_END='<!-- chrysa:standards:end -->'
+
+# Legacy artefacts from the vendored-copy mechanism (removed on migration).
+OLD_MARK_START='<!-- chrysa:standards-import:start -->'
+OLD_MARK_END='<!-- chrysa:standards-import:end -->'
+OLD_VENDOR='.chrysa/STANDARDS.md'
 
 DRY_RUN=false
 CHECK=false
 NO_APPLY=false
+STANDARDS_ONLY=false
 TARGET_REPO=""
 
 for arg in "$@"; do
     case "$arg" in
-        --dry-run)  DRY_RUN=true ;;
-        --check)    CHECK=true ;;
-        --no-apply) NO_APPLY=true ;;
+        --dry-run)        DRY_RUN=true ;;
+        --check)          CHECK=true ;;
+        --no-apply)       NO_APPLY=true ;;
+        --standards-only) STANDARDS_ONLY=true; NO_APPLY=true ;;
         -h|--help)  sed -n '2,30p' "$0" | sed 's/^# \?//'; exit 0 ;;
         *)          [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
     esac
@@ -60,6 +70,18 @@ info() { echo -e "  \033[34m→\033[0m $*"; }
 
 DRIFT=0
 mark_drift() { DRIFT=1; }
+
+# The managed block = start marker + standards body (source minus its leading HTML
+# header comment) + end marker. Written to $1.
+build_block() {
+    local out="$1"
+    { printf '%s\n' "$MARK_START"
+      # Drop the leading HTML header comment: lines 1..first line whose start is `-->`
+      # (the closer sits on its own line), then any leading blanks.
+      sed '1,/^-->/d' "$STANDARDS_SRC" | sed '/./,$!d'
+      printf '%s\n' "$MARK_END"
+    } > "$out"
+}
 
 # Copy src -> dest if content differs. Honors --dry-run / --check.
 deploy_file() {
@@ -85,54 +107,65 @@ deploy_dir() {
     done < <(find "$src" -type f -print0)
 }
 
-# Ensure the managed import block exists in <repo>/CLAUDE.md, idempotently.
-inject_import() {
+# Remove the legacy vendored copy + old import block (migration from the old mechanism).
+purge_legacy() {
+    local repo="$1" claude="$2"
+    # 1. Vendored .chrysa/STANDARDS.md (+ empty .chrysa dir).
+    if [[ -f "$repo/$OLD_VENDOR" ]]; then
+        if $CHECK;   then warn "drift: legacy $OLD_VENDOR present"; mark_drift;
+        elif $DRY_RUN; then info "[dry-run] would remove $repo/$OLD_VENDOR"; mark_drift;
+        else rm -f "$repo/$OLD_VENDOR"; rmdir "$repo/.chrysa" 2>/dev/null; ok "removed legacy $OLD_VENDOR"; fi
+    fi
+    # 2. Old import block in CLAUDE.md.
+    [[ -f "$claude" ]] && grep -qF "$OLD_MARK_START" "$claude" || return 0
+    if $CHECK;   then warn "drift: legacy import block in $claude"; mark_drift; return 0; fi
+    if $DRY_RUN; then info "[dry-run] would strip legacy import block in $claude"; mark_drift; return 0; fi
+    local tmp; tmp="$(mktemp)"
+    awk -v s="$OLD_MARK_START" -v e="$OLD_MARK_END" '
+        $0==s {skip=1; next} $0==e {skip=0; next} !skip {print}' "$claude" > "$tmp"
+    mv "$tmp" "$claude"
+    ok "stripped legacy import block in $claude"
+}
+
+# Ensure the managed inline standards block exists + is current in <repo>/CLAUDE.md.
+inject_standards() {
     local repo="$1"
     local claude="$repo/CLAUDE.md"
-    local block="$MARK_START
-$IMPORT_LINE
-$MARK_END"
+    local block; block="$(mktemp)"; build_block "$block"
 
-    # Create CLAUDE.md from template (or a minimal stub) if absent.
+    purge_legacy "$repo" "$claude"
+
+    # Create CLAUDE.md from template (or minimal stub) if absent.
     if [[ ! -f "$claude" ]]; then
-        if $CHECK;   then warn "drift: $claude absent (would be created)"; mark_drift; return 0; fi
-        if $DRY_RUN; then info "[dry-run] would create $claude with import block"; mark_drift; return 0; fi
-        if [[ -f "$CLAUDE_TPL" ]]; then
-            cp "$CLAUDE_TPL" "$claude"
-        else
-            printf '# CLAUDE.md — %s\n' "$(basename "$repo")" > "$claude"
-        fi
-        printf '\n%s\n' "$block" >> "$claude"
-        ok "created $claude with import block"
-        return 0
+        if $CHECK;   then warn "drift: $claude absent (would be created)"; mark_drift; rm -f "$block"; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would create $claude with standards block"; mark_drift; rm -f "$block"; return 0; fi
+        if [[ -f "$CLAUDE_TPL" ]]; then cp "$CLAUDE_TPL" "$claude"; else printf '# CLAUDE.md — %s\n' "$(basename "$repo")" > "$claude"; fi
+        printf '\n' >> "$claude"; cat "$block" >> "$claude"
+        ok "created $claude with standards block"; rm -f "$block"; return 0
     fi
 
-    # Already present and correct?
+    # Block already present — refresh only if content differs.
     if grep -qF "$MARK_START" "$claude"; then
-        if awk -v s="$MARK_START" -v e="$MARK_END" -v l="$IMPORT_LINE" '
-            $0==s {inb=1; next} $0==e {inb=0; next}
-            inb && $0==l {found=1}
-            END {exit found?0:1}' "$claude"; then
-            return 0
-        fi
-        if $CHECK;   then warn "drift: $claude import block stale"; mark_drift; return 0; fi
-        if $DRY_RUN; then info "[dry-run] would refresh import block in $claude"; mark_drift; return 0; fi
-        # Replace existing block in place.
+        local cur; cur="$(mktemp)"
+        awk -v s="$MARK_START" -v e="$MARK_END" '
+            $0==s {inb=1} inb {print} $0==e {inb=0}' "$claude" > "$cur"
+        if cmp -s "$cur" "$block"; then rm -f "$cur" "$block"; return 0; fi
+        if $CHECK;   then warn "drift: $claude standards block stale"; mark_drift; rm -f "$cur" "$block"; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would refresh standards block in $claude"; mark_drift; rm -f "$cur" "$block"; return 0; fi
         local tmp; tmp="$(mktemp)"
-        awk -v s="$MARK_START" -v e="$MARK_END" -v repl="$block" '
-            $0==s {print repl; skip=1; next}
+        awk -v s="$MARK_START" -v e="$MARK_END" -v bf="$block" '
+            $0==s {while ((getline line < bf) > 0) print line; close(bf); skip=1; next}
             $0==e {skip=0; next}
             !skip {print}' "$claude" > "$tmp"
         mv "$tmp" "$claude"
-        ok "refreshed import block in $claude"
-        return 0
+        ok "refreshed standards block in $claude"; rm -f "$cur" "$block"; return 0
     fi
 
     # Block missing entirely — append it.
-    if $CHECK;   then warn "drift: $claude missing import block"; mark_drift; return 0; fi
-    if $DRY_RUN; then info "[dry-run] would append import block to $claude"; mark_drift; return 0; fi
-    printf '\n%s\n' "$block" >> "$claude"
-    ok "appended import block to $claude"
+    if $CHECK;   then warn "drift: $claude missing standards block"; mark_drift; rm -f "$block"; return 0; fi
+    if $DRY_RUN; then info "[dry-run] would append standards block to $claude"; mark_drift; rm -f "$block"; return 0; fi
+    printf '\n' >> "$claude"; cat "$block" >> "$claude"
+    ok "appended standards block to $claude"; rm -f "$block"
 }
 
 main() {
@@ -143,11 +176,15 @@ main() {
 
     log "═══ distribute-standards · $(basename "$repo") ═══"
 
-    # 1. Transverse standards file.
-    deploy_file "$STANDARDS_SRC" "$repo/.chrysa/STANDARDS.md"
+    # 1. + 2. Inline standards block in CLAUDE.md (+ legacy migration).
+    inject_standards "$repo"
 
-    # 2. CLAUDE.md import block.
-    inject_import "$repo"
+    if $STANDARDS_ONLY; then
+        if $CHECK; then
+            if [[ "$DRIFT" -eq 0 ]]; then ok "no drift"; exit 0; else warn "drift detected"; exit 1; fi
+        fi
+        log "done (standards-only)"; return 0
+    fi
 
     # 3. Shared skills (managed copies).
     deploy_dir "$SKILLS_SRC" "$repo/.claude/skills"
@@ -171,7 +208,7 @@ main() {
     fi
 
     if $CHECK; then
-        [[ "$DRIFT" -eq 0 ]] && { ok "no drift"; exit 0; } || { warn "drift detected"; exit 1; }
+        if [[ "$DRIFT" -eq 0 ]]; then ok "no drift"; exit 0; else warn "drift detected"; exit 1; fi
     fi
     log "done"
 }

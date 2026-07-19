@@ -29,7 +29,8 @@ STD_STANDARD = (
     "# Transverse standards\n\n"
     "## Quality gates\n\nCoverage >= 85%.\n\n"
     "### Not a section\n\nSub-heading text.\n\n"
-    "## Commits\n\nConventional Commits.\n"
+    "## Commits\n\nConventional Commits.\n\n"
+    "## Stack\n\nPython 3.14 target.\n"
 )
 
 
@@ -46,7 +47,6 @@ def std_settings(tmp_path: Path) -> Settings:
         json.dumps({"_notes": {"x": "doc"}, "max_file_lines": 500, "max_function_lines": 50}),
     )
     _write(tmp_path / "standards/STANDARDS.chrysa.md", STD_STANDARD)
-    _write(tmp_path / ".chrysa/STANDARDS.md", "## Stack\n\nPython 3.14 target.\n")
     _write(
         tmp_path / "compliance/makefile-conformance.json",
         json.dumps(

@@ -13,8 +13,8 @@ and `CONTRIBUTING.md`.
 
 ## Standards
 
-This repo follows the chrysa transverse standards imported in `CLAUDE.md`
-(`@.chrysa/STANDARDS.md`). Key gates: test coverage >= 85%, 0 lint warnings, mypy clean,
+This repo follows the chrysa transverse standards inlined in `CLAUDE.md`
+(managed `chrysa:standards` block). Key gates: test coverage >= 85%, 0 lint warnings, mypy clean,
 SonarCloud rating A. Max function 50 lines, max file 500 lines.
 
 ## Before you commit

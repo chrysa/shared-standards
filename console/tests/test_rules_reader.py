@@ -19,7 +19,7 @@ def test_load_sections_splits_on_h2_only(std_settings: Settings) -> None:
     sections = rules_reader.load_standard_sections(std_settings)
     assert "quality-gates" in sections
     assert "commits" in sections
-    assert "stack" in sections  # from the second standards file
+    assert "stack" in sections  # a further H2 section of the canonical standard
     assert "not-a-section" not in sections  # H3 must not become a section
     assert "Coverage >= 85%." in sections["quality-gates"]
 

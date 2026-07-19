@@ -72,7 +72,7 @@ The token is resolved from `GITHUB_TOKEN`/`GH_TOKEN`, falling back to
 A **read-only** MCP server (stdio) that exposes the fleet standards as query tools —
 the "norms" counterpart to CodeGraph/GitNexus. It never enforces or writes; gating stays
 in hooks + CI. It reads the source files this repo already holds (`.claude/thresholds.json`,
-`standards/STANDARDS.chrysa.md`, `.chrysa/STANDARDS.md`, `compliance/*-conformance.json`,
+`standards/STANDARDS.chrysa.md`, `compliance/*-conformance.json`,
 `repos.yml`) — no data is duplicated.
 
 | Tool | Returns |
