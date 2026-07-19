@@ -35,5 +35,4 @@ standards:
   - status
   standard_files:
   - standards/STANDARDS.chrysa.md
-  - .chrysa/STANDARDS.md
   thresholds_file: .claude/thresholds.json
