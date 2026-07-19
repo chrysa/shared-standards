@@ -32,6 +32,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 STANDARDS_SRC="$STD_ROOT/standards/STANDARDS.chrysa.md"
+# SKILLS_SRC = the transverse DevEx skills authored HERE, fanned out to every repo.
+# Intentionally NOT chrysa-skills: that is a separate load-on-demand library
+# (functional/identity/specialty, ~61 skills) NOT wired into distribution — fanning it
+# out would push identity/persona skills to every repo. Keep transverse skills here;
+# chrysa-skills stays standalone. See fleet consolidation notes.
 SKILLS_SRC="$STD_ROOT/.claude/skills"
 AGENTS_SRC="$STD_ROOT/templates/claude/agents"
 COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
