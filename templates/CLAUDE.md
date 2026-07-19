@@ -15,6 +15,7 @@
 ## Conventions
 
 - Language: English — all code, comments, documentation, instructions, and configuration files must be in English.
+- Governance: the five strategic pillars and the refutable ADR format are mandatory — see the imported `@.chrysa/STANDARDS.md` (Governance section) and `EXECUTION_STANDARD.md` §15.
 - Commits: Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`)
 - Branch naming: `feature/`, `bugfix/`, `chore/`, `hotfix/`, `release/`
 - Default branch: `develop`
@@ -90,3 +91,7 @@ graph. Only read source files when (a) modifying/debugging specific code, (b) th
 the needed detail, or (c) the graph is missing or stale.
 
 Type `/graphify` in Copilot Chat to build or update the graph.
+
+<!-- chrysa:standards-import:start -->
+@.chrysa/STANDARDS.md
+<!-- chrysa:standards-import:end -->
