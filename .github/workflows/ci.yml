@@ -8,7 +8,9 @@
 # Jobs:
 #   Pre-commit checks — fast ruff + mypy lint (no heavy pre-commit stack).
 #   Docker tests      — runs the console suite in Docker, emits repo-root coverage.xml.
-#   SonarCloud        — single analysis over the real sources, consuming that coverage.
+#   Web coverage      — vitest lcov for console/web (TS), SF paths repo-root-relative.
+#   SonarCloud        — single analysis over the real sources, consuming both the
+#                       Python coverage.xml and the web TS lcov (shared-standards#183).
 
 name: CI
 
@@ -77,10 +79,52 @@ jobs:
                   path: coverage.xml
                   if-no-files-found: warn
 
+    web:
+        name: Web coverage
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        defaults:
+            run:
+                working-directory: console/web
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+                  cache-dependency-path: console/web/pnpm-lock.yaml
+
+            - name: Install deps
+              run: pnpm install --frozen-lockfile
+
+            - name: Vitest coverage (lcov)
+              run: pnpm test:cov
+
+            # vitest emits SF paths relative to console/web (e.g. src/…). Sonar
+            # matches lcov SF against files under sonar.sources (console/web/src),
+            # so rewrite SF to repo-root-relative. Handles both absolute and
+            # relative SF forms.
+            - name: Rewrite LCOV SF paths to repo-root-relative
+              run: |
+                  sed -i -E 's#^SF:.*/(src/.*)$#SF:console/web/\1#; t; s#^SF:(src/.*)$#SF:console/web/\1#' coverage/lcov.info
+
+            - name: Upload web LCOV coverage
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: web-coverage-lcov
+                  path: console/web/coverage/lcov.info
+                  if-no-files-found: warn
+
     sonar:
         name: SonarCloud
         if: ${{ github.actor != 'dependabot[bot]' }}
-        needs: test
+        needs: [test, web]
         runs-on: ubuntu-latest
         timeout-minutes: 15
         permissions:
@@ -91,7 +135,16 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - uses: chrysa/github-actions/sonar-scan-python@v1.3.0
+            # Web TS coverage travels from the `web` job as an artifact; land it
+            # where the action expects it (js-coverage-report path below).
+            - name: Download web LCOV coverage
+              continue-on-error: true
+              uses: actions/download-artifact@v7
+              with:
+                  name: web-coverage-lcov
+                  path: console/web/coverage
+
+            - uses: chrysa/github-actions/sonar-scan-python@v1.4.0
               with:
                   python-version: "3.14"
                   sonar-token: ${{ secrets.SONAR_TOKEN }}
@@ -106,3 +159,6 @@ jobs:
                   # Downloaded from the test-results-3.14 artifact into reports/
                   # by the action; matches sonar-scan-python's default path.
                   coverage-report: reports/coverage.xml
+                  # TS coverage from the `web` job (SF paths repo-root-relative).
+                  # Missing file is skipped by the action, never fails the scan.
+                  js-coverage-report: console/web/coverage/lcov.info
