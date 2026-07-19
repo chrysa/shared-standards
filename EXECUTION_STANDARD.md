@@ -820,9 +820,9 @@ Docker-based tests (`make docker-test`).
 ## 15. Governance — Strategic Pillars & ADR Format (Mandatory)
 
 Every project complies with the five chrysa strategic pillars and records structural
-decisions as **refutable ADRs**. Full text: the distributed baseline
-`.chrysa/STANDARDS.md` (section "Governance — strategic pillars & ADR format"),
-imported by every `CLAUDE.md` via `@.chrysa/STANDARDS.md`.
+decisions as **refutable ADRs**. Full text: the transverse standards inlined into every `CLAUDE.md` by
+`distribute-standards` (managed `<!-- chrysa:standards -->` block); source of truth
+`standards/STANDARDS.chrysa.md`, section "Governance — strategic pillars & ADR format".
 
 ### 15.1 The five pillars (non-negotiable)
 
