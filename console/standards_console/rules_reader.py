@@ -1,9 +1,10 @@
 """Read the fleet standards *rules* from local files (read-only).
 
 Pure functions over the source files that already hold the norms:
-``.claude/thresholds.json`` (structured) and the two standards markdown files
-(prose). No I/O beyond reading; missing files raise :class:`StandardsUnavailable`
-loudly rather than returning an empty "all good" result.
+``.claude/thresholds.json`` (structured) and the canonical standards markdown
+file ``standards/STANDARDS.chrysa.md`` (prose). No I/O beyond reading; missing
+files raise :class:`StandardsUnavailable` loudly rather than returning an empty
+"all good" result.
 """
 
 from __future__ import annotations
