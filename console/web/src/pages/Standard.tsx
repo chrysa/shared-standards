@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function Standard({ meta }: { meta?: Meta }) {
   const { t } = useTranslation();
-  const { data, isLoading } = useQuery({ queryKey: ["standard"], queryFn: api.standard });
+  const { data, isLoading, isError } = useQuery({ queryKey: ["standard"], queryFn: api.standard });
   const [content, setContent] = useState("");
   const [summary, setSummary] = useState("");
 
@@ -38,7 +38,9 @@ export function Standard({ meta }: { meta?: Meta }) {
           </a>
         </Banner>
       )}
-      {isLoading ? (
+      {isError ? (
+        <Banner kind="error">{t("standard.loadError")}</Banner>
+      ) : isLoading ? (
         <p className="text-muted-foreground">{t("common.loading")}</p>
       ) : (
         <>
@@ -55,7 +57,10 @@ export function Standard({ meta }: { meta?: Meta }) {
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
             />
-            <Button disabled={edit.isPending} onClick={() => edit.mutate()}>
+            <Button
+              disabled={edit.isPending || !data || content === data.text || content.trim() === ""}
+              onClick={() => edit.mutate()}
+            >
               {t("standard.openPr")}
             </Button>
           </div>

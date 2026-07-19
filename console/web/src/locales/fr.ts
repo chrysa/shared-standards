@@ -42,6 +42,7 @@ export const fr = {
       summary: "Résumé du commit (ex. durcir le seuil de couverture)",
       openPr: "Ouvrir une PR",
       prOpened: "PR #{{number}} ouverte sur la branche {{branch}}.",
+      loadError: "Impossible de charger le standard — l'éditeur est désactivé pour éviter d'ouvrir une PR depuis un état jamais chargé.",
     },
   },
 };
