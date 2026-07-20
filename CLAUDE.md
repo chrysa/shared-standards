@@ -275,6 +275,10 @@ local `CLAUDE.md`; this file is the shared baseline imported by it.
   live-reload). A single-stage Dockerfile, or one missing either `production` or `dev`, is a
   defect. Compose services select the target explicitly (`build.target: production|dev|tests`).
   Canonical shape + Python 3.14 example: the `dockerfile-multistage` skill.
+  *Exemption — container-collection repos:* a repo whose product **is** a set of standalone
+  utility/tool container images (e.g. `usefull-containers`), not one application, is exempt from the
+  `production`+`dev` two-stage rule per image — each image is single-purpose. Such images still must
+  not embed a reverse proxy and still run as non-root where they bind-mount host paths.
 - **App containers ship the app only — the platform layer is the owner's responsibility.** An
   application image/container **never embeds a reverse proxy** (nginx/Traefik/Caddy/HAProxy as a
   TLS-terminating or routing front). The app container exposes its own port and speaks plain HTTP;
