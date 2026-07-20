@@ -63,5 +63,14 @@ repos:
     rev: v1.7.7
   - hooks:
       - id: regression-gate
+      # Application Dockerfiles must be multi-stage AND ship a `production` and a
+      # `dev` stage (shared-standards artifact-isolation rule). Scoped to the main
+      # Dockerfile — dedicated Dockerfile.test/.typecheck/.sync images are exempt.
+      - args:
+          - --require-target=production
+          - --require-target=dev
+        exclude: (\.test|\.typecheck|\.sync|e2e/Dockerfile)$
+        files: (^|/)Dockerfile$
+        id: dockerfile-multi-stage-check
     repo: https://github.com/chrysa/pre-commit-tools
     rev: v0.1.1-73
