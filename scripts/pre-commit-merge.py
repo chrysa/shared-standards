@@ -126,6 +126,8 @@ def _dump(data: dict) -> str:
 HOOK_GROUPS = {
     "always": {
         "yaml-sorter", "json-sorter", "env-file-check", "env-example-sync", "adr-gate",
+        # Claude Code assets: every repo carries .claude/ and most carry .mcp.json.
+        "claude-skill-frontmatter", "claude-agent-frontmatter", "claude-mcp-config",
     },
     "python": {
         "debugger-detection", "python-print-detection", "python-pprint-detection",
