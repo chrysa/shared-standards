@@ -33,6 +33,10 @@ repos:
   - id: env-file-check
   - id: env-example-sync
   - id: adr-gate
+  # --- claude code assets (all repos) ---
+  - id: claude-skill-frontmatter
+  - id: claude-agent-frontmatter
+  - id: claude-mcp-config
   # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
   # --- python (all Python repos) ---
   - id: debugger-detection
@@ -68,7 +72,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-97
+  rev: v0.1.1-98
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks

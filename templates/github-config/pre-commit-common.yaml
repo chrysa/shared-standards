@@ -72,5 +72,10 @@ repos:
         exclude: (\.test|\.typecheck|\.sync|e2e/Dockerfile)$
         files: (^|/)Dockerfile$
         id: dockerfile-multi-stage-check
+      # Claude Code assets: a SKILL.md or agent with broken front matter is silently
+      # invisible to the model, and an MCP entry with a bad transport never connects.
+      - id: claude-skill-frontmatter
+      - id: claude-agent-frontmatter
+      - id: claude-mcp-config
     repo: https://github.com/chrysa/pre-commit-tools
-    rev: v0.1.1-73
+    rev: v0.1.1-98
