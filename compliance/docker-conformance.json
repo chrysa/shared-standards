@@ -1,5 +1,5 @@
 {
-  "policy": "EXECUTION_STANDARD.md §6.1 — container-runtime",
+  "policy": "STANDARDS.chrysa.md — Container-runtime policy",
   "repos": [
     {
       "detail": "no executable runtime",

@@ -14,7 +14,7 @@ echo "Total repos: $total_repos" >&2
 # Archetype classification from shared-standards/repos.yml (source of truth, main branch).
 # No-package archetypes (runtime exempt:config | status non-dev) ship no pip/npm package
 # and have nothing to release, so pyproject/tests/release.yml are NOT required for them
-# (EXECUTION_STANDARD §2 archetype exemption).
+# (STANDARDS.chrysa.md Container-runtime policy — archetype exemption).
 REPOS_YML="$AUDIT_DIR/repos_main.yml"
 gh api repos/chrysa/shared-standards/contents/repos.yml --jq '.content' 2>/dev/null | base64 -d > "$REPOS_YML"
 repo_runtime() { awk -v R="$1" '$1=="-"&&$2=="name:"{c=$3} c==R&&$1=="runtime:"{print $2;exit}' "$REPOS_YML"; }
@@ -53,7 +53,7 @@ while IFS='|' read -r repo_name default_branch visibility; do
   done <<< "$tree_output"
 
   # Archetype: no-package repos (config/meta or non-dev) are exempt from
-  # pyproject/tests/release.yml (EXECUTION_STANDARD §2 archetype exemption).
+  # pyproject/tests/release.yml (STANDARDS.chrysa.md Container-runtime policy — archetype exemption).
   runtime=$(repo_runtime "$repo_name")
   status=$(repo_status "$repo_name")
   has_manifest=false

@@ -23,7 +23,7 @@ Create well-formatted commits following the chrysa Conventional Commits standard
 
 ## Commit Convention (chrysa)
 
-Format — see `EXECUTION_STANDARD.md` §3 (source of truth):
+Format — see the chrysa conventions (`standards/STANDARDS.chrysa.md` → Non-negotiable conventions):
 
 ```text
 <type>(<scope>): <description>
@@ -49,5 +49,5 @@ Format — see `EXECUTION_STANDARD.md` §3 (source of truth):
 
 ## References
 
-- Convention: `EXECUTION_STANDARD.md` §3
+- Convention: `standards/STANDARDS.chrysa.md` (Non-negotiable conventions)
 - PR format: `@templates/pr-template.md`
