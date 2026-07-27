@@ -27,7 +27,7 @@ List the chrysa custom slash commands and how to use them.
 
 - **Tests/lint/typecheck**: Docker or pre-commit only — never host `pytest`/`ruff`/`tsc`.
 - **Commits**: Conventional Commits (`feat`/`fix`/`chore`/`docs`/`ci`/`refactor`/`test`/`perf`);
-  no Claude co-author trailer. See `EXECUTION_STANDARD.md` §3.
+  no Claude co-author trailer. See `standards/STANDARDS.chrysa.md` (Non-negotiable conventions).
 - **GitHub**: `gh auth switch -u chrysa` before any `gh` command.
 - **Branches**: `feat/<issue-id>-desc`, `fix/<issue-id>-desc`, `chore/`, `docs/`, `ci/`.
 

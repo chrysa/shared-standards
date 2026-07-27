@@ -5,11 +5,11 @@
 > `discord-bot-back`, `guideline-checker`, `pre-commit-tools`,
 > `quality-gatekeeper`, `chrysa-portfolio-viz`).
 >
-> This document fills the gap **between** `EXECUTION_STANDARD.md` §11
+> This document fills the gap **between** `docs/PYTHON-PACKAGING-STANDARD.md`
 > (which mandates the `src/` layout and build backend) **and** the
 > code: it specifies what the package's top-level `__init__.py` is
 > allowed to expose and how. It does **not** restate API/REST rules —
-> those live in `CODE_MANIFEST.md` §3 — nor UI rules
+> those live in `.claude/skills/api-design/SKILL.md` — nor UI rules
 > (`docs/UX-UI-GUIDELINES.md`, `.claude/skills/ui-ux/SKILL.md`).
 
 The top-level `__init__.py` **is** the package's public contract. A
@@ -21,7 +21,7 @@ is enforced uniformly across mirror families so that
 
 ## C1 — Layout (already mandated, restated for compliance)
 
-- `src/<pkg>/__init__.py` layout — per `EXECUTION_STANDARD.md` §11.
+- `src/<pkg>/__init__.py` layout — per `docs/PYTHON-PACKAGING-STANDARD.md`.
 - **Flat-layout packages are non-conformant** and must be migrated.
 
 ## C2 — `__all__` is mandatory and sorted
@@ -105,7 +105,7 @@ Evidence from `__init__.py` + `pyproject.toml` inspection of the mirror
 families. **All repos hardcode `__version__ = "0.1.0"`** (C4 violated
 everywhere). Build backend is `setuptools` everywhere except
 `django-autoload` (`hatchling` — migrate to setuptools per
-`EXECUTION_STANDARD.md` §11).
+`docs/PYTHON-PACKAGING-STANDARD.md`).
 
 | Repo | C1 layout | C4 version | C3 imports | Backend | Action |
 |---|---|---|---|---|---|
@@ -135,4 +135,4 @@ make lint && make test
 ```
 
 > Host invocation of `python`/`ruff`/`pytest` is forbidden
-> (`EXECUTION_STANDARD.md` §12). Run inside the project's `make` targets.
+> (`docs/OPS-187-testing-workflow.md`). Run inside the project's `make` targets.

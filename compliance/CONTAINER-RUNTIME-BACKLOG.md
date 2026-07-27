@@ -1,7 +1,7 @@
 # Container-runtime conformance backlog
 
 Policy: **a project runs ONLY in a container unless its nature forbids it** —
-`EXECUTION_STANDARD.md §6.1`. Classification lives in `repos.yml` (`runtime:` field);
+`standards/STANDARDS.chrysa.md` (Container-runtime policy). Classification lives in `repos.yml` (`runtime:` field);
 state is machine-checked by `scripts/audit-docker-compliance.sh`
 (baseline: `compliance/docker-conformance.json`).
 
