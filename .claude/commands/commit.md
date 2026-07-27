@@ -23,7 +23,7 @@ Create well-formatted commits following the chrysa Conventional Commits standard
 
 ## Commit Convention (chrysa)
 
-Format — see the chrysa conventions (`standards/STANDARDS.chrysa.md` → Non-negotiable conventions):
+Format — see the chrysa conventions ([standards](https://github.com/chrysa/shared-standards/blob/main/standards/STANDARDS.chrysa.md) → Non-negotiable conventions):
 
 ```text
 <type>(<scope>): <description>
@@ -49,5 +49,5 @@ Format — see the chrysa conventions (`standards/STANDARDS.chrysa.md` → Non-n
 
 ## References
 
-- Convention: `standards/STANDARDS.chrysa.md` (Non-negotiable conventions)
+- Convention: [chrysa standards](https://github.com/chrysa/shared-standards/blob/main/standards/STANDARDS.chrysa.md) (Non-negotiable conventions)
 - PR format: `@templates/pr-template.md`
