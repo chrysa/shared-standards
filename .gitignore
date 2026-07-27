@@ -34,6 +34,9 @@ Thumbs.db
 .ci-backup-*/
 .gitnexus
 
+# Local backups (find-and-replace / notion sync snapshots — regenerable)
+.fka_backups/
+
 # CodeGraph (local index — never commit)
 .codegraph/
 

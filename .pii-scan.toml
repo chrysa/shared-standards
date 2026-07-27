@@ -9,4 +9,4 @@ entities = [
   "IP_ADDRESS", "FR_NIR",
 ]
 # Globs excluded from scanning (binary/generated/large artifacts).
-exclude_paths = ["graphify", "sys", "seeds/", "*.svg", "*.png", "*.lock"]
+exclude_paths = ["graphify", "sys", "*.svg", "*.png", "*.lock"]

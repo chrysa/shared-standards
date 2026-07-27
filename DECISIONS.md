@@ -1,7 +1,7 @@
 # DECISIONS — shared-standards
 
 > Repository-local ADRs (Architectural Decision Records). Numbering: D-XXXX.
-> Any deviation from [CODE_MANIFEST.md](../../CODE_MANIFEST.md) must be documented here.
+> Any deviation from [chrysa standards](standards/STANDARDS.chrysa.md) must be documented here.
 > No active deviation → this project follows all chrysa global standards.
 
 ---
@@ -12,7 +12,7 @@
 **Status**: accepted
 
 This project is the source of shared tooling (linter configs, reusable CI workflows) for the chrysa ecosystem.
-It follows all conventions defined in `CODE_MANIFEST.md`.
+It follows all conventions defined in `standards/STANDARDS.chrysa.md`.
 No active deviation is in effect. Any future deviation must be added as a new ADR entry below.
 
 ---
@@ -22,7 +22,7 @@ No active deviation is in effect. Any future deviation must be added as a new AD
 **Date**: 2026-06-04
 **Status**: accepted
 
-Two cross-cutting standards are added to `CODE_MANIFEST.md` for every app exposing a web UI:
+Two cross-cutting standards are added to `standards/STANDARDS.chrysa.md` for every app exposing a web UI:
 
 1. **Landing page + screenshots** (§7.x): each web-UI app maintains a landing page (README hero, plus
    a public page if deployed) including up-to-date screenshots under `docs/screenshots/`, refreshed at
@@ -49,8 +49,8 @@ Portfolio-wide standard formalizing how build artifacts are distributed:
 2. **Docker images** are pushed to a **private registry** — **GHCR** under the chrysa org
    (`ghcr.io/chrysa/<repo>`, package visibility **private**, never public). CI auth via `GITHUB_TOKEN`.
 
-Codified in `EXECUTION_STANDARD.md` §6 (Registry) and §11 (Distribution), and reflected in
-`CODE_MANIFEST.md` §8.1 (`build-image.yml`, `release.yml`). Workflow implementation lives in
+Codified in `standards/STANDARDS.chrysa.md` (Container-runtime policy · Release & changelog config) and
+`docs/PYTHON-PACKAGING-STANDARD.md` (Distribution), reflected in `build-image.yml` / `release.yml`. Workflow implementation lives in
 `chrysa/github-actions`. Execution Standard bumped to v1.5.
 
 
@@ -157,7 +157,7 @@ blocking and did not enforce PR merge order or cross-repo dependency injection.
 **Decision**: adopt [`depends-on/depends-on-action`](https://github.com/depends-on/depends-on-action)
 (pinned `@0.17.0`) as the standard mechanism. Contributors declare a dependency on a
 predecessor PR with a `Depends-On: <PR URL>` line in the PR description (see
-`EXECUTION_STANDARD.md` § Merge rules). `pr-dependencies.yml` now runs two jobs:
+`standards/STANDARDS.chrysa.md` merge rules). `pr-dependencies.yml` now runs two jobs:
 1. `extract_dependencies` — injects the dependent change(s) for build/test.
 2. `check_dependencies_merged` — uses `check-unmerged-pr: true` to block the PR until
    all declared `Depends-On:` targets are merged.

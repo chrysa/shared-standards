@@ -15,7 +15,7 @@
 ## Conventions
 
 - Language: English — all code, comments, documentation, instructions, and configuration files must be in English.
-- Governance: the five strategic pillars and the refutable ADR format are mandatory — see the managed `chrysa:standards` block below (inlined by distribute-standards) and `EXECUTION_STANDARD.md` §15.
+- Governance: the five strategic pillars and the refutable ADR format are mandatory — see the managed `chrysa:standards` block below (inlined by distribute-standards, Governance section).
 - Commits: Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`)
 - Branch naming: `feature/`, `bugfix/`, `chore/`, `hotfix/`, `release/`
 - Default branch: `develop`

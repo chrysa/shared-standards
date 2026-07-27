@@ -8,7 +8,7 @@
 #   exempt:config   — no executable runtime (config, knowledge/Obsidian, deployment manifests, container-def collections).
 #   exempt:native   — bound to host OS / device / cloud platform / editor (Windows, webcam, GAS, VS Code ext, infra/Helm).
 #   pending         — pre-code scaffold; flips to `container` once app code lands (enforced at first code via project-init).
-#   Audited by audit-docker-compliance.sh. See EXECUTION_STANDARD.md §6.1.
+#   Audited by audit-docker-compliance.sh. See standards/STANDARDS.chrysa.md (Container-runtime policy).
 repos:
   - name: agent-config
     status: dev

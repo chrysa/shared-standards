@@ -91,13 +91,13 @@ git checkout -b chore/adopt-lean-ci -q 2>/dev/null || git checkout chore/adopt-l
 git add $CHANGED
 git commit --no-verify -q -m "chore: adopt chrysa standards — makefile-tier + lean CI
 
-Add '# makefile-tier: $TIER' marker (EXECUTION_STANDARD §1.1) and, for code repos,
+Add '# makefile-tier: $TIER' marker (docs/MAKEFILE-STANDARD.md) and, for code repos,
 a thin caller of the reusable lean CI (chrysa/github-actions). Auto-versioning
 unchanged (release.yml/GitVersion)."
 git push --no-verify -u origin chore/adopt-lean-ci -q 2>&1 | tail -1
 gh pr create -R "chrysa/$REPO" --base "$BASE" --head chore/adopt-lean-ci \
   --title "chore: adopt chrysa standards (makefile-tier + lean CI)" \
-  --body "Adds the \`# makefile-tier: $TIER\` marker (EXECUTION_STANDARD §1.1) and a thin caller of the reusable lean CI where applicable. Auto-versioning unchanged." 2>&1 | tail -1
+  --body "Adds the \`# makefile-tier: $TIER\` marker (docs/MAKEFILE-STANDARD.md) and a thin caller of the reusable lean CI where applicable. Auto-versioning unchanged." 2>&1 | tail -1
 sleep 2
 gh pr merge chore/adopt-lean-ci -R "chrysa/$REPO" --squash --admin --delete-branch 2>&1 | tail -1
 echo "DONE $REPO"

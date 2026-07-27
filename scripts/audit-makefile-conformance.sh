@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # audit-makefile-conformance.sh · Read-only fleet audit of Makefile derivation
-# from Forge-Stack-Workshop/base-makefile and conformance to EXECUTION_STANDARD.md §1.
+# from Forge-Stack-Workshop/base-makefile and conformance to docs/MAKEFILE-STANDARD.md.
 #
 # Source: chrysa/shared-standards/scripts/audit-makefile-conformance.sh
 #

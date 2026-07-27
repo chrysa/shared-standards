@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # makefile-classify.sh · Sourceable helper — classify a repo into a chrysa
-# Makefile tier (EXECUTION_STANDARD.md §1) and the base-makefile template it
+# Makefile tier (docs/MAKEFILE-STANDARD.md) and the base-makefile template it
 # should derive from.
 #
 # Source: chrysa/shared-standards/scripts/lib/makefile-classify.sh

@@ -5,7 +5,7 @@
 > UI for frontends, CLI for tools.
 >
 > Driving standards: `docs/PUBLIC-API-CONTRACT.md` (libs),
-> `CODE_MANIFEST.md` §3 (services), `docs/UX-UI-GUIDELINES.md` +
+> `.claude/skills/api-design/SKILL.md` (services), `docs/UX-UI-GUIDELINES.md` +
 > `.claude/skills/ui-ux/SKILL.md` (UI), this ledger (tracking).
 >
 > Execution rule: **Rule 1+2** — max 1 Socle + 2 Actifs repos in flight.
@@ -59,7 +59,7 @@
 | chrysa-portfolio-viz | todo | — | |
 | ai-aggregator | ✓ done | #159 | design campaign |
 
-## Phase 3 — API-only services (CODE_MANIFEST §3 conformance)
+## Phase 3 — API-only services (api-design skill conformance)
 
 | Repo | Status | PR | Notes |
 |---|---|---|---|

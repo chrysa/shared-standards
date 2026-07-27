@@ -26,7 +26,7 @@ CI; it is a `make`-driven dev-loop check.
    frontend port (the `docker-compose.yml` published port).
 
 4. Add the canonical `e2e` / `e2e-headed` targets to your `Makefile`
-   (see `EXECUTION_STANDARD.md` §1.3b), setting `E2E_PORT` to the same port.
+   (see [MAKEFILE-STANDARD.md](https://github.com/chrysa/shared-standards/blob/main/docs/MAKEFILE-STANDARD.md)), setting `E2E_PORT` to the same port.
 
 5. Ignore artefacts: `frontend/playwright-report/`, `frontend/test-results/`.
 
