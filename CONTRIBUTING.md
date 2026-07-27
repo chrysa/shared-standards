@@ -1,7 +1,7 @@
 # Contributing to shared-standards
 
 Thanks for contributing. This repo follows the chrysa
-[chrysa standards](standards/STANDARDS.chrysa.md).
+[chrysa standards](https://github.com/chrysa/shared-standards/blob/main/standards/STANDARDS.chrysa.md).
 
 ## Prerequisites
 
