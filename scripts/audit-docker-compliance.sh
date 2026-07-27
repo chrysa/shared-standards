@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# audit-docker-compliance.sh · Container-runtime policy conformance (EXECUTION_STANDARD §6.1).
+# audit-docker-compliance.sh · Container-runtime policy conformance (STANDARDS.chrysa.md — Container-runtime policy).
 # Source: chrysa/shared-standards/scripts/audit-docker-compliance.sh
 #
 # "A project runs ONLY in a container unless its nature forbids it." Reads the `runtime:`
@@ -139,7 +139,7 @@ printf 'pass=%d warn=%d fail=%d exempt=%d pending=%d absent=%d\n' \
 
 {
     printf '{\n'
-    printf '  "policy": "EXECUTION_STANDARD.md §6.1 — container-runtime",\n'
+    printf '  "policy": "STANDARDS.chrysa.md — Container-runtime policy",\n'
     printf '  "summary": {"pass":%d,"warn":%d,"fail":%d,"exempt":%d,"pending":%d,"absent":%d},\n' \
         "$passes" "$warns" "$fails" "$exempts" "$pendings" "$absents"
     printf '  "repos": [%s\n  ]\n' "$json_items"

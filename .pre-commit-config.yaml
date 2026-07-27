@@ -105,7 +105,7 @@ repos:
     language: python
     pass_filenames: true
     require_serial: true
-    exclude: ^(graphify|sys|seeds/|tests/pii/fixtures/|.*(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|poetry\.lock|uv\.lock)$)
+    exclude: ^(graphify|sys|tests/pii/fixtures/|.*(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|poetry\.lock|uv\.lock)$)
     additional_dependencies:
     - presidio-analyzer==2.2.359
     # spaCy's CLI imports click directly, but typer-slim (pulled by presidio) no

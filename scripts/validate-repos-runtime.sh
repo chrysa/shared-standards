@@ -2,7 +2,7 @@
 # validate-repos-runtime.sh · Enforce the container-runtime classification in repos.yml.
 # Source: chrysa/shared-standards/scripts/validate-repos-runtime.sh
 #
-# CI gate for EXECUTION_STANDARD §6.1: every repo entry must declare a `runtime:` with a
+# CI gate for STANDARDS.chrysa.md Container-runtime policy: every repo entry must declare a `runtime:` with a
 # value from the allowed set. Keeps the policy self-sustaining — a new repo cannot be added
 # without classifying how it runs. Self-contained (parses repos.yml only; no fleet checkout).
 #
