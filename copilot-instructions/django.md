@@ -61,6 +61,15 @@ pyproject.toml       # single source of truth for metadata, deps, tooling
 - `DJANGO_SETTINGS_MODULE` defaults to `<project_name>.settings.dev`; CI uses `.settings.test`,
   prod uses `.settings.prod`.
 
+## Models & choices
+
+- **One model per file** under `models/`, named after the model; re-export from `models/__init__.py`. No god-model.
+- Enumerated fields use `models.TextChoices` / `models.IntegerChoices` — never a free-form `CharField` for a closed set.
+- Every `ForeignKey` / `OneToOneField` sets an explicit `on_delete` and a `related_name`.
+- Every field carries `help_text`; add `verbose_name` when the attribute name is not self-explanatory.
+- `db_index=True` (or `Meta.indexes`) on every field used in filters, ordering, or FK lookups.
+- Query logic lives in custom **managers / QuerySets** (`objects = FooQuerySet.as_manager()`), never in views or serializers.
+
 ## DRF API design
 
 - Use **Django REST Framework** for all JSON APIs. Server-rendered templates only for Django Admin.
@@ -102,6 +111,10 @@ pyproject.toml       # single source of truth for metadata, deps, tooling
 - Always run `makemigrations` and **commit the generated migration files**.
 - Never hand-author schema migrations; for data migrations use `RunPython` with a reverse function.
 - Never call `create_all` / raw `CREATE TABLE`. Migrations are the only schema source of truth.
+- **Zero-downtime / backward-compatible** (rolling deploys): old and new code must coexist during the rollout, every migration is reversible and idempotent, and it completes in **< 10 s** on the largest production table.
+- Add a non-nullable column in **two steps** — add it nullable (+ backfill), then set the constraint in a later migration. Never a single blocking `ALTER` on a hot table.
+- `python manage.py lintmigrations` (django-migration-linter) **must pass before merge**.
+- **Max 2–3 migration files per PR** — squash aggressively; no bloat from iterative development.
 - Squash long migration chains on a `chore/` branch when they slow tests.
 
 ## Error handling
