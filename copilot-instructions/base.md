@@ -19,13 +19,20 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 
 ### Python
 - Target Python 3.14.
-- Use `ruff` for formatting and linting (`ruff check`, `ruff format`).
+- **Ruff is the source of truth** for formatting and linting (`ruff check`, `ruff format`). Do not hand-format against it. Line length is **120**; max **5** arguments per function.
 - Use `mypy` for type checking in typed projects.
 - Keep functions under 50 lines.
 - Keep files under 500 lines. Split when appropriate.
-- 0 lint warnings is the target. Every warning must be resolved or suppressed with justification.
+- 0 lint warnings is the target. Every warning must be resolved, not silenced. A `# noqa` is allowed only with a rule code and a one-line reason (`# noqa: E501 — generated URL, cannot wrap`); a bare `# noqa` is forbidden.
 - **One class per file.** Each class lives in its own module (e.g. `models/user.py` contains only `User`).
 - **Domain-driven structure.** Organize code by domain (e.g. `connectors/`, `services/`, `schemas/`), not by layer.
+- **Imports at the top of the file**, absolute only (no relative `..pkg` imports), one `from x import y` per line, third-party before first-party. Start every module with `from __future__ import annotations`.
+- **Single return point** per function where practical — compute, then `return` once at the end rather than scattering early exits (guard clauses for validation are the accepted exception).
+- **Intention-revealing names.** No cryptic abbreviations (`ti`, `obj`, `tmp`, single-letter `e` for exceptions); a name states what the value *is*. This replaces the need for explanatory comments.
+- **Constants are typed, never inline literals.** Use `StrEnum` / `IntEnum` for enumerations and module-level `Final` for scalars, loaded from the bundled YAML (see the no-hardcoded-constants rule). Only language-level enums (`http.HTTPStatus`, `fastapi.status`) are exempt.
+- **Test files carry no type annotations** — they read as executable specs, not typed production code (`mypy` excludes `tests/`).
+- **Replace in place, never fork.** Edit the existing symbol; never ship a parallel `_v2` / `_optimized` / `_new` copy alongside the original.
+- **Ruff rules to satisfy, not silence:** catch specific exceptions (never bare `except Exception`) and chain with `raise ... from err`; no boolean positional arguments (keyword-only or an enum); mutable class attributes via `field(default_factory=...)`; unused-but-interface-required args prefixed `_`; never touch another object's private members (`_x`) from outside its class (tests exempt); `%`-style logging args, never f-strings in `logger.*` calls; built-in generics (`list[str]`, `dict[str, int]`) and `X | None` over `Optional`.
 
 ### JavaScript / TypeScript
 - Target Node.js LTS.
@@ -55,6 +62,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - **Canonical source: `Forge-Stack-Workshop/base-makefile`** — every repo's `Makefile` is generated from its tiered templates (`Makefile.basic` / `Makefile.python` / `Makefile.with-sub-folder`). Extend with project-specific targets; never fork the contract or hand-roll equivalents.
 - Target names are invariant (`install`, `lint`, `format`, `test`, `build`, `clean`, `pre-commit`, …). No `fmt`/`tests`/`type-check` variants.
 - Declare the tier on line 1: `# makefile-tier: lib | python-app | fullstack | infra`.
+- **Single entry point.** Every task runs through `make <target>` — never invoke `docker`, `pytest`, `ruff`, or `python` directly in docs, CI, or by hand. New tasks are added as targets, not ad-hoc commands.
 
 ## Architecture
 
@@ -73,8 +81,11 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 - **Setup wizard on misconfiguration:** Deployable platforms (web apps, services with a UI) must detect misconfiguration at startup and redirect the user to a setup wizard rather than displaying a generic error or crashing. If required env vars are missing, DB is unreachable, or initial setup was never completed, the app must route to `/setup` (or equivalent) and guide the user through the fix. The wizard must be idempotent and skippable in CI (`SETUP_NON_INTERACTIVE=1`).
 
 ## Security
-- Never commit secrets, tokens, or credentials.
-- Use environment variables for all configuration that varies between environments.
+- Never commit secrets, tokens, or credentials. `.env` is git-ignored; document every variable in a committed `.env.example` (no real values).
+- Use environment variables for all configuration that varies between environments. Env var names are **UPPERCASE**, prefixed per service.
+- Generate secrets with the `secrets` module, never `random` (e.g. `python -c "import secrets; print(secrets.token_urlsafe(64))"`).
+- **Rotate production secrets on a schedule (≤ 90 days)**; a leaked secret is rotated, never reused.
+- Scan git history before every deploy (`detect-secrets` / `gitleaks`).
 - Validate all external inputs at system boundaries.
 
 ## Git and CI
