@@ -55,7 +55,7 @@ JSON_ROWS=()
 
 audit_one() {
     local repo="$1" name; name="$(basename "$repo")"
-    [[ -d "$repo/.git" ]] || return 0
+    [[ -e "$repo/.git" ]] || return 0
 
     local tier template
     IFS=$'\t' read -r tier template < <(classify_makefile "$repo")
