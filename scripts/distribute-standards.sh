@@ -76,6 +76,18 @@ info() { echo -e "  \033[34m→\033[0m $*"; }
 DRIFT=0
 mark_drift() { DRIFT=1; }
 
+# Guarantee the file ends with exactly ONE newline and no trailing blank lines.
+# The managed block itself is clean, but repo-specific tail content or a template
+# can leave a stray blank line at EOF; without this the sync-standards CI commit
+# fights end-of-file-fixer and the push is rejected. $() strips all trailing
+# newlines; printf re-adds exactly one. Apply-mode only (never in --check/--dry-run).
+normalize_eof() {
+    local f="$1"
+    [[ -f "$f" ]] || return 0
+    local content; content="$(cat "$f")"
+    printf '%s\n' "$content" > "$f"
+}
+
 # The managed block = start marker + standards body (source minus its leading HTML
 # header comment) + end marker. Written to $1.
 build_block() {
@@ -145,7 +157,7 @@ inject_standards() {
         if $CHECK;   then warn "drift: $claude absent (would be created)"; mark_drift; rm -f "$block"; return 0; fi
         if $DRY_RUN; then info "[dry-run] would create $claude with standards block"; mark_drift; rm -f "$block"; return 0; fi
         if [[ -f "$CLAUDE_TPL" ]]; then cp "$CLAUDE_TPL" "$claude"; else printf '# CLAUDE.md — %s\n' "$(basename "$repo")" > "$claude"; fi
-        printf '\n' >> "$claude"; cat "$block" >> "$claude"
+        printf '\n' >> "$claude"; cat "$block" >> "$claude"; normalize_eof "$claude"
         ok "created $claude with standards block"; rm -f "$block"; return 0
     fi
 
@@ -162,14 +174,14 @@ inject_standards() {
             $0==s {while ((getline line < bf) > 0) print line; close(bf); skip=1; next}
             $0==e {skip=0; next}
             !skip {print}' "$claude" > "$tmp"
-        mv "$tmp" "$claude"
+        mv "$tmp" "$claude"; normalize_eof "$claude"
         ok "refreshed standards block in $claude"; rm -f "$cur" "$block"; return 0
     fi
 
     # Block missing entirely — append it.
     if $CHECK;   then warn "drift: $claude missing standards block"; mark_drift; rm -f "$block"; return 0; fi
     if $DRY_RUN; then info "[dry-run] would append standards block to $claude"; mark_drift; rm -f "$block"; return 0; fi
-    printf '\n' >> "$claude"; cat "$block" >> "$claude"
+    printf '\n' >> "$claude"; cat "$block" >> "$claude"; normalize_eof "$claude"
     ok "appended standards block to $claude"; rm -f "$block"
 }
 
