@@ -27,7 +27,9 @@ repos:
 - hooks:
   - id: makefile-check
   # --- generic (all repos) ---
-  - exclude: ^(\.github/|workflows/|templates/)
+  # Lock files are machine-generated: reordering their keys can invalidate
+  # dependency resolution, so they are never sorted.
+  - exclude: ^(\.github/|workflows/|templates/)|(^|/)(pnpm-lock|yarn|uv|poetry)\.(yaml|lock)$
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check
