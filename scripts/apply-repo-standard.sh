@@ -222,7 +222,8 @@ merge_precommit() {
 apply_one() {
     local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     [[ -d "$repo" ]]      || { err "$repo absent"; return 2; }
-    [[ -d "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
+    # `.git` is a directory in a normal clone but a file in a worktree; -e covers both.
+    [[ -e "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
     log "═══ $name ═══"
     if $CHECK; then merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"

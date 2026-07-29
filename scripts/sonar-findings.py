@@ -47,7 +47,7 @@ MAX_DETAIL_ROWS = 50  # cap per-rule example detail in the issue body
 
 
 def _stderr(msg: str) -> None:
-    print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr)  # print-detection: disable
 
 
 def _api_get(path: str, params: dict, token: str) -> dict:
@@ -187,7 +187,7 @@ def main() -> int:
             f.write(payload + "\n")
         _stderr(f"\nwrote {args.out}")
     else:
-        print(payload)
+        print(payload)  # print-detection: disable
 
     _stderr(f"\nrepos with findings: {len(findings)} · clean: {len(skipped_clean)} · "
             f"no Sonar project: {len(skipped_noproj)}")

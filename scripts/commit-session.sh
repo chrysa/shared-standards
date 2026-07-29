@@ -65,7 +65,7 @@ fi
 do_repo() {
   local repo="$1" br="$2" msg="$3" ititle="$4"; shift 4
   local paths=( "$@" ) rel="${repo#./}"
-  [ -d "$repo/.git" ] || { echo "--  skip $rel (not a git repo)"; return; }
+  [ -e "$repo/.git" ] || { echo "--  skip $rel (not a git repo)"; return; }
   local base; base="$(base_branch "$repo")"
   [ -z "$base" ] && { echo "!!  $rel: no develop/main/master base — skip"; return; }
 

@@ -36,7 +36,7 @@ detect_pc_stacks() {
 
 audit_one() {
     local repo="$1" name; name="$(basename "$repo")"
-    [[ -d "$repo/.git" ]] || return 0
+    [[ -e "$repo/.git" ]] || return 0
     local ci=false pc=false ec=false ga=false co=false li="–" db=false ow=false
     [[ -f "$repo/.github/workflows/ci.yml" ]] && grep -q 'chrysa/github-actions' "$repo/.github/workflows/ci.yml" 2>/dev/null && ci=true
     local stacks; stacks="$(detect_pc_stacks "$repo")"

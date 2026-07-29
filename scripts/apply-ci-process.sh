@@ -218,7 +218,7 @@ deploy_one() {
         err "$repo n'existe pas"
         return 2
     fi
-    if [[ ! -d "$repo/.git" ]]; then
+    if [[ ! -e "$repo/.git" ]]; then
         warn "$repo_name : pas un repo git · skip"
         return 0
     fi
@@ -304,7 +304,7 @@ check_templates
 if $TARGET_ALL; then
     log "Mode --all · scan des repos chrysa dans $CHRYSA_ROOT/"
     for d in "$CHRYSA_ROOT"/*/; do
-        [[ -d "$d/.git" ]] || continue
+        [[ -e "$d/.git" ]] || continue
         [[ "$(basename "$d")" == "shared-standards" ]] && continue
         [[ "$(basename "$d")" == "_archived" ]] && continue
         deploy_one "$d"

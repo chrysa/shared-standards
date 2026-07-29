@@ -128,7 +128,7 @@ reconcile() {
 
 sync_one() {
     local repo="$1" name; name="$(basename "$repo")"
-    [[ -d "$repo/.git" ]] || { echo "skip $name (not a repo)"; return 0; }
+    [[ -e "$repo/.git" ]] || { echo "skip $name (not a repo)"; return 0; }
     local tier template
     IFS=$'\t' read -r tier template < <(classify_makefile "$repo")
     echo "▶ $name  [tier=$tier template=$template]"

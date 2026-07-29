@@ -53,7 +53,7 @@ freed=0; removed=0
 
 purge_repo() {
   repo="$1"
-  [ -d "$repo/.git" ] || { echo "  skip (not a git repo): $repo"; return; }
+  [ -e "$repo/.git" ] || { echo "  skip (not a git repo): $repo"; return; }
   dirs="$SAFE_DIRS"; [ $HEAVY -eq 1 ] && dirs="$dirs $HEAVY_DIRS"
   # collect matches (prune so we do not descend into a match)
   # shellcheck disable=SC2086

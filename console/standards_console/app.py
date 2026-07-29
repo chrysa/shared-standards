@@ -39,7 +39,7 @@ from .views import assemble_fleet
 router = APIRouter(prefix="/api")
 
 # Vite dev server origins allowed to call the local API during development.
-_DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # no-hardcoded-localhost: disable — dev CORS origins
 
 
 def get_services(request: Request) -> Services:

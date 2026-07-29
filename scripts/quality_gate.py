@@ -31,7 +31,7 @@ class QualityGate:
         self.last_report_path = Path(self.LAST_REPORT_FILE)
 
         if not self.config_path.exists():
-            print(f"ERROR: configuration file not found: {self.CONFIG_FILE}")
+            print(f"ERROR: configuration file not found: {self.CONFIG_FILE}")  # print-detection: disable
             sys.exit(1)
 
         with open(self.config_path, encoding="utf-8") as handle:
@@ -163,7 +163,7 @@ class QualityGate:
         self, gate_name: str, key: str, metric_name: str, default_cmd: str
     ) -> dict[str, Any]:
         cmd = self.config.get("commands", {}).get(key, default_cmd)
-        print(f"RUN_GATE|{gate_name}|{cmd}")
+        print(f"RUN_GATE|{gate_name}|{cmd}")  # print-detection: disable
         exit_code, output = self._run(cmd)
         metric = self._parse_metric(gate_name, exit_code, output)
         return {
@@ -181,7 +181,7 @@ class QualityGate:
             json.dump(report, handle, indent=2)
 
     def baseline(self) -> bool:
-        print("BASELINE|START")
+        print("BASELINE|START")  # print-detection: disable
         baseline_data: dict[str, Any] = {
             "recorded_at": datetime.now().isoformat(),
             "gates": {},
@@ -196,7 +196,7 @@ class QualityGate:
                 all_ok = False
                 baseline_data["valid"] = False
             status = "PASS" if result["exit_code"] == 0 else "FAIL"
-            print(
+            print(  # print-detection: disable
                 f"GATE_RESULT|{gate_name}|{status}|metric={result['metric']}|"
                 f"exit={result['exit_code']}|mode=baseline"
             )
@@ -213,11 +213,11 @@ class QualityGate:
         self._write_report(report)
 
         if all_ok:
-            print(_OVERALL_PASS)
+            print(_OVERALL_PASS)  # print-detection: disable
             return True
 
-        print(_OVERALL_FAIL)
-        print(
+        print(_OVERALL_FAIL)  # print-detection: disable
+        print(  # print-detection: disable
             "ERROR: baseline contains failing gates; fix quality checks before using this baseline"
         )
         return False
@@ -242,7 +242,7 @@ class QualityGate:
             return False, "comparison_error"
 
     def verify(self) -> bool:
-        print("VERIFY|START")
+        print("VERIFY|START")  # print-detection: disable
         if not self.baseline_path.exists():
             report = {
                 "mode": "verify",
@@ -251,8 +251,8 @@ class QualityGate:
                 "baseline_file": str(self.baseline_path),
             }
             self._write_report(report)
-            print(_OVERALL_FAIL)
-            print("ERROR: baseline file not found; run quality-gate-baseline first")
+            print(_OVERALL_FAIL)  # print-detection: disable
+            print("ERROR: baseline file not found; run quality-gate-baseline first")  # print-detection: disable
             return False
 
         with open(self.baseline_path, encoding="utf-8") as handle:
@@ -279,7 +279,7 @@ class QualityGate:
                 all_passed = False
 
             status = "PASS" if passed else "FAIL"
-            print(
+            print(  # print-detection: disable
                 f"GATE_RESULT|{gate_name}|{status}|baseline={baseline_metric}|"
                 f"target={target}|current={current_metric}|op={operator}|"
                 f"exit={current.get('exit_code', 1)}|reason={reason}"
@@ -310,16 +310,16 @@ class QualityGate:
         self._write_report(report)
 
         if all_passed:
-            print(_OVERALL_PASS)
+            print(_OVERALL_PASS)  # print-detection: disable
             return True
 
-        print(_OVERALL_FAIL)
+        print(_OVERALL_FAIL)  # print-detection: disable
         return False
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python3 quality_gate.py [baseline|verify]")
+        print("Usage: python3 quality_gate.py [baseline|verify]")  # print-detection: disable
         sys.exit(1)
 
     command = sys.argv[1].strip().lower()
@@ -330,7 +330,7 @@ def main() -> None:
     if command == "verify":
         sys.exit(0 if quality_gate.verify() else 1)
 
-    print(f"Unknown command: {command}")
+    print(f"Unknown command: {command}")  # print-detection: disable
     sys.exit(1)
 
 

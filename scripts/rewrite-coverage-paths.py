@@ -44,11 +44,11 @@ def _validated_report(raw: str) -> Path:
 
 def main() -> int:
     if len(sys.argv) != 3:
-        print(__doc__)
+        print(__doc__)  # print-detection: disable
         return 2
     report = _validated_report(sys.argv[1])
     report.write_text(rewrite(report.read_text(encoding="utf-8"), sys.argv[2]), encoding="utf-8")
-    print(f"rewrote {report} for repo-root Sonar mapping (prefix: {sys.argv[2]})")
+    print(f"rewrote {report} for repo-root Sonar mapping (prefix: {sys.argv[2]})")  # print-detection: disable
     return 0
 
 

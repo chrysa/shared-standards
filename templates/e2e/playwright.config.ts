@@ -14,7 +14,7 @@ import { defineConfig, devices } from "@playwright/test";
  * on the host). The stack must be up first.
  */
 
-const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:8080"; // adjust port to your stack
+const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:8080"; // adjust port to your stack · no-hardcoded-localhost: disable
 
 export default defineConfig({
   testDir: "./tests/e2e",

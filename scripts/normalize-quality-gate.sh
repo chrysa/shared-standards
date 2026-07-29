@@ -18,7 +18,7 @@ if [ ! -d "$REPO_PATH" ]; then
     exit 1
 fi
 
-if [ ! -d "$REPO_PATH/.git" ]; then
+if [ ! -e "$REPO_PATH/.git" ]; then
     echo "❌ Not a git repository: $REPO_PATH"
     exit 1
 fi
