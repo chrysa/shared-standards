@@ -77,5 +77,8 @@ repos:
       - id: claude-skill-frontmatter
       - id: claude-agent-frontmatter
       - id: claude-mcp-config
+      # Tests are pytest + pytest-mock. The stdlib unittest framework and
+      # unittest.mock are forbidden; block them at write time, not in review.
+      - id: python-no-unittest-import
     repo: https://github.com/chrysa/pre-commit-tools
-    rev: v0.1.1-98
+    rev: v0.1.1-99
