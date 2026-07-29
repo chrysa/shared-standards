@@ -99,7 +99,10 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `useEffect` synchronises with an external system and does not orchestrate business logic;
   `StrictMode` on for new apps. One API client singleton behind a service layer, one cache
   library for all server state, a root error boundary, and an explicit loading/error/empty
-  triad per container. Detail: annexe `FRONTEND.md` §2–§3.
+  triad per container. Anything outside the first meaningful paint loads lazily (split routes,
+  `loading="lazy"` media, on-demand heavy components) behind a **shape-accurate placeholder**
+  that reserves the final dimensions — a skeleton, not a spinner, so arrival shifts no layout.
+  Detail: annexe `FRONTEND.md` §2–§3, §7.
 - **Every repo declares its profile and DDD level** (`project_profile`, `ddd_level`,
   `bounded_context`, `standards_version`) — architecture is proportionate to business
   complexity, and small tools are not over-architected. Detail: annexe `ARCHITECTURE-DDD.md`.

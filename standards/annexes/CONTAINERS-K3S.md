@@ -28,7 +28,10 @@ must exist under those names (socle requirement).
 ### CT-001 — Stage rules
 
 - Share common setup in `base`.
-- Isolate dependency install/build in dedicated stages to exploit the Docker cache.
+- Isolate dependency install/build in dedicated stages **and in their own layers** to exploit
+  the Docker cache: copy the manifests alone (`pyproject.toml` + lockfile, `package.json` +
+  lockfile), install, **then** copy the source. Copying sources before installing rebuilds
+  every dependency on each code change and is a defect.
 - `development` may carry debug, quality, and test tooling.
 - `test` must run the suite reproducibly.
 - `build` produces only the runtime artifacts.

@@ -183,6 +183,26 @@ This is the frontend half of the socle's *no hardcoded constants* rule.
 
 ______________________________________________________________________
 
+## 7. Perceived performance
+
+### FE-070 — Lazy loading with shape-accurate placeholders
+
+Anything not needed for the first meaningful paint is **loaded lazily** — routes are
+code-split, below-the-fold images carry `loading="lazy"`, heavy components mount on demand.
+
+While the content loads, the container renders a **placeholder that matches the shape of the
+final element** (skeleton blocks sized like the real rows, cards, or media), not a spinner and
+not an empty area. The placeholder reserves the final dimensions, so arrival causes **no
+layout shift** — width/height or `aspect-ratio` is set on media, and the skeleton occupies the
+same box as the content it replaces.
+
+This is the *loading* leg of the FE-037 triad made concrete, and it is what keeps CLS near
+zero. Skeleton animation honours `prefers-reduced-motion`; a placeholder is marked
+`aria-busy="true"` on its container so assistive tech announces the pending state rather than
+reading empty boxes.
+
+______________________________________________________________________
+
 ## Deferred (not canon yet)
 
 Listed so they are not silently lost — these need an arbitration before becoming rules:
