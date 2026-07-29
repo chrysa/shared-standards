@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   server: {
     port: 5173,
-    proxy: { "/api": "http://127.0.0.1:8765" },
+    proxy: { "/api": "http://127.0.0.1:8765" }, // no-hardcoded-localhost: disable — dev server proxy only
   },
   build: { outDir: path.resolve(__dirname, "../standards_console/web_dist"), emptyOutDir: true },
   test: {
