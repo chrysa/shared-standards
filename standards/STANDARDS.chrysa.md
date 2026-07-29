@@ -249,7 +249,9 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   is reflected without a manual rebuild/restart: backend `uvicorn --reload` (or the framework's
   autoreload), frontend the dev server with HMR (`vite`/`npm run dev`), watched via the compose
   `develop.watch` sync or a source bind mount. A `dev` image identical to `production` (no reload) is
-  not a dev image.
+  not a dev image. Mechanised by the `compose-dev-hot-reload` hook
+  (`chrysa/pre-commit-tools`): a compose service targeting the `dev` stage with neither a bind
+  mount nor a `develop.watch` sync action is flagged at commit time.
 - **`.dockerignore` mandatory & exhaustive** — at minimum `.git`, `node_modules`, `__pycache__`,
   `.env*`, `*.log`. Base images pin an explicit version or digest (never a bare `FROM …:latest`);
   no secret in build args or image layers (BuildKit secrets or runtime env only). Every application
