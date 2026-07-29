@@ -119,3 +119,6 @@ repos:
   rev: v1.15.4
   hooks:
   - id: guideline-check
+    # Adoption baseline: fail only on NEW violations. Regenerate with
+    # `guideline-check check --write-baseline .guideline-baseline.json`.
+    args: [check, --fail-on, error, --baseline, .guideline-baseline.json]
