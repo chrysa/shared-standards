@@ -21,7 +21,7 @@ audit_repo() {
     local repo_path=$1
     local repo_name=$(basename "$repo_path")
 
-    if [ ! -d "$repo_path/.git" ]; then
+    if [ ! -e "$repo_path/.git" ]; then
         return  # Skip non-git directories
     fi
 
