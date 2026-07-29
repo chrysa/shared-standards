@@ -9,7 +9,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
 });
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root")!).render( // react-direct-dom: disable — React root mount point
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />

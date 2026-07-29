@@ -189,7 +189,8 @@ main() {
     local repo="$TARGET_REPO"
     [[ -n "$repo" ]]   || { err "Usage: $0 [--dry-run|--check|--no-apply] <repo_path>"; exit 1; }
     repo="$(cd "$repo" 2>/dev/null && pwd)" || { err "$TARGET_REPO absent"; exit 2; }
-    [[ -d "$repo/.git" ]] || warn "$(basename "$repo"): not a git repo (continuing)"
+    # `.git` is a directory in a normal clone but a file in a worktree; -e covers both.
+    [[ -e "$repo/.git" ]] || warn "$(basename "$repo"): not a git repo (continuing)"
 
     log "═══ distribute-standards · $(basename "$repo") ═══"
 

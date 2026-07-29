@@ -54,10 +54,10 @@ def _run_print_fingerprint(file: str, cfg: ScanConfig) -> int:
     path = Path(file)
     text = _read_text(path)
     if text is None:
-        print(f"error: cannot read {file}", file=sys.stderr)
+        print(f"error: cannot read {file}", file=sys.stderr)  # print-detection: disable
         return EXIT_CLEAN
     for finding in scan_text(analyzer, cfg, str(path), text):
-        print(f"{finding.fingerprint}  {finding.entity}  {finding.path}:{finding.line}")
+        print(f"{finding.fingerprint}  {finding.entity}  {finding.path}:{finding.line}")  # print-detection: disable
     return EXIT_CLEAN
 
 
@@ -110,11 +110,11 @@ def _write_report(path: Path, findings: list[Finding]) -> None:
 
 def _print_findings(findings: list[Finding]) -> None:
     for f in findings:
-        print(f"{f.path}:{f.line} · {f.entity} · score={f.score} · fp={f.fingerprint[:12]}")
+        print(f"{f.path}:{f.line} · {f.entity} · score={f.score} · fp={f.fingerprint[:12]}")  # print-detection: disable
     if findings:
-        print(f"\nPII_RESULT|FAIL|{len(findings)} finding(s). Allowlist a false positive in .pii-allowlist.json.")
+        print(f"\nPII_RESULT|FAIL|{len(findings)} finding(s). Allowlist a false positive in .pii-allowlist.json.")  # print-detection: disable
     else:
-        print("PII_RESULT|PASS|0 findings")
+        print("PII_RESULT|PASS|0 findings")  # print-detection: disable
 
 
 if __name__ == "__main__":
