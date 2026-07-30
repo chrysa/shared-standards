@@ -77,7 +77,17 @@ jobs:
               env:
                   GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
               run: |
-                  branch="$(gh api "repos/chrysa/${{ matrix.repo }}" --jq .default_branch)"
+                  meta="$(gh api "repos/chrysa/${{ matrix.repo }}" --jq '[.default_branch, .archived] | @tsv')"
+                  branch="$(echo "$meta" | cut -f1)"
+                  archived="$(echo "$meta" | cut -f2)"
+                  # An archived repo is read-only: pushing a sync branch returns 403 and
+                  # would fail the whole distribution run over a repo nobody can update.
+                  # Skip it here rather than let the push fail 20 steps later.
+                  if [ "$archived" = "true" ]; then
+                      echo "::warning::${{ matrix.repo }} is archived on GitHub — skipping. Set status:archived in repos.yml."
+                      echo "skip=true" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
                   if [ -z "$branch" ]; then
                       echo "::error::could not resolve default branch for ${{ matrix.repo }}"
                       exit 1
@@ -86,6 +96,7 @@ jobs:
                   echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
             - name: Apply standards
+              if: ${{ steps.base.outputs.skip != 'true' }}
               env:
                   REPO_NAME: ${{ matrix.repo }}
               run: |
@@ -95,7 +106,7 @@ jobs:
                   bash shared-standards/scripts/distribute-standards.sh $flags "$GITHUB_WORKSPACE/target"
 
             - name: Open sync PR
-              if: ${{ github.event.inputs.dry_run != 'true' }}
+              if: ${{ github.event.inputs.dry_run != 'true' && steps.base.outputs.skip != 'true' }}
               uses: peter-evans/create-pull-request@v8
               with:
                   path: target
