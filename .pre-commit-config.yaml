@@ -121,7 +121,7 @@ repos:
     - en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
   repo: local
 - repo: https://github.com/chrysa/guideline-checker
-  rev: v1.15.4
+  rev: v1.30.10
   hooks:
   - id: guideline-check
     # Adoption baseline: fail only on NEW violations. Regenerate with
