@@ -232,7 +232,7 @@ repos:
     public: false
     runtime: pending
   - name: satisfactory-automated_calculator
-    status: dev
+    status: archived
     public: true
     runtime: exempt:native
   - name: satisfactory-factory-manager
