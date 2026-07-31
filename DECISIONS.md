@@ -98,7 +98,7 @@ hard `❌`/`⚠️`. Shipped in shared-standards PR #110.
 
 ---
 
-## D-0005 — Standards management console (`console/`)
+## D-0008 — Standards management console (`console/`)
 
 **Date**: 2026-06-28
 **Status**: accepted
