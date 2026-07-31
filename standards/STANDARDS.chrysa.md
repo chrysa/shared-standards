@@ -485,6 +485,19 @@ components. This complements *dark mode + WCAG 2.1 AA* and the `ui-ux` skill.
   the Makefile (no `make type-check` when the target is `typecheck`).
 - **Recipe style** — prefix every recipe line with `@`; add `## Description` after each target so
   it appears in `make help`.
+- **Modular Makefiles — 500 lines max, split by domain.** No hand-maintained Makefile exceeds
+  **500 lines** (the same file gate as code). Approaching the limit, it is split into thematic
+  files under `make/` (`make/common.mk` for shared variables/functions, then `docker.mk`,
+  `test.mk`, `quality.mk`, `k8s.mk`, `docs.mk`… as the repo needs), loaded explicitly from the
+  root Makefile with `include` / `-include`. The **root Makefile stays an entry point and an
+  orchestrator**: it exposes the main commands, loads the thematic files, and serves the global
+  `make help`. A target exists **in exactly one file** — duplicates, near-identical variants and
+  copy-paste between thematic files are forbidden (*no code duplication* applies to Make too).
+  Inclusion is acyclic: a thematic file never includes back into its parent. Target names stay
+  predictable and grouped by domain (`test-unit`, `docker-build`, `k8s-deploy`), every public
+  target is documented in `make help` from its `## Description`, and any long or business-logic
+  recipe moves to a **versioned, testable script** — the Makefile is a command surface, not an
+  application language.
 
 ## Container-runtime policy
 
