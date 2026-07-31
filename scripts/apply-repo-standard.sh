@@ -7,6 +7,7 @@
 #   1b. Governance     .github/CODEOWNERS (create-if-absent)
 #   2. Stack CI        .github/workflows/ci.yml from workflows/ci-{python,node}.yml (+ token sub)
 #   3. Pre-commit      merge Full §8 baseline into .pre-commit-config.yaml (scripts/pre-commit-merge.py)
+#   3b. Ruff rules     merge the canonical LOT 1 selection into pyproject.toml (scripts/pyproject-ruff-merge.py)
 #   4. Process layer   delegates to apply-ci-process.sh (process workflows + dependabot + github-config)
 #
 # Token substitution for CI (auto-detected, override via env):
@@ -219,18 +220,55 @@ merge_precommit() {
     python3 "$SCRIPT_DIR/pre-commit-merge.py" "$baseline" "$target" --stacks "$stacks" && ok "pre-commit merged (stacks=$stacks)"
 }
 
+# Ruff's config is per-pyproject and cannot be copied (the standard forbids
+# ruff.toml), so the canonical rule set is merged into whichever pyproject owns
+# the repo's Python package — root, or one level down in a monorepo.
+find_pyproject() {
+    local repo="$1"
+    [[ -f "$repo/pyproject.toml" ]] && { echo "$repo/pyproject.toml"; return 0; }
+    local candidate
+    for candidate in "$repo"/*/pyproject.toml; do
+        [[ -f "$candidate" ]] && { echo "$candidate"; return 0; }
+    done
+    return 1
+}
+
+merge_ruff_rules() {
+    local repo="$1" target
+    if ! target="$(find_pyproject "$repo")"; then
+        # Reported in every mode: a repo with Python but no pyproject cannot
+        # receive the rules at all, and silence would read as compliance.
+        info "no pyproject.toml · ruff rules not applicable"
+        return 0
+    fi
+    local merger="$SCRIPT_DIR/pyproject-ruff-merge.py"
+    [[ -f "$merger" ]] || { warn "pyproject-ruff-merge.py missing · ruff rules skipped"; return 0; }
+    if $CHECK; then
+        python3 "$merger" "$target" --check && ok "ruff rules compliant" || warn "ruff rule drift (see above)"
+        return 0
+    fi
+    if $DRY_RUN; then
+        python3 "$merger" "$target" --check >/dev/null 2>&1 \
+            && info "[dry-run] ruff rules already complete" \
+            || info "[dry-run] would add the canonical ruff rules to ${target#"$repo"/}"
+        return 0
+    fi
+    python3 "$merger" "$target" >/dev/null && ok "ruff rules merged into ${target#"$repo"/}"
+}
+
 apply_one() {
     local repo="$1" name; name="${REPO_NAME:-$(basename "$repo")}"
     [[ -d "$repo" ]]      || { err "$repo absent"; return 2; }
     # `.git` is a directory in a normal clone but a file in a worktree; -e covers both.
     [[ -e "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
     log "═══ $name ═══"
-    if $CHECK; then merge_precommit "$repo"; return 0; fi
+    if $CHECK; then merge_precommit "$repo"; merge_ruff_rules "$repo"; return 0; fi
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"
+    merge_ruff_rules "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"
     if [[ -x "$proc" || -f "$proc" ]]; then
         local flags=""; $DRY_RUN && flags="--dry-run"
