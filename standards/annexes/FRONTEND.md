@@ -132,7 +132,13 @@ happy path is a defect.
 
 ### FE-038 — Global progress indicator
 
-Driven by the API client (request in flight), not re-implemented per screen.
+A single **full-page loading indicator** (a global progress bar / top-loader) provided by the
+**root shell/layout**, driven by the API client (request in flight) — not re-implemented per
+screen. It shows on **initial application load** and on **navigation transitions that must fetch
+data before the view can render**, and it **complements** the per-container local skeletons of
+FE-037/FE-070 rather than replacing them (global = "the app is working"; local = "this block is
+arriving"). It toggles `aria-busy="true" → "false"` on the region it governs and honours
+`prefers-reduced-motion`. A frontend Definition of Done includes this global loading state.
 
 ### FE-039 — Navigation never reloads
 
