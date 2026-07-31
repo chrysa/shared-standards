@@ -428,13 +428,25 @@ in `.pre-commit-config.yaml`. pre-commit is the authoritative runner; `make lint
 through `make` is a defect — every hook MUST be runnable via `pre-commit run` directly,
 and CI invokes `pre-commit`, not `make`.
 
+- **Every git hook goes through the framework — no hand-rolled hooks.** A repo's hooks are
+  declared as pre-commit hook ids in `.pre-commit-config.yaml` and installed by
+  `pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push`.
+  Hand-written scripts committed under `.git/hooks/` or a repo-local `hooks/` wired via
+  `core.hooksPath`, alternative runners (**husky**, **lefthook**, **overcommit**, npm
+  `prepare` hook installers), and checks reachable only through `make` or a bespoke
+  `scripts/*.sh` are **forbidden**: a gate that is not a pre-commit hook id is not
+  discoverable, not pinned, not skippable per-hook (`SKIP=`), and not runnable in CI the
+  same way. A repo-specific check is a `repo: local` hook in the config (or a hook published
+  by `chrysa/pre-commit-tools`), not a script bolted onto git. The single sanctioned
+  exception is the host-global pre-push (`dotfiles/git-hooks-global/pre-push`), which is
+  machine-level, not repo-level, and itself only invokes `pre-commit`.
 - **The gate is host-native — no strong coupling to the project's containers.** pre-commit
   runs with only `pre-commit` installed on the host (via `pipx`/`uv`, outside any repo); it
   provisions each hook's isolated environment itself (`~/.cache/pre-commit`), so a commit
   needs **no project image and no running container**. Local hooks are `language: system` /
   `python` (or another native language) invoking **host** tools — **never** `docker compose
-  run`, and `language: docker` / `docker_image` is avoided. A check that genuinely needs the
-  project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
+  run`, and `language: docker` / `language: docker_image` is **forbidden**. A check that
+  genuinely needs the project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
   it probes for the tool and skips with a message when absent
   (`command -v <tool> >/dev/null 2>&1 && <run> || echo 'skipping — runs in CI/Docker'`),
   it does **not** spin up a container. Container-side enforcement is CI's job; locally the
@@ -458,6 +470,15 @@ and CI invokes `pre-commit`, not `make`.
 - **The global pre-push hook** (`dotfiles/git-hooks-global/pre-push`) mirrors pre-commit's
   own installed pre-push hook: it runs the `pre-push` stage over the range only, then the
   SonarCloud quality gate. No `make`, no `--all-files`, no tree mutation.
+- **The shared hook package is Docker-free by construction.** `chrysa/pre-commit-tools`
+  — the hook-decentralisation package the whole fleet consumes — publishes every hook as
+  `language: python` (or another native pre-commit language) with its dependencies declared
+  in the hook definition. **Forbidden in that package:** `language: docker`,
+  `language: docker_image`, and any `docker` / `docker compose` invocation inside a hook
+  entrypoint. A published hook MUST run identically on a host where Docker is not installed
+  at all; if a check cannot work without the daemon, it is a CI job, not a hook. This keeps
+  the fleet gate installable with a single `pipx install pre-commit` and immune to the
+  daemon being down.
 - Hooks are **pinned by `rev`**; shared hooks come from `chrysa/pre-commit-tools`.
   `detect-secrets`/`gitleaks` respect the repo's secret allowlist.
 
