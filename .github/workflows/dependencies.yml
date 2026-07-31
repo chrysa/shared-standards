@@ -15,11 +15,6 @@ jobs:
         name: Check PR dependencies
 
         steps:
-            - name: Check dependencies
-              uses: gregsdennis/dependencies-action@v1.4.2
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
             - name: Add dependent label
               if: >-
                   contains(github.event.pull_request.body, 'depends on') ||
