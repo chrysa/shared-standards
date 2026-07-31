@@ -52,6 +52,13 @@ repos:
     exclude: '^(tests?/|README\.md|docs/)'
   - id: python-unreachable-code
   - id: python-no-unittest-import
+  # Mechanise the code-quality rules of the standards block: typed raises,
+  # lookup table over dispatch ladder, and the mutable-default anti-pattern.
+  # Fixtures deliberately raise builtins as detector input, hence the exclude.
+  - id: python-untyped-raise
+    exclude: '^tests?/'
+  - id: python-mutable-default
+  - id: python-dispatch-ladder
   # The agent loads .claude/ at session start; an empty mirror loads no skill
   # and says nothing. This is the only guard against that.
   - id: claude-assets-present
@@ -78,7 +85,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.1.1-100
+  rev: v0.2.0-247
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
