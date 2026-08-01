@@ -13,11 +13,26 @@ jobs:
         shell: bash
         env:
           BRANCH_NAME: ${{ github.head_ref }}
+          BASE_NAME: ${{ github.base_ref }}
         run: |
           branch="$BRANCH_NAME"
+          base="$BASE_NAME"
+          # Branch model: `develop` -> `main` is the release promotion, the only
+          # sanctioned way production gets code. It is not a feature branch and must
+          # not be rejected by the feature-branch pattern.
+          if [[ "$base" == "main" && "$branch" == "develop" ]]; then
+            echo "Release promotion develop -> main: allowed"
+            exit 0
+          fi
           pattern='^(feat|feature|fix|chore|docs|refactor|test|ci|build|perf|hotfix)/[a-z0-9._-]+$'
           if [[ ! "$branch" =~ $pattern ]]; then
             echo "Invalid branch name: $branch"
             echo "Expected: type/short-description (e.g. feat/add-auth-flow)"
+            exit 1
+          fi
+          # Everything else integrates through `develop`; only a hotfix may target main.
+          if [[ "$base" == "main" && ! "$branch" =~ ^hotfix/ ]]; then
+            echo "PR targets main from '$branch'."
+            echo "Only a release PR from develop, or a hotfix/* branch, may target main."
             exit 1
           fi
