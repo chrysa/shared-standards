@@ -223,19 +223,26 @@ merge_precommit() {
 # Ruff's config is per-pyproject and cannot be copied (the standard forbids
 # ruff.toml), so the canonical rule set is merged into whichever pyproject owns
 # the repo's Python package — root, or one level down in a monorepo.
-find_pyproject() {
-    local repo="$1"
-    [[ -f "$repo/pyproject.toml" ]] && { echo "$repo/pyproject.toml"; return 0; }
-    local candidate
+find_pyprojects() {
+    # Every pyproject that can own Python, not just the first: a monorepo may
+    # carry backend/ and agent/ side by side, and returning one silently left
+    # the other outside the rule set (measured on satisfactory-factory-manager).
+    local repo="$1" found=1 candidate
+    if [[ -f "$repo/pyproject.toml" ]]; then
+        echo "$repo/pyproject.toml"
+        return 0
+    fi
     for candidate in "$repo"/*/pyproject.toml; do
-        [[ -f "$candidate" ]] && { echo "$candidate"; return 0; }
+        [[ -f "$candidate" ]] || continue
+        echo "$candidate"
+        found=0
     done
-    return 1
+    return $found
 }
 
 merge_ruff_rules() {
-    local repo="$1" target
-    if ! target="$(find_pyproject "$repo")"; then
+    local repo="$1" targets
+    if ! targets="$(find_pyprojects "$repo")"; then
         # Reported in every mode: a repo with Python but no pyproject cannot
         # receive the rules at all, and silence would read as compliance.
         info "no pyproject.toml · ruff rules not applicable"
@@ -243,17 +250,23 @@ merge_ruff_rules() {
     fi
     local merger="$SCRIPT_DIR/pyproject-ruff-merge.py"
     [[ -f "$merger" ]] || { warn "pyproject-ruff-merge.py missing · ruff rules skipped"; return 0; }
-    if $CHECK; then
-        python3 "$merger" "$target" --check && ok "ruff rules compliant" || warn "ruff rule drift (see above)"
-        return 0
-    fi
-    if $DRY_RUN; then
-        python3 "$merger" "$target" --check >/dev/null 2>&1 \
-            && info "[dry-run] ruff rules already complete" \
-            || info "[dry-run] would add the canonical ruff rules to ${target#"$repo"/}"
-        return 0
-    fi
-    python3 "$merger" "$target" >/dev/null && ok "ruff rules merged into ${target#"$repo"/}"
+    local target rel
+    while IFS= read -r target; do
+        [[ -n "$target" ]] || continue
+        rel="${target#"$repo"/}"
+        if $CHECK; then
+            python3 "$merger" "$target" --check && ok "ruff rules compliant · $rel" \
+                || warn "ruff rule drift in $rel (see above)"
+            continue
+        fi
+        if $DRY_RUN; then
+            python3 "$merger" "$target" --check >/dev/null 2>&1 \
+                && info "[dry-run] ruff rules already complete · $rel" \
+                || info "[dry-run] would add the canonical ruff rules to $rel"
+            continue
+        fi
+        python3 "$merger" "$target" >/dev/null && ok "ruff rules merged into $rel"
+    done <<< "$targets"
 }
 
 apply_one() {
