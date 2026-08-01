@@ -90,7 +90,7 @@ jobs:
             - name: Download quality baseline from main
               if: github.event_name == 'pull_request'
               id: download-baseline
-              uses: dawidd6/action-download-artifact@v9
+              uses: dawidd6/action-download-artifact@07ab29fd4a977ae4d2b275087cf67563dfdf0295 # v9
               with:
                   workflow: ${{ github.workflow }}
                   branch: ${{ github.event.pull_request.base.ref }}
