@@ -370,6 +370,35 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   to `/setup`** rather than crashing or showing a generic error. An admin **configuration panel**
   (auth-gated CRUD API) manages runtime config with a versioned audit trail, hot-reload where
   possible (else a `RESTART_REQUIRED` flag), and JSON export/import for backup and cross-env cloning.
+- **A floating assistant where it earns its place — never as decoration.** Any human-facing
+  product whose users face a **non-obvious surface** (a dense cockpit, a multi-step form or
+  wizard, a query/graph/config console, an admin panel with domain jargon) ships an **in-app
+  floating assistant**: a persistent, dismissible affordance that answers "what am I looking
+  at / what do I do next" **in context**, without leaving the page. The value test comes
+  first — a product with two screens and no jargon does not get one, and shipping an empty
+  chat bubble is worse than shipping nothing. Where it is warranted, it obeys the same rules
+  as the rest of the app:
+  1. **Context-aware, not a generic chat box** — it receives the current route, selection and
+     visible state, and its opening move is a useful suggestion about *this* screen.
+  2. **Opt-in and reversible** — off by default behind a documented flag/config key
+     (`ASSISTANT_ENABLED`-style), dismissible, and its position/open state persists per user
+     (see *UI state survives reload & focus*). It never steals focus, never blocks the
+     underlying surface, and never auto-opens on every visit.
+  3. **Governed like any agent** — read-only Q&A is R0/R1; the moment it *acts* (writes, calls,
+     runs, changes state) the full agentic envelope applies: versioned manifest, typed I/O,
+     least privilege, risk level with proportionate confirmation and dry-run, audit trail.
+     Detail: annexe `AGENTIC-CAPABILITIES.md`.
+  4. **Provider-independent** — inference goes through the local port with ≥2 tested adapters
+     (strategic pillar 1); no vendor SDK in the product's business code, and the assistant
+     degrades to a documented help panel when no model is reachable.
+  5. **Accessible and quiet** — reachable and closable by keyboard (visible focus, `Esc`
+     closes), announced to assistive tech, honours `prefers-reduced-motion`, and respects the
+     WCAG 2.1 AA + design-token rules like every other surface. It is lazily loaded behind a
+     shape-accurate placeholder so it never delays first paint.
+  6. **Scoped and honest** — it answers from the product's own data and docs, says "I don't
+     know" rather than inventing, and states what it did after acting.
+  A desktop/overlay assistant (the `floating-agent` pattern) follows the same rules outside the
+  browser: overlay-only, dismissible, no capture of surfaces the user did not consent to.
 - **Raised errors are typed** — in any language whose type system allows it. Code raises a
   **domain-specific exception class** (Python: a module `…Error(Exception)` hierarchy rooted in one
   base per bounded context; TypeScript: `class XError extends Error` with a discriminant field, or a
