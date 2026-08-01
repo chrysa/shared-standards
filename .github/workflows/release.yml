@@ -4,9 +4,14 @@ name: Release
 on:
     push:
         branches: [main]
+        # NOTE: '**.md' is deliberately NOT ignored here. In this repo the product *is*
+        # markdown — standards/STANDARDS.chrysa.md and its annexes — and the release is what
+        # triggers distribute-standards. Ignoring markdown meant a standards-only promotion
+        # to main cut no release and never reached the fleet.
         paths-ignore:
-            - '**.md'
             - '.github/**'
+            - 'README.md'
+            - 'CHANGELOG.md'
     workflow_dispatch:
 
 permissions:
