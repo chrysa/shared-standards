@@ -89,9 +89,11 @@ def _scan_paths(cfg: ScanConfig, paths: list[Path], allowed: set[str]) -> list[F
         text = _read_text(path)
         if text is None:
             continue
-        for finding in scan_text(analyzer, cfg, str(path), text):
-            if finding.fingerprint not in allowed:
-                findings.append(finding)
+        findings.extend(
+            finding
+            for finding in scan_text(analyzer, cfg, str(path), text)
+            if finding.fingerprint not in allowed
+        )
     return findings
 
 
