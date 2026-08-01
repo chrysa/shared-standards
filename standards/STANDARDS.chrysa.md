@@ -491,6 +491,17 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   Mechanisation: Ruff (`C901`, `PLR*`, `B`, `SIM`, `PERF`, `RUF`) + Mypy on Python, ESLint
   (`complexity`, `no-await-in-loop`, `react-hooks/exhaustive-deps`) on TS, SonarCloud rating **A**
   with 0 hotspot on both. A finding here is a defect to fix, not a warning to carry.
+  The armed Ruff selection is the canonical set distributed by `scripts/pyproject-ruff-merge.py`
+  and merged into each repo's `[tool.ruff.lint] select` — the script is the source of truth for
+  which codes are on. Two rules that the `PLR*`/`RUF` shorthand above would otherwise imply are
+  **deliberately excluded**, and stay excluded until a decision says otherwise:
+  - `PLR2004` (magic-value-comparison) — 2519 findings across the 65 repos. Hardcoded constants
+    are a chantier with its own remediation (extract to an enum or external config), not a flag
+    to flip; arming it would turn every gate red at once.
+  - `RUF001` (ambiguous-unicode-character-string) — 493 findings concentrated on 4 repos, all of
+    them French user-facing copy using typographic characters (apostrophes, non-breaking spaces).
+    The rule is right about the codepoints and wrong about the intent. A repo that wants it may
+    arm it locally together with `lint.allowed-confusables`.
 
 ## Quality gates
 
