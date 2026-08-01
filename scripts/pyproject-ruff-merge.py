@@ -169,20 +169,32 @@ def merge(text: str, rules: list[str]) -> str:
     return text + block
 
 
-def main(argv: list[str]) -> int:
+def _resolve_target(argv: list[str]) -> Path | None:
+    """The single positional argument, or None when the usage is wrong."""
     args = [a for a in argv if not a.startswith("--")]
     if len(args) != 1:
         sys.stderr.write(__doc__ or "")
-        return 2
+        return None
     target = Path(args[0])
     if not target.is_file():
         sys.stderr.write(f"{target}: not found\n")
-        return 2
+        return None
+    return target
 
-    rules = CANONICAL_RULES
+
+def _resolve_rules(argv: list[str]) -> tuple[str, ...]:
+    """The canonical set, unless --rules= overrides it."""
     for arg in argv:
         if arg.startswith("--rules="):
-            rules = tuple(code.strip() for code in arg.split("=", 1)[1].split(",") if code.strip())
+            return tuple(code.strip() for code in arg.split("=", 1)[1].split(",") if code.strip())
+    return CANONICAL_RULES
+
+
+def main(argv: list[str]) -> int:
+    target = _resolve_target(argv)
+    if target is None:
+        return 2
+    rules = _resolve_rules(argv)
 
     text = target.read_text(encoding="utf-8")
     try:
@@ -197,9 +209,13 @@ def main(argv: list[str]) -> int:
             sys.stderr.write(f"{target}: missing Ruff rules: {', '.join(missing)}\n")
             return 1
         return 0
-
     if not missing:
         return 0
+    return _write_merged(target, text, missing)
+
+
+def _write_merged(target: Path, text: str, missing: list[str]) -> int:
+    """Merge the missing codes in, refusing to write a pyproject that would not parse."""
     merged = merge(text, missing)
     try:
         tomllib.loads(merged)
