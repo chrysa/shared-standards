@@ -570,6 +570,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   The test is mechanical: drop a fresh agent in the repo with no conversation history — it
   must find the entry point, the layer to touch, the command to run and the gate to pass,
   from committed files alone.
+||||||| 8f4ddad
 - **Raised errors are typed** — in any language whose type system allows it. Code raises a
   **domain-specific exception class** (Python: a module `…Error(Exception)` hierarchy rooted in one
   base per bounded context; TypeScript: `class XError extends Error` with a discriminant field, or a
