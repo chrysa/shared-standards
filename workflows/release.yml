@@ -72,16 +72,16 @@ jobs:
                   token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
 
             - name: Install GitVersion
-              uses: gittools/actions/gitversion/setup@v3
+              uses: gittools/actions/gitversion/setup@51d325634925d7d9ce0a7efc2c586c0bc2b9eee6 # v3
               with:
                   versionSpec: '6.x'
 
             - name: Determine version
               id: gitversion
-              uses: gittools/actions/gitversion/execute@v3
+              uses: gittools/actions/gitversion/execute@51d325634925d7d9ce0a7efc2c586c0bc2b9eee6 # v3
 
             - name: Install git-cliff
-              uses: taiki-e/install-action@git-cliff
+              uses: taiki-e/install-action@fec60f319ad7cbc8b09dc216572fc3b29817d658 # git-cliff
 
             - name: Generate changelog
               id: changelog
@@ -100,7 +100,7 @@ jobs:
 
             - name: Create GitHub Release
               if: ${{ inputs.create-github-release }}
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
               with:
                   tag_name: ${{ steps.changelog.outputs.version }}
                   name: Release ${{ steps.changelog.outputs.version }}

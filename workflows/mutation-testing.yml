@@ -105,7 +105,7 @@ jobs:
 
             - name: Notify Discord on failure
               if: failure() && secrets.DISCORD_WEBHOOK != ''
-              uses: Ilshidur/action-discord@0.3.2
+              uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9 # 0.3.2
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
               with:
