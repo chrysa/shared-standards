@@ -55,6 +55,14 @@ CANONICAL_RULES: tuple[str, ...] = (
     "RUF100",  # unused-noqa — autofixable, keeps suppressions honest
 )
 
+# Rules the `PLR*`/`RUF` shorthand in the standards block would imply, excluded on
+# purpose. Named here so the decision is visible at the point of distribution rather
+# than only in an issue — see STANDARDS.chrysa.md, *known anti-patterns*.
+DELIBERATELY_EXCLUDED: dict[str, str] = {
+    "PLR2004": "magic-value-comparison — 2519 fleet findings; the `no hardcoded constants` chantier, not a flag",
+    "RUF001": "ambiguous-unicode — 493 findings on 4 repos, all French prose; arm locally with allowed-confusables",
+}
+
 _SELECT_RE = re.compile(r"(?P<head>^select\s*=\s*\[)(?P<body>.*?)(?P<tail>^\s*\])", re.DOTALL | re.MULTILINE)
 
 
