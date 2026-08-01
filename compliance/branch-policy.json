@@ -1,626 +1,635 @@
 {
-  "audited": 69,
+  "audited": 70,
   "repos": [
     {
+      "repo": "agent-config",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "agent-config"
+      "pr_only": true
     },
     {
+      "repo": "ai-aggregator",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "ai-aggregator"
+      "pr_only": true
     },
     {
+      "repo": "audit-platform",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "audit-platform"
+      "pr_only": true
     },
     {
+      "repo": "automations",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "automations"
+      "pr_only": true
     },
     {
+      "repo": "catalog",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "catalog"
+      "pr_only": true
     },
     {
+      "repo": "cdn-explorer",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "cdn-explorer"
+      "pr_only": true
     },
     {
+      "repo": "chrysa-claude-template",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "chrysa-claude-template"
+      "pr_only": true
     },
     {
+      "repo": "chrysa-knowledge",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "chrysa-knowledge"
+      "pr_only": true
     },
     {
+      "repo": "chrysa-lib",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "chrysa-lib"
+      "pr_only": true
     },
     {
+      "repo": "chrysa-portfolio-viz",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "chrysa-portfolio-viz"
+      "pr_only": true
     },
     {
+      "repo": "chrysa-skills",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "chrysa-skills"
+      "pr_only": true
     },
     {
+      "repo": "claude-config",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "claude-config"
+      "pr_only": true
     },
     {
+      "repo": "coach",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "coach"
+      "pr_only": true
     },
     {
+      "repo": "container-webview",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "container-webview"
+      "pr_only": true
     },
     {
+      "repo": "D-D",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "D-D"
+      "pr_only": true
     },
     {
+      "repo": "debian-guardian",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "debian-guardian"
+      "pr_only": true
     },
     {
+      "repo": "dev-nexus",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "dev-nexus"
+      "pr_only": true
     },
     {
+      "repo": "devtool",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "devtool"
+      "pr_only": true
     },
     {
+      "repo": "discord-bot-back",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "discord-bot-back"
+      "pr_only": true
     },
     {
+      "repo": "discordium",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "discordium"
+      "pr_only": true
     },
     {
+      "repo": "diy-stream-deck",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "diy-stream-deck"
+      "pr_only": true
     },
     {
+      "repo": "django-app-forge",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-app-forge"
+      "pr_only": true
     },
     {
+      "repo": "django-autoload",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-autoload"
+      "pr_only": true
     },
     {
+      "repo": "django-migration-analyzer",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-migration-analyzer"
+      "pr_only": true
     },
     {
+      "repo": "django-pytest",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-pytest"
+      "pr_only": true
     },
     {
+      "repo": "django-query-optimizer",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-query-optimizer"
+      "pr_only": true
     },
     {
+      "repo": "django-query-optimizer-vscode",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-query-optimizer-vscode"
+      "pr_only": true
     },
     {
+      "repo": "django-traceid",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "django-traceid"
+      "pr_only": true
     },
     {
+      "repo": "doc-gen",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "doc-gen"
+      "pr_only": true
     },
     {
+      "repo": "dotfiles",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "dotfiles"
+      "pr_only": true
     },
     {
+      "repo": "epub-sorter",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "epub-sorter"
+      "pr_only": true
     },
     {
+      "repo": "fastapi-autoload",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "fastapi-autoload"
+      "pr_only": true
     },
     {
+      "repo": "fastapi-pytest",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "fastapi-pytest"
+      "pr_only": true
     },
     {
+      "repo": "fastapi-query-optimizer",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "fastapi-query-optimizer"
+      "pr_only": true
     },
     {
+      "repo": "fastapi-traceid",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "fastapi-traceid"
+      "pr_only": true
     },
     {
+      "repo": "feedback-gateway",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "feedback-gateway"
+      "pr_only": true
     },
     {
+      "repo": "floating-agent",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "floating-agent"
+      "pr_only": true
     },
     {
+      "repo": "floating-knowledge-architect-offline",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "floating-knowledge-architect-offline"
+      "pr_only": true
     },
     {
+      "repo": "game-solver-platform",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "game-solver-platform"
+      "pr_only": true
     },
     {
+      "repo": "gaming-os",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "gaming-os"
+      "pr_only": true
     },
     {
+      "repo": "genealogy-validator",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "genealogy-validator"
+      "pr_only": true
     },
     {
+      "repo": "gestureOS",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "gestureOS"
+      "pr_only": true
     },
     {
+      "repo": "github-actions",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "github-actions"
+      "pr_only": true
     },
     {
+      "repo": "guideline-checker",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "guideline-checker"
+      "pr_only": true
     },
     {
+      "repo": "herdr-rtk-savings",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "homeassistant-config"
+      "pr_only": true
     },
     {
+      "repo": "homeassistant-config",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "lifeos"
+      "pr_only": true
     },
     {
+      "repo": "lifeos",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "link-reader-bot"
+      "pr_only": true
     },
     {
+      "repo": "link-reader-bot",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "linkendin-resume"
+      "pr_only": true
     },
     {
+      "repo": "linkendin-resume",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "mediavault"
+      "pr_only": true
     },
     {
+      "repo": "mediavault",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "mirrador"
+      "pr_only": true
     },
     {
+      "repo": "mirrador",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "my-resume"
+      "pr_only": true
     },
     {
+      "repo": "my-resume",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "orchestrator"
+      "pr_only": true
     },
     {
+      "repo": "orchestrator",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "paperclip"
+      "pr_only": true
     },
     {
+      "repo": "paperclip",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "PO-GO-DEX"
+      "pr_only": true
     },
     {
+      "repo": "PO-GO-DEX",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "pre-commit-hooks-changelog"
+      "pr_only": true
     },
     {
+      "repo": "pre-commit-hooks-changelog",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "pre-commit-tools"
+      "pr_only": true
     },
     {
+      "repo": "pre-commit-tools",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "project-init"
+      "pr_only": true
     },
     {
+      "repo": "project-init",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "projects-claude-config"
+      "pr_only": true
     },
     {
+      "repo": "projects-claude-config",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "quality-gatekeeper"
+      "pr_only": true
     },
     {
+      "repo": "quality-gatekeeper",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "satisfactory-factory-manager"
+      "pr_only": true
     },
     {
+      "repo": "satisfactory-factory-manager",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "server"
+      "pr_only": true
     },
     {
+      "repo": "server",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "shared-standards"
+      "pr_only": true
     },
     {
+      "repo": "shared-standards",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "sport-intelligence-hub"
+      "pr_only": true
     },
     {
+      "repo": "sport-intelligence-hub",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "studioverse"
+      "pr_only": true
     },
     {
+      "repo": "studioverse",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "usefull-containers"
+      "pr_only": true
     },
     {
+      "repo": "usefull-containers",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "windows-autonome"
+      "pr_only": true
     },
     {
+      "repo": "windows-docker-state-notification",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "windows-docker-state-notification"
+      "pr_only": true
     },
     {
+      "repo": "windows-guardian",
       "default": "develop",
-      "default_is_develop": true,
-      "develop": true,
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "windows-guardian"
+      "pr_only": true
     },
     {
+      "repo": "workstation-os",
       "default": "develop",
-      "default_is_develop": true,
+      "main": true,
       "develop": true,
+      "default_is_develop": true,
+      "main_protected": true,
+      "pr_only": true
+    },
+    {
+      "repo": "wsmqtt-monitor",
+      "default": "develop",
       "main": true,
+      "develop": true,
+      "default_is_develop": true,
       "main_protected": true,
-      "pr_only": true,
-      "repo": "wsmqtt-monitor"
+      "pr_only": true
     }
   ]
 }
