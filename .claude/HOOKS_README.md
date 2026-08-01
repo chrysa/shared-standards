@@ -222,8 +222,8 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/secret-scanner.cjs" },
-          { "type": "command", "command": "node .claude/hooks/circuit-breaker.cjs" }
+          { "type": "command", "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/secret-scanner.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'" },
+          { "type": "command", "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/circuit-breaker.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'" }
         ]
       }
     ],
@@ -231,14 +231,14 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/verifiable-thresholds.cjs" }
+          { "type": "command", "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/verifiable-thresholds.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'" }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "node .claude/hooks/frustration-detection.cjs" }
+          { "type": "command", "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/frustration-detection.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'" }
         ]
       }
     ]
@@ -248,6 +248,15 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
 
 3. Adjust `.claude/thresholds.json` for your project standards
 4. Add `.claude/secret-scanner-allowlist.json` if you have test fixtures with example tokens
+
+> **Always use the guarded command form** shown above
+> (`sh -c 'f="$CLAUDE_PROJECT_DIR/.claude/hooks/<hook>.cjs"; [ ! -f "$f" ] || node "$f"'`),
+> never a bare `node .claude/hooks/<hook>.cjs`. A bare invocation in a repo where the hook
+> file is absent makes Node exit with `MODULE_NOT_FOUND`, which Claude Code reports on every
+> single tool call as:
+> `PreToolUse:Bash hook error - Failed with non-blocking status code: node:internal/modules/cjs/loader:<line>`.
+> The guard turns a missing hook into a silent no-op, and `$CLAUDE_PROJECT_DIR` makes the
+> path independent of the tool's working directory.
 
 ## Disabling a hook
 
