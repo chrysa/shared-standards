@@ -259,7 +259,7 @@ repos:
     status: dev
     public: true
     runtime: exempt:config
-  - name: windows-autonome
+  - name: workstation-os
     status: dev
     public: false
     runtime: exempt:native
