@@ -1,5 +1,5 @@
 {
-  "audited": 70,
+  "audited": 67,
   "repos": [
     {
       "repo": "agent-config",
@@ -57,15 +57,6 @@
     },
     {
       "repo": "chrysa-claude-template",
-      "default": "develop",
-      "main": true,
-      "develop": true,
-      "default_is_develop": true,
-      "main_protected": true,
-      "pr_only": true
-    },
-    {
-      "repo": "chrysa-knowledge",
       "default": "develop",
       "main": true,
       "develop": true,
@@ -344,15 +335,6 @@
       "pr_only": true
     },
     {
-      "repo": "game-solver-platform",
-      "default": "develop",
-      "main": true,
-      "develop": true,
-      "default_is_develop": true,
-      "main_protected": true,
-      "pr_only": true
-    },
-    {
       "repo": "gaming-os",
       "default": "develop",
       "main": true,
@@ -471,15 +453,6 @@
     },
     {
       "repo": "orchestrator",
-      "default": "develop",
-      "main": true,
-      "develop": true,
-      "default_is_develop": true,
-      "main_protected": true,
-      "pr_only": true
-    },
-    {
-      "repo": "paperclip",
       "default": "develop",
       "main": true,
       "develop": true,
