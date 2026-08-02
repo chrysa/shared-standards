@@ -6,7 +6,7 @@ on:
         branches: [main, master, develop]
         types: [opened, reopened, synchronize]
     push:
-        branches: [main, master]
+        branches: [develop, main, master]
 
 jobs:
     call:
