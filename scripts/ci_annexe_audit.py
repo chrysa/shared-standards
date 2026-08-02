@@ -164,20 +164,30 @@ def fix(text: str, name: str) -> str | None:
     return patched if patched != text else None
 
 
-def commit(repo: str, path: str, content: str, message: str) -> str:
+def commit_tree(repo: str, base_sha: str, files: dict[str, str], message: str) -> str:
+    """One commit for every patched file, via the git trees API.
+
+    The contents API costs one commit (and one round trip) per file; a repo with twenty
+    workflows would burn twenty writes and produce twenty commits for one logical change.
+    """
     full = f"{OWNER}/{repo}"
-    code, blob, _ = gh(["api", f"repos/{full}/contents/{path}?ref={BRANCH}", "-q", ".sha"])
-    if code != 0:
-        return f"blob not found: {path}"
-    payload = json.dumps({
-        "message": message,
-        "content": base64.b64encode(content.encode()).decode(),
-        "sha": blob.strip(),
-        "branch": BRANCH,
+    tree = json.dumps({
+        "base_tree": base_sha,
+        "tree": [{"path": p, "mode": "100644", "type": "blob", "content": c}
+                 for p, c in sorted(files.items())],
     })
-    code, _, err = gh(["api", f"repos/{full}/contents/{path}", "-X", "PUT", "--input", "-"],
-                      stdin=payload)
-    return "" if code == 0 else f"commit failed: {err.strip().splitlines()[0][:80]}"
+    code, out, err = gh(["api", f"repos/{full}/git/trees", "-X", "POST", "--input", "-", "-q", ".sha"],
+                        stdin=tree)
+    if code != 0:
+        return f"tree failed: {err.strip().splitlines()[0][:80]}"
+    payload = json.dumps({"message": message, "tree": out.strip(), "parents": [base_sha]})
+    code, out, err = gh(["api", f"repos/{full}/git/commits", "-X", "POST", "--input", "-", "-q", ".sha"],
+                        stdin=payload)
+    if code != 0:
+        return f"commit failed: {err.strip().splitlines()[0][:80]}"
+    code, _, err = gh(["api", f"repos/{full}/git/refs/heads/{BRANCH}", "-X", "PATCH",
+                       "-f", f"sha={out.strip()}", "-F", "force=true"])
+    return "" if code == 0 else f"ref update failed: {err.strip().splitlines()[0][:80]}"
 
 
 def sweep(repo: str, apply: bool) -> tuple[dict[str, list[str]], dict[str, str], str]:
@@ -218,10 +228,10 @@ def open_pull_request(repo: str, patches: dict[str, str]) -> str:
                "A job with no timeout holds a runner until the platform cap; a PR workflow\n"
                "with no concurrency group leaves a queue of superseded runs behind every\n"
                "push. Deploy and release workflows queue instead of cancelling.")
-    for name, patched in sorted(patches.items()):
-        error = commit(repo, f"{WORKFLOW_DIR}/{name}", patched, message)
-        if error:
-            return error
+    error = commit_tree(repo, sha.strip(),
+                        {f"{WORKFLOW_DIR}/{n}": c for n, c in patches.items()}, message)
+    if error:
+        return error
 
     body = ("Applies the two deterministic rules of annexe "
             "[`CI-CD.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/CI-CD.md):\n\n"

@@ -1,0 +1,71 @@
+{
+ "repos": {
+  "epub-sorter": {
+   "action-check.yml": [
+    "CI-030",
+    "CI-031"
+   ],
+   "approved-label.yml": [
+    "CI-030"
+   ],
+   "auto-assign.yml": [
+    "CI-030",
+    "CI-031"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-030"
+   ],
+   "build-release.yaml": [
+    "CI-010",
+    "CI-020",
+    "CI-030"
+   ],
+   "ci.yml": [
+    "CI-010"
+   ],
+   "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "enforce-feature-branch.yml": [
+    "CI-020",
+    "CI-031"
+   ],
+   "labeler.yml": [
+    "CI-030",
+    "CI-031"
+   ],
+   "pr-dependencies.yml": [
+    "CI-030",
+    "CI-031"
+   ],
+   "pull-request-size.yml": [
+    "CI-030"
+   ],
+   "quality-gate-check.yml": [
+    "CI-031"
+   ],
+   "release.yml": [
+    "CI-020"
+   ],
+   "secret-scan.yml": [
+    "CI-031"
+   ],
+   "sonar.yml": [
+    "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-030"
+   ],
+   "update-pr-body.yml": [
+    "CI-030",
+    "CI-031"
+   ]
+  }
+ },
+ "totals": {
+  "CI-030": 10,
+  "CI-031": 8,
+  "CI-010": 3,
+  "CI-020": 4
+ }
+}
