@@ -352,7 +352,7 @@ _e.g. discord-bot-back, discordium bot layer, link-reader-bot_
 - **PREFER** a `/help` command, rate-limit-aware batching, and pagination for long results.
 
 ### 12.4 Desktop / tray / native apps
-_e.g. windows-autonome, windows-docker-state-notification, diy-stream-deck, floating-agent_
+_e.g. workstation-os, windows-docker-state-notification, diy-stream-deck, floating-agent_
 
 - **RULE** Follow OS conventions (menu placement, shortcuts, window controls); persist window/position/state between launches.
 - **RULE** Honor OS dark/light mode and accent where the platform exposes it.

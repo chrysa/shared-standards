@@ -127,5 +127,5 @@ once the app imports `contract.css` AND passes
 ## Out of scope
 agent-config, catalog, chrysa-skills, claude-config, dotfiles,
 github-actions, homeassistant-config, infra-v2, orchestrator, paperclip,
-server, shared-standards, usefull-containers, windows-autonome (infra/meta);
+server, shared-standards, usefull-containers, workstation-os (infra/meta);
 django_auto_discover, game-solver-platform, mediavault (stub/empty).
