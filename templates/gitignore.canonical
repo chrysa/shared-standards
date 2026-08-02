@@ -46,6 +46,11 @@ graphify-out/
 .claude/settings.local.json
 .claude/*.local.md
 
+# Generated audit reports — regenerated on every run, never a CI baseline.
+# Tracking guideline-report.html made each commit drag ~57 lines of ordering
+# churn and then fail its own guideline-check hook.
+guideline-report.html
+
 # OS / editor
 .DS_Store
 Thumbs.db
