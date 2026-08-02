@@ -96,7 +96,7 @@ D-0008 · `guideline-checker` submodule (audit conformité repos)
 ## 🟠 Décisions ouvertes / à trancher
 
 - [ ] `project-init` CLI : utiliser `cookiecutter` ou écrire from scratch ?
-- [ ] Migration `windows-autonome` setup vers `chrysa-bootstrap-machine.sh` (script seulement OU + tests Pester)
+- [ ] Migration `workstation-os` setup vers `chrysa-bootstrap-machine.sh` (script seulement OU + tests Pester)
 - [ ] Versioning workflows GitHub Actions : tags semver vs branche `main` floating
 
 ## 📋 État des lieux
