@@ -35,7 +35,7 @@ repos:
     public: true
     runtime: container
   - name: chrysa-knowledge
-    status: non-dev
+    status: archived
     public: false
     runtime: exempt:config
   - name: chrysa-lib
@@ -147,7 +147,7 @@ repos:
     public: true
     runtime: exempt:native
   - name: game-solver-platform
-    status: dev
+    status: archived
     public: false
     runtime: exempt:config
   - name: gaming-os
@@ -208,7 +208,7 @@ repos:
     public: false
     runtime: exempt:config
   - name: paperclip
-    status: dev
+    status: archived
     public: false
     runtime: exempt:config
   - name: PO-GO-DEX
