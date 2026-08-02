@@ -41,13 +41,9 @@ jobs:
 
             - name: Build repo matrix from repos.yml
               id: list
-              run: |
-                  chmod +x scripts/list-dev-repos.sh
-                  repos="$(scripts/list-dev-repos.sh --json --only '${{ github.event.inputs.only }}')"
-                  count="$(echo "$repos" | tr ',' '\n' | grep -c '"' || true)"
-                  echo "matrix={\"repo\":$repos}" >> "$GITHUB_OUTPUT"
-                  echo "count=$count" >> "$GITHUB_OUTPUT"
-                  echo "Targeting $count repo(s): $repos"
+              env:
+                  ONLY_FILTER: ${{ github.event.inputs.only }}
+              run: bash scripts/ci/build-repo-matrix.sh
 
     distribute:
         needs: discover
@@ -76,24 +72,8 @@ jobs:
               id: base
               env:
                   GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-              run: |
-                  meta="$(gh api "repos/chrysa/${{ matrix.repo }}" --jq '[.default_branch, .archived] | @tsv')"
-                  branch="$(echo "$meta" | cut -f1)"
-                  archived="$(echo "$meta" | cut -f2)"
-                  # An archived repo is read-only: pushing a sync branch returns 403 and
-                  # would fail the whole distribution run over a repo nobody can update.
-                  # Skip it here rather than let the push fail 20 steps later.
-                  if [ "$archived" = "true" ]; then
-                      echo "::warning::${{ matrix.repo }} is archived on GitHub — skipping. Set status:archived in repos.yml."
-                      echo "skip=true" >> "$GITHUB_OUTPUT"
-                      exit 0
-                  fi
-                  if [ -z "$branch" ]; then
-                      echo "::error::could not resolve default branch for ${{ matrix.repo }}"
-                      exit 1
-                  fi
-                  echo "Target ${{ matrix.repo }} default branch: $branch"
-                  echo "branch=$branch" >> "$GITHUB_OUTPUT"
+                  TARGET_REPO: chrysa/${{ matrix.repo }}
+              run: bash shared-standards/scripts/ci/resolve-target-branch.sh
 
             - name: Apply standards
               if: ${{ steps.base.outputs.skip != 'true' }}
