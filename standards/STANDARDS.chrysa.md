@@ -476,6 +476,34 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   to `/setup`** rather than crashing or showing a generic error. An admin **configuration panel**
   (auth-gated CRUD API) manages runtime config with a versioned audit trail, hot-reload where
   possible (else a `RESTART_REQUIRED` flag), and JSON export/import for backup and cross-env cloning.
+- **If a user can supply a file, the product accepts an upload.** Wherever the workflow
+  involves a file the user already has — an import (CSV, JSON, GPX, ICS…), an avatar or image,
+  an attachment or supporting document, a configuration or dataset, a log or a crash dump sent
+  for support — the surface ships a **real upload path**. Telling the user to paste the
+  contents into a textarea, to drop the file on the server themselves, to send it by mail, or
+  to re-type what they already hold is a defect, not a simplification: it moves work onto the
+  person who has the least tooling for it.
+  1. **A real control, not a styled `<div>`** — a native `<input type="file">` with a
+     programmatic label (accept multiple only when the flow does), reachable and operable by
+     keyboard, plus drag-and-drop as an *addition* for pointer users, never as the only way in.
+     Accepted formats and the size limit are stated **before** the user picks, not discovered
+     through a rejection.
+  2. **Feedback while it travels** — visible progress, a cancel, and a result state per file
+     (accepted / rejected with the reason / retryable). Anything that can take more than a
+     couple of seconds is resumable or chunked, and a failed upload never silently loses the
+     user's selection.
+  3. **The server trusts nothing the client says.** Type is determined by inspecting the
+     content, not the extension nor the client-provided MIME; size is capped server-side;
+     the filename is sanitised and never used as a filesystem path; archives are bounded
+     (decompression limits). Rejections come back as typed errors with a message that says
+     what to do.
+  4. **Stored behind a port, not in the tree** — files go to an object store or a dedicated
+     volume through a `BlobStore`-style adapter (strategic pillar 5), never into the repo,
+     the web root, or a path the user can traverse. Content is served through the
+     application's authorisation, or by a signed, expiring URL — never by guessable path.
+  5. **What comes in must be able to come out.** Every uploaded file is listable, replaceable,
+     downloadable and deletable by the user who owns it, and is included in the data export
+     (strategic pillar 3). An upload with no delete and no export is lock-in with a progress bar.
 - **A floating assistant where it earns its place — never as decoration.** Any human-facing
   product whose users face a **non-obvious surface** (a dense cockpit, a multi-step form or
   wizard, a query/graph/config console, an admin panel with domain jargon) ships an **in-app
