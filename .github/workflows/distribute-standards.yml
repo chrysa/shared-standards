@@ -32,6 +32,7 @@ concurrency:
 jobs:
     discover:
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         name: Resolve target repos
         outputs:
             matrix: ${{ steps.list.outputs.matrix }}
