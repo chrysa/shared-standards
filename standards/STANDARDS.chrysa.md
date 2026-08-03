@@ -128,6 +128,21 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `loading="lazy"` media, on-demand heavy components) behind a **shape-accurate placeholder**
   that reserves the final dimensions — a skeleton, not a spinner, so arrival shifts no layout.
   Detail: annexe `FRONTEND.md` §2–§3, §7.
+- **The frontend says when the backend is unreachable or unstable.** Silence is the worst
+  failure mode: a spinner that never resolves, a list that stays empty, a form that swallows a
+  submit all read as "the app is broken and lying about it". The API client classifies every
+  failure into application state — `unreachable`, `unstable`, `degraded`, `unauthorised`
+  (a session problem, not an outage), `offline` (the browser's fault, worded as such) — and a
+  **persistent, non-blocking banner in the root shell** states it for the whole app, while each
+  container still resolves its own error state. The message says what happened and what to do
+  (*"Server unreachable — reconnecting in 12 s"*, never a raw status code), keeps a manual
+  **Retry** available, **disables destructive or unsaved actions** instead of failing silently
+  on submit, and **preserves in-progress form input** for re-submission on recovery. Reconnection
+  uses bounded exponential backoff with jitter — an unbounded retry loop against a struggling
+  backend is a defect — and success clears the state and refetches. The banner is a live region
+  (`role="alert"` / `role="status"`) and its behaviour is tested against a network error and a
+  503. A frontend Definition of Done includes its **API-down state**. Detail: annexe
+  `FRONTEND.md` FE-050.
 - **Every repo declares its profile and DDD level** (`project_profile`, `ddd_level`,
   `bounded_context`, `standards_version`) — architecture is proportionate to business
   complexity, and small tools are not over-architected. Detail: annexe `ARCHITECTURE-DDD.md`.
