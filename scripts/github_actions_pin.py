@@ -137,6 +137,17 @@ def sweep_repo(repo: str, target: str, apply: bool) -> tuple[str, str]:
     return "patched", ", ".join(sorted(stale))
 
 
+# sweep_repo() state -> (report line, tally bucket). A new state is a new row here,
+# not a new branch in main() (standards: prefer a lookup table to a state machine).
+STATE_REPORT: dict[str, tuple[str, str | None]] = {
+    "ok": ("ok {repo}", None),
+    "absent": ("·  {repo} · no workflows", None),
+    "drift": ("⚠  {repo} · {detail}", "drift"),
+    "patched": ("✅ {repo} · {detail}", "drift"),
+}
+_UNKNOWN_STATE = ("❌ {repo} · {detail}", "failure")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="open PRs instead of auditing")
@@ -160,16 +171,12 @@ def main() -> int:
     drift, failures = [], []
     for repo in repos:
         state, detail = sweep_repo(repo, target, args.apply)
-        if state == "ok":
-            print(f"ok {repo}")
-        elif state == "absent":
-            print(f"·  {repo} · no workflows")
-        elif state == "drift":
-            drift.append(repo); print(f"⚠  {repo} · {detail}")
-        elif state == "patched":
-            drift.append(repo); print(f"✅ {repo} · {detail}")
-        else:
-            failures.append((repo, detail)); print(f"❌ {repo} · {detail}")
+        template, bucket = STATE_REPORT.get(state, _UNKNOWN_STATE)
+        print(template.format(repo=repo, detail=detail))
+        if bucket == "drift":
+            drift.append(repo)
+        elif bucket == "failure":
+            failures.append((repo, detail))
 
     print(f"\nchecked={len(repos)} drift={len(drift)} failures={len(failures)}")
     return 1 if (failures or (drift and not args.apply)) else 0
