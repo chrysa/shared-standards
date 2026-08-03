@@ -45,7 +45,10 @@ DEPLOY_HINTS = ("deploy", "release", "publish", "promote", "cd")
 DEFAULT_TIMEOUT = 30
 
 RE_USES = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)", re.M)
-RE_JOB = re.compile(r"^(?P<indent>\s{2,})(?P<name>[A-Za-z0-9_-]+):\s*$", re.M)
+# `\s` also matches the preceding newline, which inflated the measured indent of the first
+# job by one and made the min-indent selection pick a nested key instead. Indentation is
+# spaces.
+RE_JOB = re.compile(r"^(?P<indent>[ ]{2,})(?P<name>[A-Za-z0-9_-]+):[ \t]*$", re.M)
 RE_UNTRUSTED = re.compile(
     r"\$\{\{\s*github\.event\.(?:pull_request\.(?:title|body|head\.ref|head\.label)"
     r"|issue\.(?:title|body)|comment\.body|review\.body|head_commit\.message"
@@ -83,9 +86,15 @@ def file_indent(text: str) -> str:
 
     A block written at 4 spaces inside a 2-space file is valid YAML but fails `yamllint`
     (`wrong indentation: expected 2 but found 4`), which turns a conformance fix into a red
-    lint job. Derive the step from the first nested key rather than assuming one.
+    lint job.
+
+    The step is measured under `jobs:`, never from the first indented line of the file: on a
+    key-sorted workflow the concurrency block *this script wrote* can sit at the top, so the
+    naive reading measures our own output and happily keeps a wrong indentation forever.
     """
-    for line in text.splitlines():
+    jobs = re.search(r"^jobs:\s*$", text, re.M)
+    body = text[jobs.end():] if jobs else text
+    for line in body.splitlines():
         match = re.match(r"^( +)\S", line)
         if match:
             return match.group(1)
@@ -123,10 +132,18 @@ def is_deploy(name: str, text: str) -> bool:
 
 def job_blocks(text: str) -> list[tuple[str, str]]:
     """(job name, block) for each entry under a top-level `jobs:` mapping."""
-    start = re.search(r"^jobs:\s*$", text, re.M)
+    # `\s*$` in multiline mode swallows the newline *and* the next line's indentation, so
+    # the first job key lost its indent and never matched RE_JOB — the parser then locked
+    # onto whatever came next (often a trigger under `on:` on a key-sorted file).
+    start = re.search(r"^jobs:[ \t]*$", text, re.M)
     if not start:
         return []
     body = text[start.end():]
+    # Stop at the next top-level key: on a key-sorted workflow `jobs:` can come first, and
+    # everything after it — `on:`, `permissions:` — would otherwise be read as more jobs.
+    next_top = re.search(r"^\S", body, re.M)
+    if next_top:
+        body = body[: next_top.start()]
     matches = list(RE_JOB.finditer(body))
     top = min((m.group("indent") for m in matches), key=len, default=None)
     if top is None:
