@@ -44,10 +44,10 @@
       "verdict": "PASS"
     },
     {
-      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "detail": "container runtime complete",
       "repo": "chrysa-portfolio-viz",
       "runtime": "container",
-      "verdict": "WARN"
+      "verdict": "PASS"
     },
     {
       "detail": "no executable runtime",
@@ -62,16 +62,16 @@
       "verdict": "EXEMPT"
     },
     {
-      "detail": "pre-code — container scaffold due before first code",
+      "detail": "lib — tests run in container",
       "repo": "coach",
-      "runtime": "pending",
-      "verdict": "PENDING"
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
     },
     {
-      "detail": "container runtime complete",
+      "detail": "runs in container; §6 gaps: HEALTHCHECK docker-up docker-down docker-test",
       "repo": "container-webview",
       "runtime": "container",
-      "verdict": "PASS"
+      "verdict": "WARN"
     },
     {
       "detail": "runs in container; §6 gaps: docker-up docker-down",
@@ -158,10 +158,34 @@
       "verdict": "EXEMPT"
     },
     {
-      "detail": "not checked out locally",
+      "detail": "lib — tests run in container",
       "repo": "epub-sorter",
       "runtime": "exempt:lib",
-      "verdict": "ABSENT"
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "fastapi-autoload",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "fastapi-pytest",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "fastapi-query-optimizer",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "lib — tests run in container",
+      "repo": "fastapi-traceid",
+      "runtime": "exempt:lib",
+      "verdict": "PASS"
     },
     {
       "detail": "runs in container; §6 gaps: compose docker-up docker-down",
@@ -174,12 +198,6 @@
       "repo": "floating-agent",
       "runtime": "exempt:native",
       "verdict": "EXEMPT"
-    },
-    {
-      "detail": "pre-code — container scaffold due before first code",
-      "repo": "game-solver-platform",
-      "runtime": "pending",
-      "verdict": "PENDING"
     },
     {
       "detail": "container runtime complete",
@@ -200,10 +218,10 @@
       "verdict": "EXEMPT"
     },
     {
-      "detail": "lib — tests run in container",
+      "detail": "no executable runtime",
       "repo": "github-actions",
-      "runtime": "exempt:lib",
-      "verdict": "PASS"
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
     },
     {
       "detail": "lib — tests run in container",
@@ -236,10 +254,10 @@
       "verdict": "PASS"
     },
     {
-      "detail": "pre-code — container scaffold due before first code",
+      "detail": "no executable runtime",
       "repo": "mediavault",
-      "runtime": "pending",
-      "verdict": "PENDING"
+      "runtime": "exempt:config",
+      "verdict": "EXEMPT"
     },
     {
       "detail": "container runtime complete",
@@ -256,12 +274,6 @@
     {
       "detail": "no executable runtime",
       "repo": "orchestrator",
-      "runtime": "exempt:config",
-      "verdict": "EXEMPT"
-    },
-    {
-      "detail": "no executable runtime",
-      "repo": "paperclip",
       "runtime": "exempt:config",
       "verdict": "EXEMPT"
     },
@@ -294,12 +306,6 @@
       "repo": "quality-gatekeeper",
       "runtime": "pending",
       "verdict": "PENDING"
-    },
-    {
-      "detail": "host/device/cloud/editor bound",
-      "repo": "satisfactory-automated_calculator",
-      "runtime": "exempt:native",
-      "verdict": "EXEMPT"
     },
     {
       "detail": "runs in container; §6 gaps: docker-up docker-down",
@@ -338,24 +344,48 @@
       "verdict": "EXEMPT"
     },
     {
-      "detail": "host/device/cloud/editor bound",
-      "repo": "windows-autonome",
+      "detail": "not checked out locally",
+      "repo": "workstation-os",
       "runtime": "exempt:native",
-      "verdict": "EXEMPT"
+      "verdict": "ABSENT"
     },
     {
       "detail": "host/device/cloud/editor bound",
       "repo": "windows-docker-state-notification",
       "runtime": "exempt:native",
       "verdict": "EXEMPT"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "debian-guardian",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "lib — no docker-test / Dockerfile.test (tests would run on host)",
+      "repo": "django-migration-analyzer",
+      "runtime": "exempt:lib",
+      "verdict": "WARN"
+    },
+    {
+      "detail": "host/device/cloud/editor bound",
+      "repo": "windows-guardian",
+      "runtime": "exempt:native",
+      "verdict": "EXEMPT"
+    },
+    {
+      "detail": "runs in container; §6 gaps: docker-up docker-down",
+      "repo": "wsmqtt-monitor",
+      "runtime": "container",
+      "verdict": "WARN"
     }
   ],
   "summary": {
     "absent": 1,
-    "exempt": 20,
+    "exempt": 21,
     "fail": 0,
-    "pass": 22,
-    "pending": 4,
-    "warn": 11
+    "pass": 27,
+    "pending": 1,
+    "warn": 13
   }
 }

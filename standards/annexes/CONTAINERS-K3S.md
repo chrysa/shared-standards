@@ -84,6 +84,56 @@ components are never folded into the application image.
 External addresses, ports, domains, and certificates are supplied by deployment
 configuration, never baked into the image.
 
+### CT-015 — Only a publicly useful port is published; everything else stays on the network
+
+A container port is **published to the host only when a human or an external system outside
+the stack genuinely consumes it** — in practice the public entry point of the product, and
+nothing else. Every other port stays inside the container network, where services reach each
+other by service name over the shared network.
+
+Published by default: **nothing**. Reachable from outside: the app's own HTTP port fronted by
+the platform layer (see CT-011), or the platform's own front.
+
+**Stays internal — publishing it is a defect:** databases and their admin ports, caches,
+brokers and their management UIs, search engines, object storage, internal APIs and gRPC
+services, metrics/`/debug` endpoints, mail catchers, dev tooling, and the app's own port when
+a reverse proxy already fronts it.
+
+```yaml
+services:
+    api:                       # the one public surface
+        ports:
+            - "8000:8000"      # published on purpose
+    database:
+        image: postgres:16
+        expose:
+            - "5432"           # reachable as `database:5432` on the network — not published
+    redis:
+        image: redis:7         # no ports:, no expose: needed — service DNS is enough
+```
+
+Three consequences that make this a rule and not a preference:
+
+1. **`ports:` is a firewall hole.** On a Docker host, a published port is inserted straight
+   into `nftables`/`iptables` *ahead of* `ufw`/`firewalld` — the host firewall does not filter
+   it. `ports: "5432:5432"` puts the database on the public internet even on a machine whose
+   firewall denies everything.
+2. **A port published to `0.0.0.0` binds every interface**, including the ones you forgot.
+   When a host-side tool genuinely needs access (a migration run from the host, a debugger),
+   bind the loopback explicitly — `127.0.0.1:5432:5432` — and treat it as a local development
+   affordance, never a deployment default.
+3. **Two stacks publishing the same port collide.** Internal-only services can keep their
+   canonical port in every project; publishing forces per-project port arithmetic that nobody
+   documents and everybody re-derives.
+
+Kubernetes states the same rule with its own vocabulary: every `Service` is `ClusterIP`
+unless it is the ingress-fronted entry point. `NodePort`, `LoadBalancer`, and
+`hostPort`/`hostNetwork` are exposures of last resort, each requiring an ADR — a `hostPort`
+also silently bypasses `NetworkPolicy` (CT-023).
+
+Development compose files follow the same rule; a port opened "just to look at it" is opened
+on the loopback, in an override file, never in the committed base stack.
+
 ______________________________________________________________________
 
 ## 3. Expected k3s topology
@@ -139,7 +189,10 @@ image · external exposure exclusively via `Service` + the cluster Traefik.
 Reverse-proxy install/config detected in an app image · number of responsibilities embedded ·
 Kubernetes exposure goes through a Service + a Traefik-compatible routing resource · no
 private certificates or public TLS config in images · no hardcoded infrastructure domains,
-IPs, or ports · probes, resource limits, and security policies present.
+IPs, or ports · probes, resource limits, and security policies present · **published ports
+counted per compose file (CT-015): a `ports:` on a database, cache, broker, or metrics
+endpoint fails the check, and a `0.0.0.0` publish outside the public entry point is
+flagged**.
 
 ______________________________________________________________________
 
