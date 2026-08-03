@@ -50,6 +50,7 @@ jobs:
         needs: discover
         if: ${{ needs.discover.outputs.count != '0' }}
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         name: ${{ matrix.repo }}
         strategy:
             fail-fast: false
