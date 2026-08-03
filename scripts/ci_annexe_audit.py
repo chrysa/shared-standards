@@ -174,9 +174,25 @@ def inspect(text: str, name: str) -> list[str]:
     return sorted(set(found))
 
 
+def dedupe_timeouts(text: str) -> str:
+    """Drop a repeated `timeout-minutes:` line left by the first sweep.
+
+    That sweep replaced a `runs-on:` line globally with a count of 1, so on a file whose jobs
+    share the same runner the insertion landed on the *first* job once per sibling — producing
+    a duplicate YAML key, which actionlint rejects outright.
+    """
+    return re.sub(
+        r"^(?P<indent>[ ]+)timeout-minutes:[ ]*(?P<value>\d+)[ ]*\n"
+        r"(?:(?P=indent)timeout-minutes:[ ]*(?P=value)[ ]*\n)+",
+        lambda m: f"{m.group('indent')}timeout-minutes: {m.group('value')}\n",
+        text,
+        flags=re.M,
+    )
+
+
 def fix(text: str, name: str) -> str | None:
     """Deterministic fixes only: concurrency group (CI-031) and job timeout (CI-030)."""
-    patched = text
+    patched = dedupe_timeouts(text)
 
     if re.search(r"^\s*pull_request(_target)?:", patched, re.M) and not re.search(
         r"^concurrency:", patched, re.M
