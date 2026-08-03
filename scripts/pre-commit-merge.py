@@ -133,6 +133,10 @@ HOOK_GROUPS = {
         "debugger-detection", "python-print-detection", "python-pprint-detection",
         "no-bare-except", "python-logger-detection", "python-unreachable-code",
         "no-hardcoded-localhost", "regression-gate",
+        # Detectors for the code-quality rules of the standards block. Measured dry
+        # across the 63 status:dev repos before arming: 47 untyped raises (13 of them
+        # in tests, hence the baseline exclude), 5 dispatch ladders, 0 mutable defaults.
+        "python-untyped-raise", "python-mutable-default", "python-dispatch-ladder",
     },
     "docker": {"dockerfile-no-latest"},
     "jsts": {
