@@ -134,6 +134,53 @@ also silently bypasses `NetworkPolicy` (CT-023).
 Development compose files follow the same rule; a port opened "just to look at it" is opened
 on the loopback, in an override file, never in the committed base stack.
 
+### CT-016 — The image version and the application version are two different things
+
+An image and the application it packages have separate lifecycles: rebuilding on a patched
+base image, a new OS library or a changed entrypoint yields a **new image version carrying
+the same application version**. Both are recorded, and neither is inferred from the other.
+
+Every image carries OCI labels, injected as build arguments by CI and never hand-edited:
+
+```dockerfile
+ARG APP_VERSION
+ARG IMAGE_VERSION
+ARG GIT_SHA
+ARG BUILD_DATE
+LABEL org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.revision="${GIT_SHA}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.source="https://github.com/chrysa/<repo>" \
+      chrysa.application.version="${APP_VERSION}"
+```
+
+Deployments reference an **immutable digest** (`image@sha256:…`), never `:latest` — a moving
+tag makes "what is running" unanswerable and breaks *build once, promote the artefact*
+(`CI-046`). A rollback is then a digest change, not a rebuild.
+
+### CT-017 — A running workload states which build it is
+
+Every service exposes its identity on a lightweight endpoint (`/version`, or the health
+payload): application version, image tag **and digest**, git SHA, build timestamp,
+environment name. It carries no secret and no dependency inventory — enough to answer
+"which build is this?", nothing more, so it stays safe behind the same exposure rules as the
+rest of the API.
+
+The value is read from the environment injected at deploy time (`APP_VERSION`, `IMAGE_DIGEST`,
+`GIT_SHA`), never hardcoded and never derived from a file inside the image that a rebuild
+would not update.
+
+### CT-018 — Deployed versions are visible to an operator without a shell
+
+The admin surface of the product shows the **frontend build version** — embedded at build
+time — alongside the backend's application version, image digest and environment. `kubectl`
+or `docker inspect` is a fallback for a debugging session, not the primary way to answer
+"what is deployed right now".
+
+When the frontend detects that the backend version changed under it, or that its build no
+longer matches the API it talks to, it says so and offers a reload instead of failing in
+obscure ways.
+
 ______________________________________________________________________
 
 ## 3. Expected k3s topology
@@ -192,7 +239,8 @@ private certificates or public TLS config in images · no hardcoded infrastructu
 IPs, or ports · probes, resource limits, and security policies present · **published ports
 counted per compose file (CT-015): a `ports:` on a database, cache, broker, or metrics
 endpoint fails the check, and a `0.0.0.0` publish outside the public entry point is
-flagged**.
+flagged** · **OCI version labels present and non-empty, and deployment manifests referencing
+a digest rather than a moving tag (CT-016)**.
 
 ______________________________________________________________________
 
