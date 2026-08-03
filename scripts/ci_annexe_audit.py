@@ -32,6 +32,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import time
 
 OWNER = "chrysa"
 WORKFLOW_DIR = ".github/workflows"
@@ -56,8 +57,22 @@ RE_UNTRUSTED = re.compile(
 )
 
 
-def gh(args: list[str], stdin: str | None = None) -> tuple[int, str, str]:
-    done = subprocess.run(["gh", *args], capture_output=True, text=True, input=stdin)
+def gh(args: list[str], stdin: str | None = None, attempts: int = 4) -> tuple[int, str, str]:
+    """Run `gh`, retrying a throttled call with backoff.
+
+    GitHub's secondary rate limit trips on a fleet-wide scan, and a read that fails for that
+    reason is not a finding — it is a hole in the measurement. Without retries the audit
+    reports whatever it happened to reach, which moves with the API weather rather than with
+    the code. A genuine 404 is returned immediately: there is nothing to wait for.
+    """
+    for attempt in range(attempts):
+        done = subprocess.run(["gh", *args], capture_output=True, text=True, input=stdin)
+        if done.returncode == 0:
+            return 0, done.stdout, done.stderr
+        if "404" in done.stderr or "Not Found" in done.stderr:
+            return done.returncode, done.stdout, done.stderr
+        if attempt < attempts - 1:
+            time.sleep(5 * (attempt + 1))
     return done.returncode, done.stdout, done.stderr
 
 
