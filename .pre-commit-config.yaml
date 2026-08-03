@@ -23,7 +23,7 @@ repos:
     stages:
     - manual
   repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.48.0
+  rev: v0.49.1
 - hooks:
   - id: makefile-check
   # --- generic (all repos) ---
@@ -85,7 +85,7 @@ repos:
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
-  rev: v0.2.0-247
+  rev: v0.2.0-253
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
@@ -128,7 +128,7 @@ repos:
     - en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
   repo: local
 - repo: https://github.com/chrysa/guideline-checker
-  rev: v1.30.10
+  rev: v1.31.0-13
   hooks:
   - id: guideline-check
     # Adoption baseline: fail only on NEW violations. Regenerate with
