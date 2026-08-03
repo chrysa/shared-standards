@@ -527,6 +527,39 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   to skip the test. This is what makes the *max function lines 50* / *complexity ≤ 10* gates
   achievable rather than gamed, and it is the mechanism behind the coverage floor: coverage reached
   only through end-to-end paths, with untestable god-functions underneath, does not satisfy this rule.
+- **Code is read far more often than it is written — optimise for the reader, and standardise
+  the form.** Two properties, and both are reviewable:
+  1. **Readable.** A reader — human or agent — understands *what* a unit does from its name and
+     signature, and *why* from the surrounding names, without reconstructing it line by line.
+     Concretely: intention-revealing names (`is_dispatchable`, not `check`, `flag`, `tmp`, `data`,
+     `d`, `x`), no abbreviation that is not domain vocabulary, guard clauses instead of nested
+     `if`s, one idea per line, explicit over clever. A comment explains a *why* that the code
+     cannot carry; a comment that restates the code is noise, and a comment that compensates for
+     an unreadable line is the wrong fix — rename or extract instead.
+  2. **Standardised.** The same intent is written the same way everywhere: the formatter and the
+     linter own the form (Ruff format + Ruff lint on Python, ESLint + Prettier on TS), and their
+     verdict is not negotiated in review. Style is never a review topic — the tool already
+     decided. Two files solving the same problem in two different shapes is a defect even when
+     both work.
+- **Avoid lambdas and anonymous constructs — a named function is the default.** An anonymous
+  function has no name, so it cannot be described, called from a test, or found in a traceback:
+  the stack frame reads `<lambda>` and the reviewer reads a puzzle. Rules:
+  - **Python: a `lambda` is only ever an inline key/predicate that fits on the line it is used
+    on** (`sorted(items, key=lambda i: i.rank)`). Assigning a lambda to a name is forbidden —
+    `f = lambda x: …` is a `def` written badly (Ruff `E731`). Anything with a branch, a call
+    chain, or its own rule becomes a `def` with a name, and prefer `operator.attrgetter`/
+    `itemgetter` where they say it more plainly.
+  - **TypeScript/JS: arrows stay as short callbacks** (`map`/`filter`/`reduce`, one-to-three-line
+    predicates) or as a component's inline handler when it merely forwards. A handler carrying
+    logic is a named function, hoisted out of the render path.
+  - **Forbidden in every language**: an anonymous function longer than ~3 lines, a nested named
+    function over 5 lines (extract it to the top level), a lambda used to defer or fake a
+    dependency where an injected object belongs, and clever one-liners — a nested comprehension
+    with two `for`s and a condition, a chained ternary — that trade a reader's minute for a
+    writer's second.
+  The test is mechanical: if you cannot give the expression a name that fits in three words, it
+  is doing too much to stay anonymous. Mechanisation: Ruff (`E731`, `C901`, `PLR0912`, `SIM`),
+  ESLint (`func-style: declaration`, `max-nested-callbacks: 2`, `complexity`).
 - **Basic optimisations and known anti-patterns are caught in review and in CI.** Code is written
   correct-then-obvious first — **no speculative micro-optimisation**, no premature caching, no
   hand-tuned trick without a measurement (profile before optimising; `perf` claims come with
