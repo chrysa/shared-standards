@@ -547,6 +547,36 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   to `/setup`** rather than crashing or showing a generic error. An admin **configuration panel**
   (auth-gated CRUD API) manages runtime config with a versioned audit trail, hot-reload where
   possible (else a `RESTART_REQUIRED` flag), and JSON export/import for backup and cross-env cloning.
+- **Every product that is operated ships a management backoffice.** As soon as a product has
+  users, content, or work that someone has to *run* — accounts to unlock, an import that
+  failed, a job stuck in a queue, a flag to flip — it ships an authenticated **admin
+  backoffice** covering that work. The test is blunt: **if operating the product in practice
+  means SSH, `psql`, or a hand-written script, the backoffice is missing** — and the day a
+  real incident lands, the operator improvises a `UPDATE` on production at 23:00.
+  1. **It covers the operations the product actually needs**, not a generic table browser:
+     accounts (invite, roles, deactivate, delete with their data), the domain entities support
+     is asked about, moderation/quarantine where content is user-supplied, runtime config and
+     feature flags (see *setup wizard & config panel*), background jobs and queues with a
+     **retry** and a visible failure reason, and the deployed versions of the running pieces.
+  2. **Admin power is a role, not a person.** Access is gated by an explicit permission set
+     behind the identity hierarchy — never a shared login, never "the first account created",
+     never an environment variable holding a master password. Sensitive operations
+     (impersonation, export, deletion) are separately granted, and impersonation is announced
+     in the UI and terminated by an explicit exit.
+  3. **Every admin action is audited** — who, what, when, on which record, with the before and
+     after. The audit trail is written by the same path that performs the action, not
+     reconstructed from logs, and it is readable *in* the backoffice: an admin surface that
+     cannot answer "who changed this and when" is where accountability quietly ends.
+  4. **Destructive actions are confirmed, scoped and reversible** — a typed confirmation for
+     the irreversible ones, soft delete or quarantine over hard delete, bulk operations bounded
+     and previewed before they run. "Delete all" without a preview is an incident generator.
+  5. **It shows the least data that answers the question.** A support view surfaces what the
+     operator needs and masks the rest; secrets and credentials are never displayed, only
+     rotated. Reading a person's data through the backoffice is itself an audited act.
+  6. **It is a product surface, held to the product's standards** — same design system, dark
+     mode, WCAG 2.1 AA, semantic URLs, i18n, tests and error handling. An admin panel treated
+     as a throwaway becomes the least reliable part of the system, operated under stress, by
+     the people with the most destructive permissions.
 - **The container is versioned separately from the application it hosts, and an admin can see
   what is actually deployed.** An image and an app are two artefacts with two lifecycles: a
   rebuild that only picks up a new base image, a patched OS library or a changed entrypoint
@@ -576,6 +606,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      API it is talking to, it tells the user and offers a reload rather than failing in
      obscure ways. Deployed versions per environment are also visible from the platform side
      (release notes, deployment log), so "what is in production" never requires a shell.
+||||||| f7b98e2
 - **If a user can supply a file, the product accepts an upload.** Wherever the workflow
   involves a file the user already has — an import (CSV, JSON, GPX, ICS…), an avatar or image,
   an attachment or supporting document, a configuration or dataset, a log or a crash dump sent
