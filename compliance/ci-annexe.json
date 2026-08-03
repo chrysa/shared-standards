@@ -66,12 +66,8 @@
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
-   "detect-conflicts.yml": [
-    "CI-030"
-   ],
    "e2e.yml": [
-    "CI-010",
-    "CI-030"
+    "CI-010"
    ],
    "enforce-feature-branch.yml": [
     "CI-020"
@@ -124,27 +120,82 @@
    ]
   },
   "catalog": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "cdn-explorer": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
     "CI-020"
    ],
    "enforce-feature-branch.yml": [
     "CI-020"
    ],
+   "labeler.yml": [
+    "CI-020"
+   ],
    "mutation-testing.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "pages.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -152,6 +203,12 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "chrysa-claude-template": {
@@ -201,13 +258,37 @@
    ]
   },
   "chrysa-portfolio-viz": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -215,13 +296,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "chrysa-skills": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -232,16 +346,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "claude-config": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "setup-gist-publish.yml": [
@@ -249,16 +393,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "coach": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -266,6 +440,12 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "container-webview": {
@@ -281,6 +461,18 @@
    ]
   },
   "D-D": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -290,7 +482,19 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -298,11 +502,47 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "debian-guardian": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010",
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
     "CI-020"
    ]
   },
@@ -333,10 +573,34 @@
    ]
   },
   "devtool": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "quality-checks.yml": [
@@ -347,16 +611,40 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "discord-bot-back": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "mutation-testing.yml": [
@@ -365,11 +653,35 @@
    "pages.yml": [
     "CI-010"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "discordium": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
@@ -379,14 +691,44 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "diy-stream-deck": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -396,30 +738,75 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "pages.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "quality-gate-check.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "release.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-app-forge": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -427,13 +814,43 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-autoload": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -441,21 +858,81 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-migration-analyzer": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-pytest": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -463,16 +940,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-query-optimizer": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -480,16 +987,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-query-optimizer-vscode": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -497,16 +1034,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "django-traceid": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -514,9 +1081,27 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "doc-gen": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -524,6 +1109,9 @@
     "CI-020"
    ],
    "dependencies.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
     "CI-020"
    ],
    "doc-gen-docs.yml": [
@@ -532,24 +1120,51 @@
    "enforce-feature-branch.yml": [
     "CI-020"
    ],
+   "labeler.yml": [
+    "CI-020"
+   ],
    "mutation-testing.yml": [
     "CI-020"
    ],
    "pages.yml": [
     "CI-020"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
    "publish.yml": [
     "CI-010"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "release.yml": [
     "CI-020"
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "dotfiles": {},
   "epub-sorter": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "build-release.yaml": [
     "CI-010",
     "CI-020"
@@ -560,7 +1175,19 @@
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -568,56 +1195,230 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "fastapi-autoload": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "fastapi-pytest": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "fastapi-query-optimizer": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "fastapi-traceid": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "feedback-gateway": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "floating-agent": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "mutation-testing.yml": [
@@ -629,7 +1430,13 @@
    "pages.yml": [
     "CI-020"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
    "pre-commit.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -637,6 +1444,12 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "floating-knowledge-architect-offline": {
@@ -646,6 +1459,18 @@
    ]
   },
   "gaming-os": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
@@ -655,11 +1480,29 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "genealogy-validator": {
@@ -677,9 +1520,6 @@
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
-   ],
-   "detect-conflicts.yml": [
-    "CI-030"
    ],
    "enforce-feature-branch.yml": [
     "CI-020"
@@ -708,10 +1548,34 @@
    ]
   },
   "gestureOS": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -719,9 +1583,27 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "github-actions": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci-fullstack.yml": [
     "CI-010",
     "CI-021"
@@ -743,6 +1625,12 @@
    "deploy.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
    "lint-python.yml": [
     "CI-010"
    ],
@@ -752,8 +1640,14 @@
    "pages.yml": [
     "CI-010"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
    "pre-commit.yml": [
     "CI-010"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "quality-gate-check.yml": [
     "CI-010"
@@ -766,77 +1660,176 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "guideline-checker": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "mutation-testing.yml": [
     "CI-020"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
    "pre-commit.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
     "CI-021"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "herdr-rtk-savings": {},
   "homeassistant-config": {},
   "lifeos": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "mutation-testing.yml": [
     "CI-010"
    ],
    "pages.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "quality-gate-check.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "release.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "link-reader-bot": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
     "CI-020"
    ],
    "mutation-testing.yml": [
     "CI-020"
    ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
    "publish.yml": [
     "CI-010"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "release.yml": [
     "CI-020"
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "linkendin-resume": {
@@ -894,6 +1887,18 @@
    ]
   },
   "mediavault": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -903,7 +1908,19 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -911,9 +1928,27 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "mirrador": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -921,6 +1956,9 @@
     "CI-020"
    ],
    "dependencies.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
     "CI-020"
    ],
    "e2e.yml": [
@@ -929,27 +1967,68 @@
    "enforce-feature-branch.yml": [
     "CI-020"
    ],
+   "labeler.yml": [
+    "CI-020"
+   ],
    "mutation-testing.yml": [
     "CI-010"
    ],
    "pages.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "quality-gate-check.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
    ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "my-resume": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -957,9 +2036,27 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "orchestrator": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -969,18 +2066,63 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "PO-GO-DEX": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
+   "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "quality-gate-check.yml": [
@@ -991,14 +2133,50 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "pre-commit-hooks-changelog": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "pythonpackage.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "pre-commit-tools": {
@@ -1062,6 +2240,18 @@
    ]
   },
   "project-init": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -1071,7 +2261,19 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1079,10 +2281,28 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "projects-claude-config": {},
   "quality-gatekeeper": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
@@ -1092,7 +2312,19 @@
    "dependencies.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1100,13 +2332,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "satisfactory-factory-manager": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
+   "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1114,6 +2379,12 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "server": {
@@ -1171,11 +2442,29 @@
    ]
   },
   "shared-standards": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
    "dependencies.yml": [
     "CI-010"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
    ],
    "distribute-standards.yml": [
     "CI-010"
@@ -1187,23 +2476,57 @@
     "CI-010"
    ],
    "pr-dependencies.yml": [
-    "CI-010"
+    "CI-010",
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
    ],
    "quality-gate-check.yml": [
     "CI-010"
    ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "sport-intelligence-hub": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1211,16 +2534,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "studioverse": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-021"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1228,9 +2581,27 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "usefull-containers": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "build-and-publish.yml": [
     "CI-010"
    ],
@@ -1243,7 +2614,19 @@
    "dependencies.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "quality-gate-check.yml": [
@@ -1254,16 +2637,46 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "windows-docker-state-notification": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
    "dependabot-auto-merge.yml": [
     "CI-020"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
    "enforce-feature-branch.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
     "CI-020"
    ],
    "release.yml": [
@@ -1271,35 +2684,132 @@
    ],
    "sonar.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   },
   "windows-guardian": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010",
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
     "CI-020"
    ]
   },
   "workstation-os": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
-    "CI-011"
+    "CI-011",
+    "CI-020"
    ],
    "dependabot-auto-merge.yml": [
+    "CI-020"
+   ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
     "CI-020"
    ]
   },
   "wsmqtt-monitor": {
+   "action-check.yml": [
+    "CI-020"
+   ],
+   "approved-label.yml": [
+    "CI-020"
+   ],
+   "auto-assign.yml": [
+    "CI-020"
+   ],
+   "auto-update-pre-commit.yml": [
+    "CI-020"
+   ],
    "ci.yml": [
     "CI-010"
    ],
+   "detect-conflicts.yml": [
+    "CI-020"
+   ],
+   "labeler.yml": [
+    "CI-020"
+   ],
+   "pr-dependencies.yml": [
+    "CI-020"
+   ],
+   "pull-request-size.yml": [
+    "CI-020"
+   ],
    "release.yml": [
     "CI-010"
+   ],
+   "sync-labels.yml": [
+    "CI-020"
+   ],
+   "update-pr-body.yml": [
+    "CI-020"
    ]
   }
  },
  "totals": {
   "CI-010": 208,
-  "CI-020": 155,
-  "CI-030": 30,
+  "CI-020": 668,
+  "CI-030": 27,
   "CI-011": 4,
   "CI-021": 12
  }

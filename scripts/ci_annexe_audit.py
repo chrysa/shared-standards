@@ -288,12 +288,17 @@ def sweep(repo: str, apply: bool) -> tuple[dict[str, list[str]], dict[str, str],
 
     violations: dict[str, list[str]] = {}
     patches: dict[str, str] = {}
+    unread: list[str] = []
     for name in names:
         text, status = api_text(f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}/{name}")
         if status == "absent":
             continue
         if text is None:
-            return violations, {}, status
+            # One throttled read used to abort the whole repo, so every file after it went
+            # uncounted and the fleet total read *lower* than reality — an audit that
+            # under-reports is worse than one that fails. Record it and keep going.
+            unread.append(name)
+            continue
         found = inspect(text, name)
         if found:
             violations[name] = found
@@ -301,6 +306,8 @@ def sweep(repo: str, apply: bool) -> tuple[dict[str, list[str]], dict[str, str],
             patched = fix(text, name)
             if patched:
                 patches[name] = patched
+    if unread:
+        return violations, patches, f"{len(unread)} file(s) unreadable: {', '.join(unread[:3])}"
     return violations, patches, ""
 
 
