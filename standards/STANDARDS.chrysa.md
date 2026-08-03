@@ -398,6 +398,20 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   frontend may use a minimal internal web server to serve its own built assets, but it does **not**
   proxy other services. Baking a reverse proxy into an app container is a defect (couples the app to
   infra, duplicates the platform, and breaks the ownership boundary).
+- **Only a publicly useful port is published — everything else stays on the container network.**
+  A `ports:` entry exists **only** for what a human or an external system outside the stack
+  genuinely consumes: in practice the product's public entry point, and nothing else. Databases,
+  caches, brokers and their management UIs, search engines, object storage, internal APIs,
+  metrics/`/debug` endpoints and dev tooling communicate **by service name over the container
+  network** (`expose:`, or nothing at all — service DNS is enough); publishing one is a defect.
+  This is not hygiene, it is exposure: on a Docker host a published port is inserted into
+  `nftables`/`iptables` **ahead of** `ufw`/`firewalld`, so `ports: "5432:5432"` puts the database
+  on the public internet even when the host firewall denies everything. When a host-side tool
+  genuinely needs access, bind the loopback explicitly (`127.0.0.1:5432:5432`) in a local
+  override — never in the committed base stack. In Kubernetes the same rule reads: every
+  `Service` is `ClusterIP` except the ingress-fronted entry point; `NodePort`, `LoadBalancer`,
+  `hostPort` and `hostNetwork` need an ADR (a `hostPort` also bypasses `NetworkPolicy`).
+  Detail: annexe `CONTAINERS-K3S.md` CT-015.
 - **Dev stage must hot-reload.** The `dev` target/service provides live auto-reload so a source edit
   is reflected without a manual rebuild/restart: backend `uvicorn --reload` (or the framework's
   autoreload), frontend the dev server with HMR (`vite`/`npm run dev`), watched via the compose
