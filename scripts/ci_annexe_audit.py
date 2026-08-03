@@ -151,15 +151,23 @@ def fix(text: str, name: str) -> str | None:
         if anchor:
             patched = patched[:anchor.start()] + block + patched[anchor.start():]
 
-    for job_name, block in job_blocks(patched):
-        if "timeout-minutes:" in block or ("uses:" in block and "steps:" not in block):
-            continue
-        runs_on = re.search(r"^(\s*)runs-on:.*$", block, re.M)
-        if not runs_on:
-            continue
-        indent = runs_on.group(1)
-        line = runs_on.group(0)
-        patched = patched.replace(line, f"{line}\n{indent}timeout-minutes: {DEFAULT_TIMEOUT}", 1)
+    # Rebuild the file block by block. A global `str.replace` cannot work here: sibling jobs
+    # share the exact same `runs-on: ubuntu-latest` line, so every insertion would land on the
+    # first occurrence and the later jobs would silently keep no timeout at all.
+    blocks = job_blocks(patched)
+    if blocks:
+        head = patched[: patched.index(blocks[0][1])]
+        rebuilt = [head]
+        for _, block in blocks:
+            if "timeout-minutes:" not in block and not ("uses:" in block and "steps:" not in block):
+                runs_on = re.search(r"^(\s*)runs-on:.*$", block, re.M)
+                if runs_on:
+                    indent, line = runs_on.group(1), runs_on.group(0)
+                    block = block.replace(
+                        line, f"{line}\n{indent}timeout-minutes: {DEFAULT_TIMEOUT}", 1
+                    )
+            rebuilt.append(block)
+        patched = "".join(rebuilt)
 
     return patched if patched != text else None
 
