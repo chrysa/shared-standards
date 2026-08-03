@@ -179,12 +179,21 @@ def dedupe_timeouts(text: str) -> str:
 
     That sweep replaced a `runs-on:` line globally with a count of 1, so on a file whose jobs
     share the same runner the insertion landed on the *first* job once per sibling — producing
-    a duplicate YAML key, which actionlint rejects outright.
+    a duplicate YAML key, which actionlint rejects outright. It also hit jobs that already
+    declared a timeout, leaving two different values; the repo's own value wins, since it was
+    chosen for that job and the swept one is only a default.
     """
+
+    def keep_one(match: re.Match[str]) -> str:
+        indent = match.group("indent")
+        values = re.findall(r"timeout-minutes:[ ]*(\d+)", match.group(0))
+        chosen = next((v for v in values if int(v) != DEFAULT_TIMEOUT), values[0])
+        return f"{indent}timeout-minutes: {chosen}\n"
+
     return re.sub(
-        r"^(?P<indent>[ ]+)timeout-minutes:[ ]*(?P<value>\d+)[ ]*\n"
-        r"(?:(?P=indent)timeout-minutes:[ ]*(?P=value)[ ]*\n)+",
-        lambda m: f"{m.group('indent')}timeout-minutes: {m.group('value')}\n",
+        r"^(?P<indent>[ ]+)timeout-minutes:[ ]*\d+[ ]*\n"
+        r"(?:(?P=indent)timeout-minutes:[ ]*\d+[ ]*\n)+",
+        keep_one,
         text,
         flags=re.M,
     )

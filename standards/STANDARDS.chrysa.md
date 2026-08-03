@@ -128,6 +128,21 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `loading="lazy"` media, on-demand heavy components) behind a **shape-accurate placeholder**
   that reserves the final dimensions — a skeleton, not a spinner, so arrival shifts no layout.
   Detail: annexe `FRONTEND.md` §2–§3, §7.
+- **The frontend says when the backend is unreachable or unstable.** Silence is the worst
+  failure mode: a spinner that never resolves, a list that stays empty, a form that swallows a
+  submit all read as "the app is broken and lying about it". The API client classifies every
+  failure into application state — `unreachable`, `unstable`, `degraded`, `unauthorised`
+  (a session problem, not an outage), `offline` (the browser's fault, worded as such) — and a
+  **persistent, non-blocking banner in the root shell** states it for the whole app, while each
+  container still resolves its own error state. The message says what happened and what to do
+  (*"Server unreachable — reconnecting in 12 s"*, never a raw status code), keeps a manual
+  **Retry** available, **disables destructive or unsaved actions** instead of failing silently
+  on submit, and **preserves in-progress form input** for re-submission on recovery. Reconnection
+  uses bounded exponential backoff with jitter — an unbounded retry loop against a struggling
+  backend is a defect — and success clears the state and refetches. The banner is a live region
+  (`role="alert"` / `role="status"`) and its behaviour is tested against a network error and a
+  503. A frontend Definition of Done includes its **API-down state**. Detail: annexe
+  `FRONTEND.md` FE-050.
 - **Every repo declares its profile and DDD level** (`project_profile`, `ddd_level`,
   `bounded_context`, `standards_version`) — architecture is proportionate to business
   complexity, and small tools are not over-architected. Detail: annexe `ARCHITECTURE-DDD.md`.
@@ -170,6 +185,37 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   dependency, no submodule used as a runtime link, no access to another project's database or
   private models. Each consumer wraps the external contract in a local adapter and degrades
   cleanly when the provider is gone. Detail: annexe `PROJECT-DECOUPLING.md`.
+- **Per-person data implies a user account — no exceptions dressed up as simplicity.** The
+  moment a product stores or manipulates anything whose *value depends on who is looking*
+  — preferences, saved filters and views, favourites, drafts, history, progress, notes,
+  annotations, uploads, notification settings, API keys, per-person results — it has **real
+  user accounts** behind the identity hierarchy above. The trigger is the data, not the size
+  of the app: a "small internal tool" that remembers your filters is already storing personal
+  data for several people.
+  1. **Ownership is modelled, not implied.** Every per-person row carries its owner
+     (`user_id` foreign key), and every read/write is scoped by it in the repository layer —
+     not filtered in the UI, not trusted from a request parameter. An endpoint that returns
+     another user's row because the id was guessed is the same defect whether the data is a
+     medical record or a colour theme.
+  2. **`localStorage` is a cache, never the system of record.** Browser storage holds what
+     the user can afford to lose on a new device; anything they would be upset to lose lives
+     server-side under their account. A product whose personalisation exists only in one
+     browser has no personalisation — it has a cookie.
+  3. **A shared password is not an account.** One credential handed to several people makes
+     every action unattributable, every revocation a fleet-wide password change, and every
+     export meaningless. Same for "profiles" selected from a dropdown with no authentication:
+     that is a preference switch pretending to be identity.
+  4. **Account plumbing is part of the feature, not a later epic** — sign-up/invite, sign-in,
+     password or SSO recovery, session expiry, and **deletion of the account with its data**
+     ship together with the first per-person field. Retrofitting ownership onto a table that
+     already holds everyone's rows is a migration, an audit, and an apology.
+  5. **Anonymous stays anonymous.** A genuinely public, read-only surface (a landing page, a
+     public catalogue) needs no account — and therefore must not quietly accumulate
+     per-person state either. If a feature needs to remember the visitor, it needs an account;
+     "we'll just key it by browser fingerprint" is tracking, not architecture.
+  This is the precondition of *portable personalisation data* (strategic pillar 3): an export
+  command only means something when the data has an owner. Detail on the identity path itself:
+  the rule below.
 - **Identity goes through the cluster SSO first.** Every interactive product deployed in the
   cluster integrates the **common cluster SSO** as its primary sign-in. The priority protocol is
   **OpenID Connect over OAuth 2.x** (SAML only where an enterprise context requires it), and the
@@ -430,6 +476,34 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   to `/setup`** rather than crashing or showing a generic error. An admin **configuration panel**
   (auth-gated CRUD API) manages runtime config with a versioned audit trail, hot-reload where
   possible (else a `RESTART_REQUIRED` flag), and JSON export/import for backup and cross-env cloning.
+- **If a user can supply a file, the product accepts an upload.** Wherever the workflow
+  involves a file the user already has — an import (CSV, JSON, GPX, ICS…), an avatar or image,
+  an attachment or supporting document, a configuration or dataset, a log or a crash dump sent
+  for support — the surface ships a **real upload path**. Telling the user to paste the
+  contents into a textarea, to drop the file on the server themselves, to send it by mail, or
+  to re-type what they already hold is a defect, not a simplification: it moves work onto the
+  person who has the least tooling for it.
+  1. **A real control, not a styled `<div>`** — a native `<input type="file">` with a
+     programmatic label (accept multiple only when the flow does), reachable and operable by
+     keyboard, plus drag-and-drop as an *addition* for pointer users, never as the only way in.
+     Accepted formats and the size limit are stated **before** the user picks, not discovered
+     through a rejection.
+  2. **Feedback while it travels** — visible progress, a cancel, and a result state per file
+     (accepted / rejected with the reason / retryable). Anything that can take more than a
+     couple of seconds is resumable or chunked, and a failed upload never silently loses the
+     user's selection.
+  3. **The server trusts nothing the client says.** Type is determined by inspecting the
+     content, not the extension nor the client-provided MIME; size is capped server-side;
+     the filename is sanitised and never used as a filesystem path; archives are bounded
+     (decompression limits). Rejections come back as typed errors with a message that says
+     what to do.
+  4. **Stored behind a port, not in the tree** — files go to an object store or a dedicated
+     volume through a `BlobStore`-style adapter (strategic pillar 5), never into the repo,
+     the web root, or a path the user can traverse. Content is served through the
+     application's authorisation, or by a signed, expiring URL — never by guessable path.
+  5. **What comes in must be able to come out.** Every uploaded file is listable, replaceable,
+     downloadable and deletable by the user who owns it, and is included in the data export
+     (strategic pillar 3). An upload with no delete and no export is lock-in with a progress bar.
 - **A floating assistant where it earns its place — never as decoration.** Any human-facing
   product whose users face a **non-obvious surface** (a dense cockpit, a multi-step form or
   wizard, a query/graph/config console, an admin panel with domain jargon) ships an **in-app
