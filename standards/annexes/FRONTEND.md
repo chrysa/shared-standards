@@ -145,6 +145,43 @@ arriving"). It toggles `aria-busy="true" → "false"` on the region it governs a
 Navigation goes through the router (see the socle's *URL-addressable navigation*); a full
 page reload as a navigation mechanism is a defect.
 
+### FE-050 — The frontend says when the backend is unreachable or unstable
+
+A frontend whose API is down must **say so**, in its own words, at the moment it knows. Silence
+is the worst failure mode: a spinner that never resolves, a list that stays empty, a form that
+swallows a submit — all three read as "the app is broken and lying about it", and the user's
+next move is to retry the same action or leave.
+
+- **Detect, don't guess.** The single API client (FE-030) classifies every failure and exposes
+  the result as application state: `unreachable` (network error, DNS, CORS, timeout),
+  `unstable` (5xx, repeated timeouts, a circuit-breaker that opened), `degraded` (a health
+  endpoint reporting a dependency down), `unauthorised` (401/403 — a session problem, **not**
+  an outage), `offline` (`navigator.onLine === false`, which is the *browser's* fault and must
+  be worded as such). Deriving this from a component's local `catch` gives one screen the
+  truth and leaves the rest of the app lying.
+- **One global surface, plus local truth.** A persistent, non-blocking banner in the root
+  shell states the connection state for the whole app; each container still resolves its own
+  error state (FE-037). The banner never covers the content, never steals focus, and
+  disappears by itself once a call succeeds.
+- **Say what happened, what it means, and what to do.** *"Server unreachable — reconnecting
+  in 12 s"*, not *"Error"*, not a raw status code, not a stack trace. A manual **Retry** stays
+  available next to the message, and any destructive or unsaved action is disabled while the
+  backend is unreachable rather than failing silently on submit.
+- **Recovery is automatic and visible.** Reconnection attempts use bounded exponential backoff
+  with jitter, the banner shows the next attempt, and success clears the state and refetches
+  what the screen needs. An unbounded retry loop hammering a struggling backend is a defect
+  (mirrors the socle's *failures are contained, and observable*).
+- **Unsaved work survives the outage.** In-progress form input is kept client-side while the
+  backend is unavailable and re-submittable on recovery — losing what the user typed because
+  the network blinked is a data-loss bug, not a network problem.
+- **Accessible and testable.** The banner is a live region (`role="status"` for degraded,
+  `role="alert"` for unreachable) so screen-reader users learn about it too, and it is
+  exercised in tests: MSW returns a network error and a 503, and the test asserts the message,
+  the disabled destructive action, and the recovery path (FE-041).
+
+A frontend Definition of Done includes its **API-down state**, exactly like the loading and
+empty ones.
+
 ______________________________________________________________________
 
 ## 4. Frontend tests
