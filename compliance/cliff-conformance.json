@@ -2,371 +2,66 @@
   "canonical": "cliff.toml",
   "canonical_sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
   "rows": [
-    {
-      "note": "-",
-      "repo": "agent-config",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "ai-aggregator",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "audit-platform",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "automations",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "catalog",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "cdn-explorer",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "chrysa-lib",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "chrysa-portfolio-viz",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "chrysa-skills",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "claude-config",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "coach",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "container-webview",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "D-D",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "dev-nexus",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "devtool",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "discord-bot-back",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "discordium",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "diy-stream-deck",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-app-forge",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-autoload",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-pytest",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-query-optimizer",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-query-optimizer-vscode",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "django-traceid",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "doc-gen",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "epub-sorter",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "fastapi-autoload",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "fastapi-pytest",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "fastapi-query-optimizer",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "fastapi-traceid",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "feedback-gateway",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "floating-agent",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "game-solver-platform",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "gaming-os",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "genealogy-validator",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "gestureOS",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "github-actions",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "guideline-checker",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "lifeos",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "linkendin-resume",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "link-reader-bot",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "mediavault",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "mirrador",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "my-resume",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "orchestrator",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "paperclip",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "PO-GO-DEX",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "pre-commit-hooks-changelog",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "pre-commit-tools",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "project-init",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "quality-gatekeeper",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "satisfactory-automated_calculator",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "satisfactory-factory-manager",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "server",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "shared-standards",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "sport-intelligence-hub",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "studioverse",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "usefull-containers",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "windows-autonome",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "windows-docker-state-notification",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    },
-    {
-      "note": "-",
-      "repo": "wsmqtt-monitor",
-      "sha": "6c85f2fb274c5fe0fbda55cecb569cd66fad5da9",
-      "status": "ok"
-    }
+    {"repo":"agent-config","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"ai-aggregator","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"audit-platform","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"automations","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"catalog","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"cdn-explorer","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"chrysa-lib","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"chrysa-portfolio-viz","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"chrysa-skills","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"claude-config","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"coach","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"container-webview","status":"drift","sha":"bd3fa5a70c4fd1666b82ac4a24e5d5bd50cfeb60","note":"cluster:bd3fa5a7"},
+    {"repo":"D-D","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"dev-nexus","status":"drift","sha":"dad52a93b6a777df951b0a15c342010d75119b84","note":"cluster:dad52a93"},
+    {"repo":"devtool","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"discord-bot-back","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"discordium","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"diy-stream-deck","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-app-forge","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-autoload","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-pytest","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-query-optimizer","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-query-optimizer-vscode","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-traceid","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"doc-gen","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"epub-sorter","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"fastapi-autoload","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"fastapi-pytest","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"fastapi-query-optimizer","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"fastapi-traceid","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"feedback-gateway","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"floating-agent","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"gaming-os","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"genealogy-validator","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"gestureOS","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"github-actions","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"guideline-checker","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"lifeos","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"linkendin-resume","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"link-reader-bot","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"mediavault","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"mirrador","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"my-resume","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"orchestrator","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"PO-GO-DEX","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"pre-commit-hooks-changelog","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"pre-commit-tools","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"project-init","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"quality-gatekeeper","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"satisfactory-factory-manager","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"server","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"shared-standards","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"sport-intelligence-hub","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"studioverse","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"usefull-containers","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"workstation-os","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"windows-docker-state-notification","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"debian-guardian","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"django-migration-analyzer","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"windows-guardian","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"},
+    {"repo":"wsmqtt-monitor","status":"ok","sha":"6c85f2fb274c5fe0fbda55cecb569cd66fad5da9","note":"-"}
   ]
 }
