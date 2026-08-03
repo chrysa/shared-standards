@@ -21,10 +21,15 @@ permissions:
     contents: read
     pull-requests: read
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     issue-link:
         name: Issue link
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         if: >-
             github.actor != 'dependabot[bot]'
             && !contains(github.event.pull_request.labels.*.name, 'hotfix')
