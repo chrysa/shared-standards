@@ -78,6 +78,44 @@ def workflow_names(repo: str) -> tuple[list[str], str]:
     return [], err.strip().splitlines()[0][:90] if err else "error"
 
 
+def file_indent(text: str) -> str:
+    """The file's own nesting step (2 or 4 spaces).
+
+    A block written at 4 spaces inside a 2-space file is valid YAML but fails `yamllint`
+    (`wrong indentation: expected 2 but found 4`), which turns a conformance fix into a red
+    lint job. Derive the step from the first nested key rather than assuming one.
+    """
+    for line in text.splitlines():
+        match = re.match(r"^( +)\S", line)
+        if match:
+            return match.group(1)
+    return "  "
+
+
+def concurrency_block(text: str, cancel: str) -> str:
+    step = file_indent(text)
+    return ("concurrency:\n"
+            f"{step}group: ${{{{ github.workflow }}}}-${{{{ github.ref }}}}\n"
+            f"{step}cancel-in-progress: {cancel}\n\n")
+
+
+def reindent_concurrency(text: str) -> str:
+    """Re-indent a concurrency block this script wrote at the wrong nesting step."""
+    step = file_indent(text)
+    pattern = re.compile(
+        r"^concurrency:\n"
+        r"[ ]+group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n"
+        r"[ ]+cancel-in-progress: (?P<cancel>true|false)\n",
+        re.M,
+    )
+    return pattern.sub(
+        lambda m: ("concurrency:\n"
+                   f"{step}group: ${{{{ github.workflow }}}}-${{{{ github.ref }}}}\n"
+                   f"{step}cancel-in-progress: {m.group('cancel')}\n"),
+        text,
+    )
+
+
 def is_deploy(name: str, text: str) -> bool:
     stem = name.rsplit(".", 1)[0].lower()
     return any(h in stem for h in DEPLOY_HINTS) or "environment:" in text
@@ -144,22 +182,30 @@ def fix(text: str, name: str) -> str | None:
         r"^concurrency:", patched, re.M
     ):
         cancel = "false" if is_deploy(name, patched) else "true"
-        block = ("concurrency:\n"
-                 "    group: ${{ github.workflow }}-${{ github.ref }}\n"
-                 f"    cancel-in-progress: {cancel}\n\n")
+        block = concurrency_block(patched, cancel)
         anchor = re.search(r"^jobs:\s*$", patched, re.M)
         if anchor:
             patched = patched[:anchor.start()] + block + patched[anchor.start():]
+    else:
+        patched = reindent_concurrency(patched)
 
-    for job_name, block in job_blocks(patched):
-        if "timeout-minutes:" in block or ("uses:" in block and "steps:" not in block):
-            continue
-        runs_on = re.search(r"^(\s*)runs-on:.*$", block, re.M)
-        if not runs_on:
-            continue
-        indent = runs_on.group(1)
-        line = runs_on.group(0)
-        patched = patched.replace(line, f"{line}\n{indent}timeout-minutes: {DEFAULT_TIMEOUT}", 1)
+    # Rebuild the file block by block. A global `str.replace` cannot work here: sibling jobs
+    # share the exact same `runs-on: ubuntu-latest` line, so every insertion would land on the
+    # first occurrence and the later jobs would silently keep no timeout at all.
+    blocks = job_blocks(patched)
+    if blocks:
+        head = patched[: patched.index(blocks[0][1])]
+        rebuilt = [head]
+        for _, block in blocks:
+            if "timeout-minutes:" not in block and not ("uses:" in block and "steps:" not in block):
+                runs_on = re.search(r"^(\s*)runs-on:.*$", block, re.M)
+                if runs_on:
+                    indent, line = runs_on.group(1), runs_on.group(0)
+                    block = block.replace(
+                        line, f"{line}\n{indent}timeout-minutes: {DEFAULT_TIMEOUT}", 1
+                    )
+            rebuilt.append(block)
+        patched = "".join(rebuilt)
 
     return patched if patched != text else None
 
