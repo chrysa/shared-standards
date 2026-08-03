@@ -25,8 +25,3 @@ jobs:
         delete-other-labels: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-name: Sync GitHub Labels
-permissions:
-  contents: read
-  issues: write
-run-name: "🏷️ Sync labels from config"
