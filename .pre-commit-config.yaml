@@ -42,21 +42,21 @@ repos:
   # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
   # --- python (all Python repos) ---
   - id: debugger-detection
-    exclude: '^(tests?/|README\.md|docs/)'
+    exclude: '(^|/)tests?/|^(README\.md|docs/)'
   - id: python-print-detection
-    exclude: '^(tests?/|README\.md|docs/)'
+    exclude: '(^|/)tests?/|^(README\.md|docs/)'
   - id: python-pprint-detection
-    exclude: '^(tests?/|README\.md|docs/)'
+    exclude: '(^|/)tests?/|^(README\.md|docs/)'
   - id: no-bare-except
   - id: python-logger-detection
-    exclude: '^(tests?/|README\.md|docs/)'
+    exclude: '(^|/)tests?/|^(README\.md|docs/)'
   - id: python-unreachable-code
   - id: python-no-unittest-import
   # Mechanise the code-quality rules of the standards block: typed raises,
   # lookup table over dispatch ladder, and the mutable-default anti-pattern.
   # Fixtures deliberately raise builtins as detector input, hence the exclude.
   - id: python-untyped-raise
-    exclude: '^tests?/'
+    exclude: '(^|/)tests?/'
   - id: python-mutable-default
   - id: python-dispatch-ladder
   # The agent loads .claude/ at session start; an empty mirror loads no skill
