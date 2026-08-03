@@ -15,8 +15,8 @@
   workflow_call:
   workflow_dispatch:
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   extract_dependencies:
@@ -31,6 +31,7 @@ jobs:
   check_dependencies_merged:
     name: Check dependent Pull Requests are merged
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: depends-on/depends-on-action@c7ac9a6932a7069e83aef80c202d9f60f91e43fd # 0.17.0
         with:
