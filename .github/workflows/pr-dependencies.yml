@@ -37,8 +37,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           check-unmerged-pr: true
-name: Check PR dependencies
-permissions:
-  contents: read
-  pull-requests: write
-run-name: ${{ github.workflow }} by ${{ github.actor }}
