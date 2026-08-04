@@ -45,7 +45,16 @@ WORKFLOW_DIR = ".github/workflows"
 BRANCH = "ci/explicit-secrets"
 LEDGER = pathlib.Path(__file__).resolve().parent.parent / "compliance" / "branch-policy.json"
 
-RE_INHERIT = re.compile(r"^(?P<indent>[ ]+)secrets:[ ]*inherit[ ]*$", re.M)
+# A trailing comment is common on this line (`# pragma: allowlist secret`, or a note
+# explaining why inherit was needed) — without it in the pattern the whole file is
+# silently skipped and reads as "nothing to do". Any comment block immediately above
+# that argues for the inherit is dropped with it: left behind, it documents the
+# opposite of what the file now does.
+RE_INHERIT = re.compile(
+    r"(?P<lead>(?:^[ ]+#[^\n]*\n)*)"
+    r"^(?P<indent>[ ]+)secrets:[ ]*inherit[ ]*(?:#[^\n]*)?$",
+    re.M,
+)
 RE_REUSABLE = re.compile(
     r"uses:\s*(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+)/(?P<path>\.github/workflows/[\w.-]+\.ya?ml)"
     r"@(?P<ref>[\w.\-/]+)"
@@ -111,6 +120,20 @@ def rewrite(text: str, names: list[str], indent: str, span: tuple[int, int]) -> 
     return text[: span[0]] + "\n".join(lines) + text[span[1]:]
 
 
+def keeps_lead(lead: str) -> str:
+    """Keep the comment block above the inherit, unless it argues for it.
+
+    The decision is per *block*, never per line: these notes run over several lines, and
+    dropping only the line containing the word leaves a truncated sentence that still reads
+    as an argument for what the file no longer does.
+    """
+    if not lead:
+        return ""
+    if "inherit" in lead.lower():
+        return ""
+    return lead
+
+
 def process(repo: str) -> tuple[dict[str, str], list[str]]:
     """(patched files, human-readable skips)."""
     code, listing, _ = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}", "-q", ".[].name"])
@@ -155,7 +178,10 @@ def process(repo: str) -> tuple[dict[str, str], list[str]]:
                     "fix the callee first, removing the inherit would break it silently"
                 )
                 break
-            patched = rewrite(patched, names, match.group("indent"), match.span())
+            start = match.start() + len(keeps_lead(match.group("lead")))
+            patched = (patched[: match.start()] + keeps_lead(match.group("lead"))
+                       + rewrite(patched, names, match.group("indent"),
+                                 (start, match.end()))[start:])
 
         if patched != text:
             patches[name] = patched
