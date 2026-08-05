@@ -187,7 +187,10 @@ def inspect(text: str, name: str) -> list[str]:
             found.append("CI-010")
     if not re.search(r"^\s*permissions:", text, re.M):
         found.append("CI-020")
-    if re.search(r"secrets:\s*inherit", text):
+    # Anchored past the indent so a *commented* example — the usage snippets at the top of
+    # the reusable workflows are written `#       secrets: inherit` — is not counted as a
+    # violation. Three of the twelve CI-021 findings were documentation.
+    if re.search(r"^[ ]*secrets:[ ]*inherit\b", text, re.M):
         found.append("CI-021")
     for block in re.findall(r"run:\s*\|?[\s\S]{0,600}", text):
         if RE_UNTRUSTED.search(block):
