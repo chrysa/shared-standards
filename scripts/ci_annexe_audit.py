@@ -32,6 +32,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import time
 
 OWNER = "chrysa"
 WORKFLOW_DIR = ".github/workflows"
@@ -56,8 +57,22 @@ RE_UNTRUSTED = re.compile(
 )
 
 
-def gh(args: list[str], stdin: str | None = None) -> tuple[int, str, str]:
-    done = subprocess.run(["gh", *args], capture_output=True, text=True, input=stdin)
+def gh(args: list[str], stdin: str | None = None, attempts: int = 4) -> tuple[int, str, str]:
+    """Run `gh`, retrying a throttled call with backoff.
+
+    GitHub's secondary rate limit trips on a fleet-wide scan, and a read that fails for that
+    reason is not a finding — it is a hole in the measurement. Without retries the audit
+    reports whatever it happened to reach, which moves with the API weather rather than with
+    the code. A genuine 404 is returned immediately: there is nothing to wait for.
+    """
+    for attempt in range(attempts):
+        done = subprocess.run(["gh", *args], capture_output=True, text=True, input=stdin)
+        if done.returncode == 0:
+            return 0, done.stdout, done.stderr
+        if "404" in done.stderr or "Not Found" in done.stderr:
+            return done.returncode, done.stdout, done.stderr
+        if attempt < attempts - 1:
+            time.sleep(5 * (attempt + 1))
     return done.returncode, done.stdout, done.stderr
 
 
@@ -172,7 +187,10 @@ def inspect(text: str, name: str) -> list[str]:
             found.append("CI-010")
     if not re.search(r"^\s*permissions:", text, re.M):
         found.append("CI-020")
-    if re.search(r"secrets:\s*inherit", text):
+    # Anchored past the indent so a *commented* example — the usage snippets at the top of
+    # the reusable workflows are written `#       secrets: inherit` — is not counted as a
+    # violation. Three of the twelve CI-021 findings were documentation.
+    if re.search(r"^[ ]*secrets:[ ]*inherit\b", text, re.M):
         found.append("CI-021")
     for block in re.findall(r"run:\s*\|?[\s\S]{0,600}", text):
         if RE_UNTRUSTED.search(block):
@@ -288,12 +306,17 @@ def sweep(repo: str, apply: bool) -> tuple[dict[str, list[str]], dict[str, str],
 
     violations: dict[str, list[str]] = {}
     patches: dict[str, str] = {}
+    unread: list[str] = []
     for name in names:
         text, status = api_text(f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}/{name}")
         if status == "absent":
             continue
         if text is None:
-            return violations, {}, status
+            # One throttled read used to abort the whole repo, so every file after it went
+            # uncounted and the fleet total read *lower* than reality — an audit that
+            # under-reports is worse than one that fails. Record it and keep going.
+            unread.append(name)
+            continue
         found = inspect(text, name)
         if found:
             violations[name] = found
@@ -301,6 +324,8 @@ def sweep(repo: str, apply: bool) -> tuple[dict[str, list[str]], dict[str, str],
             patched = fix(text, name)
             if patched:
                 patches[name] = patched
+    if unread:
+        return violations, patches, f"{len(unread)} file(s) unreadable: {', '.join(unread[:3])}"
     return violations, patches, ""
 
 
