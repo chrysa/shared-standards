@@ -157,6 +157,23 @@ GOVERNED = set().union(*HOOK_GROUPS.values())
 # older pins false-positive when an earlier auto-fixing hook reorders staged files.
 REV_ALIGNED_REPOS = {"https://github.com/chrysa/pre-commit-tools"}
 
+# Hook ids whose `exclude` is a POLICY, not per-repo tuning: the baseline value wins over
+# whatever a consumer already has. Without this, a corrected exclude never reaches the fleet
+# — merge() is a union where "existing wins", so a hook a repo already has is never touched
+# again. That is right for a repo's own tuning and wrong for a pattern the standard defines:
+# `^tests?/` (anchored at the repo root) silently missed `backend/tests/`, and the fix could
+# not propagate to the 57 repos that already carried the hook. Keep this set small — every id
+# here gives up the right to tune its own exclude.
+EXCLUDE_ALIGNED_IDS = {
+    "debugger-detection",
+    "python-print-detection",
+    "python-pprint-detection",
+    "python-logger-detection",
+    "python-untyped-raise",
+    "fastapi-missing-response-model",
+    "fastapi-missing-links",
+}
+
 # `repo: local` hooks reference repo-relative scripts/files (e.g. the canonical-drift
 # gate runs scripts/check-canonical-drift.sh against templates/ copies that only exist
 # in shared-standards itself). They are self-only and must never be fanned out to the
@@ -190,6 +207,35 @@ def enforced_hooks(brepo: dict, allowed: set[str]) -> dict:
     return {hid: h for hid, h in index_hooks(brepo).items() if hook_enforced(hid, allowed)}
 
 
+def describe_actions(gaps: list[str]) -> str:
+    """Summarise what the merge did, keeping the two actions distinct.
+
+    "added" is a hook the repo did not have; "aligned" is a policy exclude that was
+    overwritten. Reporting an overwrite as an addition hides what actually changed.
+    """
+    aligned = sum(1 for gap in gaps if gap.endswith("!exclude"))
+    added = len(gaps) - aligned
+    parts = []
+    if added:
+        parts.append(f"added {added} baseline item(s)")
+    if aligned:
+        parts.append(f"aligned {aligned} policy exclude(s)")
+    return ", ".join(parts)
+
+
+def exclude_drifts(target_hook: dict, baseline_hook: dict) -> bool:
+    """True when a policy hook's exclude differs from the baseline's."""
+    return target_hook.get("exclude") != baseline_hook.get("exclude")
+
+
+def align_exclude(target_hook: dict, baseline_hook: dict) -> None:
+    """Force the baseline exclude onto a policy hook (mutates target_hook)."""
+    if "exclude" in baseline_hook:
+        target_hook["exclude"] = baseline_hook["exclude"]
+    else:
+        target_hook.pop("exclude", None)
+
+
 def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
     gaps: list[str] = []
@@ -206,6 +252,11 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
         existing = target_by_url[url]
         have = index_hooks(existing)
         gaps.extend(f"{url}#{hid}" for hid in wanted if hid not in have)
+        gaps.extend(
+            f"{url}#{hid}!exclude"
+            for hid, hook in wanted.items()
+            if hid in have and hid in EXCLUDE_ALIGNED_IDS and exclude_drifts(have[hid], hook)
+        )
         if url in REV_ALIGNED_REPOS and existing.get("rev") != brepo.get("rev"):
             gaps.append(f"{url}@{brepo.get('rev')}")
     canon_py = canonical_python(baseline)
@@ -238,6 +289,8 @@ def _merge_single_repo(
     for hid, hook in wanted.items():
         if hid not in have:
             existing.setdefault("hooks", []).append(hook)
+        elif hid in EXCLUDE_ALIGNED_IDS:
+            align_exclude(have[hid], hook)
     if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
         existing["rev"] = brepo["rev"]
 
@@ -309,7 +362,7 @@ def main() -> int:
         return 0
     merged = merge(baseline, target, allowed)
     target_path.write_text(_dump(merged))
-    sys.stderr.write(f"added {len(gaps)} baseline item(s)\n")
+    sys.stderr.write(describe_actions(gaps) + "\n")
     return 0
 
 
