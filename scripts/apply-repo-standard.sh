@@ -182,15 +182,29 @@ deploy_stack_ci() {
 }
 
 # Comma list of pre-commit stacks for a repo: python,docker,jsts,react,fastapi
+# Find a marker file at the repo root OR in a first/second-level subdirectory, skipping
+# vendored trees. The fleet's dominant layout puts the app under backend/ or api/, so a
+# root-only probe classified those repos as non-Python and their Python hooks were never
+# governed (shared-standards #365) — the same root-anchoring mistake as `^tests?/`.
+find_marker() {
+    local repo="$1" name="$2"
+    find "$repo" -maxdepth 3 -name "$name" -not -path '*/node_modules/*' -not -path '*/.git/*' \
+        -not -path '*/.venv/*' -not -path '*/vendor/*' -print -quit 2>/dev/null
+}
+
+# Comma list of pre-commit stacks for a repo: python,docker,jsts,react,fastapi
 detect_pc_stacks() {
-    local repo="$1" s=""
-    { [[ -f "$repo/pyproject.toml" ]] || ls "$repo"/requirements*.txt &>/dev/null; } && s+="python,"
-    { [[ -f "$repo/Dockerfile" ]] || ls "$repo"/docker/Dockerfile* &>/dev/null; } && s+="docker,"
-    if [[ -f "$repo/package.json" ]]; then
+    local repo="$1" s="" pkg
+    { [[ -n "$(find_marker "$repo" 'pyproject.toml')" ]] || [[ -n "$(find_marker "$repo" 'requirements*.txt')" ]]; } && s+="python,"
+    [[ -n "$(find_marker "$repo" 'Dockerfile*')" ]] && s+="docker,"
+    pkg="$(find_marker "$repo" 'package.json')"
+    if [[ -n "$pkg" ]]; then
         s+="jsts,"
-        grep -q '"react"' "$repo/package.json" 2>/dev/null && s+="react,"
+        grep -q '"react"' "$pkg" 2>/dev/null && s+="react,"
     fi
-    { grep -riqs 'fastapi' "$repo/pyproject.toml" "$repo"/requirements*.txt 2>/dev/null; } && s+="fastapi,"
+    { grep -riqs --include='pyproject.toml' --include='requirements*.txt' \
+        --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.venv \
+        'fastapi' "$repo" 2>/dev/null; } && s+="fastapi,"
     echo "${s%,}"
 }
 
