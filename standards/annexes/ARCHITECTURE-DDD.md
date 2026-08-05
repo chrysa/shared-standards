@@ -187,3 +187,29 @@ tests/  Product.Domain.Tests/ Product.Application.Tests/ Product.Infrastructure.
 - `ScriptableObject` = data/configuration, not a global mutable logic container.
 - Game loop, rendering, input, and Unity services are adapters around the domain.
 - Critical systems are deterministic and testable outside a scene.
+
+### AR-045 — A game is DRM-free and fully playable solo offline
+
+The single-player experience is **complete without a network, an account, or a licence
+check**. Unplug the machine and the game still starts, saves, loads, and can be finished.
+
+- **No DRM of any kind** — no licence server, no phone-home activation, no online
+  entitlement check, no always-on requirement, no third-party wrapper (Denuvo and
+  equivalents) that gates launch. A copy someone owns keeps working when the servers are
+  gone, the company is gone, or the network is down. A build that will not start offline is
+  a defect, not an anti-piracy measure.
+- **Saves are local, open, and portable** — a readable format (JSON/SQLite) under the
+  platform's standard user directory, copyable to another machine, not tied to an account or
+  encrypted against its owner. This is the strategic pillar *portable personalisation data*
+  applied to a save file.
+- **Online is additive, never load-bearing.** Multiplayer, leaderboards, cloud sync,
+  telemetry and stores are opt-in layers over a complete offline game. Losing any of them
+  degrades a feature; it never blocks the campaign, the progression, or the ability to launch.
+- **No content behind a live service in a single-player game** — assets, levels and unlocks
+  ship in the build. A "day-one download" that gates the game itself, or content streamed
+  from a server that will one day be switched off, breaks the guarantee.
+- **The offline path is tested, not assumed** — a build is validated with the network
+  disabled, on a machine that has never signed in. An offline mode nobody exercises is an
+  offline mode that has already stopped working.
+
+This applies to any repo declaring the `game` profile, whatever the engine.
