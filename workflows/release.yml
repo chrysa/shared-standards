@@ -71,25 +71,25 @@ jobs:
                   fetch-depth: 0
                   token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
 
-            - name: Install GitVersion
-              uses: gittools/actions/gitversion/setup@51d325634925d7d9ce0a7efc2c586c0bc2b9eee6 # v3
-              with:
-                  versionSpec: '6.x'
-
+            # Both tools come from chrysa/github-actions rather than being wired here:
+            # this template is *copied* into ~40 repos, so every inlined line is a line
+            # that has to be re-fixed 40 times (CI-004). The composite actions are the
+            # single edit point — see annexe CI-045.
             - name: Determine version
               id: gitversion
-              uses: gittools/actions/gitversion/execute@51d325634925d7d9ce0a7efc2c586c0bc2b9eee6 # v3
-
-            - name: Install git-cliff
-              uses: taiki-e/install-action@fec60f319ad7cbc8b09dc216572fc3b29817d658 # git-cliff
+              uses: chrysa/github-actions/gitversion@v1.8.0
 
             - name: Generate changelog
+              id: cliff
+              uses: chrysa/github-actions/changelog@v1.8.0
+              with:
+                  version: ${{ steps.gitversion.outputs.semVer }}
+
+            - name: Expose the release tag
               id: changelog
               run: |
-                  CURRENT_TAG="${{ inputs.tag-prefix }}${{ steps.gitversion.outputs.semVer }}"
-                  git cliff --output CHANGELOG_RELEASE.md --tag "$CURRENT_TAG" 2>/dev/null || \
-                    git cliff --unreleased --output CHANGELOG_RELEASE.md
-                  echo "version=$CURRENT_TAG" >> "$GITHUB_OUTPUT"
+                  echo "version=${{ inputs.tag-prefix }}${{ steps.gitversion.outputs.semVer }}" \
+                    >> "$GITHUB_OUTPUT"
 
             - name: Create tag
               run: |
@@ -104,5 +104,5 @@ jobs:
               with:
                   tag_name: ${{ steps.changelog.outputs.version }}
                   name: Release ${{ steps.changelog.outputs.version }}
-                  body_path: CHANGELOG_RELEASE.md
+                  body: ${{ steps.cliff.outputs.content }}
                   token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
