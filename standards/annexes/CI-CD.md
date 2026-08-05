@@ -230,6 +230,48 @@ Semantic version derived from the git graph, images and artefacts tagged with it
 run, changelog generated. A hand-edited version string is a merge conflict with a release
 attached.
 
+The two tools are settled, not a per-repo choice — a fleet where each repo derives its
+version differently cannot answer "which of these is newer" without reading three configs:
+
+| Concern | Tool | Config |
+| --- | --- | --- |
+| Compute the semantic version | [**GitVersion**](https://gitversion.net/) | `GitVersion.yml` |
+| Generate the changelog | [**git-cliff**](https://git-cliff.org/) | `cliff.toml` |
+
+Both config files are **canonical**: one source of truth in `shared-standards`, byte-identical
+in every consumer, drift blocked by a `repo: local` pre-commit hook. A repo that tunes its own
+`GitVersion.yml` has opted out of the fleet's version ordering.
+
+The release job wires them in this order — compute, then describe, then tag:
+
+```yaml
+- uses: gittools/actions/gitversion/setup@<sha>   # v4
+  with:
+      versionSpec: 6.x
+- id: gitversion
+  uses: gittools/actions/gitversion/execute@<sha> # v4
+
+- uses: taiki-e/install-action@<sha>              # git-cliff
+- id: changelog
+  run: |
+      CURRENT_TAG="v${{ steps.gitversion.outputs.semVer }}"
+      git cliff --output CHANGELOG_RELEASE.md --tag "$CURRENT_TAG" 2>/dev/null || \
+        git cliff --unreleased --output CHANGELOG_RELEASE.md
+```
+
+Three details that are not decoration:
+
+1. **`fetch-depth: 0` on the checkout.** GitVersion reads the commit graph and the tags; a
+   shallow clone makes it compute a wrong version rather than fail, which is worse.
+2. **git-cliff is fed the tag GitVersion computed**, not the last tag it can find — the
+   changelog then describes the release actually being cut.
+3. **The same version tags the images built in that run** (`CI-046`), so an artefact, its
+   changelog entry and its git tag are one fact rather than three that drift apart.
+
+git-cliff reads Conventional Commits, which is why the commit convention is enforced at the
+commit gate: a non-conventional message is silently absent from the changelog, and nobody
+notices until a user asks what changed.
+
 ### CI-046 — Build once, promote the artefact
 
 The artefact tested is the artefact deployed — the same image digest moves through the
