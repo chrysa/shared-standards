@@ -214,6 +214,17 @@ These are stated in the socle and are not restated here:
 - i18n from V1 — **including error and fallback screens**, which are localised like any
   other surface (FE-050). Dates and numbers are formatted with the active locale (FE-051).
 
+### FE-052 — Every page ships a favicon and app icons
+
+Every web surface declares, in the document `<head>`, a **favicon** (SVG preferred, with an
+`.ico` fallback for legacy browsers), an **`apple-touch-icon`** for iOS home-screen use, and a
+**web app manifest** (`manifest.webmanifest` with `name`, `short_name`, `theme-color`,
+`background_color`, and PNG `icons` at 192 and 512 px). The icons are **real committed assets**
+referenced by the head — a `link rel="icon"` pointing at a 404 is a defect. The favicon is part
+of the **brand kit** (a design-system asset, not a per-repo afterthought) and, where the format
+allows (SVG with `prefers-color-scheme`), adapts to light and dark. A tab left showing the
+browser's default globe icon is an unfinished page.
+
 ______________________________________________________________________
 
 ## 6. Environment & configuration
