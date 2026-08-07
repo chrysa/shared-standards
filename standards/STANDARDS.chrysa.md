@@ -260,7 +260,6 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   Values live in external config (`SESSION_IDLE_TIMEOUT`, `SESSION_ABSOLUTE_LIFETIME`) like
   every other constant — a timeout hardcoded in a middleware is both a *no hardcoded constants*
   violation and a security parameter nobody can tune without a deploy.
-||||||| d9f6b8f
 - **Every form is a hostile input surface — validate on the server, always.** A form is the
   place where an unknown person hands the product data of their choosing; the browser is their
   machine, so **nothing enforced only in the client is enforced at all**. `required`,
@@ -620,7 +619,6 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      API it is talking to, it tells the user and offers a reload rather than failing in
      obscure ways. Deployed versions per environment are also visible from the platform side
      (release notes, deployment log), so "what is in production" never requires a shell.
-||||||| f7b98e2
 - **If a user can supply a file, the product accepts an upload.** Wherever the workflow
   involves a file the user already has — an import (CSV, JSON, GPX, ICS…), an avatar or image,
   an attachment or supporting document, a configuration or dataset, a log or a crash dump sent
