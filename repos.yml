@@ -200,11 +200,11 @@ repos:
     alias_of: lifeos
     runtime: exempt:native
   - name: my-resume
-    status: dev
+    status: archived
     public: false
     runtime: container
   - name: orchestrator
-    status: dev
+    status: archived
     public: false
     runtime: exempt:config
   - name: paperclip
