@@ -403,7 +403,6 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   Values live in external config (`SESSION_IDLE_TIMEOUT`, `SESSION_ABSOLUTE_LIFETIME`) like
   every other constant — a timeout hardcoded in a middleware is both a *no hardcoded constants*
   violation and a security parameter nobody can tune without a deploy.
-||||||| d9f6b8f
 - **Every form is a hostile input surface — validate on the server, always.** A form is the
   place where an unknown person hands the product data of their choosing; the browser is their
   machine, so **nothing enforced only in the client is enforced at all**. `required`,
@@ -672,20 +671,6 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `Service` is `ClusterIP` except the ingress-fronted entry point; `NodePort`, `LoadBalancer`,
   `hostPort` and `hostNetwork` need an ADR (a `hostPort` also bypasses `NetworkPolicy`).
   Detail: annexe `CONTAINERS-K3S.md` CT-015.
-- **A compose file is minimal — declare only what the stack needs, default the rest.** A
-  `docker-compose*.yml` is a description of *this* stack, not a copy of Compose's defaults. It
-  declares the services, their `build.target`/`image`, `depends_on`, `environment`, volumes,
-  `healthcheck` and `restart` — and **nothing Compose already does for you**. Forbidden as
-  noise: an explicit `networks:` block re-declaring the default bridge and wiring every service
-  to it (Compose already puts all services on a shared default network with service-name DNS —
-  see the ports rule), a redundant `container_name`, a `version:` top-level key (obsolete in
-  Compose v2), commented-out dead services, copy-pasted blocks that a YAML anchor or an
-  `extends`/override file would fold, and env values inlined where an `.env` / `env_file`
-  belongs. Environment- or developer-specific settings (a loopback port bind, a source bind
-  mount for hot-reload, debug flags) live in `docker-compose.override.yml` or a `*.dev.yml`,
-  never in the committed base stack. The test is mechanical: every line in the base compose
-  file is one a reader could not have inferred from Compose's defaults — a line that only
-  restates a default is deleted. Detail: annexe `CONTAINERS-K3S.md` CT-019.
 - **Dev stage must hot-reload.** The `dev` target/service provides live auto-reload so a source edit
   is reflected without a manual rebuild/restart: backend `uvicorn --reload` (or the framework's
   autoreload), frontend the dev server with HMR (`vite`/`npm run dev`), watched via the compose
@@ -777,7 +762,6 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      API it is talking to, it tells the user and offers a reload rather than failing in
      obscure ways. Deployed versions per environment are also visible from the platform side
      (release notes, deployment log), so "what is in production" never requires a shell.
-||||||| f7b98e2
 - **If a user can supply a file, the product accepts an upload.** Wherever the workflow
   involves a file the user already has — an import (CSV, JSON, GPX, ICS…), an avatar or image,
   an attachment or supporting document, a configuration or dataset, a log or a crash dump sent
