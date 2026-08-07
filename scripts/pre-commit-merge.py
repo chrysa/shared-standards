@@ -39,7 +39,9 @@ except ImportError:
     try:
         import yaml
     except ImportError:
-        sys.stderr.write("neither ruamel.yaml nor pyyaml available — manual merge required\n")
+        sys.stderr.write(
+            "neither ruamel.yaml nor pyyaml available — manual merge required\n"
+        )
         sys.exit(2)
     _BACKEND = "pyyaml"
 
@@ -65,7 +67,11 @@ def _repos_block_offset(lines: list[str]) -> int | None:
         m = re.match(r"^(\s*)-\s", line)
         if m:
             return len(m.group(1))
-        if line.strip() and not line.lstrip().startswith("#") and not line.startswith(" "):
+        if (
+            line.strip()
+            and not line.lstrip().startswith("#")
+            and not line.startswith(" ")
+        ):
             break
     return None
 
@@ -110,7 +116,9 @@ def configure_document_start(text: str) -> None:
     # Preserve a leading `---`: ruamel drops it on re-dump, which fails yamllint's
     # document-start rule (error-level in strict repos like diy-stream-deck).
     if _BACKEND == "ruamel":
-        _RUAMEL.explicit_start = bool(re.match(r"^---\s*$", text.splitlines()[0])) if text.strip() else False
+        _RUAMEL.explicit_start = (
+            bool(re.match(r"^---\s*$", text.splitlines()[0])) if text.strip() else False
+        )
 
 
 def _dump(data: dict) -> str:
@@ -120,33 +128,52 @@ def _dump(data: dict) -> str:
         return buf.getvalue()
     return yaml.safe_dump(data, sort_keys=False, default_flow_style=False)
 
+
 # chrysa/pre-commit-tools hook ids grouped by stack. Ids not listed here belong to
 # other repos (pre-commit-hooks, gitleaks, conventional, markdownlint) and are always
 # enforced. "always" applies to every repo.
 HOOK_GROUPS = {
     "always": {
-        "yaml-sorter", "json-sorter", "env-file-check", "env-example-sync", "adr-gate",
+        "yaml-sorter",
+        "json-sorter",
+        "env-file-check",
+        "env-example-sync",
+        "adr-gate",
         # Claude Code assets: every repo carries .claude/ and most carry .mcp.json.
-        "claude-skill-frontmatter", "claude-agent-frontmatter", "claude-mcp-config",
+        "claude-skill-frontmatter",
+        "claude-agent-frontmatter",
+        "claude-mcp-config",
     },
     "python": {
-        "debugger-detection", "python-print-detection", "python-pprint-detection",
-        "no-bare-except", "python-logger-detection", "python-unreachable-code",
-        "no-hardcoded-localhost", "regression-gate",
+        "debugger-detection",
+        "python-print-detection",
+        "python-pprint-detection",
+        "no-bare-except",
+        "python-logger-detection",
+        "python-unreachable-code",
+        "no-hardcoded-localhost",
+        "regression-gate",
         # Detectors for the code-quality rules of the standards block. Measured dry
         # across the 63 status:dev repos before arming: 47 untyped raises (13 of them
         # in tests, hence the baseline exclude), 5 dispatch ladders, 0 mutable defaults.
-        "python-untyped-raise", "python-mutable-default", "python-dispatch-ladder",
+        "python-untyped-raise",
+        "python-mutable-default",
+        "python-dispatch-ladder",
     },
     "docker": {"dockerfile-no-latest"},
     "jsts": {
-        "console-log-detection", "console-debug-detection",
-        "react-console-error-detection", "no-console-warn", "ts-unreachable-code",
+        "console-log-detection",
+        "console-debug-detection",
+        "react-console-error-detection",
+        "no-console-warn",
+        "ts-unreachable-code",
         "import-no-relative-parent",
     },
     "react": {"react-no-async-in-useeffect", "react-direct-dom"},
     "fastapi": {
-        "fastapi-missing-response-model", "fastapi-missing-links", "no-sync-in-async",
+        "fastapi-missing-response-model",
+        "fastapi-missing-links",
+        "no-sync-in-async",
     },
 }
 GOVERNED = set().union(*HOOK_GROUPS.values())
@@ -155,7 +182,39 @@ GOVERNED = set().union(*HOOK_GROUPS.values())
 # the hook *implementation* carries fixes the campaign depends on. Example: the
 # adr-gate index-fallback (#177) lands only at chrysa/pre-commit-tools >= v0.1.1-93;
 # older pins false-positive when an earlier auto-fixing hook reorders staged files.
+#
+# The alignment is a FLOOR, not an equality: it moves a consumer forward to the
+# baseline, never backward. Written as plain equality it downgraded every repo that
+# was ahead of the baseline — the release-triggered run of 2026-08-07 rolled
+# lifeos/discordium/D-D from v0.2.0-253 back to the baseline's v0.2.0-247, undoing
+# six releases of hook fixes in the name of "aligning".
 REV_ALIGNED_REPOS = {"https://github.com/chrysa/pre-commit-tools"}
+
+# `vX.Y.Z-N` (the GitVersion tag shape used across the fleet). Anything else is
+# unorderable — an unrecognised rev aligns unconditionally, as before.
+_REV_PATTERN = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)(?:-(\d+))?$")
+
+
+def rev_order(rev: object) -> tuple[int, int, int, int] | None:
+    """Sortable tuple for a `vX.Y.Z-N` tag, or ``None`` when the shape is unknown."""
+    match = _REV_PATTERN.match(str(rev or ""))
+    if match is None:
+        return None
+    major, minor, patch, build = match.groups()
+    return (int(major), int(minor), int(patch), int(build or 0))
+
+
+def rev_regresses(baseline_rev: object, existing_rev: object) -> bool:
+    """True when aligning to the baseline would move the consumer *backwards*.
+
+    Both revs must be orderable to conclude that: two tags this cannot parse are
+    treated as alignable, which is the pre-existing behaviour.
+    """
+    baseline_order, existing_order = rev_order(baseline_rev), rev_order(existing_rev)
+    if baseline_order is None or existing_order is None:
+        return False
+    return baseline_order < existing_order
+
 
 # Hook ids whose `exclude` is a POLICY, not per-repo tuning: the baseline value wins over
 # whatever a consumer already has. Without this, a corrected exclude never reaches the fleet
@@ -204,7 +263,9 @@ def index_hooks(repo: dict) -> dict:
 
 
 def enforced_hooks(brepo: dict, allowed: set[str]) -> dict:
-    return {hid: h for hid, h in index_hooks(brepo).items() if hook_enforced(hid, allowed)}
+    return {
+        hid: h for hid, h in index_hooks(brepo).items() if hook_enforced(hid, allowed)
+    }
 
 
 def describe_actions(gaps: list[str]) -> str:
@@ -255,9 +316,15 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
         gaps.extend(
             f"{url}#{hid}!exclude"
             for hid, hook in wanted.items()
-            if hid in have and hid in EXCLUDE_ALIGNED_IDS and exclude_drifts(have[hid], hook)
+            if hid in have
+            and hid in EXCLUDE_ALIGNED_IDS
+            and exclude_drifts(have[hid], hook)
         )
-        if url in REV_ALIGNED_REPOS and existing.get("rev") != brepo.get("rev"):
+        if (
+            url in REV_ALIGNED_REPOS
+            and existing.get("rev") != brepo.get("rev")
+            and not rev_regresses(brepo.get("rev"), existing.get("rev"))
+        ):
             gaps.append(f"{url}@{brepo.get('rev')}")
     canon_py = canonical_python(baseline)
     if canon_py and target_python(target) not in (None, canon_py):
@@ -291,7 +358,11 @@ def _merge_single_repo(
             existing.setdefault("hooks", []).append(hook)
         elif hid in EXCLUDE_ALIGNED_IDS:
             align_exclude(have[hid], hook)
-    if url in REV_ALIGNED_REPOS and brepo.get("rev") is not None:
+    if (
+        url in REV_ALIGNED_REPOS
+        and brepo.get("rev") is not None
+        and not rev_regresses(brepo["rev"], existing.get("rev"))
+    ):
         existing["rev"] = brepo["rev"]
 
 
