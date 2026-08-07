@@ -169,6 +169,15 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   and a documented idempotency/timeout/limits/circuit-breaker/rollback envelope. Untrusted
   execution is sandboxed with network off by default; no agent auto-merges to `main`.
   Detail: annexe `AGENTIC-CAPABILITIES.md`.
+- **An AI feature is evaluated, not just shipped.** An agent *acting* is governed above; an
+  AI feature's *output quality* is a separate obligation. Prompts, models, parameters and
+  tools are **versioned**; every critical AI task carries an **evaluation dataset** and
+  non-regression tests measuring quality, hallucinations, refusals, latency and cost; each
+  answer records the model, its version, the prompt and the sources it used, so it can be
+  reproduced and audited; and the product degrades to a **fallback model or a no-AI mode**,
+  with human validation proportionate to the risk and an explicit policy for what data is
+  sent to a model. A feature whose quality is asserted by feel rather than measured is a
+  defect. Detail: annexe `AGENTIC-CAPABILITIES.md` AG-012–AG-015.
 - **An agent writes only where the owner owns.** An AI agent may open issues, pull requests,
   comments, branches and releases **only on repositories the owner owns** — the `chrysa`
   account and the organisations under the owner's control. On any third-party repository
@@ -820,6 +829,12 @@ deprecated and archived — nothing is added to it, nothing reads from it.
 - Test coverage **>= 85%** by default. A repo may override upward, never below 80%.
 - Lint warnings: **0**. Mypy clean. SonarCloud rating **A**, 0 security hotspot.
 - Max function lines 50 · max file lines 500 · cyclomatic complexity heuristic <= 10.
+- **Performance and cost budgets are declared per profile and enforced.** Frontend bundle,
+  Docker image size, startup time, memory, CPU, latency, throughput, storage and log volume
+  each carry a budget; AI paths additionally budget tokens, cost, latency, concurrency and
+  cache. CI measures them and **blocks significant regressions** (info → warning → error); an
+  overrun carries a justification, an impact measurement and a reduction plan — never a silent
+  pass. Detail: annexe `CI-CD.md` CI-053.
 
 ## Design system
 
