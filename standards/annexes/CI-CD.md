@@ -298,6 +298,15 @@ actually feel.
 Retention matches the debugging window, not the platform default. Unowned artefacts are a
 storage bill nobody reads and a search that returns forty identically named files.
 
+### CI-053 — Performance and cost budgets
+
+Each profile declares explicit **budgets** — frontend bundle, Docker image size, startup
+time, memory, CPU, latency, throughput, storage, and log volume — and the pipeline measures
+them and **blocks significant regressions** (`info` → `warning` → `error`, like every other
+gate). AI paths additionally budget **tokens, cost, latency, concurrency, and cache**. A
+budget overrun is never silently accepted: it carries a justification, an impact measurement,
+and a reduction plan.
+
 ______________________________________________________________________
 
 ## 7. Review checklist
@@ -313,6 +322,7 @@ A workflow change is reviewable against this list in under a minute:
 7. Is the runner choice justified by the workload? (CI-035)
 8. New gate: does a failure mean the code is wrong? (CI-040)
 9. Does a skipped job report as skipped, never as passed? (CI-032)
+10. Are the profile's performance and cost budgets measured, with regressions blocked? (CI-053)
 
 ______________________________________________________________________
 
@@ -325,6 +335,7 @@ ______________________________________________________________________
 | CI-030, CI-031 | reviewed in pull request |
 | CI-004, CI-003 | fleet audit script over the workflow corpus |
 | CI-040 | any permanently red check is an issue with an owner |
+| CI-053 | per-profile budget file; CI measures and blocks significant regressions |
 
 Rules not yet mechanised are declared as manually reviewed — a rule claiming automation with no
 check behind it is misdeclared (`GOVERNANCE.md` GV-012).
