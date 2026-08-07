@@ -501,9 +501,11 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      **schema.org JSON-LD** appropriate to its type (`Article`, `Product`, `Organization`,
      `BreadcrumbList`, `SoftwareApplication`…), plus the metadata that makes a link
      self-describing: `<title>`, `meta description`, canonical link, Open Graph/Twitter
-     cards, `hreflang` on localised pages, `sitemap.xml` and `robots.txt`. The structured
+     cards, `hreflang` on localised pages, a **favicon + app icons + web app manifest**
+     (`theme-color` included), and `sitemap.xml` and `robots.txt`. The structured
      data **describes what is actually on the page** — mismatched markup is a defect, not
-     an SEO trick.
+     an SEO trick. A tab left with the browser's default globe icon is an unfinished page
+     (FE-052).
   4. **Semantic code and data shapes.** Intention-revealing names over comments, typed
      contracts over free-form dicts, ISO-8601 dates and explicit units/currency in payloads,
      stable machine-readable codes on errors (see *typed errors*). A field named `data`,
