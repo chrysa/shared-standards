@@ -1112,6 +1112,27 @@ Every repo ships a session lifecycle so an AI agent keeps context across session
 - **Session end**: `make hindsight` (`/hindsight`) — updates `primer.md` + `progress.md`, clears
   `session.md`, optional Obsidian export (`OBSIDIAN=<path>`).
 
+## Compliance targets
+
+The fleet is held to two external compliance frameworks. Neither is a separate corpus — each
+is operationalised by rules already in this canon; declaring the target names the obligation
+those rules must satisfy, and certification is a governance program on top, not a code change.
+
+- **GDPR / RGPD — by construction.** Every product that touches personal data records its
+  lawful basis and purpose, minimises and time-bounds what it stores, keeps PII out of logs
+  and test data, and supports export / rectification / erasure by a documented command. This
+  is *per-person data implies a user account* and *portable personalisation data* applied to a
+  legal obligation. Detail: annexe `GOVERNANCE.md` GV-040.
+- **ISO/IEC 27001 — the security baseline.** Information security is a governed, documented
+  ISMS, not ad-hoc practice. Access control, cryptography, logging and audit, operations and
+  change control, supplier security, and incident management each map onto an existing canon
+  rule (cluster SSO & session security, secrets handling, observability & audit trail, CI
+  gates & protected `main`, project decoupling & supply-chain pinning, typed/contained errors),
+  so conformance is reached by satisfying those — not a parallel checklist. The organizational
+  artefacts ISO 27001 also demands (ISMS scope, risk assessment & treatment, Statement of
+  Applicability, internal audit) are a versioned governance backlog under `docs/`. Detail:
+  annexe `GOVERNANCE.md` GV-041.
+
 ## Governance — strategic pillars & ADR format
 
 Five non-negotiables hold across every chrysa project, whatever the stack. Breaking one

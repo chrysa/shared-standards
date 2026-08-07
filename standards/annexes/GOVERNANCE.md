@@ -90,3 +90,44 @@ several documents. Prose references the contract; it does not duplicate its valu
 
 Known consumers to keep aligned: `.claude/thresholds.json`, `.quality-gate.json`,
 `guideline-checker/guidelines/`.
+
+______________________________________________________________________
+
+## 5. External compliance
+
+The fleet is held to two external compliance frameworks. Neither is a parallel corpus: each is
+operationalised by rules that already exist in the canon. Declaring the target does not by
+itself grant certification — it names the obligation the existing rules must satisfy.
+
+### GV-040 — GDPR / RGPD by construction
+
+Any product handling personal data is **compliant by design**, not by a later audit: lawful
+basis or consent and purpose are recorded, data is minimised and its retention bounded, and
+export / rectification / erasure of a person's data is served by a documented command
+(pillar 3 · *portable personalisation data*). No PII in logs, traces, screenshots, test
+fixtures, or prompts without an explicit justification; development and demos use synthetic or
+anonymised data. Operationalised by the *per-person data implies a user account* and privacy
+rules in the socle, and the `rgpd-compliance` skill.
+
+### GV-041 — ISO/IEC 27001 as the security baseline
+
+The fleet targets **ISO/IEC 27001** compliance: information security is a governed, documented
+Information Security Management System (ISMS), not ad-hoc practice. The Annex A control
+families map onto existing canon rules — conformance is reached by satisfying those, not by a
+separate checklist:
+
+| ISO/IEC 27001 Annex A theme | Canon rule that satisfies it |
+| --- | --- |
+| Access control (A.5.15–18, A.8.2–5) | cluster SSO + identity hierarchy, session security & revocation (socle) · least privilege `AG-002` |
+| Cryptography (A.8.24) | TLS in the platform layer, secrets out of git, modern password hashing, encryption at rest for sensitive data (socle · `AG-005`) |
+| Logging & monitoring (A.8.15–16) | structured logs, correlated audit trail, Sentry → issues, observability backend (socle · `AG-008`) |
+| Operations & change (A.8.9, A.8.32) | CI gates, build-once-promote (`CI-046`), protected `main`, ADRs for structural change |
+| Supplier & supply-chain (A.5.19–23, A.8.30) | versioned contracts (`PROJECT-DECOUPLING`), pinned dependencies + SBOM + signed artefacts (`CI-*`) |
+| Incident management (A.5.24–28) | typed & contained errors, automatic issue creation, management backoffice + runbooks (socle) |
+| Privacy (A.5.34) | `GV-040` |
+
+What ISO 27001 additionally requires is **organizational, not code**: a documented ISMS scope,
+a risk assessment and treatment plan, a Statement of Applicability (SoA), defined security
+roles, and periodic internal audit plus management review. Those artefacts are versioned under
+`docs/` (or a dedicated governance repo) and tracked as a governance backlog — the code rules
+above are necessary for certification but not sufficient on their own.
