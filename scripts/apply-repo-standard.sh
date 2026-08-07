@@ -267,13 +267,23 @@ find_pyprojects() {
     # Every pyproject that can own Python, not just the first: a monorepo may
     # carry backend/ and agent/ side by side, and returning one silently left
     # the other outside the rule set (measured on satisfactory-factory-manager).
-    local repo="$1" found=1 candidate
+    local repo="$1" found=1 has_root=1 candidate
     if [[ -f "$repo/pyproject.toml" ]]; then
         echo "$repo/pyproject.toml"
-        return 0
+        found=0 has_root=0
     fi
     for candidate in "$repo"/*/pyproject.toml; do
         [[ -f "$candidate" ]] || continue
+        # Returning at the root left a nested config that *shadows* it outside
+        # the rule set: Ruff resolves to the nearest pyproject that declares a
+        # [tool.ruff] section, so chrysa-portfolio-viz/backend — which declares
+        # five — escaped all 20 canonical codes while the root read as compliant.
+        # A nested file with no [tool.ruff] is skipped on purpose: it inherits
+        # the root's rules today, and writing a `select` into it would sever that
+        # inheritance and drop the root's other Ruff settings along with it.
+        if ((has_root == 0)) && ! grep -q '^\[tool\.ruff' "$candidate"; then
+            continue
+        fi
         echo "$candidate"
         found=0
     done
