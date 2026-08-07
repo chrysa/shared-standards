@@ -63,6 +63,28 @@ Strong confirmation and an immutable audit trail are mandatory for such actions.
 A capability is first built inside its first consuming project. Extraction into a shared
 brick happens only at the **second real consumer** — not in anticipation.
 
+### AG-012 — AI functions are versioned
+
+Prompts, models, parameters, and the tool set an AI feature uses are versioned like code. A
+change to any of them is a traceable change, not an invisible drift.
+
+### AG-013 — Critical AI tasks have an evaluation set
+
+Every critical AI task ships an **evaluation dataset** and non-regression tests run in CI.
+Quality, hallucinations, refusals, latency, and cost are **measured**, not asserted by feel.
+
+### AG-014 — Every AI answer is traceable
+
+An AI output records the model, its version, the prompt, and the sources it used, so any
+answer can be reproduced and audited after the fact.
+
+### AG-015 — An AI feature degrades to a fallback
+
+The product provides a fallback model or a no-AI mode wherever it can, and **human validation
+is proportionate to the risk** of the action. The policy for what data is sent to a model is
+explicit (pillar 1 · `PROJECT-DECOUPLING.md`) — no per-person or sensitive data reaches an
+external model without a documented authorisation.
+
 ______________________________________________________________________
 
 ## 2. CI gates (progressive rollout)
@@ -74,4 +96,5 @@ Add as `info`, promote to `warning`, then `error` once existing debt is cleared:
 - shell calls not wrapped by an adapter;
 - capability manifest validation;
 - dry-run, idempotency, timeout, and rollback tests;
-- R3–R5 actions requiring the expected confirmation.
+- R3–R5 actions requiring the expected confirmation;
+- evaluation-set non-regression on critical AI tasks (AG-013).
