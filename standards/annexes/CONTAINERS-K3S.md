@@ -181,6 +181,60 @@ When the frontend detects that the backend version changed under it, or that its
 longer matches the API it talks to, it says so and offers a reload instead of failing in
 obscure ways.
 
+### CT-019 — The compose file is minimal — it declares intent, not defaults
+
+A `docker-compose*.yml` describes **this** stack: its services, their build target or image,
+`depends_on`, `environment`/`env_file`, volumes, `healthcheck`, and `restart`. It declares
+nothing Compose already provides. A line that only restates a Compose default is noise, and
+noise hides the one line that matters.
+
+**Removed as noise:**
+
+- **`version:`** — obsolete under Compose v2; its presence only emits a warning.
+- **An explicit default network.** Compose puts every service on a shared default network
+  with service-name DNS. A `networks:` block that re-declares that bridge and attaches each
+  service to it re-states a default (and misleads about CT-015). Declare a network **only**
+  when the topology is non-default — a second isolated segment, an external network, a driver
+  option.
+- **`container_name:`** unless a fixed name is genuinely required — it defeats scaling and
+  collides between stacks.
+- **Commented-out services / dead blocks** — git history is the archive.
+- **Copy-pasted service blocks** — factor shared config with a YAML anchor (`&x`/`*x`) or an
+  `extends`, per *no code duplication*.
+- **Inlined env values** where an `.env` / `env_file` belongs.
+
+**Kept out of the base file, pushed to an override:** loopback port binds, source bind mounts
+for hot-reload, debug flags — anything environment- or developer-specific lives in
+`docker-compose.override.yml` or a `*.dev.yml` (CT-015, and *Dev stage must hot-reload*).
+
+```yaml
+# minimal — every line is intent Compose could not infer
+services:
+    api:
+        build:
+            target: production
+        env_file: .env
+        depends_on: [database]
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+        restart: unless-stopped
+        ports:
+            - "8000:8000"      # the one public surface (CT-015)
+    database:
+        image: postgres:16
+        env_file: .env
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        restart: unless-stopped
+
+volumes:
+    pgdata:
+# no version:, no networks: (default bridge is enough), no container_name:
+```
+
+The test is mechanical: delete any line and ask whether Compose's default already does it —
+if yes, the line was noise. Counted by CT-024.
+
 ______________________________________________________________________
 
 ## 3. Expected k3s topology
@@ -240,7 +294,9 @@ IPs, or ports · probes, resource limits, and security policies present · **pub
 counted per compose file (CT-015): a `ports:` on a database, cache, broker, or metrics
 endpoint fails the check, and a `0.0.0.0` publish outside the public entry point is
 flagged** · **OCI version labels present and non-empty, and deployment manifests referencing
-a digest rather than a moving tag (CT-016)**.
+a digest rather than a moving tag (CT-016)** · **compose files carry no obsolete `version:`
+key, no default-network re-declaration, and no commented-out or duplicated service blocks
+(CT-019)**.
 
 ______________________________________________________________________
 
