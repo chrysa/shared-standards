@@ -10,6 +10,7 @@ All hooks are written in Node.js (`.cjs`) and require only the standard library.
 | Hook | Type | File | Blocks? |
 |------|------|------|---------|
 | Secret scanner | `PreToolUse` (Bash → git commit) | `secret-scanner.cjs` | Yes (exit 2) |
+| No-env-files | `PreToolUse` (Bash → git commit) · CLI `--ci` | `check-no-env-files.cjs` | Yes (exit 2) · CI exit 1 |
 | Circuit breaker | `PreToolUse` (Bash → API calls) | `circuit-breaker.cjs` | Yes when open (exit 2) |
 | Frustration detection | `UserPromptSubmit` | `frustration-detection.cjs` | No (injects context) |
 | Verifiable thresholds | `PostToolUse` (Write/Edit) | `verifiable-thresholds.cjs` | No (warnings only) |
@@ -257,6 +258,24 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
 > `PreToolUse:Bash hook error - Failed with non-blocking status code: node:internal/modules/cjs/loader:<line>`.
 > The guard turns a missing hook into a silent no-op, and `$CLAUDE_PROJECT_DIR` makes the
 > path independent of the tool's working directory.
+
+## No-env-files hook (`check-no-env-files.cjs`) — enforces AG-005
+
+Blocks a commit that stages a `.env`-class secret file, and doubles as a CI gate.
+Config is injected at runtime (env / secret store), never committed — Rain-devkit model.
+
+```bash
+# PreToolUse (blocking) — reads the tool payload on stdin
+echo '{"tool_input":{"command":"git commit -m x"}}' | node .claude/hooks/check-no-env-files.cjs
+# Expected: exit 2 if a staged path is `.env` / `.env.<x>` (not *.example|sample|template|dist)
+
+# CI gate — scan the whole tree, wire into `make ci`
+node .claude/hooks/check-no-env-files.cjs --ci .
+# Expected: exit 1 on any tracked/present .env secret file, else 0
+```
+
+**Allowed, never flagged:** `*.env.example`, `*.env.sample`, `*.env.template`, `*.env.dist`.
+**Allowlist file:** `.claude/no-env-allowlist.json` (JSON array of glob patterns).
 
 ## Disabling a hook
 
