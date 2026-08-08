@@ -283,3 +283,27 @@ repos:
     status: dev
     public: false
     runtime: container
+
+# ── profiles ──────────────────────────────────────────────────────────────────
+# Role-scoped clone sets, consumed by scripts/clone-profile.sh (Rain-devkit model:
+# a front dev never clones the libs, an infra dev never clones the React apps).
+# `full` is NOT listed here — it resolves to every status:dev repo via list-dev-repos.sh.
+#
+# Curated 2026-08-08 from real repo descriptions + primary language. A repo may sit in
+# several profiles (a fullstack app is both `front` and `back`). `lib` and `config` track
+# the `runtime:` tiers above; `front`/`back`/`ai`/`infra` are by product nature. Membership
+# is inline lists so the awk parser in clone-profile.sh can read them. Keep names in sync
+# with the entries above. Judgment calls flagged inline.
+profiles:
+  # reusable dev bricks (runtime: exempt:lib) — imported, not run standalone
+  lib: [chrysa-lib, django-app-forge, django-autoload, django-pytest, django-query-optimizer, django-traceid, django-migration-analyzer, epub-sorter, fastapi-autoload, fastapi-pytest, fastapi-query-optimizer, fastapi-traceid, guideline-checker, pre-commit-hooks-changelog, pre-commit-tools, project-init]
+  # config / knowledge / manifests / Claude-config (runtime: exempt:config)
+  config: [agent-config, catalog, chrysa-skills, claude-config, chrysa-claude-template, dotfiles, github-actions, homeassistant-config, projects-claude-config, usefull-containers, shared-standards]
+  # UI-primary apps (web front-end is the main deliverable)
+  front: [chrysa-portfolio-viz, container-webview, dev-nexus, devtool, gaming-os, cdn-explorer, discordium, studioverse, mediavault, D-D, PO-GO-DEX, linkendin-resume, my-resume, diy-stream-deck, wsmqtt-monitor, guideline-checker]
+  # back-end services / APIs (FastAPI/Django services, gateways, bots)
+  back: [ai-aggregator, audit-platform, discord-bot-back, discordium, feedback-gateway, link-reader-bot, mirrador, genealogy-validator, sport-intelligence-hub, doc-gen, content-organizer, wsmqtt-monitor, daedalus-document-factory]
+  # LLM / AI-centric products (inference, RAG, observability, assistants)
+  ai: [ai-aggregator, mirrador, content-organizer, doc-gen, floating-agent, lifeos, coach, daedalus-document-factory, dev-nexus]
+  # deployment / host / fleet tooling / observability
+  infra: [catalog, server, github-actions, shared-standards, dotfiles, project-init, agent-config, claude-config, projects-claude-config, chrysa-claude-template]

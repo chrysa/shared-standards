@@ -87,6 +87,25 @@ external model without a documented authorisation.
 
 ______________________________________________________________________
 
+### AG-016 — Agent autonomy scales with layer determinism
+
+AG-003 grades confirmation by the risk of a single **action**. AG-016 grades an **agent's**
+standing autonomy by the determinism of the **layer** it works in — the two compose.
+
+An agent operating a deterministic layer (data model, repositories, API/GraphQL contract,
+provider ACL, deploy manifests) may run at **high autonomy**: its correctness is checkable
+against a fixed rule or schema. An agent operating a non-deterministic layer (canvas /
+visual rendering, voice, RAG, LLM prompting) runs **assisted only** — output requires human
+judgment, so it gets no prescriptive skill and every result is validated before it lands.
+
+Consequences:
+- High-autonomy agents still obey per-action gates: infra/deploy agents **never `apply`
+  automatically** and **never merge to main** (AG-009), whatever their layer autonomy.
+- A non-deterministic layer must not be given a prescriptive rule-skill; its guidance is
+  advisory. Encoding "assisted" as "automatic" is a defect.
+- Each agent declares its layer and autonomy tier (`high` | `assisted`) in its manifest
+  (AG-001), so the grading is auditable, not implicit.
+
 ## 2. CI gates (progressive rollout)
 
 Add as `info`, promote to `warning`, then `error` once existing debt is cleared:
@@ -97,4 +116,6 @@ Add as `info`, promote to `warning`, then `error` once existing debt is cleared:
 - capability manifest validation;
 - dry-run, idempotency, timeout, and rollback tests;
 - R3–R5 actions requiring the expected confirmation;
-- evaluation-set non-regression on critical AI tasks (AG-013).
+- evaluation-set non-regression on critical AI tasks (AG-013);
+- agent manifest declares layer + autonomy tier, non-deterministic layers stay `assisted` (AG-016);
+- `.env` secret files staged or present in the tree (AG-005, `check-no-env-files.cjs --ci`).
