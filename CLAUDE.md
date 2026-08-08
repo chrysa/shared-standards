@@ -89,6 +89,7 @@ make lint     # Run pre-commit on all files
 | Hook | Event | Purpose |
 |------|-------|---------|
 | secret-scanner.cjs | PreToolUse (git commit) | Block secrets from being committed |
+| check-no-env-files.cjs | PreToolUse (git commit) · CLI `--ci` | Block `.env` secret files (AG-005) — config injected at runtime |
 | circuit-breaker.cjs | PreToolUse (API calls) | Prevent repeated failing API calls |
 | frustration-detection.cjs | UserPromptSubmit | Inject context on frustrating prompts |
 | verifiable-thresholds.cjs | PostToolUse (file writes) | Warn on quality threshold violations |

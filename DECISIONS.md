@@ -168,3 +168,69 @@ predecessor PR with a `Depends-On: <PR URL>` line in the PR description (see
 also supports Gerrit and GitLab dependency URLs and Go/Python/JS/Ansible/container
 dependency injection, which the fleet does not yet use but may adopt later without
 further ADR changes.
+
+---
+
+## D-0009 — Claude config distribution: per-repo inlining vs a centralised plugin
+
+**Date**: 2026-08-08
+**Status**: proposed
+**Deciders**: owner
+**Pillars touched**: none
+
+### Context
+
+The Rain devkit (external org, audited 2026-08-08) proposes a **centralised Claude model**:
+business repos carry **no** `CLAUDE.md` and **no** `.claude/`; a single devkit repo owns the
+skills/agents/hooks and each workspace gets a symlink `CLAUDE.md -> devkit/assistant/CLAUDE.fragment.md`,
+so `git pull` in one repo updates the Claude context everywhere.
+
+The chrysa fleet does the **opposite today** and by settled convention: the standards block is
+the *only artifact inlined* into every consumer repo (`CLAUDE.md` "Normative annexes"), and
+*every code repo depends on `project-init`* — scaffolded at birth and kept in sync by
+`scripts/distribute-standards.sh`. Shared skills are already loaded on demand from
+`shared-standards/.claude/skills/`, and a plugin-marketplace mechanism already exists in the
+fleet (`herdr-rtk-savings`, `.claude-plugin/marketplace.json`). So the fleet already sits
+between the two poles: **inlined standards** + **centrally-sourced skills**.
+
+### Decision
+
+Keep the inlined-per-repo standards block as canon; do **not** adopt the symlink model. Evaluate
+promoting the shared skills/agents/hooks into a **single fleet Claude plugin** (marketplace,
+like herdr) that every repo declares instead of copying `.claude/` contents — an additive,
+git-native distribution, not a symlink.
+
+### Fatal hypothesis
+
+A central plugin distributes skill/agent/hook **updates** across the fleet with materially less
+drift and effort than the current per-repo copy via `distribute-standards.sh`, **without**
+breaking the "a fresh agent finds everything from committed files alone" property.
+
+### Kill-test
+
+Prototype the plugin on 2 repos. Measure over 30 days: (a) mean time to propagate one skill
+change to all consuming repos, and (b) number of repos where a dropped-in agent, with no plugin
+resolution, fails to find a rule it needs. If propagation time is **not** at least 50% below the
+`distribute-standards.sh` PR-fanout baseline, **or** any repo fails the fresh-agent legibility
+test because context now lives outside the repo, the hypothesis is false → stay per-repo.
+
+### Validation gate
+
+Green only if: standards block stays inlined (unchanged), the plugin carries *only* the evolving
+skills/agents/hooks, and the 2-repo prototype passes both kill-test metrics. Then roll to the
+fleet via `distribute-standards`. Otherwise close as `Killed` and keep the copy model.
+
+### Options considered
+
+| Option | Why not |
+| ------ | ------- |
+| Symlink `CLAUDE.md -> devkit/fragment` (Rain model) | Cross-repo symlink is not tracked by git per-repo, breaks on relocation, Windows-hostile, and voids the "legible from committed files alone" rule. |
+| Status quo (copy everything via distribute-standards) | Works, but a skill change is a ~60-PR fanout; the duplication the canon forbids elsewhere. |
+| Full centralisation (repos carry no `.claude/`) | Conflicts with *repo provenance* and *repo legible to an agent*; a repo must stand alone. |
+
+### Consequences
+
+Additive if accepted: repos keep their inlined standards and gain a declared plugin for the
+moving parts; the `.claude/skills` copy is replaced by a `rev`-pinned plugin reference (same model
+as `chrysa/pre-commit-tools` and `chrysa/github-actions`). Debt: one more marketplace to version.
+Blast radius if `Killed`: revert the 2 prototype repos to the copy model — no fleet change made.
