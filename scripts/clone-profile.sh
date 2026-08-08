@@ -50,46 +50,39 @@ done
 
 [ -f "$REPOS_YML" ] || die "repos.yml not found: $REPOS_YML"
 
-# Extract the `profiles:` block members for a profile name.
-# Block shape in repos.yml:
+# Extract the `profiles:` block members for a profile name. The block is stored in the
+# yaml-sorter canonical shape (block sequences, keys sorted), e.g.:
 #   profiles:
-#     front: [dashboard, my-resume, ...]
-#     back:  [ai-aggregator, ...]
+#     ai:
+#     - ai-aggregator
+#     - mirrador
+#     back:
+#     - audit-platform
+# A profile header is a 2-space-indented `name:`; members are `- value` lines beneath it,
+# until the next header or the end of the block (`repos:` / any unindented key).
 profile_members() {
   awk -v want="$1" '
-    /^profiles:/ { inblk=1; next }
-    inblk && /^[a-zA-Z]/ { inblk=0 }          # left the block (next top-level key)
+    $0 ~ /^profiles:[[:space:]]*$/ { inblk=1; next }
+    inblk && /^[^[:space:]]/ { inblk=0 }        # unindented key (e.g. repos:) → block ended
     inblk {
-      line=$0
-      sub(/^[[:space:]]+/, "", line)
-      if (line ~ /^#/ || line == "") next     # skip comments / blank lines
-      # match "name: [ ... ]" or "name:" continued — we only support inline lists here
-      if (line ~ "^" want ":") {
-        sub("^" want ":[[:space:]]*", "", line)
-        gsub(/[][]/, "", line)
-        gsub(/,/, " ", line)
-        print line
-      }
+      if ($1 ~ /^[A-Za-z0-9_-]+:$/) { cur=$1; sub(/:$/, "", cur); next }  # profile header
+      if ($1 == "-" && cur == want) { print $2 }                          # member line
     }
   ' "$REPOS_YML"
 }
 
 profile_names() {
   awk '
-    /^profiles:/ { inblk=1; next }
-    inblk && /^[a-zA-Z]/ { inblk=0 }
-    inblk {
-      line=$0; sub(/^[[:space:]]+/, "", line)
-      if (line ~ /^#/ || line == "") next
-      if (line ~ /:/) { sub(/:.*/, "", line); print line }
-    }
+    $0 ~ /^profiles:[[:space:]]*$/ { inblk=1; next }
+    inblk && /^[^[:space:]]/ { inblk=0 }
+    inblk && $1 ~ /^[A-Za-z0-9_-]+:$/ { n=$1; sub(/:$/, "", n); print n }
   ' "$REPOS_YML"
 }
 
 if [ "$LIST" -eq 1 ]; then
   printf '\n  Profiles (from %s):\n\n' "$REPOS_YML"
   for p in $(profile_names); do
-    printf '  \033[36m%-8s\033[0m %s\n' "$p" "$(profile_members "$p")"
+    printf '  \033[36m%-8s\033[0m %s\n' "$p" "$(profile_members "$p" | tr '\n' ' ')"
   done
   printf '\n'
   exit 0
