@@ -1,309 +1,356 @@
-# repos.yml — chrysa repo classification for config normalization (OPS-190).
-# Generated 2026-06-06 from gh repo list chrysa + local checkout. Hand-tune as needed.
-# status: dev (apply full standard) | non-dev (config/static, skip CI+Docker) | archived (skip).
-# public: true emits LICENSE (MIT); false skips it.
-# runtime: container-runtime policy — "projects run ONLY in containers unless nature forbids".
-#   container       — runs as a service; MUST ship Dockerfile(s) + compose + HEALTHCHECK + docker-up/down/test.
-#   exempt:lib      — distributed/imported (lib, plugin, pre-commit hook, GitHub Action, CLI tool); keep docker-test only.
-#   exempt:config   — no executable runtime (config, knowledge/Obsidian, deployment manifests, container-def collections).
-#   exempt:native   — bound to host OS / device / cloud platform / editor (Windows, webcam, GAS, VS Code ext, infra/Helm).
-#   pending         — pre-code scaffold; flips to `container` once app code lands (enforced at first code via project-init).
-#   Audited by audit-docker-compliance.sh. See standards/STANDARDS.chrysa.md (Container-runtime policy).
-repos:
-  - name: agent-config
-    status: dev
-    public: false
-    runtime: exempt:config
-  - name: ai-aggregator
-    status: dev
-    public: false
-    runtime: container
-  - name: audit-platform
-    status: dev
-    public: false
-    runtime: container
-  - name: automations
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: catalog
-    status: dev
-    public: false
-    runtime: exempt:config
-  - name: cdn-explorer
-    status: dev
-    public: true
-    runtime: container
-  - name: chrysa-knowledge
-    status: archived
-    public: false
-    runtime: exempt:config
-  - name: chrysa-lib
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: chrysa-portfolio-viz
-    status: dev
-    public: false
-    runtime: container
-  - name: chrysa-skills
-    status: dev
-    public: false
-    runtime: exempt:config
-  - name: claude-config
-    status: dev
-    public: false
-    runtime: exempt:config
-  - name: coach
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: container-webview
-    status: dev
-    public: true
-    runtime: container
-  - name: D-D
-    status: dev
-    public: false
-    runtime: container
-  - name: dev-nexus
-    status: dev
-    public: false
-    runtime: container
-  - name: devtool
-    status: dev
-    public: false
-    runtime: container
-  - name: discord-bot-back
-    status: dev
-    public: false
-    runtime: container
-  - name: discordium
-    status: dev
-    public: false
-    runtime: container
-  - name: diy-stream-deck
-    status: dev
-    public: true
-    runtime: exempt:native
-  - name: django-app-forge
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: django-autoload
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: django-pytest
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: django-query-optimizer
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: django-query-optimizer-vscode
-    status: dev
-    public: true
-    runtime: exempt:native
-  - name: django-traceid
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: doc-gen
-    status: dev
-    public: false
-    runtime: container
-  - name: dotfiles
-    status: non-dev
-    public: false
-    runtime: exempt:config
-  - name: epub-sorter
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: fastapi-autoload
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: fastapi-pytest
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: fastapi-query-optimizer
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: fastapi-traceid
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: feedback-gateway
-    status: dev
-    public: false
-    runtime: container
-  - name: floating-agent
-    status: dev
-    public: true
-    runtime: exempt:native
-  - name: game-solver-platform
-    status: archived
-    public: false
-    runtime: exempt:config
-  - name: gaming-os
-    status: dev
-    public: false
-    runtime: container
-  - name: genealogy-validator
-    status: dev
-    public: false
-    runtime: container
-  - name: gestureOS
-    status: dev
-    public: true
-    runtime: exempt:native
-  - name: github-actions
-    status: dev
-    public: true
-    runtime: exempt:config
-  - name: guideline-checker
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: homeassistant-config
-    status: non-dev
-    public: false
-    runtime: exempt:config
-  - name: lifeos
-    status: dev
-    public: true
-    runtime: exempt:native
-  - name: linkendin-resume
-    status: dev
-    public: true
-    runtime: container
-  - name: link-reader-bot
-    status: dev
-    public: false
-    runtime: container
-  - name: mediavault
-    status: dev
-    public: false
-    runtime: exempt:config
-  - name: mirrador
-    status: dev
-    public: false
-    runtime: container
-  - name: my-assistant
-    status: alias
-    public: false
-    alias_of: lifeos
-    runtime: exempt:native
-  - name: my-resume
-    status: archived
-    public: false
-    runtime: container
-  - name: orchestrator
-    status: archived
-    public: false
-    runtime: exempt:config
-  - name: paperclip
-    status: archived
-    public: false
-    runtime: exempt:config
-  - name: PO-GO-DEX
-    status: dev
-    public: false
-    runtime: container
-  - name: pre-commit-hooks-changelog
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: pre-commit-tools
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: project-init
-    status: dev
-    public: true
-    runtime: exempt:lib
-  - name: quality-gatekeeper
-    status: dev
-    public: false
-    runtime: pending
-  - name: satisfactory-automated_calculator
-    status: archived
-    public: true
-    runtime: exempt:native
-  - name: satisfactory-factory-manager
-    status: dev
-    public: false
-    runtime: container
-  - name: server
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: shared-standards
-    status: dev
-    public: true
-    runtime: exempt:config
-  - name: sport-intelligence-hub
-    status: dev
-    public: false
-    runtime: container
-  - name: studioverse
-    status: dev
-    public: false
-    runtime: container
-  - name: usefull-containers
-    status: dev
-    public: true
-    runtime: exempt:config
-  - name: workstation-os
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: windows-docker-state-notification
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: debian-guardian
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: django-migration-analyzer
-    status: dev
-    public: false
-    runtime: exempt:lib
-  - name: windows-guardian
-    status: dev
-    public: false
-    runtime: exempt:native
-  - name: wsmqtt-monitor
-    status: dev
-    public: false
-    runtime: container
-
-# ── profiles ──────────────────────────────────────────────────────────────────
-# Role-scoped clone sets, consumed by scripts/clone-profile.sh (Rain-devkit model:
-# a front dev never clones the libs, an infra dev never clones the React apps).
-# `full` is NOT listed here — it resolves to every status:dev repo via list-dev-repos.sh.
-#
-# Curated 2026-08-08 from real repo descriptions + primary language. A repo may sit in
-# several profiles (a fullstack app is both `front` and `back`). `lib` and `config` track
-# the `runtime:` tiers above; `front`/`back`/`ai`/`infra` are by product nature. Membership
-# is inline lists so the awk parser in clone-profile.sh can read them. Keep names in sync
-# with the entries above. Judgment calls flagged inline.
 profiles:
-  # reusable dev bricks (runtime: exempt:lib) — imported, not run standalone
-  lib: [chrysa-lib, django-app-forge, django-autoload, django-pytest, django-query-optimizer, django-traceid, django-migration-analyzer, epub-sorter, fastapi-autoload, fastapi-pytest, fastapi-query-optimizer, fastapi-traceid, guideline-checker, pre-commit-hooks-changelog, pre-commit-tools, project-init]
-  # config / knowledge / manifests / Claude-config (runtime: exempt:config)
-  config: [agent-config, catalog, chrysa-skills, claude-config, chrysa-claude-template, dotfiles, github-actions, homeassistant-config, projects-claude-config, usefull-containers, shared-standards]
-  # UI-primary apps (web front-end is the main deliverable)
-  front: [chrysa-portfolio-viz, container-webview, dev-nexus, devtool, gaming-os, cdn-explorer, discordium, studioverse, mediavault, D-D, PO-GO-DEX, linkendin-resume, my-resume, diy-stream-deck, wsmqtt-monitor, guideline-checker]
-  # back-end services / APIs (FastAPI/Django services, gateways, bots)
-  back: [ai-aggregator, audit-platform, discord-bot-back, discordium, feedback-gateway, link-reader-bot, mirrador, genealogy-validator, sport-intelligence-hub, doc-gen, content-organizer, wsmqtt-monitor, daedalus-document-factory]
-  # LLM / AI-centric products (inference, RAG, observability, assistants)
-  ai: [ai-aggregator, mirrador, content-organizer, doc-gen, floating-agent, lifeos, coach, daedalus-document-factory, dev-nexus]
-  # deployment / host / fleet tooling / observability
-  infra: [catalog, server, github-actions, shared-standards, dotfiles, project-init, agent-config, claude-config, projects-claude-config, chrysa-claude-template]
+  ai:
+  - ai-aggregator
+  - mirrador
+  - content-organizer
+  - doc-gen
+  - floating-agent
+  - lifeos
+  - coach
+  - daedalus-document-factory
+  - dev-nexus
+  back:
+  - ai-aggregator
+  - audit-platform
+  - discord-bot-back
+  - discordium
+  - feedback-gateway
+  - link-reader-bot
+  - mirrador
+  - genealogy-validator
+  - sport-intelligence-hub
+  - doc-gen
+  - content-organizer
+  - wsmqtt-monitor
+  - daedalus-document-factory
+  config:
+  - agent-config
+  - catalog
+  - chrysa-skills
+  - claude-config
+  - chrysa-claude-template
+  - dotfiles
+  - github-actions
+  - homeassistant-config
+  - projects-claude-config
+  - usefull-containers
+  - shared-standards
+  front:
+  - chrysa-portfolio-viz
+  - container-webview
+  - dev-nexus
+  - devtool
+  - gaming-os
+  - cdn-explorer
+  - discordium
+  - studioverse
+  - mediavault
+  - D-D
+  - PO-GO-DEX
+  - linkendin-resume
+  - my-resume
+  - diy-stream-deck
+  - wsmqtt-monitor
+  - guideline-checker
+  infra:
+  - catalog
+  - server
+  - github-actions
+  - shared-standards
+  - dotfiles
+  - project-init
+  - agent-config
+  - claude-config
+  - projects-claude-config
+  - chrysa-claude-template
+  lib:
+  - chrysa-lib
+  - django-app-forge
+  - django-autoload
+  - django-pytest
+  - django-query-optimizer
+  - django-traceid
+  - django-migration-analyzer
+  - epub-sorter
+  - fastapi-autoload
+  - fastapi-pytest
+  - fastapi-query-optimizer
+  - fastapi-traceid
+  - guideline-checker
+  - pre-commit-hooks-changelog
+  - pre-commit-tools
+  - project-init
+repos:
+- name: agent-config
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: ai-aggregator
+  public: false
+  runtime: container
+  status: dev
+- name: audit-platform
+  public: false
+  runtime: container
+  status: dev
+- name: automations
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: catalog
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: cdn-explorer
+  public: true
+  runtime: container
+  status: dev
+- name: chrysa-knowledge
+  public: false
+  runtime: exempt:config
+  status: archived
+- name: chrysa-lib
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: chrysa-portfolio-viz
+  public: false
+  runtime: container
+  status: dev
+- name: chrysa-skills
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: claude-config
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: coach
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: container-webview
+  public: true
+  runtime: container
+  status: dev
+- name: D-D
+  public: false
+  runtime: container
+  status: dev
+- name: dev-nexus
+  public: false
+  runtime: container
+  status: dev
+- name: devtool
+  public: false
+  runtime: container
+  status: dev
+- name: discord-bot-back
+  public: false
+  runtime: container
+  status: dev
+- name: discordium
+  public: false
+  runtime: container
+  status: dev
+- name: diy-stream-deck
+  public: true
+  runtime: exempt:native
+  status: dev
+- name: django-app-forge
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: django-autoload
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: django-pytest
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: django-query-optimizer
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: django-query-optimizer-vscode
+  public: true
+  runtime: exempt:native
+  status: dev
+- name: django-traceid
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: doc-gen
+  public: false
+  runtime: container
+  status: dev
+- name: dotfiles
+  public: false
+  runtime: exempt:config
+  status: non-dev
+- name: epub-sorter
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: fastapi-autoload
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: fastapi-pytest
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: fastapi-query-optimizer
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: fastapi-traceid
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: feedback-gateway
+  public: false
+  runtime: container
+  status: dev
+- name: floating-agent
+  public: true
+  runtime: exempt:native
+  status: dev
+- name: game-solver-platform
+  public: false
+  runtime: exempt:config
+  status: archived
+- name: gaming-os
+  public: false
+  runtime: container
+  status: dev
+- name: genealogy-validator
+  public: false
+  runtime: container
+  status: dev
+- name: gestureOS
+  public: true
+  runtime: exempt:native
+  status: dev
+- name: github-actions
+  public: true
+  runtime: exempt:config
+  status: dev
+- name: guideline-checker
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: homeassistant-config
+  public: false
+  runtime: exempt:config
+  status: non-dev
+- name: lifeos
+  public: true
+  runtime: exempt:native
+  status: dev
+- name: linkendin-resume
+  public: true
+  runtime: container
+  status: dev
+- name: link-reader-bot
+  public: false
+  runtime: container
+  status: dev
+- name: mediavault
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: mirrador
+  public: false
+  runtime: container
+  status: dev
+- alias_of: lifeos
+  name: my-assistant
+  public: false
+  runtime: exempt:native
+  status: alias
+- name: my-resume
+  public: false
+  runtime: container
+  status: archived
+- name: orchestrator
+  public: false
+  runtime: exempt:config
+  status: archived
+- name: paperclip
+  public: false
+  runtime: exempt:config
+  status: archived
+- name: PO-GO-DEX
+  public: false
+  runtime: container
+  status: dev
+- name: pre-commit-hooks-changelog
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: pre-commit-tools
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: project-init
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: quality-gatekeeper
+  public: false
+  runtime: pending
+  status: dev
+- name: satisfactory-automated_calculator
+  public: true
+  runtime: exempt:native
+  status: archived
+- name: satisfactory-factory-manager
+  public: false
+  runtime: container
+  status: dev
+- name: server
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: shared-standards
+  public: true
+  runtime: exempt:config
+  status: dev
+- name: sport-intelligence-hub
+  public: false
+  runtime: container
+  status: dev
+- name: studioverse
+  public: false
+  runtime: container
+  status: dev
+- name: usefull-containers
+  public: true
+  runtime: exempt:config
+  status: dev
+- name: workstation-os
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: windows-docker-state-notification
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: debian-guardian
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: django-migration-analyzer
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: windows-guardian
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: wsmqtt-monitor
+  public: false
+  runtime: container
+  status: dev
