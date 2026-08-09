@@ -511,6 +511,17 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      **never `user: root`** — root-owned artifacts written into a bind mount are unremovable
      without `sudo` and are treated as a defect. Root user is allowed only for containers with
      **no** repo bind mount (e.g. `.:/code` absent).
+  4. **Dependency directories are a build output, never a source artifact.** `node_modules` and
+     its per-ecosystem equivalents — `vendor/` (Go/PHP), `target/` (Rust/Maven), `.gradle/`,
+     `Pods/` (CocoaPods), `bin/`+`obj/` (.NET), and `.venv`/`site-packages` (already forbidden in
+     the tree by *no virtualenv in a repo*) — are **generated at build time**, either baked into
+     the image layer (`RUN npm ci` / `pip install` / `cargo build` in the `builder` stage) or
+     mounted from a **named volume that shadows the bind mount** (`node-modules:/code/node_modules`
+     above). They are **never materialised in the working copy on the host**: a `node_modules/`
+     (or equivalent) sitting in the project tree is a defect — machine-specific, unreproducible,
+     and it shadows the container's own install. The **lockfile is committed; the resolved tree is
+     not**, and a fresh clone reaches a green `make ci` without ever running an install on the
+     host (see *external dependencies are installed in containers*).
   Regenerable artifacts already in a repo are purged with `scripts/purge-artifacts.sh`.
 - **Every tracked file and folder must earn its place — a repo holds only what is useful to it
   now.** A repository contains its own source, its tests, config that is actually loaded, docs

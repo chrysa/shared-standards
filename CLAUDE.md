@@ -655,6 +655,17 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      **never `user: root`** — root-owned artifacts written into a bind mount are unremovable
      without `sudo` and are treated as a defect. Root user is allowed only for containers with
      **no** repo bind mount (e.g. `.:/code` absent).
+  4. **Dependency directories are a build output, never a source artifact.** `node_modules` and
+     its per-ecosystem equivalents — `vendor/` (Go/PHP), `target/` (Rust/Maven), `.gradle/`,
+     `Pods/` (CocoaPods), `bin/`+`obj/` (.NET), and `.venv`/`site-packages` (already forbidden in
+     the tree by *no virtualenv in a repo*) — are **generated at build time**, either baked into
+     the image layer (`RUN npm ci` / `pip install` / `cargo build` in the `builder` stage) or
+     mounted from a **named volume that shadows the bind mount** (`node-modules:/code/node_modules`
+     above). They are **never materialised in the working copy on the host**: a `node_modules/`
+     (or equivalent) sitting in the project tree is a defect — machine-specific, unreproducible,
+     and it shadows the container's own install. The **lockfile is committed; the resolved tree is
+     not**, and a fresh clone reaches a green `make ci` without ever running an install on the
+     host (see *external dependencies are installed in containers*).
   Regenerable artifacts already in a repo are purged with `scripts/purge-artifacts.sh`.
 - **Every tracked file and folder must earn its place — a repo holds only what is useful to it
   now.** A repository contains its own source, its tests, config that is actually loaded, docs
@@ -1334,19 +1345,9 @@ those rules must satisfy, and certification is a governance program on top, not 
 Five non-negotiables hold across every chrysa project, whatever the stack. Breaking one
 requires an ADR with a kill-test, not a shrug.
 
-1. **LLM-provider independence & local-first routing** — no vendor SDK in business code;
-   inference goes through a local port with **≥2 real, tested adapters** (e.g. a local model
-   + Claude). A prompt that only works on one vendor is a bug, not a feature. Beyond mere
-   independence, every AI-using project is **multi-model by construction** and ships a
-   **local model as the default provider** — the product must run useful with zero cloud
-   credentials and no network to any vendor (tested with the network disabled, like the
-   offline-game rule). Cloud providers are an **opt-in upgrade**, never a hard dependency.
-   Provider selection goes through a **configurable multi-LLM routing layer** (config/env,
-   not code): the operator can route per task, cost, latency, context size, and data
-   sensitivity, add or reorder providers, and set fallback order — all without a redeploy.
-   Sending data to an external model is off by default and requires a documented
-   authorisation (see annexe AG, rule AG-011). Shipping an AI feature that is single-model,
-   cloud-only, or whose provider/routing is hard-coded is a pillar-1 breach needing an ADR.
+1. **LLM-provider independence** — no vendor SDK in business code; inference goes through a
+   local port with **≥2 real, tested adapters** (e.g. Claude + a local model). A prompt that
+   only works on one vendor is a bug, not a feature.
 2. **GAFAM independence** — every managed-cloud dependency has a documented self-hosted exit
    path; the cloud SDK stays confined to an adapter (`BlobStore`, not `S3Client`).
 3. **Portable personalisation data** — all user/personal data is exportable to an open format
