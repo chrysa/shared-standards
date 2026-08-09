@@ -61,6 +61,8 @@ def list_rules(settings: Settings | None = None) -> list[dict[str, str]]:
         for key in load_thresholds(settings)
     ]
     for path in settings.standard_file_paths:
-        for match in _H2.finditer(_read_text(path)):
-            rules.append({"id": _slug(match.group(1)), "section": "standards", "source": path.name})
+        rules.extend(
+            {"id": _slug(match.group(1)), "section": "standards", "source": path.name}
+            for match in _H2.finditer(_read_text(path))
+        )
     return rules

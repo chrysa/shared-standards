@@ -84,13 +84,17 @@ def commit(repo: str, path: str, content: str, message: str) -> str:
     return "" if code == 0 else f"commit failed: {err.strip().splitlines()[0][:80]}"
 
 
-def sweep_repo(repo: str, target: str, apply: bool) -> tuple[str, str]:
-    """Returns (state, detail) with state in {ok, drift, patched, absent, error}."""
+def stale_pins(repo: str, target: str) -> tuple[dict[str, str], tuple[str, str] | None]:
+    """(stale files → repinned body, early-return state).
+
+    The second element is a (state, detail) pair the caller must return immediately
+    (`absent`/`error`), or `None` when the scan completed and the first element is authoritative.
+    """
     names, status = workflows(repo)
     if status == "absent":
-        return "absent", ""
+        return {}, ("absent", "")
     if status != "ok":
-        return "error", status
+        return {}, ("error", status)
 
     stale: dict[str, str] = {}
     for name in names:
@@ -98,15 +102,14 @@ def sweep_repo(repo: str, target: str, apply: bool) -> tuple[str, str]:
         if status != "ok":
             if status == "absent":
                 continue
-            return "error", status
+            return {}, ("error", status)
         if PIN.search(body) and any(m.group(2) != target for m in PIN.finditer(body)):
             stale[name] = PIN.sub(lambda m: m.group(1) + target, body)
+    return stale, None
 
-    if not stale:
-        return "ok", ""
-    if not apply:
-        return "drift", ", ".join(sorted(stale))
 
+def push_pin_pr(repo: str, stale: dict[str, str], target: str) -> tuple[str, str]:
+    """Commit every repinned file and open the PR; returns (state, detail)."""
     full = f"{OWNER}/{repo}"
     code, sha, _ = gh(["api", f"repos/{full}/git/ref/heads/develop", "-q", ".object.sha"])
     if code != 0:
@@ -135,6 +138,18 @@ def sweep_repo(repo: str, target: str, apply: bool) -> tuple[str, str]:
     if code != 0 and "already exists" not in err:
         return "error", f"pr failed: {err.strip().splitlines()[0][:80]}"
     return "patched", ", ".join(sorted(stale))
+
+
+def sweep_repo(repo: str, target: str, apply: bool) -> tuple[str, str]:
+    """Returns (state, detail) with state in {ok, drift, patched, absent, error}."""
+    stale, early = stale_pins(repo, target)
+    if early is not None:
+        return early
+    if not stale:
+        return "ok", ""
+    if not apply:
+        return "drift", ", ".join(sorted(stale))
+    return push_pin_pr(repo, stale, target)
 
 
 # sweep_repo() state -> (report line, tally bucket). A new state is a new row here,

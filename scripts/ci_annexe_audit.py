@@ -171,20 +171,35 @@ def job_blocks(text: str) -> list[tuple[str, str]]:
     return blocks
 
 
-def inspect(text: str, name: str) -> list[str]:
-    """Rule ids violated by one workflow file."""
+def action_pin_violations(text: str) -> list[str]:
+    """CI-010 / CI-011 ids for every `uses:` that is not pinned as its origin requires."""
     found = []
     for match in RE_USES.finditer(text):
         ref = match.group(1).strip("'\"")
         if ref.startswith("./"):
             continue
         pin = ref.split("@")[1] if "@" in ref else ""
-        internal = ref.startswith(INTERNAL)
-        if internal:
+        if ref.startswith(INTERNAL):
             if not pin.startswith("v"):
                 found.append("CI-011")
         elif not re.fullmatch(r"[0-9a-f]{40}", pin):
             found.append("CI-010")
+    return found
+
+
+def missing_job_timeout(text: str) -> bool:
+    """True if any real job (not a bare reusable-workflow call) declares no timeout — CI-030."""
+    for _, block in job_blocks(text):
+        if "uses:" in block and "steps:" not in block:
+            continue  # a job that only calls a reusable workflow inherits its timeout
+        if "timeout-minutes:" not in block:
+            return True
+    return False
+
+
+def inspect(text: str, name: str) -> list[str]:
+    """Rule ids violated by one workflow file."""
+    found = action_pin_violations(text)
     if not re.search(r"^\s*permissions:", text, re.M):
         found.append("CI-020")
     # Anchored past the indent so a *commented* example — the usage snippets at the top of
@@ -192,16 +207,10 @@ def inspect(text: str, name: str) -> list[str]:
     # violation. Three of the twelve CI-021 findings were documentation.
     if re.search(r"^[ ]*secrets:[ ]*inherit\b", text, re.M):
         found.append("CI-021")
-    for block in re.findall(r"run:\s*\|?[\s\S]{0,600}", text):
-        if RE_UNTRUSTED.search(block):
-            found.append("CI-022")
-            break
-    for _, block in job_blocks(text):
-        if "uses:" in block and "steps:" not in block:
-            continue  # a job that only calls a reusable workflow inherits its timeout
-        if "timeout-minutes:" not in block:
-            found.append("CI-030")
-            break
+    if any(RE_UNTRUSTED.search(block) for block in re.findall(r"run:\s*\|?[\s\S]{0,600}", text)):
+        found.append("CI-022")
+    if missing_job_timeout(text):
+        found.append("CI-030")
     if re.search(r"^\s*pull_request(_target)?:", text, re.M) and not re.search(
         r"^concurrency:", text, re.M
     ):

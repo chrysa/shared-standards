@@ -132,15 +132,12 @@ def migrate(text: str) -> tuple[str | None, str]:
     return patched, ""
 
 
-def open_pull_request(repo: str, name: str, content: str) -> str:
-    full = f"{OWNER}/{repo}"
-    code, sha, _ = gh(["api", f"repos/{full}/git/ref/heads/develop", "-q", ".object.sha"])
-    if code != 0:
-        return "no develop branch"
-    base = sha.strip()
-    gh(["api", f"repos/{full}/git/refs", "-X", "POST",
-        "-f", f"ref=refs/heads/{BRANCH}", "-f", f"sha={base}"])
+def commit_file(full: str, base: str, name: str, content: str) -> tuple[str, str]:
+    """Build a tree + commit for one workflow file; returns (commit_sha, error).
 
+    A non-empty error string stops the caller — including the deliberate refusal to open a
+    zero-diff pull request when the tree is identical to the base.
+    """
     tree = json.dumps({
         "base_tree": base,
         "tree": [{"path": f"{WORKFLOW_DIR}/{name}", "mode": "100644",
@@ -149,9 +146,9 @@ def open_pull_request(repo: str, name: str, content: str) -> str:
     code, tree_sha, err = gh(
         ["api", f"repos/{full}/git/trees", "-X", "POST", "--input", "-", "-q", ".sha"], stdin=tree)
     if code != 0:
-        return f"tree failed: {err.strip().splitlines()[0][:70]}"
+        return "", f"tree failed: {err.strip().splitlines()[0][:70]}"
     if tree_sha.strip() == base:
-        return "produced no change — refusing to open an empty PR"
+        return "", "produced no change — refusing to open an empty PR"
 
     message = ("ci: use the shared changelog action instead of inlining git-cliff\n\n"
                "The inlined --latest describes the newest tag in the graph; this job\n"
@@ -162,9 +159,24 @@ def open_pull_request(repo: str, name: str, content: str) -> str:
         ["api", f"repos/{full}/git/commits", "-X", "POST", "--input", "-", "-q", ".sha"],
         stdin=commit)
     if code != 0:
-        return f"commit failed: {err.strip().splitlines()[0][:70]}"
+        return "", f"commit failed: {err.strip().splitlines()[0][:70]}"
+    return commit_sha.strip(), ""
+
+
+def open_pull_request(repo: str, name: str, content: str) -> str:
+    full = f"{OWNER}/{repo}"
+    code, sha, _ = gh(["api", f"repos/{full}/git/ref/heads/develop", "-q", ".object.sha"])
+    if code != 0:
+        return "no develop branch"
+    base = sha.strip()
+    gh(["api", f"repos/{full}/git/refs", "-X", "POST",
+        "-f", f"ref=refs/heads/{BRANCH}", "-f", f"sha={base}"])
+
+    commit_sha, error = commit_file(full, base, name, content)
+    if error:
+        return error
     code, _, err = gh(["api", f"repos/{full}/git/refs/heads/{BRANCH}", "-X", "PATCH",
-                       "-f", f"sha={commit_sha.strip()}", "-F", "force=true"])
+                       "-f", f"sha={commit_sha}", "-F", "force=true"])
     if code != 0:
         return f"ref update failed: {err.strip().splitlines()[0][:70]}"
 
@@ -187,6 +199,35 @@ def open_pull_request(repo: str, name: str, content: str) -> str:
     return ""
 
 
+def migratable_workflows(
+    repo: str,
+) -> tuple[list[tuple[str, str]], list[tuple[str, str]], list[str]]:
+    """([(file, patched text)], [(file, refusal reason)], [read-failure details]) for one repo."""
+    code, listing, _ = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}",
+                           "-q", ".[].name"])
+    if code != 0:
+        return [], [], []
+    candidates: list[tuple[str, str]] = []
+    refusals: list[tuple[str, str]] = []
+    read_failures: list[str] = []
+    for name in listing.split():
+        if not name.endswith((".yml", ".yaml")):
+            continue
+        text, status = read(f"{OWNER}/{repo}", f"{WORKFLOW_DIR}/{name}")
+        if text is None:
+            if status != "absent":
+                read_failures.append(f"{name}: {status}")
+            continue
+        if "git-cliff" not in text and "git_cliff" not in text:
+            continue
+        patched, reason = migrate(text)
+        if patched is None:
+            refusals.append((name, reason))
+        else:
+            candidates.append((name, patched))
+    return candidates, refusals, read_failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
@@ -202,25 +243,12 @@ def main() -> int:
 
     migrated, refused, failures = 0, 0, []
     for repo in repos:
-        code, listing, _ = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}",
-                               "-q", ".[].name"])
-        if code != 0:
-            continue
-        for name in listing.split():
-            if not name.endswith((".yml", ".yaml")):
-                continue
-            text, status = read(f"{OWNER}/{repo}", f"{WORKFLOW_DIR}/{name}")
-            if text is None:
-                if status != "absent":
-                    failures.append((repo, f"{name}: {status}"))
-                continue
-            if "git-cliff" not in text and "git_cliff" not in text:
-                continue
-            patched, reason = migrate(text)
-            if patched is None:
-                refused += 1
-                print(f"⚠  {repo}/{name}: {reason}")
-                continue
+        candidates, refusals, read_failures = migratable_workflows(repo)
+        failures.extend((repo, detail) for detail in read_failures)
+        for name, reason in refusals:
+            refused += 1
+            print(f"⚠  {repo}/{name}: {reason}")
+        for name, patched in candidates:
             migrated += 1
             print(f"{'✅' if args.apply else '·'}  {repo}/{name}")
             if args.apply:
