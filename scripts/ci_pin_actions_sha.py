@@ -101,15 +101,12 @@ def pin(text: str) -> tuple[str, list[str]]:
     return patched, skipped
 
 
-def open_pull_request(repo: str, patches: dict[str, str]) -> str:
-    full = f"{OWNER}/{repo}"
-    code, sha, _ = gh(["api", f"repos/{full}/git/ref/heads/develop", "-q", ".object.sha"])
-    if code != 0:
-        return "no develop branch"
-    base = sha.strip()
-    gh(["api", f"repos/{full}/git/refs", "-X", "POST",
-        "-f", f"ref=refs/heads/{BRANCH}", "-f", f"sha={base}"])
+def commit_patches(full: str, base: str, patches: dict[str, str]) -> tuple[str, str]:
+    """Build a tree + commit for `patches` on top of `base`; returns (commit_sha, error).
 
+    A non-empty error string means the caller stops — that includes the deliberate refusal
+    to open a zero-diff pull request when the patch produced nothing.
+    """
     tree = json.dumps({
         "base_tree": base,
         "tree": [{"path": f"{WORKFLOW_DIR}/{n}", "mode": "100644", "type": "blob", "content": c}
@@ -118,7 +115,7 @@ def open_pull_request(repo: str, patches: dict[str, str]) -> str:
     code, tree_sha, err = gh(
         ["api", f"repos/{full}/git/trees", "-X", "POST", "--input", "-", "-q", ".sha"], stdin=tree)
     if code != 0:
-        return f"tree failed: {err.strip().splitlines()[0][:70]}"
+        return "", f"tree failed: {err.strip().splitlines()[0][:70]}"
 
     message = ("ci: pin third-party actions by commit SHA (CI-010)\n\n"
                "A tag is a mutable pointer — its owner can move it, and every workflow\n"
@@ -129,14 +126,29 @@ def open_pull_request(repo: str, patches: dict[str, str]) -> str:
         ["api", f"repos/{full}/git/commits", "-X", "POST", "--input", "-", "-q", ".sha"],
         stdin=commit)
     if code != 0:
-        return f"commit failed: {err.strip().splitlines()[0][:70]}"
+        return "", f"commit failed: {err.strip().splitlines()[0][:70]}"
     # An empty tree means the patch produced nothing; opening the PR anyway yields a
     # zero-diff pull request that merges cleanly and changes nothing.
     code, parent_tree, _ = gh(["api", f"repos/{full}/git/commits/{base}", "-q", ".tree.sha"])
     if code == 0 and parent_tree.strip() == tree_sha.strip():
-        return "produced no change — refusing to open an empty PR"
+        return "", "produced no change — refusing to open an empty PR"
+    return commit_sha.strip(), ""
+
+
+def open_pull_request(repo: str, patches: dict[str, str]) -> str:
+    full = f"{OWNER}/{repo}"
+    code, sha, _ = gh(["api", f"repos/{full}/git/ref/heads/develop", "-q", ".object.sha"])
+    if code != 0:
+        return "no develop branch"
+    base = sha.strip()
+    gh(["api", f"repos/{full}/git/refs", "-X", "POST",
+        "-f", f"ref=refs/heads/{BRANCH}", "-f", f"sha={base}"])
+
+    commit_sha, error = commit_patches(full, base, patches)
+    if error:
+        return error
     code, _, err = gh(["api", f"repos/{full}/git/refs/heads/{BRANCH}", "-X", "PATCH",
-                       "-f", f"sha={commit_sha.strip()}", "-F", "force=true"])
+                       "-f", f"sha={commit_sha}", "-F", "force=true"])
     if code != 0:
         return f"ref update failed: {err.strip().splitlines()[0][:70]}"
 
@@ -163,6 +175,33 @@ def open_pull_request(repo: str, patches: dict[str, str]) -> str:
     return ""
 
 
+def collect_repo_patches(
+    repo: str,
+) -> tuple[dict[str, str], list[tuple[str, str]], list[str]]:
+    """(patches by file, [(file, skip-reason)], unreadable files) for one repo."""
+    code, listing, _ = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}",
+                           "-q", ".[].name"])
+    if code != 0:
+        return {}, [], []
+    patches: dict[str, str] = {}
+    reasons: list[tuple[str, str]] = []
+    unreadable: list[str] = []
+    for name in listing.split():
+        if not name.endswith((".yml", ".yaml")):
+            continue
+        code, text, err = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}/{name}",
+                              "-H", "Accept: application/vnd.github.raw"])
+        if code != 0:
+            if "404" not in err:
+                unreadable.append(name)
+            continue
+        patched, skipped = pin(text)
+        reasons.extend((name, reason) for reason in skipped)
+        if patched != text:
+            patches[name] = patched
+    return patches, reasons, unreadable
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
@@ -178,26 +217,11 @@ def main() -> int:
 
     pinned, failures, skips = 0, [], 0
     for repo in repos:
-        code, listing, _ = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}",
-                               "-q", ".[].name"])
-        if code != 0:
-            continue
-        patches: dict[str, str] = {}
-        for name in listing.split():
-            if not name.endswith((".yml", ".yaml")):
-                continue
-            code, text, err = gh(["api", f"repos/{OWNER}/{repo}/contents/{WORKFLOW_DIR}/{name}",
-                                  "-H", "Accept: application/vnd.github.raw"])
-            if code != 0:
-                if "404" not in err:
-                    failures.append((repo, f"{name}: unreadable"))
-                continue
-            patched, reasons = pin(text)
-            for reason in reasons:
-                skips += 1
-                print(f"⚠  {repo}/{name}: {reason}")
-            if patched != text:
-                patches[name] = patched
+        patches, reasons, unreadable = collect_repo_patches(repo)
+        for name, reason in reasons:
+            skips += 1
+            print(f"⚠  {repo}/{name}: {reason}")
+        failures.extend((repo, f"{name}: unreadable") for name in unreadable)
         if not patches:
             continue
         pinned += len(patches)

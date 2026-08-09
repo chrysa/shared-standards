@@ -148,7 +148,7 @@ def resolve_token() -> str:
             "No GitHub token found. Set GITHUB_TOKEN/GH_TOKEN or run `gh auth login`."
         )
     try:
-        out = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        out = subprocess.run(  # fixed argv, no shell
             [gh, "auth", "token"],
             capture_output=True,
             text=True,
