@@ -8,6 +8,8 @@
 # Exemptions (skip the check):
 #   - Dependabot PRs
 #   - PRs labeled: hotfix, standards-sync, automated
+#   - Release promotion PRs (base main, head develop) — the documented develop→main
+#     promotion carries accumulated work, not a single issue.
 #
 # Make it required: Settings → Branches → branch protection → require "Issue link".
 
@@ -30,6 +32,8 @@ jobs:
             && !contains(github.event.pull_request.labels.*.name, 'hotfix')
             && !contains(github.event.pull_request.labels.*.name, 'standards-sync')
             && !contains(github.event.pull_request.labels.*.name, 'automated')
+            && !(github.event.pull_request.base.ref == 'main'
+                 && github.event.pull_request.head.ref == 'develop')
         steps:
             - name: Require an issue reference in the PR body
               shell: bash
