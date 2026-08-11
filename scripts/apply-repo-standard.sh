@@ -106,6 +106,32 @@ deploy_hygiene() {
     fi
 }
 
+# The quality gate is a CANONICAL file, not a starter: templates/quality_gate.py is the
+# single source of truth and consumers converge on it. Create-if-absent was how 11 repos
+# ended up with 11 different parsers, one of which reported a repo at 42% coverage as 85%
+# and passed its own gate (shared-standards#274).
+#
+# A repo that deliberately EXTENDS the gate opts out by carrying the marker below on its
+# own copy — an explicit, greppable declaration rather than a hardcoded exception list
+# (guideline-checker adds a CommandSpec layer the canonical does not have).
+QUALITY_GATE_OPT_OUT="quality-gate: repo-managed"
+
+deploy_quality_gate() {
+    local repo="$1" src="$TPL/quality_gate.py" dest="$repo/scripts/quality_gate.py"
+    [[ -f "$src" ]] || { warn "template missing: quality_gate.py"; return 0; }
+    if [[ -f "$dest" ]] && grep -qF "$QUALITY_GATE_OPT_OUT" "$dest"; then
+        info "quality_gate.py: repo-managed (opt-out marker) · left untouched"
+        return 0
+    fi
+    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+        return 0
+    fi
+    if $DRY_RUN; then info "[dry-run] would sync $dest to the canonical quality gate"; return 0; fi
+    mkdir -p "$repo/scripts"
+    cp "$src" "$dest"
+    ok "quality_gate.py synced to canonical"
+}
+
 # Release tooling + repo meta. Create-if-absent only — never clobber an existing
 # CHANGELOG (real history), opencode.json, AGENTS.md, etc.
 deploy_release_tooling() {
@@ -241,13 +267,23 @@ find_pyprojects() {
     # Every pyproject that can own Python, not just the first: a monorepo may
     # carry backend/ and agent/ side by side, and returning one silently left
     # the other outside the rule set (measured on satisfactory-factory-manager).
-    local repo="$1" found=1 candidate
+    local repo="$1" found=1 has_root=1 candidate
     if [[ -f "$repo/pyproject.toml" ]]; then
         echo "$repo/pyproject.toml"
-        return 0
+        found=0 has_root=0
     fi
     for candidate in "$repo"/*/pyproject.toml; do
         [[ -f "$candidate" ]] || continue
+        # Returning at the root left a nested config that *shadows* it outside
+        # the rule set: Ruff resolves to the nearest pyproject that declares a
+        # [tool.ruff] section, so chrysa-portfolio-viz/backend — which declares
+        # five — escaped all 20 canonical codes while the root read as compliant.
+        # A nested file with no [tool.ruff] is skipped on purpose: it inherits
+        # the root's rules today, and writing a `select` into it would sever that
+        # inheritance and drop the root's other Ruff settings along with it.
+        if ((has_root == 0)) && ! grep -q '^\[tool\.ruff' "$candidate"; then
+            continue
+        fi
         echo "$candidate"
         found=0
     done
@@ -292,6 +328,7 @@ apply_one() {
     if $CHECK; then merge_precommit "$repo"; merge_ruff_rules "$repo"; return 0; fi
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
+    deploy_quality_gate "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"

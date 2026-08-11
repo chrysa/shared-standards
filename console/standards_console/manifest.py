@@ -48,16 +48,15 @@ def parse(text: str) -> list[RepoEntry]:
     data = _yaml().load(text)
     if not data or "repos" not in data:
         raise ManifestError("manifest has no `repos:` key")
-    entries: list[RepoEntry] = []
-    for item in data["repos"]:
-        entries.append(
-            RepoEntry(
-                name=str(item["name"]),
-                status=str(item.get("status", "")),
-                public=item.get("public"),
-                runtime=item.get("runtime"),
-            )
+    entries: list[RepoEntry] = [
+        RepoEntry(
+            name=str(item["name"]),
+            status=str(item.get("status", "")),
+            public=item.get("public"),
+            runtime=item.get("runtime"),
         )
+        for item in data["repos"]
+    ]
     return entries
 
 
