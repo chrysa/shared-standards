@@ -112,6 +112,12 @@ repos:
     language: system
     pass_filenames: false
     files: ^(cliff\.toml|templates/cliff\.toml)$
+  - id: quality-gate-canonical-drift
+    name: quality_gate.py canonical drift
+    entry: scripts/check-canonical-drift.sh scripts/quality_gate.py templates/quality_gate.py
+    language: system
+    pass_filenames: false
+    files: ^(scripts/quality_gate\.py|templates/quality_gate\.py)$
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan

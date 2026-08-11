@@ -154,8 +154,10 @@ HOOK_GROUPS = {
         "no-hardcoded-localhost",
         "regression-gate",
         # Detectors for the code-quality rules of the standards block. Measured dry
-        # across the 63 status:dev repos before arming: 47 untyped raises (13 of them
+        # on 2026-08-03 across the status:dev fleet (63 repos then, 59 today after the
+        # archived-flag reconciliations in #305 and #376): 47 untyped raises (13 of them
         # in tests, hence the baseline exclude), 5 dispatch ladders, 0 mutable defaults.
+        # Remediated to 0 in product code on 2026-08-05, re-verified on fresh clones.
         "python-untyped-raise",
         "python-mutable-default",
         "python-dispatch-ladder",

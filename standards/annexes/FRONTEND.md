@@ -214,6 +214,17 @@ These are stated in the socle and are not restated here:
 - i18n from V1 — **including error and fallback screens**, which are localised like any
   other surface (FE-050). Dates and numbers are formatted with the active locale (FE-051).
 
+### FE-052 — Every page ships a favicon and app icons
+
+Every web surface declares, in the document `<head>`, a **favicon** (SVG preferred, with an
+`.ico` fallback for legacy browsers), an **`apple-touch-icon`** for iOS home-screen use, and a
+**web app manifest** (`manifest.webmanifest` with `name`, `short_name`, `theme-color`,
+`background_color`, and PNG `icons` at 192 and 512 px). The icons are **real committed assets**
+referenced by the head — a `link rel="icon"` pointing at a 404 is a defect. The favicon is part
+of the **brand kit** (a design-system asset, not a per-repo afterthought) and, where the format
+allows (SVG with `prefers-color-scheme`), adapts to light and dark. A tab left showing the
+browser's default globe icon is an unfinished page.
+
 ______________________________________________________________________
 
 ## 6. Environment & configuration
@@ -243,6 +254,38 @@ This is the *loading* leg of the FE-037 triad made concrete, and it is what keep
 zero. Skeleton animation honours `prefers-reduced-motion`; a placeholder is marked
 `aria-busy="true"` on its container so assistive tech announces the pending state rather than
 reading empty boxes.
+
+______________________________________________________________________
+
+## 8. Reactivity & real-time
+
+### FE-080 — Reactive, real-time-first UI
+
+A surface reflects the current state of the system without a manual refresh. The rules:
+
+- **Server state lives in the cache library** (FE-032), never mirrored into component state. A
+  mutation **invalidates or optimistically updates** the queries it affects, so the view that
+  triggered a change and every other view reading the same data converge without a reload.
+- **Push over poll.** Data a *different* actor (another user, a job, a device) can change is
+  delivered over a live transport — **WebSocket or SSE** through a single client in the service
+  layer (FE-031) — and applied to the cache in place. Polling is a **bounded fallback** (fixed
+  interval, backoff, paused when the tab is hidden) used only where no push channel exists; an
+  unbounded or always-on poll against the backend is a defect.
+- **Immediate input feedback.** An action whose result is predictable updates the UI
+  **optimistically** and reconciles with the server response, rolling back visibly on error;
+  derived state recomputes reactively (memoised, debounced for high-frequency input) rather than
+  behind a blocking spinner. Sub-second work never shows a full-screen loader.
+- **Live, but honest.** The real-time layer sits **on top of** the loading/error/empty triad
+  (FE-037) and the API-down contract (FE-050): when the live channel drops, the UI shows the last
+  known state plus the reconnection banner and refetches on recovery — it does not freeze, and it
+  does not present stale data as current.
+- **Cross-tab & focus.** Live updates and cache invalidation propagate across the app's own
+  tabs/windows and on refocus (the socle *UI state survives reload & focus* rule), so a background
+  tab is never left showing a superseded view.
+
+The transport, reconnection, and backpressure details are a realtime concern shared with the
+backend contract; the frontend rule is that the **default posture is reactive** — a screen that
+needs a manual refresh to be correct has a bug, not a missing feature.
 
 ______________________________________________________________________
 

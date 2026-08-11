@@ -55,6 +55,18 @@ per repository.
 It lists the reusable workflows (purpose, inputs, outputs, runner) and draws the job graph of
 each entry point. A pipeline nobody can read is a pipeline nobody dares change, and it ossifies.
 
+### CI-006 — Every repo runs CI
+
+There is **no repository without CI**. Every repo has a workflow that runs its gate on every
+push and pull request to `develop`, and on every PR to `main`. What the gate runs scales with
+the `runtime:` tier (`repos.yml`): an **application** runs the full `make ci` (lint, typecheck,
+tests + coverage, build, quality gate); an **`exempt:lib`** runs its suite in a container
+(`docker-test`) plus lint; an **`exempt:config`** validates and lints what it ships (YAML,
+manifests) with no application gate; an **`exempt:native`** runs its tests where the host
+allows. The gate is the one a developer runs locally (`pre-commit`, `make ci`), invoked by glue
+— not re-implemented in YAML. A repo with no pipeline, or one whose check is green only because
+nothing ran, is a defect (`CI-040`, `CI-032`).
+
 ______________________________________________________________________
 
 ## 2. Supply chain
@@ -277,6 +289,22 @@ notices until a user asks what changed.
 The artefact tested is the artefact deployed — the same image digest moves through the
 environments. Rebuilding per environment means production runs something no test ever saw.
 
+### CI-047 — Every deployable product ships continuous delivery
+
+Where a product is meant to run somewhere, its deployment is a **pipeline, not a person**. A
+**deployable product** (`runtime: container` — a service or an app) has a **CD workflow** that,
+on the release of `main` (or a tagged release), deploys the already-tested promoted artefact
+(`CI-046`) to its environment automatically — gated by an `environment:` with its reviewers
+(`CI-023`) and using the deploy concurrency group that never cancels a deploy mid-flight
+(`CI-031`). No manual deploy from a laptop, no hand-copied image tag. A **distributable library**
+delivers by **publishing its package** (GHCR / PyPI via OIDC Trusted Publishing) as its CD;
+`exempt:config` and `exempt:native` repos have no CD. "When needed" is the test: a product that
+is *released* but reaches production by a human running commands is missing its CD. What CD puts
+in production **announces its version** — the deployed service and frontend surface the running
+application version, image digest and environment, as already required by the socle's *the
+container is versioned separately … an admin can see what is actually deployed* rule — so a
+deploy is observable, never a silent swap.
+
 ______________________________________________________________________
 
 ## 6. Feedback
@@ -298,6 +326,15 @@ actually feel.
 Retention matches the debugging window, not the platform default. Unowned artefacts are a
 storage bill nobody reads and a search that returns forty identically named files.
 
+### CI-053 — Performance and cost budgets
+
+Each profile declares explicit **budgets** — frontend bundle, Docker image size, startup
+time, memory, CPU, latency, throughput, storage, and log volume — and the pipeline measures
+them and **blocks significant regressions** (`info` → `warning` → `error`, like every other
+gate). AI paths additionally budget **tokens, cost, latency, concurrency, and cache**. A
+budget overrun is never silently accepted: it carries a justification, an impact measurement,
+and a reduction plan.
+
 ______________________________________________________________________
 
 ## 7. Review checklist
@@ -313,6 +350,7 @@ A workflow change is reviewable against this list in under a minute:
 7. Is the runner choice justified by the workload? (CI-035)
 8. New gate: does a failure mean the code is wrong? (CI-040)
 9. Does a skipped job report as skipped, never as passed? (CI-032)
+10. Are the profile's performance and cost budgets measured, with regressions blocked? (CI-053)
 
 ______________________________________________________________________
 
@@ -324,7 +362,9 @@ ______________________________________________________________________
 | CI-020, CI-021, CI-022 | reviewed in pull request; grep-able patterns, candidates for a hook |
 | CI-030, CI-031 | reviewed in pull request |
 | CI-004, CI-003 | fleet audit script over the workflow corpus |
+| CI-006, CI-047 | fleet audit: every repo has a CI workflow; every `runtime: container` repo has a CD workflow |
 | CI-040 | any permanently red check is an issue with an owner |
+| CI-053 | per-profile budget file; CI measures and blocks significant regressions |
 
 Rules not yet mechanised are declared as manually reviewed — a rule claiming automation with no
 check behind it is misdeclared (`GOVERNANCE.md` GV-012).
