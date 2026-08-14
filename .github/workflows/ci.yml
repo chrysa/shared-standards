@@ -148,7 +148,7 @@ jobs:
                   name: web-coverage-lcov
                   path: console/web/coverage
 
-            - uses: chrysa/github-actions/sonar-scan-python@v1.7.0
+            - uses: chrysa/github-actions/sonar-scan-python@v1.8.1
               with:
                   python-version: "3.14"
                   sonar-token: ${{ secrets.SONAR_TOKEN }}
