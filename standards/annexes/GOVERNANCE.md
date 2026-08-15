@@ -64,7 +64,11 @@ a **domain** `STD-<DOMAIN>-nnn` is the unit of governance, adoption status, owne
 priority (what Notion tracks and a PRD references); a **rule** `XX-nnn` is a single
 deterministic rule under a stable two-letter prefix owned by one home. Every `STD-*` domain
 maps to **exactly one home** (a normative annexe, or the socle for cross-cutting rules) and to
-**one rule prefix**. This table is the single source of truth for that correspondence:
+**one rule prefix**. This table is the single source of truth for that correspondence, and it
+is published in machine-readable form at [`standards/domains.yaml`](../domains.yaml) — consumers
+(the `project-init` standards profiles, `guideline-checker`, the Standards Hub) read that data
+file rather than hand-mirroring this prose. Edit the two together; a drift check keeps them one
+source in two forms.
 
 | Domain (`STD-*`)     | Home (annexe / socle)                     | Rule prefix |
 | -------------------- | ----------------------------------------- | ----------- |
