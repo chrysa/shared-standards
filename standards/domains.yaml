@@ -1,0 +1,74 @@
+domains:
+- home: standards/annexes/GOVERNANCE.md
+  id: STD-GOV-001
+  prefix: GV-
+  priority: P0
+  status: Adopted
+  title: Standards governance & lifecycle
+- home: standards/annexes/DATA-MIGRATIONS.md
+  id: STD-DATA-001
+  prefix: DA-
+  priority: P0
+  status: Adopted
+  title: Data, persistence & migrations
+- home: standards/annexes/OBSERVABILITY-OPS.md
+  id: STD-OPS-001
+  prefix: OP-
+  priority: P0
+  status: Adopted
+  title: Observability & production readiness
+- home: standards/annexes/API-CONTRACTS.md
+  id: STD-API-001
+  prefix: AP-
+  priority: P0
+  status: Adopted
+  title: API, SDK & public contracts
+- home: standards/annexes/CI-CD.md
+  id: STD-SUPPLY-001
+  prefix: CI-
+  priority: P0
+  status: Adopted
+  title: Software supply-chain security
+- home: standards/annexes/CI-CD.md
+  id: STD-DEPLOY-001
+  prefix: CI-
+  priority: P1
+  status: Adopted
+  title: Deployment & artefact promotion
+- home: standards/annexes/GOVERNANCE.md
+  id: STD-PRIVACY-001
+  prefix: GV-
+  priority: P1
+  status: Adopted
+  title: Privacy & personal data
+- home: standards/annexes/FRONTEND.md
+  id: STD-UX-STATE-001
+  prefix: FE-
+  priority: P1
+  status: Adopted
+  title: Behavioural UI states
+- home: socle
+  id: STD-CONFIG-001
+  prefix: socle
+  priority: P1
+  status: Adopted
+  title: Configuration & feature flags
+- home: standards/annexes/TESTING.md
+  id: STD-TEST-001
+  prefix: TS-
+  priority: P1
+  status: Adopted
+  title: Risk-based testing
+- home: standards/annexes/CI-CD.md
+  id: STD-PERF-001
+  prefix: CI-
+  priority: P2
+  status: Adopted
+  title: Performance & cost budgets
+- home: standards/annexes/AGENTIC-CAPABILITIES.md
+  id: STD-AI-QUALITY-001
+  prefix: AG-
+  priority: P2
+  status: Adopted
+  title: AI feature quality
+version: 1
