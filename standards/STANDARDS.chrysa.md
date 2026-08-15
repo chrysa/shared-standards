@@ -118,6 +118,19 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   boundaries; external data validated at **runtime** even when typed; contract types
   generated from OpenAPI/AsyncAPI, never hand-copied. One committed lockfile, frozen CI
   installs, no `latest` dependency. Detail: annexe `FRONTEND.md` §1.
+- **The JS/TS package manager is `pnpm` — `npm` and `yarn` are forbidden.** Every
+  Node/TypeScript repo (app, library, workspace, tooling) installs, runs scripts, and
+  resolves dependencies with **pnpm**. Concretely: the committed lockfile is
+  **`pnpm-lock.yaml`** (a `package-lock.json` or `yarn.lock` in the tree is a defect — delete
+  it and regenerate with pnpm), workspaces are pnpm workspaces (`pnpm-workspace.yaml`) under
+  Turborepo, CI installs with **`pnpm install --frozen-lockfile`** (never `npm ci`), images
+  install with pnpm in the builder stage, and scripts run as `pnpm <script>` / `pnpm dlx`
+  (never `npm run` / `npx`). The version is pinned via `packageManager` in `package.json` and
+  provisioned by Corepack, so every machine and runner resolves the same pnpm. This makes
+  *one committed lockfile* and *no host installs* concrete for the JS side: the lockfile is
+  `pnpm-lock.yaml`, `node_modules` stays a pnpm-managed build output (see *dependency
+  directories are a build output*), never materialised on the host. The only `npm` left
+  anywhere is the registry it talks to; the command is always `pnpm`.
 - **React is a presentation layer, not the domain.** `domain/` and `application/` never
   import React; no `fetch`, browser storage, or vendor SDK in `domain/`. Components and hooks
   stay pure, props/state immutable, derived state computed rather than duplicated;
