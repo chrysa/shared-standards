@@ -27,6 +27,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `PROJECT-DECOUPLING.md`   | inter-project contracts, forbidden linkages, degradation        |
 | `CONTAINERS-K3S.md`       | reference stage shape · container responsibility · k3s workload baseline |
 | `DATA-MIGRATIONS.md`      | data ownership & classification · versioned schemas · safe migrations · rollback · retention/export |
+| `OBSERVABILITY-OPS.md`    | probes · OpenTelemetry (replaceable backend) · alerts+runbooks · SLI/SLO · resource envelope · `/version` · production-ready gate |
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
@@ -529,6 +530,15 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   restore-tested, and data is exportable to an open format with no vendor lock-in. Full rules and
   gates: annexe [`DATA-MIGRATIONS.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/DATA-MIGRATIONS.md)
   (`DA-nnn`).
+- **Observability & production readiness follow the `STD-OPS-001` contract.** A deployable
+  service exposes startup/liveness/readiness probes, emits structured logs + metrics + traces
+  correlated through a common id via **OpenTelemetry with a replaceable backend**, and ships an
+  actionable alert + owner + runbook per principal incident. Resource limits and saturation
+  behaviour are explicit; graceful shutdown, restart recovery and dependency-loss are tested;
+  backup/restore/rollback/degraded mode are documented before the first prod deploy; and the
+  service publishes `/version`. Full rules and the Production-Ready gate: annexe
+  [`OBSERVABILITY-OPS.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/OBSERVABILITY-OPS.md)
+  (`OP-nnn`).
 - **External dependencies are installed in containers, never on the host.** A project's
   runtime dependencies — language packages (pip/npm/cargo/nuget), databases, brokers, caches,
   system libraries, compilers, CLIs a service shells out to — are declared in the image
