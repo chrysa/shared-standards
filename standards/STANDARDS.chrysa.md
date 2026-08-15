@@ -28,6 +28,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `CONTAINERS-K3S.md`       | reference stage shape · container responsibility · k3s workload baseline |
 | `DATA-MIGRATIONS.md`      | data ownership & classification · versioned schemas · safe migrations · rollback · retention/export |
 | `OBSERVABILITY-OPS.md`    | probes · OpenTelemetry (replaceable backend) · alerts+runbooks · SLI/SLO · resource envelope · `/version` · production-ready gate |
+| `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · idempotency · contract tests · events/webhooks |
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
@@ -539,6 +540,16 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   service publishes `/version`. Full rules and the Production-Ready gate: annexe
   [`OBSERVABILITY-OPS.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/OBSERVABILITY-OPS.md)
   (`OP-nnn`).
+- **APIs, SDKs & public contracts follow the `STD-API-001` contract.** A machine-readable
+  contract (OpenAPI/AsyncAPI/JSON Schema) is the canonical interface; public versions are
+  explicit with a backward-compatibility guarantee and a dated deprecation policy; errors are
+  typed with a machine code + correlation id; collections paginate by cursor; critical writes
+  are idempotent; guards (timeouts, sizes, authz) live in the contract; inter-project contracts
+  are tested provider **and** consumer side; SDKs track the public contract, never internal
+  models; and events/webhooks are identified, versioned, signed, replay-protected, with bounded
+  retry + dead-letter. Full rules and gates: annexe
+  [`API-CONTRACTS.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/API-CONTRACTS.md)
+  (`AP-nnn`) and the `api-design` skill.
 - **External dependencies are installed in containers, never on the host.** A project's
   runtime dependencies — language packages (pip/npm/cargo/nuget), databases, brokers, caches,
   system libraries, compilers, CLIs a service shells out to — are declared in the image

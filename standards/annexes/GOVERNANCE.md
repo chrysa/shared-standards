@@ -71,7 +71,7 @@ maps to **exactly one home** (a normative annexe, or the socle for cross-cutting
 | `STD-GOV-001`        | `GOVERNANCE.md`                           | `GV-`       |
 | `STD-DATA-001`       | `DATA-MIGRATIONS.md`                      | `DA-`       |
 | `STD-OPS-001`        | `OBSERVABILITY-OPS.md`                    | `OP-`       |
-| `STD-API-001`        | `API-CONTRACTS.md` (pending — Wave 2)     | `AP-`       |
+| `STD-API-001`        | `API-CONTRACTS.md`                        | `AP-`       |
 | `STD-SUPPLY-001`     | `CI-CD.md` (supply-chain section)         | `CI-`       |
 | `STD-DEPLOY-001`     | `CI-CD.md` / `CONTAINERS-K3S.md`          | `CI-`/`CT-` |
 | `STD-PRIVACY-001`    | `GOVERNANCE.md` (GV-040) + socle          | `GV-`       |
