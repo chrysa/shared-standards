@@ -348,6 +348,49 @@ deploy is observable, never a silent swap.
 
 ______________________________________________________________________
 
+## 5b. Deployment & promotion
+
+> **`STD-DEPLOY-001` — deployment & artefact promotion.** Its executable home is CI-046, CI-047
+> (above) plus CI-060…CI-064 here (GV-015). Runtime/rollout topology detail lives in
+> [`CONTAINERS-K3S.md`](CONTAINERS-K3S.md).
+
+### CI-060 — Configuration is injected at deploy, separate from the image
+
+The promoted artefact carries no environment-specific configuration: config is **injected at
+deploy time** and kept separate from the image, so the same digest runs unchanged from local to
+prod (*build once, promote the artefact*, CI-046). External endpoints and secrets arrive by
+environment, never baked into the image (socle *external servers addressed through the
+environment*).
+
+### CI-061 — Migrations run in a distinct, observable, controlled job
+
+Schema migrations execute in their **own deployment job** — observable, ordered, and gated —
+never silently inside application boot. The migration follows the data-side safety rules
+([`DATA-MIGRATIONS.md`](DATA-MIGRATIONS.md) DA-010, DA-011, DA-020); this rule mandates that its
+*execution* is a controlled step, not a side effect of the first pod starting.
+
+### CI-062 — Readiness before traffic, and post-deploy validation
+
+A new version receives traffic only after its readiness probe passes (OP-000), shuts down
+gracefully (OP-031), and the deploy runs a **post-deploy validation** (smoke check / health
+assertion) before it is declared done. A deploy with no post-check is a hope, not a release.
+
+### CI-063 — Progressive rollout for critical services; flags separate deploy from activation
+
+Critical services roll out **progressively** (canary / staged / blue-green), and **feature
+flags separate deployment from activation** — code ships dark and is turned on independently, so
+a rollback of *activation* needs no redeploy. Flag lifecycle follows the socle config rules
+(owner, expiry, removal).
+
+### CI-064 — A rollback path exists and prior versions are retained; no opaque manual deploy
+
+Every production deploy has a documented **rollback path**, and prior artefact versions are
+**retained per the retention policy** (CI-052) so rollback is immediate (OP-032). No opaque
+manual production change: an exceptional hand intervention is **audited**, never a silent
+`kubectl edit` that no record explains (mirrors CI-047).
+
+______________________________________________________________________
+
 ## 6. Feedback
 
 ### CI-050 — Notify on what people act on
