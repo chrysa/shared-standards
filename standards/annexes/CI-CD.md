@@ -108,6 +108,47 @@ The first choice is a maintained public action (checkout, language setup, build-
 artifact upload). Re-implementing caching, toolchain setup or publishing in a `run:` block is a
 defect; "it's shorter this way" is not a reason.
 
+> **`STD-SUPPLY-001` — software supply-chain security.** Rules CI-010…CI-019 are the executable
+> home of the supply-chain domain (GV-015). They cover pinning (CI-010, CI-011, CI-015),
+> provenance & signing (CI-019), inventory (CI-016), scanning & remediation (CI-017, CI-018),
+> and least-privilege publishing (CI-013, CI-024). Numeric remediation windows live in the
+> per-repo contract (GV-030).
+
+### CI-015 — Production images are pinned by version, critical components by digest
+
+A production image references an immutable version tag, and a **critical** component
+(base runtime, security-sensitive dependency) is additionally pinned by **digest**
+(`image@sha256:…`). A bare `:latest` in a deployed manifest is a defect (mirrors *build once,
+promote the artefact*, CI-046).
+
+### CI-016 — An SBOM is generated for every distributed release
+
+Every release that ships an artefact or image produces a **Software Bill of Materials** (SPDX
+or CycloneDX), attached to the release. A distributed build with no inventory of what it
+contains cannot be audited when a dependency is later found vulnerable.
+
+### CI-017 — Vulnerability, secret, PII and license scans run in CI
+
+The pipeline scans, per the repo's `runtime:` profile, for **vulnerabilities, leaked secrets,
+PII, and license violations**. License policy is an explicit **allowlist / denylist** with a
+review step on any license change — a dependency that changes to a forbidden license is a
+finding, not a silent update.
+
+### CI-018 — Remediation deadlines are defined by severity and exposure
+
+A finding from CI-017 carries a **fix deadline set by its severity and exposure** (a
+critical vuln on an internet-facing service is not the same clock as a low on an internal
+tool). The windows live in the per-repo contract (GV-030); this rule mandates that they exist,
+are owned, and are tracked — an ageing critical with no owner is the defect.
+
+### CI-019 — Publish only from controlled CI; sign artefacts, images & provenance
+
+Artefacts and images are published **only from a controlled CI pipeline**, never a laptop, and
+are **signed** with their **provenance attestation** (SLSA-style: what commit, which builder,
+which inputs) where the toolchain allows (Sigstore/cosign, `pypa/gh-action-pypi-publish` OIDC).
+Builds are **reproducible, or at minimum traceable** to the commit, the standards profile and
+the resolved dependencies that produced them.
+
 ______________________________________________________________________
 
 ## 3. Least privilege
