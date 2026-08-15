@@ -1,0 +1,6 @@
+{
+  "mode": "verify",
+  "overall": "SKIP",
+  "reason": "no_baseline",
+  "baseline_file": ".quality-gate-baseline.json"
+}
