@@ -118,6 +118,14 @@ repos:
     language: system
     pass_filenames: false
     files: ^(scripts/quality_gate\.py|templates/quality_gate\.py)$
+  - id: domains-drift
+    name: GV-015 table vs standards/domains.yaml drift
+    entry: python -m scripts.check_domains_drift
+    language: python
+    pass_filenames: false
+    files: ^(standards/domains\.yaml|standards/annexes/GOVERNANCE\.md)$
+    additional_dependencies:
+    - pyyaml==6.0.2
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan
