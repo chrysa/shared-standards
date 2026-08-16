@@ -57,6 +57,41 @@ An exception requires an ADR, a named owner, and an **expiry date**.
 Rules are versioned and may be deprecated with a migration window. Each repo exposes the
 standards version it applies.
 
+### GV-015 — `STD-*` domain aliases
+
+The corpus is identified at two altitudes (ADR [`D-0010`](../../docs/adr/D-0010-standards-id-taxonomy.md)):
+a **domain** `STD-<DOMAIN>-nnn` is the unit of governance, adoption status, ownership and
+priority (what Notion tracks and a PRD references); a **rule** `XX-nnn` is a single
+deterministic rule under a stable two-letter prefix owned by one home. Every `STD-*` domain
+maps to **exactly one home** (a normative annexe, or the socle for cross-cutting rules) and to
+**one rule prefix**. This table is the single source of truth for that correspondence, and it
+is published in machine-readable form at [`standards/domains.yaml`](../domains.yaml) — consumers
+(the `project-init` standards profiles, `guideline-checker`, the Standards Hub) read that data
+file rather than hand-mirroring this prose. Edit the two together; a drift check keeps them one
+source in two forms.
+
+| Domain (`STD-*`)     | Home (annexe / socle)                     | Rule prefix |
+| -------------------- | ----------------------------------------- | ----------- |
+| `STD-GOV-001`        | `GOVERNANCE.md`                           | `GV-`       |
+| `STD-DATA-001`       | `DATA-MIGRATIONS.md`                      | `DA-`       |
+| `STD-OPS-001`        | `OBSERVABILITY-OPS.md`                    | `OP-`       |
+| `STD-API-001`        | `API-CONTRACTS.md`                        | `AP-`       |
+| `STD-SUPPLY-001`     | `CI-CD.md` (supply-chain section)         | `CI-`       |
+| `STD-DEPLOY-001`     | `CI-CD.md` / `CONTAINERS-K3S.md`          | `CI-`/`CT-` |
+| `STD-PRIVACY-001`    | `GOVERNANCE.md` (GV-040) + socle          | `GV-`       |
+| `STD-UX-STATE-001`   | `FRONTEND.md`                             | `FE-`       |
+| `STD-CONFIG-001`     | socle (config rules)                      | socle       |
+| `STD-TEST-001`       | `TESTING.md`                              | `TS-`       |
+| `STD-PERF-001`       | `CI-CD.md` (CI-053)                       | `CI-`       |
+| `STD-AI-QUALITY-001` | `AGENTIC-CAPABILITIES.md`                 | `AG-`       |
+
+A `STD-*` domain whose home is `pending` (no annexe implements it yet) is a **ghost domain** —
+it governs nothing and **must not be marked `Adopted`** (in the repo or in Notion). This is the
+domain-tier extension of GV-001 (ghost rule): a governance unit is real only when an executable
+home implements it. A prefix is shared across domains only where those domains genuinely share
+one home annexe (e.g. `CI-` across supply-chain, deploy and perf inside `CI-CD.md`); the domain
+id disambiguates the governance unit, the rule id stays unique within its home (GV-010).
+
 ______________________________________________________________________
 
 ## 3. Maturity ladder
