@@ -77,7 +77,7 @@ source in two forms.
 | `STD-OPS-001`        | `OBSERVABILITY-OPS.md`                    | `OP-`       |
 | `STD-API-001`        | `API-CONTRACTS.md`                        | `AP-`       |
 | `STD-SUPPLY-001`     | `CI-CD.md` (supply-chain section)         | `CI-`       |
-| `STD-DEPLOY-001`     | `CI-CD.md` / `CONTAINERS-K3S.md`          | `CI-`/`CT-` |
+| `STD-DEPLOY-001`     | `CI-CD.md`                                | `CI-`       |
 | `STD-PRIVACY-001`    | `GOVERNANCE.md` (GV-040) + socle          | `GV-`       |
 | `STD-UX-STATE-001`   | `FRONTEND.md`                             | `FE-`       |
 | `STD-CONFIG-001`     | socle (config rules)                      | socle       |
