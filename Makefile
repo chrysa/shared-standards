@@ -1,5 +1,5 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov docker-test lint format typecheck build clean pre-commit
+.PHONY: help install dev test test-cov docker-test lint format typecheck build clean pre-commit ci
 
 help:
 	@echo "Available targets:"
@@ -49,6 +49,9 @@ clean:
 
 pre-commit:
 	pre-commit run --all-files
+
+ci: lint typecheck test ## Run the repo CI gate (lint + typecheck + test)
+	@echo "CI gate passed."
 
 # ── Quality Gates ──────────────────────────────────────────────────────────────
 
