@@ -27,9 +27,12 @@ repos:
 - hooks:
   - id: makefile-check
   # --- generic (all repos) ---
-  # Lock files are machine-generated: reordering their keys can invalidate
-  # dependency resolution, so they are never sorted.
-  - exclude: ^(\.github/|workflows/|templates/)|(^|/)(pnpm-lock|yarn|uv|poetry)\.(yaml|lock)$
+  # Never key-sort: GitHub workflows (PyYAML coerces `on:` to True), distributed
+  # templates, authored compose files, machine-generated lock files (reordering
+  # can invalidate dependency resolution), and `.pre-commit-config.yaml` itself —
+  # a hook must not reorder the file that configures it (its order is authored:
+  # repo → rev → hooks).
+  - exclude: ^(\.github/|workflows/|templates/|docker-compose)|(^|/)(pnpm-lock|yarn|uv|poetry)\.(yaml|lock)$|(^|/)\.pre-commit-config\.yaml$
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check

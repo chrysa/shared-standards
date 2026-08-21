@@ -233,6 +233,11 @@ EXCLUDE_ALIGNED_IDS = {
     "python-untyped-raise",
     "fastapi-missing-response-model",
     "fastapi-missing-links",
+    # yaml-sorter's exclude is policy: it must always skip workflows, lock files
+    # and `.pre-commit-config.yaml`. A repo that carries an older, narrower exclude
+    # (missing the config, so the sorter rewrites it on every run) is corrected by
+    # the baseline instead of drifting forever.
+    "yaml-sorter",
 }
 
 # `repo: local` hooks reference repo-relative scripts/files (e.g. the canonical-drift
