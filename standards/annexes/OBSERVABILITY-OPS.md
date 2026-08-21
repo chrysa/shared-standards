@@ -60,6 +60,31 @@ An alert nobody acts on trains everyone to ignore the board — it is tuned to b
 removed. A permanently-firing or permanently-muted alert is a defect (mirrors TS-004 for tests
 and CI-040 for red checks).
 
+### OP-023 — Dashboards are code
+
+A dashboard is a **versioned definition in a single-source artifact**, not a view hand-built in
+the monitoring tool's UI. The rules:
+
+- **Source of truth in git.** The dashboard's native machine definition (its exported
+  JSON/model) lives in a repository and is the only authority. A change made directly in the
+  running tool that is not in the repo is **drift**, reconciled back to the repo (never the
+  reverse) — the same GV-000 discipline the standards corpus applies to itself.
+- **Mandated metadata.** Each definition carries a **stable machine id**, the **schema/format
+  version** it targets, ownership/domain **tags**, and **templating variables** for the
+  environment axes (cluster / namespace / instance) so one definition serves every environment
+  rather than a copy per env. The concrete field names and the schema version are the
+  monitoring tool's contract, declared per-repo (GV-030), not restated here.
+- **Deployed by GitOps.** A merge to the source branch is what updates the deployed dashboards
+  (provisioning / a sync step applies the definition); no human clicks "save" in production.
+  This is the observability-tier expression of the socle *k8s config in-project* pillar —
+  nothing that shapes what operators see exists only inside a running tool.
+- **One canonical definition per view, organised by domain** (core / infrastructure / service /
+  third-party), so a metric has one board, not five divergent copies (mirrors *no code
+  duplication*).
+
+A dashboard that exists only in the tool, or drifts from its committed definition, is a defect —
+it cannot be reviewed, reproduced in a fresh environment, or restored after the tool is lost.
+
 ______________________________________________________________________
 
 ## 4. Resource envelope & resilience
