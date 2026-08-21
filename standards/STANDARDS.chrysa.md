@@ -940,13 +940,19 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      a single pass instead of repeated traversals of the same collection.
   2. **No work in a loop that is loop-invariant** — hoist the constant computation, the compiled
      regex, the config read, the connection setup.
-  3. **No N+1** — database queries and network/API calls are batched or eager-loaded
-     (`selectinload`/`joinedload`, bulk endpoints); a query inside a `for` over rows is a defect.
-     Frontend equivalent: no request per list item, no re-render per keystroke without debounce,
-     no unmemoised derived state recomputed on every render.
+  3. **No N+1, and query the store efficiently** — database queries and network/API calls are
+     batched or eager-loaded (`selectinload`/`joinedload`, bulk endpoints); a query inside a `for`
+     over rows is a defect. In the same spirit: an **existence check** uses a dedicated exists-query,
+     never a full fetch then a length; **writes are batched** (bulk create/update) instead of a loop
+     of single-row writes; only the **columns/fields actually used** are selected (projection, not
+     `SELECT *` into an object graph); and **aggregation runs in the store**, not a Python/JS loop
+     summing rows the app just pulled over the wire. Frontend equivalent: no request per list item,
+     no re-render per keystroke without debounce, no unmemoised derived state recomputed on every
+     render.
   4. **Bounded resources** — no unbounded `SELECT *` / unpaginated list endpoint, no full-file read
      of arbitrary-size input (stream it), explicit timeouts on every outbound call, connections and
-     file handles closed via context managers.
+     file handles closed via context managers. Every column used to **filter or sort a large table
+     is indexed** — an unindexed predicate on a growing table is a latent full scan.
   5. **Known anti-patterns are named and rejected**: god object/function, copy-paste duplication
      (factor into `chrysa-lib` — see *no code duplication*), boolean trap parameters, primitive
      obsession over a value object, deep nesting (guard clauses instead), mutable default arguments,
