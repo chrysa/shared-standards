@@ -320,6 +320,36 @@ reads as success. The rules:
 
 ______________________________________________________________________
 
+## 9. Gates
+
+The **loading-state trio** (FE-037 triad · FE-038 global progress · FE-070 shape-accurate
+placeholder) is not a matter of taste — a surface that fetches and shows nothing, a spinner that
+never resolves, or content that jumps in and reflows the page are the failures these rules exist to
+prevent. They are therefore **mechanised**, and, per GV-020, land as `info` before any promotion to
+`warning`/`error`:
+
+| Gate | Rule | Mode (this wave) |
+| ---- | ---- | ---------------- |
+| A data container has no explicit **empty** and **error** branch (happy-path only) | FE-037 | `guideline-checker` · **info** |
+| No single **global progress indicator** wired to the API client at the root shell | FE-038 | `guideline-checker` · **info** |
+| A fetching/lazy container renders a **spinner or bare area** instead of a shape-accurate skeleton | FE-070 | `guideline-checker` · **info** |
+| A skeleton/media box does not reserve its final size (measurable **CLS**) | FE-070 | Lighthouse/CI budget (CI-053) |
+| Skeleton or progress motion ignores `prefers-reduced-motion`; placeholder missing `aria-busy` | FE-037/038/070 | axe / a11y check |
+
+Two of these are directly measurable and enforced today, not just heuristic: **CLS** is a
+performance budget (CI-053) — a placeholder that does not reserve its box regresses it and blocks;
+and the **a11y** obligations (`aria-busy`, `prefers-reduced-motion`) are caught by the axe/keyboard
+pass already required (Lighthouse a11y ≥ 90). The three structural detectors (FE-037/038/070) are
+heuristic and therefore `info` — they flag the likely defect for a human to confirm, and are
+promoted per GV-020 as the fleet's debt clears; they are never a silent green.
+
+A frontend **Definition of Done** already names these states (FE-037/038/070); this section makes
+"named in the DoD" enforceable rather than aspirational — a PR that ships a fetching surface with
+no error/empty branch, no skeleton, or a layout-shifting placeholder is a defect the gate surfaces,
+not a style note left to review.
+
+______________________________________________________________________
+
 ## Deferred (not canon yet)
 
 Listed so they are not silently lost — these need an arbitration before becoming rules:
