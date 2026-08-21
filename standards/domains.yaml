@@ -77,4 +77,10 @@ domains:
   priority: P2
   status: Adopted
   title: Type-driven issues & pull requests
+- home: standards/annexes/EVENTING.md
+  id: STD-EVENTING-001
+  prefix: EV-
+  priority: P2
+  status: Adopted
+  title: Eventing & real-time streaming
 version: 1
