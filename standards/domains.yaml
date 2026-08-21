@@ -71,4 +71,10 @@ domains:
   priority: P2
   status: Adopted
   title: AI feature quality
+- home: standards/annexes/SCM.md
+  id: STD-SCM-001
+  prefix: SC-
+  priority: P2
+  status: Adopted
+  title: Type-driven issues & pull requests
 version: 1
