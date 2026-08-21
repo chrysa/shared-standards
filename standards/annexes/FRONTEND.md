@@ -287,11 +287,42 @@ The transport, reconnection, and backpressure details are a realtime concern sha
 backend contract; the frontend rule is that the **default posture is reactive** — a screen that
 needs a manual refresh to be correct has a bug, not a missing feature.
 
+### FE-081 — Every data-mutating interaction confirms its outcome (toast)
+
+Any interaction that **mutates server data** — a create/update/delete, a form submission, a
+toggle, a reorder, a retryable action, an agent action that writes — **confirms its outcome with
+a transient toast, on success *and* on failure**. Silence is a defect: a mutation that returns
+nothing leaves the user unable to tell whether it worked, and a swallowed failure is worse — it
+reads as success. The rules:
+
+- **Both outcomes, always.** Success emits a short toast stating what happened
+  (*"Project archived"*). Failure emits a toast that says **what failed and what to do**, drawn
+  from the typed error's user-facing message (error-taxonomy contract) — **never** a raw status
+  code, stack trace, or internal path. A `4xx` the user can fix (*"Name already taken — pick
+  another"*) reads differently from a transient `5xx` (*"Couldn't save — try again"*), and the
+  toast carries a **retry** where the action is retryable.
+- **Distinct from optimistic UI (FE-080).** The optimistic update shows the user's *intent*; the
+  toast confirms the *server outcome*. On failure the visible rollback is **announced by the
+  failure toast**, not left as a silent revert the user may miss.
+- **Classified failures defer to the global surface.** A failure that is really an outage or
+  session loss is classified by the API client (FE-050/FE-030) and shown by the **root banner**,
+  not duplicated as a per-action toast; the toast covers the *action-scoped* outcome.
+- **One surface, accessible.** Toasts route through a **single app-level notification surface**
+  with consistent placement — success is a `role="status"` live region, failure is
+  `role="alert"`; toasts are keyboard-dismissible, never steal focus, honour
+  `prefers-reduced-motion`, and their auto-dismiss duration, max stack, and easing come from the
+  **motion/design-token contract** (no literal in component code — socle *no hardcoded constants*).
+  A failure toast is **persistent or long enough to read and act on**, never auto-dismissed before
+  the user can react.
+- **Testable.** The Definition of Done for a mutating surface includes **both** its success and
+  its failure toast, asserted through the accessible tree against a happy path and an injected
+  error (FE-040/FE-041).
+
 ______________________________________________________________________
 
 ## Deferred (not canon yet)
 
 Listed so they are not silently lost — these need an arbitration before becoming rules:
-cache-key factory, centralised permission gating hook, single notification service,
+cache-key factory, centralised permission gating hook,
 route-level code splitting, systematic cache invalidation on mutation, single canonical
 location per component, compiler-managed memoisation, single auth source of truth.
