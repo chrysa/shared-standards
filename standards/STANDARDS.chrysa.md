@@ -31,6 +31,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · idempotency · contract tests · events/webhooks |
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
+| `SCM.md`                  | type-driven issues & pull requests · taxonomy & labels · per-type templates · shape gates |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
 
 **Source of truth:** the canon lives in this repo. Notion is a governance and decision view
@@ -96,6 +97,14 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
+- **Issues and PRs are type-driven.** Every issue declares exactly one **type** from a fixed
+  taxonomy (bug · feature · enhancement · chore · docs · ci · security · research · epic),
+  carried as a canonical label and backed by a committed per-type issue form; every PR's type is
+  its Conventional Commit type, and its body carries the fields that type needs (a `fix` shows the
+  root cause + a regression test, a `feat` its acceptance criteria + a UI proof, a `refactor` a
+  no-behaviour-change attestation, a `perf` a before/after measurement). Templates and labels are
+  socle-distributed, not per-repo inventions, and the shape is machine-checked (info-first). A
+  free-text issue or a one-line PR is a defect. Detail: annexe `SCM.md` (`SC-nnn`).
 - **Repo provenance — every code repo depends on `project-init`.** A repository is
   **created by** the `project-init` / `chrysa-init` CLI (shared-standards) at birth **and
   kept in sync** with it thereafter: the scaffolded socle (Makefile contract, docs skeleton,
