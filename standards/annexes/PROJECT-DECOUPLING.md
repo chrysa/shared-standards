@@ -53,6 +53,34 @@ When a service becomes unavailable or deprecated, the consumer fails cleanly, di
 affected capability, or switches to an alternative adapter — without compromising its core
 function.
 
+### DC-009 — Interchangeable external integrations go through a validated registry
+
+When a product integrates **several interchangeable external systems of the same kind** — payment
+providers, LLM providers (the `chrysa-LLM` gateway is the fleet instance of this), map/telemetry
+vendors, notification channels, identity providers — the set is a **registry**, not a switch
+statement. Each integration is:
+
+- an **isolated module** (one per provider), never a branch in shared code — adding a provider
+  adds a file, it never edits the dispatch logic (the socle *prefer a lookup table to a state
+  machine* rule applied to integrations);
+- configured by a **schema-validated** settings object, validated at load (external config is
+  validated at runtime even when typed — socle rule), never trusted raw;
+- **registered declaratively** (a registration decorator / a registry entry) and found by
+  **autodiscovery** — there is no hand-maintained list of providers to edit when one is added
+  or removed;
+- reached only through a **single abstract contract** (the port, in the domain's language, per
+  pillar 5) with **mandatory methods and explicit optional hooks** (a provider that does not
+  support a capability overrides it as a documented no-op, rather than the caller special-casing
+  that provider);
+- **resolved at runtime per context** (per tenant / per territory / per environment) from
+  configuration, through a proxy — the consumer names the capability, the registry binds the
+  provider.
+
+This is DC-005 (consumers wrap the contract) made concrete for the many-providers case: the
+business code depends on the port and the registry, never on a provider's name. A hard-coded
+`if provider == "X"` ladder, or a provider list the dispatcher must edit, is the defect this rule
+removes.
+
 ______________________________________________________________________
 
 ## 2. Why
