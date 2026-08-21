@@ -32,6 +32,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
 | `SCM.md`                  | type-driven issues & pull requests · taxonomy & labels · per-type templates · shape gates |
+| `EVENTING.md`             | real-time channels · typed channel contracts · non-blocking bounded buffers · fail-safe external access · delivery semantics · transport-as-adapter |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
 
 **Source of truth:** the canon lives in this repo. Notion is a governance and decision view
@@ -182,6 +183,15 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   losing the live channel degrades to the last known state with the API-down banner (FE-050), never
   to a frozen or lying screen. A surface that shows data a refresh would change is a defect. Detail:
   annexe `FRONTEND.md` FE-080.
+- **A real-time backend has channel contracts and never blocks.** The producer/consumer side of a
+  real-time system is governed too: every channel carries a **name and a typed, versioned
+  contract**; **subscription is decoupled from processing by a bounded buffer** so the receiver
+  never blocks on I/O and a slow consumer cannot stall the transport (backlog is a metric with an
+  alert); **every call to external infra is guarded** and degrades safely when the dependency is
+  down (dependency health is probed on-demand and cached, not hot-polled); **delivery semantics are
+  declared** and at-least-once consumers are idempotent; and the **transport is an adapter behind
+  the domain's port** (WebSocket/SSE/broker chosen by config, not wired into business code). This is
+  the backend twin of the reactive-frontend rule above. Detail: annexe `EVENTING.md` (`EV-nnn`).
 - **Every repo declares its profile and DDD level** (`project_profile`, `ddd_level`,
   `bounded_context`, `standards_version`) — architecture is proportionate to business
   complexity, and small tools are not over-architected. Detail: annexe `ARCHITECTURE-DDD.md`.

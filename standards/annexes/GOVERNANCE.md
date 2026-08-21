@@ -85,6 +85,7 @@ source in two forms.
 | `STD-PERF-001`       | `CI-CD.md` (CI-053)                       | `CI-`       |
 | `STD-AI-QUALITY-001` | `AGENTIC-CAPABILITIES.md`                 | `AG-`       |
 | `STD-SCM-001`        | `SCM.md`                                  | `SC-`       |
+| `STD-EVENTING-001`   | `EVENTING.md`                             | `EV-`       |
 
 A `STD-*` domain whose home is `pending` (no annexe implements it yet) is a **ghost domain** —
 it governs nothing and **must not be marked `Adopted`** (in the repo or in Notion). This is the
