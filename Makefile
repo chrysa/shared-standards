@@ -60,3 +60,8 @@ quality-gate-baseline: ## Record baseline metrics for regression detection
 
 quality-gate-verify: ## Verify no regression since baseline
 	@python3 scripts/quality_gate.py verify
+
+# ── Fleet ────────────────────────────────────────────────────────────────────
+
+fleet-pr: ## Triage open PRs fleet-wide (read-only). Add ARGS='--merge --yes' to act.
+	@python3 -m scripts.fleet_pr $(ARGS)

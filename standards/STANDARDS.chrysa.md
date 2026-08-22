@@ -966,6 +966,31 @@ deprecated and archived — nothing is added to it, nothing reads from it.
     them French user-facing copy using typographic characters (apostrophes, non-breaking spaces).
     The rule is right about the codepoints and wrong about the intent. A repo that wants it may
     arm it locally together with `lint.allowed-confusables`.
+- **A cache is a correctness contract, not a sprinkle of speed.** The moment a value is cached,
+  three questions must have answers, or the cache is a bug: **how it expires**, **how it is
+  invalidated**, and **what it may not hold**. Concretely: caching is **read-through / cache-aside**
+  behind the data-access layer, never scattered `get`/`set` calls in business code; every entry has
+  a **TTL taken from the per-repo contract** (*no hardcoded constants* — a literal `3600` in a
+  decorator is the defect), and the store is **bounded** (a max size / eviction policy — an
+  unbounded cache is a memory leak with latency). A **write invalidates or updates** the entries it
+  affects in the same path (a read-your-writes guarantee — a stale cache after a mutation is the
+  same defect as FE-080's stale screen), and a cache miss under load is **stampede-protected**
+  (single-flight / lock / jittered TTL) so an expiry does not turn one slow query into a thousand.
+  What is **never cached** is as governed as what is: an **authorization decision** is not cached
+  across principals, and **personal/secret data** is cached only within its classification
+  (`DA-001`, `GV-040`) with an owner. Cache keys are namespaced and versioned so a shape change
+  cannot serve a poisoned old value. A cache nobody can explain the invalidation of is removed.
+- **Deferred work is a governed job, not a fire-and-forget.** Any work pushed to a background
+  queue / worker / scheduler is, by contract: **idempotent** (safe to run twice — a redelivered or
+  retried job produces no double effect, mirroring `EV-030`); **bounded** — an explicit **timeout**,
+  a **bounded retry** with backoff, and a **dead-letter / failure sink** so a poison job neither
+  retries forever nor vanishes; and **observable** — a failed or stuck job **surfaces** (a metric,
+  an alert, an admin-visible state), it is never swallowed silently. A **scheduled** task has a
+  named **owner** and a runbook like any incident source (`OP-020`). No **business capability is
+  reachable only through a job with no manual/admin trigger** — an operator must be able to inspect,
+  retry, and cancel it from the backoffice (*every product ships a management backoffice*). Jobs are
+  deferred *work*; a real-time *stream* is `EVENTING.md` — related, not the same. The queue/broker
+  is reached through an adapter (pillar 5), its endpoint from the environment.
 
 ## Quality gates
 
