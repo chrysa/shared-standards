@@ -83,4 +83,10 @@ domains:
   priority: P2
   status: Adopted
   title: Eventing & real-time streaming
+- home: standards/annexes/DELIVERY.md
+  id: STD-DELIVERY-001
+  prefix: DL-
+  priority: P1
+  status: Proposed
+  title: Delivery workflow (Shortcut · GitHub · Slack)
 version: 1
