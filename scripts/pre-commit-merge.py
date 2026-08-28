@@ -304,6 +304,43 @@ def align_exclude(target_hook: dict, baseline_hook: dict) -> None:
         target_hook.pop("exclude", None)
 
 
+# Distributed canonical files a consumer must not reformat: they are owned + formatted by
+# shared-standards and fanned out as managed copies. A consumer autofixer (ruff-format's
+# quote style, add-trailing-comma, auto-walrus) rewrites the copy on every touch and drifts
+# it from source. One top-level exclude fixes it for all hooks at once; applied here so the
+# whole fleet converges on the next distribute (shared-standards#390).
+CANONICAL_EXCLUDE_PATTERNS = (r"scripts/quality_gate\.py$",)
+AUTOFIXER_HOOK_IDS = {"ruff-format", "add-trailing-comma", "auto-walrus"}
+
+
+def _runs_autofixer(target: dict) -> bool:
+    return any(
+        hook.get("id") in AUTOFIXER_HOOK_IDS
+        for repo in target.get("repos", [])
+        for hook in repo.get("hooks", [])
+    )
+
+
+def _exclude_missing_canonical(target: dict) -> list[str]:
+    """Canonical patterns a reformatting consumer does not yet exclude (empty if none needed)."""
+    if not _runs_autofixer(target):
+        return []
+    current = target.get("exclude") or ""
+    return [pattern for pattern in CANONICAL_EXCLUDE_PATTERNS if pattern not in current]
+
+
+def ensure_canonical_exclude(target: dict) -> None:
+    """OR-append the distributed-canonical patterns onto the top-level exclude (mutates)."""
+    missing = _exclude_missing_canonical(target)
+    if not missing:
+        return
+    parts = [f"({pattern})" for pattern in missing]
+    current = target.get("exclude")
+    if current:
+        parts.insert(0, f"({current})")
+    target["exclude"] = "|".join(parts)
+
+
 def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
     gaps: list[str] = []
@@ -336,6 +373,8 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     canon_py = canonical_python(baseline)
     if canon_py and target_python(target) not in (None, canon_py):
         gaps.append(f"default_language_version.python={canon_py}")
+    if _exclude_missing_canonical(target):
+        gaps.append("top-level!exclude")
     return gaps
 
 
@@ -389,6 +428,7 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
     canon_py = canonical_python(baseline)
     if canon_py and target_python(target) not in (None, canon_py):
         target["default_language_version"]["python"] = canon_py
+    ensure_canonical_exclude(target)
     return target
 
 
