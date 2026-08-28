@@ -129,6 +129,18 @@ repos:
     files: ^(standards/domains\.yaml|standards/annexes/GOVERNANCE\.md)$
     additional_dependencies:
     - pyyaml==6.0.2
+  # Managed skill/agent drift gate: the transverse skills (.claude/skills/*) and the
+  # generic agents (templates/claude/agents/*.md, the distribution staging) are a single
+  # source fanned out to the fleet as managed copies. An edit to a copy — or to the agent
+  # staging so it no longer matches the agent-config registry — drifts silently and Claude
+  # then loads something that is not the canon. Enforced here; degrades to a skip when a
+  # sibling source is absent (best-effort locally, enforced in CI over the fleet checkout).
+  - id: managed-skills-agents-drift
+    name: managed skill/agent copies match their canonical source
+    entry: scripts/check-managed-drift.sh
+    language: system
+    pass_filenames: false
+    files: ^(\.claude/skills/|\.claude/agents/|templates/claude/agents/)
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan
