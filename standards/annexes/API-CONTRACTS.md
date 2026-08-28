@@ -49,6 +49,26 @@ Timeouts, maximum sizes, authentication, authorization and permissions are descr
 contract**, not left implicit. A consumer reads the contract and knows the limits before it
 calls.
 
+### AP-014 — Responses are hypermedia-driven (HATEOAS)
+
+A REST response carries the **links** that describe what a client can do next, so the client
+discovers available actions and related resources from the payload instead of hardcoding URLs
+or reconstructing them from ids. Every resource representation exposes at least a **`self`**
+link; a resource with successor states or related resources exposes the links for those
+(`next`/`prev` on a paginated collection — the cursor of AP-011 travels as a link, not a
+value the client must assemble — and the state transitions available on the resource, e.g.
+`cancel`, `approve`, `pay`). Links are **absolute** (or resolvable against a documented base),
+**named by relation** (a stable `rel`, from the IANA registry or a documented namespace, never
+a positional array), and **present only when the action is actually permitted** for the caller
+— so the link set is an authorization-aware description of the reachable state machine, not a
+static menu. The link shape is part of the machine-readable contract (AP-000): a consistent
+envelope (**HAL**, **JSON:API**, or a documented equivalent) is chosen once and applied across
+the API, never per-endpoint. This is the payload-level expression of the socle's *everything
+is semantic* URLs — the address is a permanent, resource-oriented contract, and the response
+tells the client which of those addresses it may follow next. A REST API that returns bare ids
+and forces the client to template every URL is a defect: it couples the client to the server's
+routing and breaks the moment a path changes.
+
 ______________________________________________________________________
 
 ## 3. Contract tests & SDKs

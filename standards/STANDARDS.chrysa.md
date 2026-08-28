@@ -28,7 +28,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `CONTAINERS-K3S.md`       | reference stage shape · container responsibility · k3s workload baseline |
 | `DATA-MIGRATIONS.md`      | data ownership & classification · versioned schemas · safe migrations · rollback · retention/export |
 | `OBSERVABILITY-OPS.md`    | probes · OpenTelemetry (replaceable backend) · alerts+runbooks · SLI/SLO · resource envelope · `/version` · production-ready gate |
-| `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · idempotency · contract tests · events/webhooks |
+| `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · hypermedia/HATEOAS links · idempotency · contract tests · events/webhooks |
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
 | `SCM.md`                  | type-driven issues & pull requests · taxonomy & labels · per-type templates · shape gates |
@@ -562,7 +562,10 @@ deprecated and archived — nothing is added to it, nothing reads from it.
 - **APIs, SDKs & public contracts follow the `STD-API-001` contract.** A machine-readable
   contract (OpenAPI/AsyncAPI/JSON Schema) is the canonical interface; public versions are
   explicit with a backward-compatibility guarantee and a dated deprecation policy; errors are
-  typed with a machine code + correlation id; collections paginate by cursor; critical writes
+  typed with a machine code + correlation id; collections paginate by cursor; responses are
+  **hypermedia-driven (HATEOAS)** — each carries at least a `self` link plus the
+  authorization-aware links for the actions and related resources reachable next, so a client
+  follows links instead of templating URLs from ids; critical writes
   are idempotent; guards (timeouts, sizes, authz) live in the contract; inter-project contracts
   are tested provider **and** consumer side; SDKs track the public contract, never internal
   models; and events/webhooks are identified, versioned, signed, replay-protected, with bounded
