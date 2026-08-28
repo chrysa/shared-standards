@@ -50,6 +50,7 @@ graphify-out/
 # Tracking guideline-report.html made each commit drag ~57 lines of ordering
 # churn and then fail its own guideline-check hook.
 guideline-report.html
+.guideline-cache/
 
 # OS / editor
 .DS_Store
