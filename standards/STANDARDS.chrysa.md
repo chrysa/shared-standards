@@ -96,6 +96,19 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   deletion, and is machine-checked across the fleet by `scripts/audit-branch-policy.sh`.
 - **Merge**: squash merge only (exception: the `develop` → `main` release promotion, merged
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
+- **Every change advances the version — nothing lands flat.** The project version is a
+  **computed consequence of merging**, never a manual act: GitVersion (`mode:
+  ContinuousDeployment`) derives a **new, unique version for every commit** that reaches an
+  integration branch, and the **Conventional Commit type sets the increment** (`feat` → minor,
+  `fix`/`perf` → patch, everything else → the continuous-deployment build increment). So **no
+  change merges without the version moving forward** — code, config, docs, CI, and the
+  **standards corpus itself** included; a modification that leaves the version unchanged is a
+  defect. Two corollaries are load-bearing: the tip of `main` maps to exactly **one** version
+  (what runs in prod), and **every merged PR is releasable and traceable to a version**. The
+  number is **computed, never typed** (`CI-045`) — a hand-edited version string is a merge
+  conflict with a release attached. This is the flip side of *never bump manually*: you never
+  touch the number, and the number always moves. Detail: the *Release & changelog config*
+  section and annexe `CI-CD.md` (`CI-045`).
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
 - **Issues and PRs are type-driven.** Every issue declares exactly one **type** from a fixed
