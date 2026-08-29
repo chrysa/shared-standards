@@ -238,6 +238,27 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `@notion-sync` after any state change; on conflict about project state, Notion wins.
   This does **not** apply to the standards corpus: there the repo is the canon and Notion is
   a governance view (annexe `GOVERNANCE.md` GV-000).
+- **Documentation and Notion are maintained in lockstep with the code — a change that leaves
+  them stale is unfinished.** Keeping the docs and the project's Notion current is an
+  **obligation of every change**, part of the same unit of work, never a later cleanup.
+  Concretely, in the **same PR** as a behaviour or interface change:
+  1. **The affected documentation is updated** — the repo `README.md` and the per-folder
+     `README.md` (folder-readme rule), the `docs/` pages (MkDocs), the ADR for the *why*, the
+     API/contract docs, and the setup/ops runbook. `README.md` always reflects the **actual
+     current state** (updated at least each release); a `primer.md`/session-state file, where
+     the repo carries one, is refreshed too.
+  2. **Notion is updated** — every advancement, decision or state change is logged per the
+     *Notion logging* rule above (Notion is the source of truth for **project state**;
+     `@notion-sync` after any state change). A state change that never reaches Notion is a
+     lie by omission about where the project stands.
+  Stale documentation is a defect on par with a failing test: a doc that describes behaviour
+  the code no longer has misleads every future reader — human or agent — and an agent that
+  trusts it acts on a falsehood (this is why *the repository is legible to an agent* depends on
+  it). The Definition of Done for any change therefore includes **"the docs and the Notion it
+  touches are current"**; a PR that changes behaviour without touching a single doc, or a state
+  change never reflected in Notion, is incomplete — reviewers reject it. The one carve-out is
+  the standards corpus itself (this repo): there the repo is canon and Notion is only a
+  governance view (`GV-000`).
 - **Agent actions are governed.** Any feature where an agent *acts* (writes, calls, runs,
   changes state) needs a versioned manifest with typed I/O and a business owner, least
   privilege, a declared risk level R0–R5 with proportionate confirmation and dry-run,
