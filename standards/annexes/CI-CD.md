@@ -255,6 +255,25 @@ verifies the pair exists. This is the container-side half of the host-native rul
 `CI-032` — that rule forbids a skip that reads as a *pass*, this one forbids a skip that reads
 as *coverage the pipeline never produced*.
 
+### CI-037 — No `continue-on-error` that swallows a real failure
+
+`continue-on-error: true` makes a step fail **green** — the job continues and reports success
+though the step failed. On anything that matters — a test, lint, type-check, build, scan,
+migration, deploy — this is the pipeline lying, the same defect as `CI-032`/`CI-040`: a red
+that reads as a pass trains everyone to ignore red, and the next real failure ships. So
+`continue-on-error` is **forbidden by default**, and it is never acceptable on a step whose
+failure means the code is wrong. If a step's failure is genuinely inconsequential (a truly
+optional artifact, an advisory-only probe), that is expressed **explicitly** — an `if:` guard
+(`hashFiles(...)`, a job output), a conditional inside the step, or a step designed to exit 0
+when the optional input is absent — **not** by blanket-swallowing every failure mode of the
+step, including the network error or auth error you did *not* mean to tolerate. The single
+tolerated use is a step that is **purely informational and blocks nothing**, and even then it
+carries an inline comment stating why its failure is safe. A `continue-on-error` on a gate step
+is a defect; a `continue-on-error` with no explanation is one too. Related: a matrix leg that
+may fail belongs to `strategy.fail-fast: false`, not `continue-on-error`; "run this step even if
+a previous one failed" is `if: always()`, which reports honestly, not `continue-on-error`, which
+hides.
+
 ______________________________________________________________________
 
 ## 5. What the gate must prove

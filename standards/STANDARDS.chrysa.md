@@ -1169,6 +1169,12 @@ Five of its rules are load-bearing enough to state here:
 - **A skipped job reports as skipped, never as passed** (`CI-032`). Path filters may skip work;
   they must never turn a required check green without running it. A tick that means "not
   executed" destroys trust in the whole pipeline.
+- **No `continue-on-error` that swallows a real failure** (`CI-037`). A step that matters — a
+  test, lint, type-check, build, scan, migration, deploy — never runs under
+  `continue-on-error: true`: making it fail *green* is the same lie as a skip that reads as a
+  pass. A genuinely optional step is guarded **explicitly** (`if:`, a `hashFiles` check, an
+  exit-0-on-absent design), never by blanket-tolerating every failure mode; "run even if a
+  previous step failed" is `if: always()` (honest), not `continue-on-error` (hidden).
 - **Build once, promote the artefact** (`CI-046`). The image digest that was tested is the one
   deployed; rebuilding per environment means production runs something no test ever saw.
 - **Every job declares `timeout-minutes:` and every PR workflow a concurrency group**

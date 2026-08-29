@@ -37,12 +37,14 @@ jobs:
         with:
           python-version: "3.14"
 
+      # Only when the repo actually has a Node project — the "if needed" made explicit
+      # with a guard instead of swallowing every setup failure with continue-on-error (CI-037).
       - name: Set up Node.js (if needed)
+        if: ${{ hashFiles('package.json') != '' }}
         uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"
-        continue-on-error: true
 
       - name: Install dependencies
         run: |
