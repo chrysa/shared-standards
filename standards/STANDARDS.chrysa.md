@@ -1244,7 +1244,7 @@ and CI invokes `pre-commit`, not `make`.
   as *skipped*, never as *passed* (`CI-032`) — so no image-dependent rule can fall through the
   gap between a green local commit and a green pipeline. "Runs in CI/Docker" in a host skip
   message is a **promise the pipeline must keep**, not a way to make the check disappear. Detail:
-  annexe `CI-CD.md`.
+  annexe `CI-CD.md` (`CI-036`); basis ADR-0007.
 - **Two stages, two scopes — do not mix them:**
   - **commit stage** (`pre-commit run`, default): auto-fixers + fast lints —
     `ruff`, `end-of-file-fixer`, `trailing-whitespace`, `detect-secrets`/`gitleaks`,
