@@ -337,6 +337,18 @@ git-cliff reads Conventional Commits, which is why the commit convention is enfo
 commit gate: a non-conventional message is silently absent from the changelog, and nobody
 notices until a user asks what changed.
 
+### CI-048 — Every change advances the version; nothing lands flat
+
+A merge that leaves the project version unchanged is a defect. Any modification — code,
+config, docs, CI, even these standards — is a change to the artefact and must be reachable by
+a version. GitVersion in ContinuousDeployment mode already yields a **unique version per
+commit** off `develop`/`main`, so this is not extra work: it is a property to *rely on*, and
+to notice when it breaks. A version that does not move across a merge means the graph was
+rewritten, the tool was bypassed, or the commit never landed where GitVersion reads — each a
+release-integrity bug, not a cosmetic one. This is the counterpart of `CI-045` (the version is
+computed, never typed): CI-045 says *how* the version is produced, CI-048 says it must be
+produced *for every change* — no silent no-op releases, no two artefacts sharing a version.
+
 ### CI-046 — Build once, promote the artefact
 
 The artefact tested is the artefact deployed — the same image digest moves through the
@@ -448,6 +460,7 @@ A workflow change is reviewable against this list in under a minute:
 9. Does a skipped job report as skipped, never as passed? (CI-032)
 10. Does every locally-skippable image-dependent hook have a container-side counterpart in CI? (CI-036)
 11. Are the profile's performance and cost budgets measured, with regressions blocked? (CI-053)
+12. Does the merge move the computed version — no flat, version-less change? (CI-048)
 
 ______________________________________________________________________
 
@@ -462,6 +475,7 @@ ______________________________________________________________________
 | CI-006, CI-047 | fleet audit: every repo has a CI workflow; every `runtime: container` repo has a CD workflow |
 | CI-036 | reviewed in pull request; fleet audit cross-checks each locally-skipped hook against a `docker-test` counterpart |
 | CI-040 | any permanently red check is an issue with an owner |
+| CI-045, CI-048 | GitVersion (ContinuousDeployment) computes a unique version per commit; a merge that does not move it is investigated |
 | CI-053 | per-profile budget file; CI measures and blocks significant regressions |
 
 Rules not yet mechanised are declared as manually reviewed — a rule claiming automation with no
