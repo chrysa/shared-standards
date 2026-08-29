@@ -243,6 +243,18 @@ capacity for heavy builds and test suites. One exception is deliberate and docum
 **a workflow whose job is to detect that the self-hosted fleet is down must run on a hosted
 runner** — a monitor that shares its subject's failure mode is not a monitor.
 
+### CI-036 — A check skipped on the host is a gate only if CI runs it for real
+
+The host-native gate lets a check that genuinely needs the project image (a DB, framework
+settings, a compiled tool) **degrade gracefully and skip on the host**. That skip is sound
+only when the identical check runs, for real, in the project container in CI. A check skipped
+locally **and** absent from the CI gate is not a gate — it runs nowhere, and its silence reads
+as approval. So every locally-skippable hook has a **mandatory container-side counterpart** in
+CI (`docker compose run` / the `docker-test` job over the same hook), and the review checklist
+verifies the pair exists. This is the container-side half of the host-native rule; it sharpens
+`CI-032` — that rule forbids a skip that reads as a *pass*, this one forbids a skip that reads
+as *coverage the pipeline never produced*.
+
 ______________________________________________________________________
 
 ## 5. What the gate must prove
@@ -434,7 +446,8 @@ A workflow change is reviewable against this list in under a minute:
 7. Is the runner choice justified by the workload? (CI-035)
 8. New gate: does a failure mean the code is wrong? (CI-040)
 9. Does a skipped job report as skipped, never as passed? (CI-032)
-10. Are the profile's performance and cost budgets measured, with regressions blocked? (CI-053)
+10. Does every locally-skippable image-dependent hook have a container-side counterpart in CI? (CI-036)
+11. Are the profile's performance and cost budgets measured, with regressions blocked? (CI-053)
 
 ______________________________________________________________________
 
@@ -447,6 +460,7 @@ ______________________________________________________________________
 | CI-030, CI-031 | reviewed in pull request |
 | CI-004, CI-003 | fleet audit script over the workflow corpus |
 | CI-006, CI-047 | fleet audit: every repo has a CI workflow; every `runtime: container` repo has a CD workflow |
+| CI-036 | reviewed in pull request; fleet audit cross-checks each locally-skipped hook against a `docker-test` counterpart |
 | CI-040 | any permanently red check is an issue with an owner |
 | CI-053 | per-profile budget file; CI measures and blocks significant regressions |
 

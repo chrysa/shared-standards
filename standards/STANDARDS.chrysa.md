@@ -1222,8 +1222,10 @@ and CI invokes `pre-commit`, not `make`.
   genuinely needs the project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
   it probes for the tool and skips with a message when absent
   (`command -v <tool> >/dev/null 2>&1 && <run> || echo 'skipping — runs in CI/Docker'`),
-  it does **not** spin up a container. Container-side enforcement is CI's job; locally the
-  gate is best-effort and never blocks on the Docker daemon being up. This does not
+  it does **not** spin up a container. Container-side enforcement is CI's job **and is
+  mandatory**: a check skipped on the host **and** absent from CI is not a gate — it runs
+  nowhere (`CI-036`). Locally the gate is best-effort and never blocks on the Docker daemon
+  being up. This does not
   contradict the container-runtime policy — the *application* runs in a container; the
   *commit gate*, like git, is a host tool.
 - **Two stages, two scopes — do not mix them:**
