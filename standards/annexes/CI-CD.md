@@ -243,6 +243,19 @@ capacity for heavy builds and test suites. One exception is deliberate and docum
 **a workflow whose job is to detect that the self-hosted fleet is down must run on a hosted
 runner** — a monitor that shares its subject's failure mode is not a monitor.
 
+### CI-036 — An image-dependent local skip has a blocking containerised counterpart in CI
+
+The commit gate is host-native by default (STANDARDS.chrysa.md); a check that genuinely needs
+the project image (a DB, framework settings, a compiled tool) may run locally as an **opt-in**
+docker hook or degrade to a **host skip** — either way, that local skip is only sound because
+the same check runs **for real in CI, inside the project container** (`docker compose run` /
+`make docker-*`) as a **blocking** job over the full tree. A check that is skipped locally
+**and** absent from CI is not a gate; it is decoration — the local pass proved nothing and
+nothing else ran. `"runs in CI/Docker"` in a host skip message is a promise the pipeline must
+keep. This is the CI counterpart of the host-native rule and a specialisation of `CI-032`
+(a skip reports as *skipped*, never as *passed*). Basis: **ADR-0007** (docker pre-commit hooks
+permitted opt-in, daemon-free floor preserved).
+
 ______________________________________________________________________
 
 ## 5. What the gate must prove
