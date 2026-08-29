@@ -732,6 +732,35 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   not a dev image. Mechanised by the `compose-dev-hot-reload` hook
   (`chrysa/pre-commit-tools`): a compose service targeting the `dev` stage with neither a bind
   mount nor a `develop.watch` sync action is flagged at commit time.
+- **Local dev runs the code in-container, live, in debug mode — never the production server.**
+  The local development loop is edit-on-host, run-in-container, and the three properties below
+  are non-negotiable because together they make "it ran on my machine" mean "it ran the way the
+  container runs it":
+  1. **Sources are synchronised host ↔ container.** The code the developer edits on the host is
+     the code executing in the running `dev` container, with **no rebuild step** between save and
+     effect — via a source **bind mount** (`.:/app`) or Compose `develop.watch` **sync** (not
+     `sync+restart` for interpreted code, which defeats the point). A dev workflow that requires
+     `docker build` after every edit is a defect: it is not a dev loop, it is a slow CI loop.
+  2. **The dev process is the framework's dev server with autoreload, not a production server.**
+     The `dev` stage launches the app through its **autoreloading dev runner** — `uvicorn --reload`,
+     `flask run --debug`, `manage.py runserver`, `vite`/`next dev`, `nodemon`, `air`, etc. — so a
+     source change reloads the process automatically. A **production WSGI/ASGI/static server —
+     `gunicorn`, `uwsgi`, `serve`, `nginx` fronting built assets, `uvicorn` **without** `--reload`,
+     a compiled release binary — is forbidden in the `dev` stage**: those exist for the
+     `production` target (multi-worker, no reload, no debugger), where reloading on every edit and
+     exposing a debugger would be exactly wrong. The `dev` and `production` stages differ **here**,
+     not only in installed tooling.
+  3. **Debug mode is on in dev.** The dev process runs with the framework's debug switch enabled
+     (`DEBUG=1`, `--debug`, `--reload`, `NODE_ENV=development`) — verbose errors, the interactive
+     debugger/PDB attach, and autoreload — and that switch is **off in production by contract**
+     (`DEBUG` false, no debugger, no stack traces to the client; a debug-on production build is a
+     security defect, see *every form is a hostile input surface* and the session rules). Debug is
+     a **per-environment flag read from config** (*no hardcoded constants*), never a literal baked
+     into an image that ships to prod.
+  In short: same sources, live, debug-on, dev runner in `dev`; a frozen copy, no reload, debug-off,
+  production runner in `production`. A `dev` service that runs `gunicorn`/`serve`, needs a rebuild
+  to see a change, or ships with debug off is not a dev environment. Extends *Dev stage must
+  hot-reload* and is checked by the same `compose-dev-hot-reload` hook plus review.
 - **`.dockerignore` mandatory & exhaustive** — at minimum `.git`, `node_modules`, `__pycache__`,
   `.env*`, `*.log`. Base images pin an explicit version or digest (never a bare `FROM …:latest`);
   no secret in build args or image layers (BuildKit secrets or runtime env only). Every application
