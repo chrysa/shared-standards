@@ -62,7 +62,11 @@ def scan_text(analyzer: AnalyzerEngine, cfg: ScanConfig, path: str, text: str) -
 
 
 def _to_finding(path: str, line: int, entity: str, score: float, matched: str) -> Finding:
-    digest = hashlib.sha256(f"{entity}|{path}|{line}|{matched}".encode()).hexdigest()
+    # Content-only fingerprint (entity + file + matched text): deliberately excludes the
+    # line number so an allowlisted false positive (a loopback IP, a doc example, a synthetic
+    # fixture) stays allowlisted when an unrelated edit shifts it up or down the file. The
+    # line still travels on the Finding for reporting; it is just not part of the identity.
+    digest = hashlib.sha256(f"{entity}|{path}|{matched}".encode()).hexdigest()
     return Finding(path=path, line=line, entity=entity, score=round(score, 3), fingerprint=digest)
 
 
