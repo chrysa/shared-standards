@@ -1226,6 +1226,21 @@ and CI invokes `pre-commit`, not `make`.
   gate is best-effort and never blocks on the Docker daemon being up. This does not
   contradict the container-runtime policy — the *application* runs in a container; the
   *commit gate*, like git, is a host tool.
+- **A locally-skippable check has a mandatory container-side counterpart in CI — the skip is
+  never the whole story.** The graceful host skip above is *only* acceptable because the same
+  check is **run for real in CI, inside the project container**. Every image-dependent check
+  that degrades on the host (needs a DB, framework settings, a compiled tool, the full built
+  image) therefore MUST also run **in a container in CI** — via `docker compose run` /
+  `make docker-*` over the full tree — as a **blocking** job. A check that is skipped locally
+  **and** absent from CI is not a gate, it is decoration: the local pass proved nothing and
+  nothing else ran. The division of labour is fixed and complete: the **local** gate is
+  host-native and best-effort (fast, daemon-free, `language: docker` still forbidden — the rule
+  above is unchanged); the **CI** gate is containerised and authoritative, and it is where every
+  heavy, image-dependent rule is actually enforced. The CI job reports honestly — a skip reports
+  as *skipped*, never as *passed* (`CI-032`) — so no image-dependent rule can fall through the
+  gap between a green local commit and a green pipeline. "Runs in CI/Docker" in a host skip
+  message is a **promise the pipeline must keep**, not a way to make the check disappear. Detail:
+  annexe `CI-CD.md`.
 - **Two stages, two scopes — do not mix them:**
   - **commit stage** (`pre-commit run`, default): auto-fixers + fast lints —
     `ruff`, `end-of-file-fixer`, `trailing-whitespace`, `detect-secrets`/`gitleaks`,
