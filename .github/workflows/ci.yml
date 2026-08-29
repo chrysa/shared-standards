@@ -141,8 +141,10 @@ jobs:
 
             # Web TS coverage travels from the `web` job as an artifact; land it
             # where the action expects it (js-coverage-report path below).
+            # `sonar` needs `web`, which always uploads this artifact, so the download
+            # cannot legitimately be absent — no continue-on-error (CI-037). If web ever
+            # stops producing it, this failing loudly is correct, not something to swallow.
             - name: Download web LCOV coverage
-              continue-on-error: true
               uses: actions/download-artifact@v8
               with:
                   name: web-coverage-lcov
