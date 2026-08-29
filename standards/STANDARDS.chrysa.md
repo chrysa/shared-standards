@@ -1216,16 +1216,19 @@ and CI invokes `pre-commit`, not `make`.
 - **The gate is host-native — no strong coupling to the project's containers.** pre-commit
   runs with only `pre-commit` installed on the host (via `pipx`/`uv`, outside any repo); it
   provisions each hook's isolated environment itself (`~/.cache/pre-commit`), so a commit
-  needs **no project image and no running container**. Local hooks are `language: system` /
-  `python` (or another native language) invoking **host** tools — **never** `docker compose
-  run`, and `language: docker` / `language: docker_image` is **forbidden**. A check that
-  genuinely needs the project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
-  it probes for the tool and skips with a message when absent
-  (`command -v <tool> >/dev/null 2>&1 && <run> || echo 'skipping — runs in CI/Docker'`),
-  it does **not** spin up a container. Container-side enforcement is CI's job; locally the
-  gate is best-effort and never blocks on the Docker daemon being up. This does not
-  contradict the container-runtime policy — the *application* runs in a container; the
-  *commit gate*, like git, is a host tool.
+  needs **no project image and no running container** for the baseline gate. Local hooks
+  default to `language: system` / `python` (or another native language) invoking **host**
+  tools, so the **core gate installs and runs with `pipx install pre-commit` alone**. A
+  `language: docker` / `docker compose run` hook is **permitted** (ADR-0007) — but only for a
+  check that genuinely needs the project image (framework settings, a DB, a compiled tool),
+  and only as an **opt-in layer, never the baseline**. Every docker hook **degrades to a skip
+  when the Docker daemon is unavailable** (`docker info >/dev/null 2>&1 && <run> || echo
+  'skipping — runs in CI/Docker'`), so a routine `git commit` is **never hard-blocked** by the
+  daemon being down; a host-native check missing an absent host tool skips the same way. The
+  gate never *forces* a container onto the commit path. Container-side enforcement remains CI's
+  authoritative job (see the next rule); locally the gate is best-effort and daemon-free by
+  default. This does not contradict the container-runtime policy — the *application* runs in a
+  container; the *baseline commit gate*, like git, is a host tool.
 - **A locally-skippable check has a mandatory container-side counterpart in CI — the skip is
   never the whole story.** The graceful host skip above is *only* acceptable because the same
   check is **run for real in CI, inside the project container**. Every image-dependent check
@@ -1234,8 +1237,9 @@ and CI invokes `pre-commit`, not `make`.
   `make docker-*` over the full tree — as a **blocking** job. A check that is skipped locally
   **and** absent from CI is not a gate, it is decoration: the local pass proved nothing and
   nothing else ran. The division of labour is fixed and complete: the **local** gate is
-  host-native and best-effort (fast, daemon-free, `language: docker` still forbidden — the rule
-  above is unchanged); the **CI** gate is containerised and authoritative, and it is where every
+  host-native and best-effort (fast, daemon-free by default; a docker hook is opt-in and
+  daemon-less-degrading per ADR-0007, never the baseline); the **CI** gate is containerised and
+  authoritative, and it is where every
   heavy, image-dependent rule is actually enforced. The CI job reports honestly — a skip reports
   as *skipped*, never as *passed* (`CI-032`) — so no image-dependent rule can fall through the
   gap between a green local commit and a green pipeline. "Runs in CI/Docker" in a host skip
@@ -1264,9 +1268,12 @@ and CI invokes `pre-commit`, not `make`.
   in the hook definition. **Forbidden in that package:** `language: docker`,
   `language: docker_image`, and any `docker` / `docker compose` invocation inside a hook
   entrypoint. A published hook MUST run identically on a host where Docker is not installed
-  at all; if a check cannot work without the daemon, it is a CI job, not a hook. This keeps
-  the fleet gate installable with a single `pipx install pre-commit` and immune to the
-  daemon being down.
+  at all. This keeps the fleet gate installable with a single `pipx install pre-commit` and
+  immune to the daemon being down. This constraint binds the **shared package** specifically —
+  it is the daemon-free floor the whole fleet stands on. A **repo-local** docker hook for an
+  image-dependent check is a separate, permitted opt-in (ADR-0007): it lives in the consuming
+  repo's own config, not in this package, and it degrades to a skip when the daemon is absent
+  so the floor is never broken.
 - Hooks are **pinned by `rev`**; shared hooks come from `chrysa/pre-commit-tools`.
   `detect-secrets`/`gitleaks` respect the repo's secret allowlist.
 - **Hook logic is centralised in `chrysa/pre-commit-tools` — `repo: local` is glue only.**
