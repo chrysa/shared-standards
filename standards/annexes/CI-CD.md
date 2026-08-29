@@ -289,11 +289,16 @@ The local hook covers the diff; CI covers everything, from **the same configurat
 second, CI-only list of checks drifts from the local one and turns "it passed on my machine"
 into a legitimate complaint.
 
-### CI-045 — The version is computed, never typed
+### CI-045 — The version is computed, never typed — and it advances on every change
 
 Semantic version derived from the git graph, images and artefacts tagged with it in the same
 run, changelog generated. A hand-edited version string is a merge conflict with a release
-attached.
+attached. Under `mode: ContinuousDeployment` the derived version is also **monotonic**: **every**
+commit that reaches an integration branch yields a new, unique version (the Conventional Commit
+type sets the increment — `feat` → minor, `fix`/`perf` → patch, everything else → the build
+increment), so **no change lands flat**. A merge that leaves the project version unchanged is a
+defect. Corollary: the tip of `main` maps to exactly one version, and every merged PR is
+releasable and traceable to it.
 
 The two tools are settled, not a per-repo choice — a fleet where each repo derives its
 version differently cannot answer "which of these is newer" without reading three configs:

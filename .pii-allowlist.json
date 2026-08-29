@@ -1,6 +1,7 @@
 {
   "_comment": "sha256 fingerprints of reviewed false positives (synthetic fixtures, loopback addresses, dev-only origins and doc examples). Add with: pii_scan.py --print-fingerprint <file>",
   "allow": [
+    "eb6217a76f981ce2e5fe58303474bd1135d44f10c549138875fcced6e2f2b63e",
     "aaf435668ab66572620d478308da2bc8e206cc267bd9ded4ef5040dd15385301",
     "3ee1a1e18b74a7b3d6002f9dd7b0e270f111ecd4e7857ea26de891190c408da0",
     "ae3020162377614f728d477f801ebbe61e8056b3c89d0578a6a85a2ade418639",
