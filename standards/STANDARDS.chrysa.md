@@ -28,9 +28,11 @@ Where an annexe and this file disagree, **this file wins**.
 | `CONTAINERS-K3S.md`       | reference stage shape · container responsibility · k3s workload baseline |
 | `DATA-MIGRATIONS.md`      | data ownership & classification · versioned schemas · safe migrations · rollback · retention/export |
 | `OBSERVABILITY-OPS.md`    | probes · OpenTelemetry (replaceable backend) · alerts+runbooks · SLI/SLO · resource envelope · `/version` · production-ready gate |
-| `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · idempotency · contract tests · events/webhooks |
+| `API-CONTRACTS.md`        | machine-readable contract · versioning & deprecation · typed errors · cursor pagination · hypermedia/HATEOAS links · idempotency · contract tests · events/webhooks |
 | `TESTING.md`              | common test levels and rules across languages                   |
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
+| `SCM.md`                  | type-driven issues & pull requests · taxonomy & labels · per-type templates · shape gates |
+| `EVENTING.md`             | real-time channels · typed channel contracts · non-blocking bounded buffers · fail-safe external access · delivery semantics · transport-as-adapter |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
 
 **Source of truth:** the canon lives in this repo. Notion is a governance and decision view
@@ -96,6 +98,14 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
+- **Issues and PRs are type-driven.** Every issue declares exactly one **type** from a fixed
+  taxonomy (bug · feature · enhancement · chore · docs · ci · security · research · epic),
+  carried as a canonical label and backed by a committed per-type issue form; every PR's type is
+  its Conventional Commit type, and its body carries the fields that type needs (a `fix` shows the
+  root cause + a regression test, a `feat` its acceptance criteria + a UI proof, a `refactor` a
+  no-behaviour-change attestation, a `perf` a before/after measurement). Templates and labels are
+  socle-distributed, not per-repo inventions, and the shape is machine-checked (info-first). A
+  free-text issue or a one-line PR is a defect. Detail: annexe `SCM.md` (`SC-nnn`).
 - **Repo provenance — every code repo depends on `project-init`.** A repository is
   **created by** the `project-init` / `chrysa-init` CLI (shared-standards) at birth **and
   kept in sync** with it thereafter: the scaffolded socle (Makefile contract, docs skeleton,
@@ -173,6 +183,15 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   losing the live channel degrades to the last known state with the API-down banner (FE-050), never
   to a frozen or lying screen. A surface that shows data a refresh would change is a defect. Detail:
   annexe `FRONTEND.md` FE-080.
+- **A real-time backend has channel contracts and never blocks.** The producer/consumer side of a
+  real-time system is governed too: every channel carries a **name and a typed, versioned
+  contract**; **subscription is decoupled from processing by a bounded buffer** so the receiver
+  never blocks on I/O and a slow consumer cannot stall the transport (backlog is a metric with an
+  alert); **every call to external infra is guarded** and degrades safely when the dependency is
+  down (dependency health is probed on-demand and cached, not hot-polled); **delivery semantics are
+  declared** and at-least-once consumers are idempotent; and the **transport is an adapter behind
+  the domain's port** (WebSocket/SSE/broker chosen by config, not wired into business code). This is
+  the backend twin of the reactive-frontend rule above. Detail: annexe `EVENTING.md` (`EV-nnn`).
 - **Every repo declares its profile and DDD level** (`project_profile`, `ddd_level`,
   `bounded_context`, `standards_version`) — architecture is proportionate to business
   complexity, and small tools are not over-architected. Detail: annexe `ARCHITECTURE-DDD.md`.
@@ -219,6 +238,27 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `@notion-sync` after any state change; on conflict about project state, Notion wins.
   This does **not** apply to the standards corpus: there the repo is the canon and Notion is
   a governance view (annexe `GOVERNANCE.md` GV-000).
+- **Documentation and Notion are maintained in lockstep with the code — a change that leaves
+  them stale is unfinished.** Keeping the docs and the project's Notion current is an
+  **obligation of every change**, part of the same unit of work, never a later cleanup.
+  Concretely, in the **same PR** as a behaviour or interface change:
+  1. **The affected documentation is updated** — the repo `README.md` and the per-folder
+     `README.md` (folder-readme rule), the `docs/` pages (MkDocs), the ADR for the *why*, the
+     API/contract docs, and the setup/ops runbook. `README.md` always reflects the **actual
+     current state** (updated at least each release); a `primer.md`/session-state file, where
+     the repo carries one, is refreshed too.
+  2. **Notion is updated** — every advancement, decision or state change is logged per the
+     *Notion logging* rule above (Notion is the source of truth for **project state**;
+     `@notion-sync` after any state change). A state change that never reaches Notion is a
+     lie by omission about where the project stands.
+  Stale documentation is a defect on par with a failing test: a doc that describes behaviour
+  the code no longer has misleads every future reader — human or agent — and an agent that
+  trusts it acts on a falsehood (this is why *the repository is legible to an agent* depends on
+  it). The Definition of Done for any change therefore includes **"the docs and the Notion it
+  touches are current"**; a PR that changes behaviour without touching a single doc, or a state
+  change never reflected in Notion, is incomplete — reviewers reject it. The one carve-out is
+  the standards corpus itself (this repo): there the repo is canon and Notion is only a
+  governance view (`GV-000`).
 - **Agent actions are governed.** Any feature where an agent *acts* (writes, calls, runs,
   changes state) needs a versioned manifest with typed I/O and a business owner, least
   privilege, a declared risk level R0–R5 with proportionate confirmation and dry-run,
@@ -543,7 +583,10 @@ deprecated and archived — nothing is added to it, nothing reads from it.
 - **APIs, SDKs & public contracts follow the `STD-API-001` contract.** A machine-readable
   contract (OpenAPI/AsyncAPI/JSON Schema) is the canonical interface; public versions are
   explicit with a backward-compatibility guarantee and a dated deprecation policy; errors are
-  typed with a machine code + correlation id; collections paginate by cursor; critical writes
+  typed with a machine code + correlation id; collections paginate by cursor; responses are
+  **hypermedia-driven (HATEOAS)** — each carries at least a `self` link plus the
+  authorization-aware links for the actions and related resources reachable next, so a client
+  follows links instead of templating URLs from ids; critical writes
   are idempotent; guards (timeouts, sizes, authz) live in the contract; inter-project contracts
   are tested provider **and** consumer side; SDKs track the public contract, never internal
   models; and events/webhooks are identified, versioned, signed, replay-protected, with bounded
@@ -689,6 +732,35 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   not a dev image. Mechanised by the `compose-dev-hot-reload` hook
   (`chrysa/pre-commit-tools`): a compose service targeting the `dev` stage with neither a bind
   mount nor a `develop.watch` sync action is flagged at commit time.
+- **Local dev runs the code in-container, live, in debug mode — never the production server.**
+  The local development loop is edit-on-host, run-in-container, and the three properties below
+  are non-negotiable because together they make "it ran on my machine" mean "it ran the way the
+  container runs it":
+  1. **Sources are synchronised host ↔ container.** The code the developer edits on the host is
+     the code executing in the running `dev` container, with **no rebuild step** between save and
+     effect — via a source **bind mount** (`.:/app`) or Compose `develop.watch` **sync** (not
+     `sync+restart` for interpreted code, which defeats the point). A dev workflow that requires
+     `docker build` after every edit is a defect: it is not a dev loop, it is a slow CI loop.
+  2. **The dev process is the framework's dev server with autoreload, not a production server.**
+     The `dev` stage launches the app through its **autoreloading dev runner** — `uvicorn --reload`,
+     `flask run --debug`, `manage.py runserver`, `vite`/`next dev`, `nodemon`, `air`, etc. — so a
+     source change reloads the process automatically. A **production WSGI/ASGI/static server —
+     `gunicorn`, `uwsgi`, `serve`, `nginx` fronting built assets, `uvicorn` **without** `--reload`,
+     a compiled release binary — is forbidden in the `dev` stage**: those exist for the
+     `production` target (multi-worker, no reload, no debugger), where reloading on every edit and
+     exposing a debugger would be exactly wrong. The `dev` and `production` stages differ **here**,
+     not only in installed tooling.
+  3. **Debug mode is on in dev.** The dev process runs with the framework's debug switch enabled
+     (`DEBUG=1`, `--debug`, `--reload`, `NODE_ENV=development`) — verbose errors, the interactive
+     debugger/PDB attach, and autoreload — and that switch is **off in production by contract**
+     (`DEBUG` false, no debugger, no stack traces to the client; a debug-on production build is a
+     security defect, see *every form is a hostile input surface* and the session rules). Debug is
+     a **per-environment flag read from config** (*no hardcoded constants*), never a literal baked
+     into an image that ships to prod.
+  In short: same sources, live, debug-on, dev runner in `dev`; a frozen copy, no reload, debug-off,
+  production runner in `production`. A `dev` service that runs `gunicorn`/`serve`, needs a rebuild
+  to see a change, or ships with debug off is not a dev environment. Extends *Dev stage must
+  hot-reload* and is checked by the same `compose-dev-hot-reload` hook plus review.
 - **`.dockerignore` mandatory & exhaustive** — at minimum `.git`, `node_modules`, `__pycache__`,
   `.env*`, `*.log`. Base images pin an explicit version or digest (never a bare `FROM …:latest`);
   no secret in build args or image layers (BuildKit secrets or runtime env only). Every application
@@ -940,13 +1012,19 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      a single pass instead of repeated traversals of the same collection.
   2. **No work in a loop that is loop-invariant** — hoist the constant computation, the compiled
      regex, the config read, the connection setup.
-  3. **No N+1** — database queries and network/API calls are batched or eager-loaded
-     (`selectinload`/`joinedload`, bulk endpoints); a query inside a `for` over rows is a defect.
-     Frontend equivalent: no request per list item, no re-render per keystroke without debounce,
-     no unmemoised derived state recomputed on every render.
+  3. **No N+1, and query the store efficiently** — database queries and network/API calls are
+     batched or eager-loaded (`selectinload`/`joinedload`, bulk endpoints); a query inside a `for`
+     over rows is a defect. In the same spirit: an **existence check** uses a dedicated exists-query,
+     never a full fetch then a length; **writes are batched** (bulk create/update) instead of a loop
+     of single-row writes; only the **columns/fields actually used** are selected (projection, not
+     `SELECT *` into an object graph); and **aggregation runs in the store**, not a Python/JS loop
+     summing rows the app just pulled over the wire. Frontend equivalent: no request per list item,
+     no re-render per keystroke without debounce, no unmemoised derived state recomputed on every
+     render.
   4. **Bounded resources** — no unbounded `SELECT *` / unpaginated list endpoint, no full-file read
      of arbitrary-size input (stream it), explicit timeouts on every outbound call, connections and
-     file handles closed via context managers.
+     file handles closed via context managers. Every column used to **filter or sort a large table
+     is indexed** — an unindexed predicate on a growing table is a latent full scan.
   5. **Known anti-patterns are named and rejected**: god object/function, copy-paste duplication
      (factor into `chrysa-lib` — see *no code duplication*), boolean trap parameters, primitive
      obsession over a value object, deep nesting (guard clauses instead), mutable default arguments,
@@ -966,6 +1044,31 @@ deprecated and archived — nothing is added to it, nothing reads from it.
     them French user-facing copy using typographic characters (apostrophes, non-breaking spaces).
     The rule is right about the codepoints and wrong about the intent. A repo that wants it may
     arm it locally together with `lint.allowed-confusables`.
+- **A cache is a correctness contract, not a sprinkle of speed.** The moment a value is cached,
+  three questions must have answers, or the cache is a bug: **how it expires**, **how it is
+  invalidated**, and **what it may not hold**. Concretely: caching is **read-through / cache-aside**
+  behind the data-access layer, never scattered `get`/`set` calls in business code; every entry has
+  a **TTL taken from the per-repo contract** (*no hardcoded constants* — a literal `3600` in a
+  decorator is the defect), and the store is **bounded** (a max size / eviction policy — an
+  unbounded cache is a memory leak with latency). A **write invalidates or updates** the entries it
+  affects in the same path (a read-your-writes guarantee — a stale cache after a mutation is the
+  same defect as FE-080's stale screen), and a cache miss under load is **stampede-protected**
+  (single-flight / lock / jittered TTL) so an expiry does not turn one slow query into a thousand.
+  What is **never cached** is as governed as what is: an **authorization decision** is not cached
+  across principals, and **personal/secret data** is cached only within its classification
+  (`DA-001`, `GV-040`) with an owner. Cache keys are namespaced and versioned so a shape change
+  cannot serve a poisoned old value. A cache nobody can explain the invalidation of is removed.
+- **Deferred work is a governed job, not a fire-and-forget.** Any work pushed to a background
+  queue / worker / scheduler is, by contract: **idempotent** (safe to run twice — a redelivered or
+  retried job produces no double effect, mirroring `EV-030`); **bounded** — an explicit **timeout**,
+  a **bounded retry** with backoff, and a **dead-letter / failure sink** so a poison job neither
+  retries forever nor vanishes; and **observable** — a failed or stuck job **surfaces** (a metric,
+  an alert, an admin-visible state), it is never swallowed silently. A **scheduled** task has a
+  named **owner** and a runbook like any incident source (`OP-020`). No **business capability is
+  reachable only through a job with no manual/admin trigger** — an operator must be able to inspect,
+  retry, and cancel it from the backoffice (*every product ships a management backoffice*). Jobs are
+  deferred *work*; a real-time *stream* is `EVENTING.md` — related, not the same. The queue/broker
+  is reached through an adapter (pillar 5), its endpoint from the environment.
 
 ## Quality gates
 
@@ -1095,6 +1198,12 @@ Five of its rules are load-bearing enough to state here:
 - **A skipped job reports as skipped, never as passed** (`CI-032`). Path filters may skip work;
   they must never turn a required check green without running it. A tick that means "not
   executed" destroys trust in the whole pipeline.
+- **No `continue-on-error` that swallows a real failure** (`CI-037`). A step that matters — a
+  test, lint, type-check, build, scan, migration, deploy — never runs under
+  `continue-on-error: true`: making it fail *green* is the same lie as a skip that reads as a
+  pass. A genuinely optional step is guarded **explicitly** (`if:`, a `hashFiles` check, an
+  exit-0-on-absent design), never by blanket-tolerating every failure mode; "run even if a
+  previous step failed" is `if: always()` (honest), not `continue-on-error` (hidden).
 - **Build once, promote the artefact** (`CI-046`). The image digest that was tested is the one
   deployed; rebuilding per environment means production runs something no test ever saw.
 - **Every job declares `timeout-minutes:` and every PR workflow a concurrency group**
@@ -1169,8 +1278,10 @@ and CI invokes `pre-commit`, not `make`.
   genuinely needs the project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
   it probes for the tool and skips with a message when absent
   (`command -v <tool> >/dev/null 2>&1 && <run> || echo 'skipping — runs in CI/Docker'`),
-  it does **not** spin up a container. Container-side enforcement is CI's job; locally the
-  gate is best-effort and never blocks on the Docker daemon being up. This does not
+  it does **not** spin up a container. Container-side enforcement is CI's job **and is
+  mandatory**: a check skipped on the host **and** absent from CI is not a gate — it runs
+  nowhere (`CI-036`). Locally the gate is best-effort and never blocks on the Docker daemon
+  being up. This does not
   contradict the container-runtime policy — the *application* runs in a container; the
   *commit gate*, like git, is a host tool.
 - **Two stages, two scopes — do not mix them:**
