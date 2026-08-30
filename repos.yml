@@ -354,3 +354,47 @@ repos:
   public: false
   runtime: container
   status: dev
+- name: projects-claude-config
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: forge-studio-core
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: chrysa-claude-template
+  public: false
+  runtime: exempt:config
+  status: dev
+- name: semantic-feed-filter
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: clean-video-experience
+  public: false
+  runtime: exempt:native
+  status: dev
+- name: herdr-rtk-savings
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: daedalus-document-factory
+  public: false
+  runtime: container
+  status: dev
+- name: knowledge-compiler
+  public: false
+  runtime: container
+  status: dev
+- name: eka
+  public: false
+  runtime: container
+  status: dev
+- name: content-organizer
+  public: false
+  runtime: container
+  status: dev
+- name: logos
+  public: false
+  runtime: container
+  status: dev
