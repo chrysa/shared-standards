@@ -145,3 +145,25 @@ class TestCommittedViewsAreCurrent:
         first = {p: c for p, c in g._planned_outputs().items()}
         second = {p: c for p, c in g._planned_outputs().items()}
         assert first == second
+
+    def test_emit_matches_the_committed_blocks(self, capsys):
+        # `--emit` is what distribute-standards.sh consumes to deliver each view to a
+        # consumer repo. Its body must equal the block the generator injects locally, so
+        # the fleet gets byte-identical content without re-rendering the canon in bash.
+        core_body = g._strip_gen_header(g._core_text())
+        assert g.emit("claude") == core_body
+        assert g.emit("agents") == g._agents_view()
+        assert g.emit("copilot") == g._copilot_view()
+
+        for view, expected in (
+            ("claude", core_body),
+            ("agents", g._agents_view()),
+            ("copilot", g._copilot_view()),
+        ):
+            assert g.main(["--emit", view]) == 0
+            assert capsys.readouterr().out == expected
+
+    def test_emit_rejects_an_unknown_view(self, capsys):
+        assert g.main(["--emit", "nope"]) == 2
+        assert g.main(["--emit"]) == 2
+        assert "usage:" in capsys.readouterr().err
