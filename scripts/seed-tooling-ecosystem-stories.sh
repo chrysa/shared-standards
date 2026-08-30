@@ -50,8 +50,8 @@ while IFS='|' read -r name type desc; do
   if printf '%s' "$existing" | grep -Fq "$name"; then
     echo "skip (exists): $name"; continue
   fi
-  body="$(python3 -c 'import json,sys;n,t,d,s=sys.argv[1:5];print(json.dumps({"name":n,"story_type":t,"description":d,"labels":[{"name":"tooling-ecosystem"}],"workflow_state_id":int(s)}))' \
-    "$name" "$type" "$desc" "$WORKFLOW_STATE_ID")"
+  body="$(python3 -c 'import json,sys;n,t,d,s,g=sys.argv[1:6];p={"name":n,"story_type":t,"description":d,"labels":[{"name":"tooling-ecosystem"}],"workflow_state_id":int(s)};g and p.update(group_id=g);print(json.dumps(p))' \
+    "$name" "$type" "$desc" "$WORKFLOW_STATE_ID" "${GROUP_ID:-}")"
   if [ "$DRY_RUN" = "--dry-run" ]; then
     echo "DRY: would create [$type] $name"
   else
