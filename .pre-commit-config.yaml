@@ -126,6 +126,19 @@ repos:
     language: system
     pass_filenames: false
     files: ^(\.claude/skills/|\.claude/agents/|templates/claude/agents/)
+  # The agent views (slim CLAUDE.md core, .claude/rules/<domain>.md, AGENTS.md,
+  # .github/copilot-instructions.md) are GENERATED from standards/STANDARDS.chrysa.md by
+  # scripts/gen_agent_views.py. This gate regenerates them and fails if any committed view
+  # differs — so the canon, the mapping and every view stay one source. Host-native, no
+  # Docker; pyyaml is the only dependency (same as domains-drift).
+  - id: agent-views-drift
+    name: agent views (CLAUDE core / .claude/rules / AGENTS / copilot) match the canon
+    entry: python -m scripts.gen_agent_views --check
+    language: python
+    pass_filenames: false
+    files: ^(standards/(STANDARDS\.chrysa\.md|CORE\.chrysa\.md|rule-domains\.yaml|rules/.*)|scripts/gen_agent_views\.py|CLAUDE\.md|AGENTS\.md|\.github/copilot-instructions\.md)$
+    additional_dependencies:
+    - pyyaml==6.0.2
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan

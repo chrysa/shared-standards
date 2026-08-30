@@ -31,7 +31,12 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-STANDARDS_SRC="$STD_ROOT/standards/STANDARDS.chrysa.md"
+# The managed CLAUDE.md block is the SLIM CORE (rule title + per-domain pointer), generated
+# from the canon by scripts/gen_agent_views.py. The full canon (STANDARDS.chrysa.md) stays
+# the source of truth; its detail lives on-demand in each repo's .claude/rules/<domain>.md.
+# CORE.chrysa.md is itself generated + drift-gated (agent-views-drift), so this stays a
+# byte-faithful inline of a generated artefact — never hand-edited.
+STANDARDS_SRC="$STD_ROOT/standards/CORE.chrysa.md"
 # SKILLS_SRC = the transverse DevEx skills authored HERE, fanned out to every repo.
 # Intentionally NOT chrysa-skills: that is a separate load-on-demand library
 # (functional/identity/specialty, ~61 skills) NOT wired into distribution — fanning it
