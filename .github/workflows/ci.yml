@@ -58,6 +58,14 @@ jobs:
                   uv run ruff check .
                   uv run mypy standards_console
 
+            # The agent views (slim CLAUDE.md core, standards/rules/<domain>.md, AGENTS.md,
+            # .github/copilot-instructions.md) are generated from standards/STANDARDS.chrysa.md.
+            # Regenerate and fail if any committed view drifted (mirrors the agent-views-drift
+            # pre-commit hook). Runs from the repo root, off the console project.
+            - name: Agent views drift
+              working-directory: ${{ github.workspace }}
+              run: uv run --no-project --with pyyaml==6.0.2 python -m scripts.gen_agent_views --check
+
     test:
         name: Docker tests
         runs-on: ubuntu-latest
