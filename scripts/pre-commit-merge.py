@@ -233,6 +233,11 @@ EXCLUDE_ALIGNED_IDS = {
     "python-untyped-raise",
     "fastapi-missing-response-model",
     "fastapi-missing-links",
+    # yaml-sorter's exclude is policy: it must always skip workflows, lock files
+    # and `.pre-commit-config.yaml`. A repo that carries an older, narrower exclude
+    # (missing the config, so the sorter rewrites it on every run) is corrected by
+    # the baseline instead of drifting forever.
+    "yaml-sorter",
 }
 
 # `repo: local` hooks reference repo-relative scripts/files (e.g. the canonical-drift
@@ -240,6 +245,35 @@ EXCLUDE_ALIGNED_IDS = {
 # in shared-standards itself). They are self-only and must never be fanned out to the
 # fleet, or every consumer's pre-commit fails with "executable not found".
 NON_DISTRIBUTED_REPOS = {"local"}
+
+# Distributed canonical files a consumer must never let its own autofixers rewrite:
+# they are managed copies kept byte-identical to source by the drift gate. Per-hook
+# excludes miss the autofixers that carry none (ruff-format, add-trailing-comma,
+# auto-walrus), so any touch — incl. distributing the #468 parser fix — drifts the
+# managed copy. A single top-level `exclude` makes EVERY hook skip them. #469.
+CANONICAL_EXCLUDE_PATTERNS: tuple[str, ...] = (
+    r"(^|/)quality_gate\.py$",
+    r"^\.claude/ape/",
+)
+
+
+def _exclude_gaps(target: dict) -> list[str]:
+    """Canonical exclude fragments not already present in the target's top-level exclude."""
+    current = target.get("exclude") or ""
+    return [p for p in CANONICAL_EXCLUDE_PATTERNS if p not in current]
+
+
+def ensure_top_level_exclude(target: dict) -> None:
+    """Union the canonical distributed-canonical patterns into the top-level `exclude`.
+
+    A repo's own top-level exclude is kept and extended (alternation), never replaced;
+    running twice is a no-op (each fragment is added only when absent).
+    """
+    gaps = _exclude_gaps(target)
+    if not gaps:
+        return
+    current = (target.get("exclude") or "").strip()
+    target["exclude"] = "|".join([current, *gaps]) if current else "|".join(gaps)
 
 
 def enforced_ids(stacks: set[str]) -> set[str]:
@@ -331,6 +365,7 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     canon_py = canonical_python(baseline)
     if canon_py and target_python(target) not in (None, canon_py):
         gaps.append(f"default_language_version.python={canon_py}")
+    gaps.extend(f"exclude:{pattern}" for pattern in _exclude_gaps(target))
     return gaps
 
 
@@ -384,6 +419,7 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
     canon_py = canonical_python(baseline)
     if canon_py and target_python(target) not in (None, canon_py):
         target["default_language_version"]["python"] = canon_py
+    ensure_top_level_exclude(target)
     return target
 
 

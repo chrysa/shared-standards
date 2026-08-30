@@ -84,6 +84,8 @@ source in two forms.
 | `STD-TEST-001`       | `TESTING.md`                              | `TS-`       |
 | `STD-PERF-001`       | `CI-CD.md` (CI-053)                       | `CI-`       |
 | `STD-AI-QUALITY-001` | `AGENTIC-CAPABILITIES.md`                 | `AG-`       |
+| `STD-SCM-001`        | `SCM.md`                                  | `SC-`       |
+| `STD-EVENTING-001`   | `EVENTING.md`                             | `EV-`       |
 
 A `STD-*` domain whose home is `pending` (no annexe implements it yet) is a **ghost domain** —
 it governs nothing and **must not be marked `Adopted`** (in the repo or in Notion). This is the
@@ -128,11 +130,13 @@ Known consumers to keep aligned: `.claude/thresholds.json`, `.quality-gate.json`
 
 ______________________________________________________________________
 
-## 5. External compliance
+## 5. Security & legal compliance
 
-The fleet is held to two external compliance frameworks. Neither is a parallel corpus: each is
-operationalised by rules that already exist in the canon. Declaring the target does not by
-itself grant certification — it names the obligation the existing rules must satisfy.
+The fleet is held to external security frameworks and to the law. None is a parallel corpus:
+each is operationalised by rules that already exist in the canon. Declaring a target does not by
+itself grant compliance — it names the obligation the existing rules must satisfy. GV-042 states
+the **security floor** every product meets before it ships; GV-043 makes **respecting the
+applicable law** a build-time requirement, not a legal afterthought.
 
 ### GV-040 — GDPR / RGPD by construction
 
@@ -166,3 +170,67 @@ a risk assessment and treatment plan, a Statement of Applicability (SoA), define
 roles, and periodic internal audit plus management review. Those artefacts are versioned under
 `docs/` (or a dedicated governance repo) and tracked as a governance backlog — the code rules
 above are necessary for certification but not sufficient on their own.
+
+### GV-042 — Baseline security prerequisites every product meets before it ships
+
+Independently of any certification, a product does not reach production without the **security
+floor** below. These are not new rules — each is the socle rule named beside it, gathered here as
+one non-negotiable checklist so "secure enough to ship" has a fixed meaning:
+
+- **Encryption in transit and at rest.** All traffic is TLS (terminated in the platform layer,
+  never a plaintext public port); sensitive and secret data is encrypted at rest. No credential,
+  token, or personal datum crosses the wire or sits on disk in clear.
+- **No secret in the repo or the image.** Secrets arrive by environment / a secrets manager,
+  documented in `.env.example`, scanned by the commit gate; a hardcoded secret is a leak, not a
+  config choice (socle *external servers addressed through the environment*, `.env` rules).
+- **Authenticated, least-privilege access.** Per-person data sits behind a real account and the
+  identity hierarchy (SSO → external OAuth → local); every actor gets the minimum rights, and
+  admin power is a role, not a shared login (socle identity/session rules, `AG-002`).
+- **A secured, expiring session.** Idle **and** absolute timeouts enforced server-side, opaque
+  server-revocable tokens, `HttpOnly`/`Secure`/`SameSite` cookies, session id regenerated at every
+  privilege change (socle *a session is secured and it expires*).
+- **Every input is validated server-side.** Forms and API payloads are re-validated against a
+  typed schema, bound to an allowlist of fields (no mass assignment), CSRF-protected, rate-limited;
+  user-supplied content is escaped and uploaded files are content-checked (socle *every form is a
+  hostile input surface*, *if a user can supply a file…*).
+- **Dependencies and images are scanned and pinned.** One committed lockfile, no `latest`,
+  dependency and image vulnerability scanning + SBOM + signed artefacts in CI, base images pinned
+  by digest (socle · `CI-*`).
+- **Errors leak nothing; security events are logged.** No stack trace, SQL, or internal path
+  reaches the user; authentication failures stay generic; auth, access, and admin actions are
+  audited without recording the secret itself (socle *typed/contained errors*, backoffice audit).
+- **No default or shipped credential.** A first-run bootstrap credential is single-use and rotated;
+  a product that ships with a known default password is a defect.
+
+A product missing any of these is **not production-ready** (`OP-050`), regardless of feature
+completeness. Values (timeouts, rate limits, key sizes) live in the per-repo contract (GV-030).
+
+### GV-043 — Respecting the applicable law is a build-time requirement
+
+A product is **lawful by construction** for every jurisdiction it operates in — legality is a
+requirement gathered before the first line, not a review bolted on before launch. Concretely:
+
+- **The applicable law is identified and owned.** A product names the jurisdictions it serves and
+  the regimes that bind it — data protection (GDPR/RGPD → `GV-040`, and the local equivalent where
+  users are elsewhere), **accessibility law** (the socle WCAG 2.1 AA floor is also a legal
+  obligation for public and many private services), sector rules (finance, health, minors),
+  consumer / e-commerce / distance-selling law, and any **data-residency / sovereignty** constraint
+  — each with a named owner, recorded under `docs/`.
+- **Consent and disclosure are real, not decorative.** Where the law requires consent (tracking,
+  marketing, cookies) it is **freely given, granular, and revocable**, the pre-ticked box is
+  forbidden, and the mandatory legal notices exist and are reachable — terms, privacy policy, legal
+  entity / mentions légales, licences of bundled third-party work.
+- **Data location and transfer obey the rule.** Where data must stay in a region, the storage and
+  its backups honour it; a cross-border transfer has a lawful basis. This binds the deployment
+  target and the provider choice (pillar 2 *GAFAM independence* gives the exit path).
+- **Licensing is respected both ways.** Every third-party dependency's licence is compatible with
+  the product's use and distribution (checked in CI), and the product's own licence is declared;
+  content, fonts, and assets are used within their terms.
+- **Illegal-by-design is a blocking defect.** A feature that can only work by breaking a law that
+  applies to its users is not shipped pending a lawful design — the same status as a failing
+  security gate. Where a legal question is unresolved, it is an owned, dated item (`GV-013`), never
+  an implicit bet.
+
+This does not turn engineers into lawyers: it makes the legal constraints **explicit inputs** to
+design and deployment, owned and tracked like any other requirement, so compliance is verifiable
+rather than assumed. Detail for privacy specifically: `GV-040` + the `rgpd-compliance` skill.

@@ -48,7 +48,7 @@ jobs:
         steps:
             - uses: actions/checkout@v7.0.1
 
-            - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+            - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
               with:
                   enable-cache: true
 
@@ -78,6 +78,26 @@ jobs:
               with:
                   name: test-results-3.14
                   path: coverage.xml
+                  if-no-files-found: warn
+
+            # The canonical scripts (quality_gate parser, pre-commit-merge) run as host
+            # tools; test them on the host and ship their coverage to Sonar alongside the
+            # console report so a scripts/ change is not counted as 0% new-code coverage.
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.14"
+
+            - name: Scripts tests + coverage (host)
+              run: |
+                  python -m pip install --quiet pytest pytest-cov coverage ruamel.yaml
+                  make test-scripts
+
+            - name: Upload scripts coverage
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: scripts-coverage
+                  path: scripts-coverage.xml
                   if-no-files-found: warn
 
     web:
@@ -141,12 +161,24 @@ jobs:
 
             # Web TS coverage travels from the `web` job as an artifact; land it
             # where the action expects it (js-coverage-report path below).
+            # `sonar` needs `web`, which always uploads this artifact, so the download
+            # cannot legitimately be absent — no continue-on-error (CI-037). If web ever
+            # stops producing it, this failing loudly is correct, not something to swallow.
             - name: Download web LCOV coverage
-              continue-on-error: true
               uses: actions/download-artifact@v8
               with:
                   name: web-coverage-lcov
                   path: console/web/coverage
+
+            # Scripts coverage from the `test` job; land it in reports/ so it is passed to
+            # Sonar next to the console coverage.xml the action downloads itself. `sonar`
+            # needs `test`, which only reaches the upload after the scripts step passed, so
+            # the artifact cannot legitimately be absent — no continue-on-error (CI-037).
+            - name: Download scripts coverage
+              uses: actions/download-artifact@v8
+              with:
+                  name: scripts-coverage
+                  path: reports
 
             - uses: chrysa/github-actions/sonar-scan-python@v1.8.1
               with:
@@ -160,9 +192,10 @@ jobs:
                   # `scripts` only, which never covered console/ → 0% coverage).
                   sources: console/standards_console,scripts,console/web/src
                   tests: console/tests
-                  # Downloaded from the test-results-3.14 artifact into reports/
-                  # by the action; matches sonar-scan-python's default path.
-                  coverage-report: reports/coverage.xml
+                  # console coverage.xml is downloaded from the test-results-3.14 artifact
+                  # into reports/ by the action; scripts-coverage.xml is placed in reports/
+                  # by the step above. reportPaths accepts a comma list.
+                  coverage-report: reports/coverage.xml,reports/scripts-coverage.xml
                   # TS coverage from the `web` job (SF paths repo-root-relative).
                   # Missing file is skipped by the action, never fails the scan.
                   js-coverage-report: console/web/coverage/lcov.info

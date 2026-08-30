@@ -8,14 +8,16 @@ as a file — it has to be merged into a table that already carries repo-specifi
 tuning. That is this script.
 
 Union by rule code, appended to `[tool.ruff.lint] select`. Existing entries win and
-are never reordered, removed, or reformatted; `ignore`, `per-file-ignores` and every
-other key are left untouched. Running it twice is a no-op.
+are never reordered, removed, or reformatted; `ignore` and repo-owned `per-file-ignores`
+are left untouched — with one exception: the canonical test-ignore that a high-volume
+rule requires to be armable (see CANONICAL_TEST_IGNORES). Running it twice is a no-op.
 
 The default set is LOT 1 — the structural, low-volume rules measured as armable
 fleet-wide (see the standards block: complexity, dead branches, obvious perf traps).
-It deliberately excludes PLR2004 (magic values, ~2500 fleet findings — that is the
-`no hardcoded constants` chantier, not a flag) and RUF001 (ambiguous unicode, fires
-on French prose).
+It now also arms PLR2004 (magic values) paired with its tests exemption: 86% of the
+~2519 fleet findings were in tests (shared-standards#272, re-measured 2026-08-29), so
+exempting `tests/**` leaves ~350 src findings as the tracked `no hardcoded constants`
+extraction backlog. RUF001 (ambiguous unicode, fires on French prose) stays excluded.
 
 Usage: pyproject-ruff-merge.py <pyproject.toml> [--check] [--rules C901,PERF401]
   --check  : exit 1 if any canonical rule is missing (no write), listing them.
@@ -53,13 +55,25 @@ CANONICAL_RULES: tuple[str, ...] = (
     "RUF043",  # pytest-raises-ambiguous-pattern
     "RUF059",  # unused-unpacked-variable
     "RUF100",  # unused-noqa — autofixable, keeps suppressions honest
+    "PLR2004",  # magic-value-comparison — the `no hardcoded constants` gate; tests/** exempt (see CANONICAL_TEST_IGNORES)
 )
+
+# The one per-file-ignore this distributor manages: high-volume rules whose findings
+# in tests are legitimate (HTTP status codes, fixtures) and must not gate CI. Measured
+# 2026-08-29 (shared-standards#272): 86% of PLR2004's ~2519 fleet findings live in
+# tests, so arming it fleet-wide requires exempting them here — the remaining ~350 src
+# findings are the tracked `no hardcoded constants` extraction backlog. Every other
+# per-file-ignore is repo-owned and left untouched.
+CANONICAL_TEST_IGNORES: dict[str, tuple[str, ...]] = {
+    "**/tests/**": ("PLR2004",),
+    "**/test_*.py": ("PLR2004",),
+    "**/conftest.py": ("PLR2004",),
+}
 
 # Rules the `PLR*`/`RUF` shorthand in the standards block would imply, excluded on
 # purpose. Named here so the decision is visible at the point of distribution rather
 # than only in an issue — see STANDARDS.chrysa.md, *known anti-patterns*.
 DELIBERATELY_EXCLUDED: dict[str, str] = {
-    "PLR2004": "magic-value-comparison — 2519 fleet findings; the `no hardcoded constants` chantier, not a flag",
     "RUF001": "ambiguous-unicode — 493 findings on 4 repos, all French prose; arm locally with allowed-confusables",
 }
 
@@ -169,6 +183,68 @@ def merge(text: str, rules: list[str]) -> str:
     return text + block
 
 
+def _current_ignores(data: dict) -> dict:
+    """Return the repo's per-file-ignores mapping, whichever table style it uses."""
+    lint = _lint_table(data)
+    if "per-file-ignores" in lint:
+        return dict(lint["per-file-ignores"])
+    return dict(data.get("tool", {}).get("ruff", {}).get("per-file-ignores", {}))
+
+
+def missing_test_ignores(data: dict) -> dict[str, list[str]]:
+    """Return, per canonical glob, the codes not yet ignored there (canonical order).
+
+    A glob absent from the repo, or present without the code, needs the code added.
+    A glob that already lists the code (or a covering prefix) counts as present.
+    """
+    current = _current_ignores(data)
+    out: dict[str, list[str]] = {}
+    for glob, codes in CANONICAL_TEST_IGNORES.items():
+        have = set(current.get(glob, []))
+        need = [c for c in codes if not any(c.startswith(sel) for sel in have)]
+        if need:
+            out[glob] = need
+    return out
+
+
+def _ensure_ignores(text: str, missing: dict[str, list[str]]) -> str:
+    """Idempotently add the canonical test-ignores, touching no other ignore entry."""
+    if not missing:
+        return text
+    # Prefer an existing per-file-ignores table (new-style, then pre-0.2 layout).
+    for header in ("tool.ruff.lint.per-file-ignores", "tool.ruff.per-file-ignores"):
+        span = _section_span(text, header)
+        if span is None:
+            continue
+        start, end = span
+        section = text[start:end]
+        appended: list[str] = []
+        for glob, codes in missing.items():
+            row = re.search(rf'^"{re.escape(glob)}"\s*=\s*\[(?P<body>.*?)\]', section, re.MULTILINE | re.DOTALL)
+            if row is None:
+                # Glob absent: queue a fresh row to append at the end of the table body.
+                appended.append(f'"{glob}" = [{", ".join(f'"{c}"' for c in codes)}]')
+            else:
+                inner = row.group("body").strip()
+                prefix = f"{inner}, " if inner and not inner.rstrip().endswith(",") else f"{inner} " if inner else ""
+                section = (
+                    section[: row.start("body")]
+                    + prefix
+                    + ", ".join(f'"{c}"' for c in codes)
+                    + section[row.end("body") :]
+                )
+        if appended:
+            section = section.rstrip("\n") + "\n" + "\n".join(appended) + "\n"
+        return text[:start] + section + text[end:]
+    # No table at all: append a canonical new-style one.
+    block = "\n[tool.ruff.lint.per-file-ignores]\n" + "".join(
+        f'"{glob}" = [{", ".join(f'"{c}"' for c in codes)}]\n' for glob, codes in missing.items()
+    )
+    if not text.endswith("\n"):
+        text += "\n"
+    return text + block
+
+
 def _resolve_target(argv: list[str]) -> Path | None:
     """The single positional argument, or None when the usage is wrong."""
     args = [a for a in argv if not a.startswith("--")]
@@ -204,26 +280,39 @@ def main(argv: list[str]) -> int:
         return 2
 
     missing = missing_rules(data, rules)
+    # The canonical test-ignore is the companion of arming PLR2004; only manage it when
+    # PLR2004 is in the active set (a --rules= override without it leaves ignores alone).
+    ignores = missing_test_ignores(data) if "PLR2004" in rules else {}
     if "--check" in argv:
+        problems = []
         if missing:
-            sys.stderr.write(f"{target}: missing Ruff rules: {', '.join(missing)}\n")
+            problems.append(f"missing Ruff rules: {', '.join(missing)}")
+        if ignores:
+            problems.append(f"missing test-ignores: {', '.join(ignores)}")
+        if problems:
+            sys.stderr.write(f"{target}: " + "; ".join(problems) + "\n")
             return 1
         return 0
-    if not missing:
+    if not missing and not ignores:
         return 0
-    return _write_merged(target, text, missing)
+    return _write_merged(target, text, missing, ignores)
 
 
-def _write_merged(target: Path, text: str, missing: list[str]) -> int:
-    """Merge the missing codes in, refusing to write a pyproject that would not parse."""
-    merged = merge(text, missing)
+def _write_merged(target: Path, text: str, missing: list[str], ignores: dict[str, list[str]]) -> int:
+    """Merge the missing codes + canonical test-ignores, refusing to write invalid TOML."""
+    merged = _ensure_ignores(merge(text, missing), ignores)
     try:
         tomllib.loads(merged)
     except tomllib.TOMLDecodeError as exc:  # never hand back a broken pyproject
         sys.stderr.write(f"{target}: merge would produce invalid TOML — {exc}\n")
         return 2
     target.write_text(merged, encoding="utf-8")
-    print(f"{target}: added {', '.join(missing)}")
+    parts = []
+    if missing:
+        parts.append(", ".join(missing))
+    if ignores:
+        parts.append("test-ignores " + ", ".join(ignores))
+    print(f"{target}: added {'; '.join(parts)}")
     return 0
 
 

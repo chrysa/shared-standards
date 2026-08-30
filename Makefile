@@ -1,5 +1,5 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov docker-test lint format typecheck build clean pre-commit
+.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci
 
 help:
 	@echo "Available targets:"
@@ -22,7 +22,15 @@ test:
 test-cov:
 	@echo "No tests — shared-standards is a documentation-only repo"
 
-# The only executable code lives in console/. CI's `make docker-test` builds its
+# Host-native tests for the canonical scripts (quality_gate parser, pre-commit-merge).
+# These run as host tools (pre-commit invokes them without Docker), so they are tested on
+# the host and their coverage travels to Sonar next to the console coverage — otherwise a
+# scripts/ change is counted as 0% new-code coverage.
+test-scripts: ## Run the scripts test suite with coverage (host)
+	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py' -m pytest tests/scripts -q
+	python3 -m coverage xml -o scripts-coverage.xml
+
+# The console app lives in console/ and its suite runs in Docker. CI's `make docker-test` builds its
 # dev image, runs the suite in-container, and emits a repo-root coverage.xml whose
 # paths are rewritten so SonarCloud (analysing from the repo root) can map them.
 docker-test: ## Run the console test suite in Docker; emit repo-root coverage.xml
@@ -49,6 +57,9 @@ clean:
 
 pre-commit:
 	pre-commit run --all-files
+
+ci: lint typecheck test ## Run the repo CI gate (lint + typecheck + test)
+	@echo "CI gate passed."
 
 # ── Quality Gates ──────────────────────────────────────────────────────────────
 
