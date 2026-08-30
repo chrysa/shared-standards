@@ -27,7 +27,7 @@ test-cov:
 # the host and their coverage travels to Sonar next to the console coverage — otherwise a
 # scripts/ change is counted as 0% new-code coverage.
 test-scripts: ## Run the scripts test suite with coverage (host)
-	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py' -m pytest tests/scripts -q
+	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
 	python3 -m coverage xml -o scripts-coverage.xml
 
 # The console app lives in console/ and its suite runs in Docker. CI's `make docker-test` builds its
