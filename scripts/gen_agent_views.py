@@ -24,12 +24,18 @@ Run ``python -m scripts.gen_agent_views`` to (re)write the views, or
 ``python -m scripts.gen_agent_views --check`` to fail on drift (the ``agent-views-drift``
 pre-commit hook + the CI gate). Deterministic output — stable ordering everywhere — so the
 drift check is stable.
+
+``python -m scripts.gen_agent_views --emit {claude|agents|copilot}`` prints one view's
+managed-block body (markers excluded) to stdout. This is the single rendering entry point
+``scripts/distribute-standards.sh`` calls to deliver each view to a consumer repo, so the
+fleet never re-implements the canon's rendering in bash.
 """
 
 from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -313,6 +319,26 @@ def _copilot_view() -> str:
     return "\n".join(body).rstrip() + "\n"
 
 
+def _claude_view() -> str:
+    """The CLAUDE.md core managed-block body (the CORE, header comment stripped)."""
+    return _strip_gen_header(_core_text())
+
+
+# Managed-block BODY (markers excluded) per agent view — a lookup table, not a branch ladder.
+# distribute-standards.sh consumes these via ``--emit`` to deliver a byte-identical block to
+# every consumer repo, so the fleet never re-implements the canon's rendering in bash.
+_VIEW_BODIES: dict[str, Callable[[], str]] = {
+    "claude": _claude_view,
+    "agents": _agents_view,
+    "copilot": _copilot_view,
+}
+
+
+def emit(view: str) -> str:
+    """Return the managed-block body for one agent view (``claude``/``agents``/``copilot``)."""
+    return _VIEW_BODIES[view]()
+
+
 def _planned_outputs() -> dict[Path, str]:
     """Every file this generator owns, mapped to its expected content."""
     rules, _ = parse_rules()
@@ -387,6 +413,14 @@ def check() -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
+    if args and args[0] == "--emit":
+        match args[1:]:
+            case [view] if view in _VIEW_BODIES:
+                sys.stdout.write(emit(view))
+                return 0
+            case _:
+                sys.stderr.write("usage: gen_agent_views --emit {claude|agents|copilot}\n")
+                return 2
     if "--check" in args:
         problems = check()
         if not problems:

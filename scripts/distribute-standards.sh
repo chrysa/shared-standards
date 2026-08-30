@@ -5,25 +5,32 @@
 # This is the single entry point used by the distribute-standards GitHub Action
 # (one matrix job per repo) and runnable locally against any repo checkout.
 #
-# Composes, idempotently:
-#   1. CLAUDE.md standards      inline the transverse standards CONTENT into a managed
-#                              `<!-- chrysa:standards:start/end -->` block (create file if absent).
+# Composes, idempotently. Layers 1a-1c are the SLIM-CORE STANDARDS SYSTEM — one
+# generated view of the canon per agent tool, plus the on-demand detail behind it.
+# They are delivered together and travel even in --standards-only mode:
+#   1a. CLAUDE.md standards     inline the slim CORE (rule title + per-domain pointer) into a
+#                              managed `<!-- chrysa:standards:start/end -->` block (create if absent).
 #                              The block is self-contained — NO `.chrysa/` copy, no `@import`.
-#   2. Legacy migration        remove any old `.chrysa/standards-import` block + the vendored
+#   1b. On-demand rule detail  standards/rules/<domain>.md -> <repo>/standards/rules/  (managed copies).
+#                              These are the full per-domain rules the CORE's pointers resolve to;
+#                              the consumer path mirrors shared-standards so the pointers work verbatim.
+#   1c. AGENTS + Copilot views AGENTS.md + .github/copilot-instructions.md each get the same core in a
+#                              managed block, so every agent tool sees one synchronised rule index.
+#   2.  Legacy migration       remove any old `.chrysa/standards-import` block + the vendored
 #                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
-#   3. Shared skills           .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
-#   4. Shared agents+commands  templates/claude/{agents,commands}/* -> <repo>/.claude/
-#   5. Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
+#   3.  Shared skills          .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
+#   4.  Shared agents+commands templates/claude/{agents,commands}/* -> <repo>/.claude/
+#   5.  Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
-# Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md is preserved;
-# only the delimited standards block is touched.
+# Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md / AGENTS.md /
+# copilot-instructions.md is preserved; only the delimited managed blocks are touched.
 #
 # Usage:
 #   distribute-standards.sh <repo_path>              # apply
 #   distribute-standards.sh --dry-run <repo_path>    # preview, no writes
 #   distribute-standards.sh --check <repo_path>      # report drift, exit 1 if any
 #   distribute-standards.sh --no-apply <repo_path>   # skip apply-repo-standard.sh delegation
-#   distribute-standards.sh --standards-only <repo>  # only the CLAUDE.md block + legacy purge
+#   distribute-standards.sh --standards-only <repo>  # only the slim-core standards system + legacy purge
 #
 # Exit: 0 ok (or no drift) · 1 drift found (--check) / error · 2 repo absent
 set -uo pipefail
@@ -33,10 +40,16 @@ STD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # The managed CLAUDE.md block is the SLIM CORE (rule title + per-domain pointer), generated
 # from the canon by scripts/gen_agent_views.py. The full canon (STANDARDS.chrysa.md) stays
-# the source of truth; its detail lives on-demand in each repo's .claude/rules/<domain>.md.
-# CORE.chrysa.md is itself generated + drift-gated (agent-views-drift), so this stays a
-# byte-faithful inline of a generated artefact — never hand-edited.
+# the source of truth; its detail lives on-demand in each repo's standards/rules/<domain>.md.
+# CORE.chrysa.md, AGENTS.md and copilot-instructions.md are themselves generated + drift-gated
+# (agent-views-drift), so every view distributed here is a byte-faithful copy of a generated
+# artefact — never hand-edited. The AGENTS/Copilot view bodies are produced by the generator
+# itself (`gen_agent_views --emit <view>`), with a fallback that extracts the committed,
+# drift-gated block from this repo's own view file when Python/pyyaml is unavailable.
 STANDARDS_SRC="$STD_ROOT/standards/CORE.chrysa.md"
+RULES_SRC="$STD_ROOT/standards/rules"
+AGENTS_VIEW_SRC="$STD_ROOT/AGENTS.md"
+COPILOT_VIEW_SRC="$STD_ROOT/.github/copilot-instructions.md"
 # SKILLS_SRC = the transverse DevEx skills authored HERE, fanned out to every repo.
 # Intentionally NOT chrysa-skills: that is a separate load-on-demand library
 # (functional/identity/specialty, ~61 skills) NOT wired into distribution — fanning it
@@ -49,6 +62,13 @@ CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
 
 MARK_START='<!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->'
 MARK_END='<!-- chrysa:standards:end -->'
+
+# Per-view managed markers — identical to scripts/gen_agent_views.py, so the block distributed
+# here is byte-for-byte what the generator injects into this repo's own AGENTS.md / copilot file.
+AGENTS_MARK_START='<!-- chrysa:standards-agents:start · generated · DO NOT EDIT -->'
+AGENTS_MARK_END='<!-- chrysa:standards-agents:end -->'
+COPILOT_MARK_START='<!-- chrysa:standards-copilot:start · generated · DO NOT EDIT -->'
+COPILOT_MARK_END='<!-- chrysa:standards-copilot:end -->'
 
 # Legacy artefacts from the vendored-copy mechanism (removed on migration).
 OLD_MARK_START='<!-- chrysa:standards-import:start -->'
@@ -67,7 +87,7 @@ for arg in "$@"; do
         --check)          CHECK=true ;;
         --no-apply)       NO_APPLY=true ;;
         --standards-only) STANDARDS_ONLY=true; NO_APPLY=true ;;
-        -h|--help)  sed -n '2,30p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        -h|--help)  sed -n '2,35p' "$0" | sed 's/^# \?//'; exit 0 ;;
         *)          [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
     esac
 done
@@ -103,6 +123,65 @@ build_block() {
       sed '1,/^-->/d' "$STANDARDS_SRC" | sed '/./,$!d'
       printf '%s\n' "$MARK_END"
     } > "$out"
+}
+
+# Emit one agent-view body (the managed-block body, WITHOUT markers) to file $2.
+# Primary path: the generator itself — the single source of rendering (task requirement:
+# never re-implement the rendering in bash). Fallback: extract the committed, drift-gated
+# block from this repo's own view file, for a minimal runner without Python/pyyaml. Both are
+# byte-identical by the agent-views-drift gate, so the fallback never diverges from the canon.
+emit_view_body() {
+    local view="$1" out="$2"
+    if ( cd "$STD_ROOT" && python3 -m scripts.gen_agent_views --emit "$view" ) > "$out" 2>/dev/null \
+        && [[ -s "$out" ]]; then
+        return 0
+    fi
+    local src ms me
+    case "$view" in
+        agents)  src="$AGENTS_VIEW_SRC";  ms="$AGENTS_MARK_START";  me="$AGENTS_MARK_END" ;;
+        copilot) src="$COPILOT_VIEW_SRC"; ms="$COPILOT_MARK_START"; me="$COPILOT_MARK_END" ;;
+        *)       return 1 ;;
+    esac
+    [[ -f "$src" ]] || return 1
+    awk -v s="$ms" -v e="$me" '$0==s {inb=1; next} $0==e {inb=0} inb {print}' "$src" > "$out"
+    [[ -s "$out" ]]
+}
+
+# Upsert a managed block (start + body-file + end) into $target, creating the file if absent.
+# Repo-specific content outside the block is preserved. Honors --dry-run / --check.
+# Args: target mark_start mark_end body_file label
+upsert_block() {
+    local target="$1" mark_start="$2" mark_end="$3" body="$4" label="$5"
+    local block; block="$(mktemp)"
+    { printf '%s\n' "$mark_start"; cat "$body"; printf '%s\n' "$mark_end"; } > "$block"
+
+    if [[ ! -f "$target" ]]; then
+        if $CHECK;   then warn "drift: $target absent (would be created)"; mark_drift; rm -f "$block"; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would create $target with $label block"; mark_drift; rm -f "$block"; return 0; fi
+        mkdir -p "$(dirname "$target")"
+        cat "$block" > "$target"; normalize_eof "$target"
+        ok "created $target with $label block"; rm -f "$block"; return 0
+    fi
+
+    if grep -qF "$mark_start" "$target"; then
+        local cur; cur="$(mktemp)"
+        awk -v s="$mark_start" -v e="$mark_end" '$0==s {inb=1} inb {print} $0==e {inb=0}' "$target" > "$cur"
+        if cmp -s "$cur" "$block"; then rm -f "$cur" "$block"; return 0; fi
+        if $CHECK;   then warn "drift: $target $label block stale"; mark_drift; rm -f "$cur" "$block"; return 0; fi
+        if $DRY_RUN; then info "[dry-run] would refresh $label block in $target"; mark_drift; rm -f "$cur" "$block"; return 0; fi
+        local tmp; tmp="$(mktemp)"
+        awk -v s="$mark_start" -v e="$mark_end" -v bf="$block" '
+            $0==s {while ((getline line < bf) > 0) print line; close(bf); skip=1; next}
+            $0==e {skip=0; next}
+            !skip {print}' "$target" > "$tmp"
+        mv "$tmp" "$target"; normalize_eof "$target"
+        ok "refreshed $label block in $target"; rm -f "$cur" "$block"; return 0
+    fi
+
+    if $CHECK;   then warn "drift: $target missing $label block"; mark_drift; rm -f "$block"; return 0; fi
+    if $DRY_RUN; then info "[dry-run] would append $label block to $target"; mark_drift; rm -f "$block"; return 0; fi
+    printf '\n' >> "$target"; cat "$block" >> "$target"; normalize_eof "$target"
+    ok "appended $label block to $target"; rm -f "$block"
 }
 
 # Copy src -> dest if content differs. Honors --dry-run / --check.
@@ -190,6 +269,33 @@ inject_standards() {
     ok "appended standards block to $claude"; rm -f "$block"
 }
 
+# Fan out the on-demand rule detail + (re)generate the AGENTS.md and Copilot views.
+# Part of the slim-core standards system, so this runs in the standards layer (before the
+# --standards-only early return): an exempt:config repo still gets the whole rule system,
+# just no application scaffold.
+deploy_agent_views() {
+    local repo="$1"
+    # On-demand per-domain detail behind the CORE's pointers. Consumer path mirrors
+    # shared-standards (standards/rules/<domain>.md) so `standards/rules/<domain>.md`
+    # pointers in the injected CORE resolve verbatim.
+    deploy_dir "$RULES_SRC" "$repo/standards/rules"
+
+    local body; body="$(mktemp)"
+    if emit_view_body agents "$body"; then
+        upsert_block "$repo/AGENTS.md" \
+            "$AGENTS_MARK_START" "$AGENTS_MARK_END" "$body" "agents"
+    else
+        warn "could not emit AGENTS view (no generator, no committed block) · skip"
+    fi
+    if emit_view_body copilot "$body"; then
+        upsert_block "$repo/.github/copilot-instructions.md" \
+            "$COPILOT_MARK_START" "$COPILOT_MARK_END" "$body" "copilot"
+    else
+        warn "could not emit Copilot view (no generator, no committed block) · skip"
+    fi
+    rm -f "$body"
+}
+
 main() {
     local repo="$TARGET_REPO"
     [[ -n "$repo" ]]   || { err "Usage: $0 [--dry-run|--check|--no-apply] <repo_path>"; exit 1; }
@@ -199,8 +305,10 @@ main() {
 
     log "═══ distribute-standards · $(basename "$repo") ═══"
 
-    # 1. + 2. Inline standards block in CLAUDE.md (+ legacy migration).
+    # 1a. + 2. Inline slim-core standards block in CLAUDE.md (+ legacy migration).
     inject_standards "$repo"
+    # 1b. + 1c. On-demand rule detail + AGENTS/Copilot views (the rest of the slim-core system).
+    deploy_agent_views "$repo"
 
     if $STANDARDS_ONLY; then
         if $CHECK; then
