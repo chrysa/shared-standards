@@ -691,10 +691,11 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   `production`+`dev` two-stage rule per image — each image is single-purpose. Such images still must
   not embed a reverse proxy and still run as non-root where they bind-mount host paths.
 - **App containers ship the app only — the platform layer is the owner's responsibility.** An
-  application image/container **never embeds a reverse proxy** (nginx/Traefik/Caddy/HAProxy as a
-  TLS-terminating or routing front). The app container exposes its own port and speaks plain HTTP;
+  application image/container **never embeds a reverse proxy** (any TLS-terminating or routing
+  front). The app container exposes its own port and speaks plain HTTP;
   routing, TLS, virtual hosts, and load-balancing live in the **platform layer** (the owner's
-  Nginx/Traefik + Certbot on the host, or `deploy/k8s/` ingress), out of the app image. A static
+  reverse proxy with automated TLS/ACME certificate management on the host, or `deploy/k8s/`
+  ingress), out of the app image. A static
   frontend may use a minimal internal web server to serve its own built assets, but it does **not**
   proxy other services. Baking a reverse proxy into an app container is a defect (couples the app to
   infra, duplicates the platform, and breaks the ownership boundary).
@@ -727,8 +728,8 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   file is one a reader could not have inferred from Compose's defaults — a line that only
   restates a default is deleted. Detail: annexe `CONTAINERS-K3S.md` CT-019.
 - **Dev stage must hot-reload.** The `dev` target/service provides live auto-reload so a source edit
-  is reflected without a manual rebuild/restart: backend `uvicorn --reload` (or the framework's
-  autoreload), frontend the dev server with HMR (`vite`/`npm run dev`), watched via the compose
+  is reflected without a manual rebuild/restart: the backend's autoreload runner and the
+  frontend's dev server with HMR, watched via the compose
   `develop.watch` sync or a source bind mount. A `dev` image identical to `production` (no reload) is
   not a dev image. Mechanised by the `compose-dev-hot-reload` hook
   (`chrysa/pre-commit-tools`): a compose service targeting the `dev` stage with neither a bind
@@ -743,11 +744,12 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      `sync+restart` for interpreted code, which defeats the point). A dev workflow that requires
      `docker build` after every edit is a defect: it is not a dev loop, it is a slow CI loop.
   2. **The dev process is the framework's dev server with autoreload, not a production server.**
-     The `dev` stage launches the app through its **autoreloading dev runner** — `uvicorn --reload`,
-     `flask run --debug`, `manage.py runserver`, `vite`/`next dev`, `nodemon`, `air`, etc. — so a
+     The `dev` stage launches the app through its **autoreloading dev runner** — the framework's own
+     reload-enabled dev server (backend hot-reload, frontend dev server with HMR) — so a
      source change reloads the process automatically. A **production WSGI/ASGI/static server —
-     `gunicorn`, `uwsgi`, `serve`, `nginx` fronting built assets, `uvicorn` **without** `--reload`,
-     a compiled release binary — is forbidden in the `dev` stage**: those exist for the
+     a multi-worker application server, a static or reverse-proxy server fronting built assets, an
+     application server **without** autoreload, a compiled release binary — is forbidden in the `dev`
+     stage**: those exist for the
      `production` target (multi-worker, no reload, no debugger), where reloading on every edit and
      exposing a debugger would be exactly wrong. The `dev` and `production` stages differ **here**,
      not only in installed tooling.
