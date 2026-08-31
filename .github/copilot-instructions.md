@@ -166,6 +166,7 @@
 - Observability — Sentry → GitHub issues (norm)
 
 ### Containers & compose · `standards/rules/containers.md`
+- Everything runs in a container — the only exception is the slice of a repo genuinely bound to the host OS
 - External dependencies are installed in containers, never on the host
 - No virtualenv in a repo — ever
 - Tool caches & deps never touch the project tree

@@ -5,6 +5,8 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 
 > Detail for the slim core in `CLAUDE.md`. **Generated** from `standards/STANDARDS.chrysa.md` — do not edit here; edit the canon and regenerate.
 
+- **Everything runs in a container — the only exception is the slice of a repo genuinely bound to the host OS.** Application code, tooling, dependencies, tests, and the services a project talks to all execute inside images / compose — the container *is* the environment. A repo runs code natively **only** for the part that genuinely requires deep host access (`exempt:native`: desktop apps, OS/hardware agents, editor/IDE extensions, kernel or device work), and **only that part**: its portable pieces (deps, tests, tooling, CI) still containerise. "It is simpler on the host" is not a reason; a real host binding (a syscall, a device, a GUI toolkit, an OS API) is. The three sanctioned host tools (git, Docker, the commit gate) are the only things installed on the machine itself; everything else reaches the developer through `docker compose` / `make docker-*`. A service that could run in a container but does not is drift, not a preference.
+
 - **External dependencies are installed in containers, never on the host.** A project's
   runtime dependencies — language packages (pip/npm/cargo/nuget), databases, brokers, caches,
   system libraries, compilers, CLIs a service shells out to — are declared in the image
