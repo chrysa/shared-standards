@@ -111,7 +111,7 @@ sections:
   Governance — strategic pillars & ADR format: governance
   Makefile targets: dev-loop
   Normative annexes: governance
-  Observability — Sentry → GitHub issues (norm): observability
+  Observability — error-tracking → GitHub issues (norm): observability
   Pre-commit & git hooks (native, via pre-commit.com — never wrapped in make): ci-cd
   Quality gates: code-quality
   Release & changelog config (canonical): ci-cd

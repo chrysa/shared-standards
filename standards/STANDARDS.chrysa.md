@@ -35,6 +35,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `EVENTING.md`             | real-time channels · typed channel contracts · non-blocking bounded buffers · fail-safe external access · delivery semantics · transport-as-adapter |
 | `TOOLING-ECOSYSTEM.md`    | one truth per tool (Shortcut/Sentry/GitHub/Notion/Slack) · native-before-custom integrations · `sc-<id>` cross-tool thread · canonical journeys · anti-patterns |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
+| `STACK.chrysa.md`         | chrysa's concrete settled stack — the named products/versions implementing the canon's agnostic categories (deliberately NOT tool-agnostic) |
 
 **Source of truth:** the canon lives in this repo. Notion is a governance and decision view
 of the standards corpus, not its authority (`GOVERNANCE.md` GV-000). `chrysa/standards` is
@@ -42,30 +43,12 @@ deprecated and archived — nothing is added to it, nothing reads from it.
 
 ## Cross-cutting stack (settled ADRs — do not relitigate)
 
-| Layer            | Decision                                                        |
-|------------------|----------------------------------------------------------------|
-| Python           | 3.14 target (CI matrix 3.12 + 3.14)                            |
-| FastAPI          | >= 0.115 + Pydantic v2                                          |
-| Frontend         | React 19 + TypeScript 7 + Vite 8                                |
-| UI               | shadcn/ui + Tailwind CSS                                        |
-| State            | TanStack Query + Zustand                                        |
-| DB               | PostgreSQL 16 + Redis 7                                         |
-| ORM              | SQLAlchemy 2.0 async + Alembic                                  |
-| Auth             | Cluster SSO (OIDC) → external OAuth → local (bcrypt) · MFA-capable |
-| i18n             | react-i18next + fastapi-babel · FR + EN from V1                 |
-| Monorepo         | Turborepo + pnpm workspaces                                     |
-| Versioning       | [GitVersion](https://gitversion.net/) (semantic auto — never bump manually) |
-| Quality CI       | SonarCloud (0 hotspot · rating A)                               |
-| Linting          | Ruff + Mypy (Python) · ESLint (TS)                             |
-| Pre-commit       | detect-secrets + ruff + mypy + commitlint                      |
-| Error handling   | withErrorHandling() → auto GitHub Issue on failure             |
-| Hosting          | Kimsufi · Docker Compose (local) · Nginx · Certbot · Tailscale  |
-| Monitoring       | Sentry + Uptime Kuma (self-hosted)                            |
-| Agents           | Claude API (primary) · Ollama (fallback)                       |
-| Orchestration    | LangGraph (stateful) · PydanticAI (structured outputs)         |
-| Registry         | GHCR private `ghcr.io/chrysa/{repo}` — never public            |
-| Docs             | MkDocs → GitHub Pages (`pages.yml`) · ADRs in `docs/adr/`       |
-| Changelog        | [git-cliff](https://git-cliff.org/) (`cliff.toml`) · Keep a Changelog |
+This canon stays **product-agnostic**: it mandates functional categories (a reverse proxy, an
+error-tracking service, a local model runtime, a semantic-version tool…), never a named vendor.
+The concrete products and versions the ecosystem has actually settled on — the answer to "which
+tool implements each category" — live in the annexe
+[`STACK.chrysa.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/STACK.chrysa.md).
+That record deliberately names products; where it and this canon disagree, **this file wins**.
 
 ## Non-negotiable conventions
 
@@ -90,8 +73,8 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      promotion opens with conflicts. *Squash merge only* governs feature PRs into `develop`;
      the release promotion is the documented exception.
   5. **Production is triggered by a new release**, not by a merge: merging `develop` → `main`
-     lands the code, and the deployment is driven by the tagged release (GitVersion tag +
-     git-cliff changelog + the release workflow). No manual deploy from a laptop, no push
+     lands the code, and the deployment is driven by the tagged release (the semantic-version
+     tool's tag + git-cliff changelog + the release workflow). No manual deploy from a laptop, no push
      that silently ships.
   Protection is configured, not assumed: `main` requires a PR, blocks force-push and
   deletion, and is machine-checked across the fleet by `scripts/audit-branch-policy.sh`.
@@ -137,7 +120,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   resolves dependencies with **pnpm**. Concretely: the committed lockfile is
   **`pnpm-lock.yaml`** (a `package-lock.json` or `yarn.lock` in the tree is a defect — delete
   it and regenerate with pnpm), workspaces are pnpm workspaces (`pnpm-workspace.yaml`) under
-  Turborepo, CI installs with **`pnpm install --frozen-lockfile`** (never `npm ci`), images
+  the monorepo task runner, CI installs with **`pnpm install --frozen-lockfile`** (never `npm ci`), images
   install with pnpm in the builder stage, and scripts run as `pnpm <script>` / `pnpm dlx`
   (never `npm run` / `npx`). The version is pinned via `packageManager` in `package.json` and
   provisioned by Corepack, so every machine and runner resolves the same pnpm. This makes
@@ -244,7 +227,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   **obligation of every change**, part of the same unit of work, never a later cleanup.
   Concretely, in the **same PR** as a behaviour or interface change:
   1. **The affected documentation is updated** — the repo `README.md` and the per-folder
-     `README.md` (folder-readme rule), the `docs/` pages (MkDocs), the ADR for the *why*, the
+     `README.md` (folder-readme rule), the `docs/` pages (the docs-site generator), the ADR for the *why*, the
      API/contract docs, and the setup/ops runbook. `README.md` always reflects the **actual
      current state** (updated at least each release); a `primer.md`/session-state file, where
      the repo carries one, is refreshed too.
@@ -427,7 +410,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
   the design system. Inside one repo, duplication is extracted to a shared module in the same
   layer — never re-typed in a sibling. Rewriting the same logic in different words does not
   make it a different implementation; a near-duplicate diverges silently and costs sixty PRs
-  to fix once. Mechanisation: SonarCloud duplication ratio and `jscpd`-class detectors; a
+  to fix once. Mechanisation: the code-quality analysis service's duplication ratio and `jscpd`-class detectors; a
   reported duplicate block is a defect to factor, not a warning to carry. Legitimate exception:
   a deliberate copy that decouples two projects on purpose (see *projects talk through
   versioned contracts only*) — documented as such, not left implicit.
@@ -1034,8 +1017,8 @@ deprecated and archived — nothing is added to it, nothing reads from it.
      shared mutable global state, silent `except: pass` (see *typed errors*), stringly-typed domains,
      circular imports, and dead code kept "just in case" (git is the archive).
   Mechanisation: Ruff (`C901`, `PLR*`, `B`, `SIM`, `PERF`, `RUF`) + Mypy on Python, ESLint
-  (`complexity`, `no-await-in-loop`, `react-hooks/exhaustive-deps`) on TS, SonarCloud rating **A**
-  with 0 hotspot on both. A finding here is a defect to fix, not a warning to carry.
+  (`complexity`, `no-await-in-loop`, `react-hooks/exhaustive-deps`) on TS, the code-quality
+  analysis service rating **A** with 0 hotspot on both. A finding here is a defect to fix, not a warning to carry.
   The armed Ruff selection is the canonical set distributed by `scripts/pyproject-ruff-merge.py`
   and merged into each repo's `[tool.ruff.lint] select` — the script is the source of truth for
   which codes are on. Two rules that the `PLR*`/`RUF` shorthand above would otherwise imply are
@@ -1076,7 +1059,7 @@ deprecated and archived — nothing is added to it, nothing reads from it.
 ## Quality gates
 
 - Test coverage **>= 85%** by default. A repo may override upward, never below 80%.
-- Lint warnings: **0**. Mypy clean. SonarCloud rating **A**, 0 security hotspot.
+- Lint warnings: **0**. Mypy clean. Code-quality analysis service rating **A**, 0 security hotspot.
 - Max function lines 50 · max file lines 500 · cyclomatic complexity heuristic <= 10.
 - **Performance and cost budgets are declared per profile and enforced.** Frontend bundle,
   Docker image size, startup time, memory, CPU, latency, throughput, storage and log volume
@@ -1160,7 +1143,7 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
 
 ## Release & changelog config (canonical)
 
-- **Versioning** is GitVersion (`GitVersion.yml`, flat `mode: ContinuousDeployment`) — never bump
+- **Versioning** is the semantic-version tool (`GitVersion.yml`, flat `mode: ContinuousDeployment`) — never bump
   manually. Legacy v5 schemas (`GitHubFlow`, no top-level `mode:`) are incompatible and must be
   **replaced**, not version-bumped.
 - **Changelog** is generated by [git-cliff](https://git-cliff.org/) (`cliff.toml`), Keep a
@@ -1170,9 +1153,9 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
   shared-standards (repo root + byte-identical `templates/` copy). A `repo: local` pre-commit hook
   (`gitversion-canonical-drift`, `cliff-canonical-drift`) blocks drift; `audit-canonical-conformance.sh`
   audits the fleet.
-- **Docs** live in `docs/` (MkDocs), deployed to GitHub Pages via `pages.yml`. `README.md` reflects
+- **Docs** live in `docs/` (the docs-site generator), deployed to GitHub Pages via `pages.yml`. `README.md` reflects
   the actual current state and is updated on each release.
-- **Registry** — application images publish to **private GHCR** (`ghcr.io/chrysa/{repo}`, tags mirror
+- **Registry** — application images publish to the **private container registry** (`ghcr.io/chrysa/{repo}`, tags mirror
   the git tag + `:latest`); CI authenticates with the workflow `GITHUB_TOKEN` (or least-privilege
   `packages:write`), never a plaintext PAT. Distributable libraries publish to public PyPI via
   Trusted Publishing (OIDC), never a token in plaintext.
@@ -1303,7 +1286,7 @@ and CI invokes `pre-commit`, not `make`.
   to a deliberate local audit — never to the push gate.
 - **The global pre-push hook** (`dotfiles/git-hooks-global/pre-push`) mirrors pre-commit's
   own installed pre-push hook: it runs the `pre-push` stage over the range only, then the
-  SonarCloud quality gate. No `make`, no `--all-files`, no tree mutation.
+  code-quality analysis service quality gate. No `make`, no `--all-files`, no tree mutation.
 - **The shared hook package is Docker-free by construction.** `chrysa/pre-commit-tools`
   — the hook-decentralisation package the whole fleet consumes — publishes every hook as
   `language: python` (or another native pre-commit language) with its dependencies declared
@@ -1333,9 +1316,9 @@ and CI invokes `pre-commit`, not `make`.
 - `api-design` — REST standards + FastAPI patterns (designing endpoints)
 - `async-patterns` — async FastAPI + SQLAlchemy async sessions (async code)
 - `clean-architecture` — FastAPI module/layer structure (adding a feature)
-- `error-handling` — FastAPI errors + Sentry + logging (handling errors)
+- `error-handling` — FastAPI errors + the error-tracking service + logging (handling errors)
 - `contract-testing` — library contract / breaking-change tests (@chrysa/* releases)
-- `agent-patterns` — LangGraph + PydanticAI + Claude API (building agents)
+- `agent-patterns` — the agent-orchestration library + the structured-output library + Claude API (building agents)
 - `ui-ux` — UX/UI/ergonomics + WCAG 2.1 AA + dark mode + i18n (human-facing surfaces)
 - `accessibility` — per-disability-category contract + testable DoD (any surface, incl. public micro-sites)
 
@@ -1346,13 +1329,14 @@ try:    fn()
 except: gh issue create --title "[chrysa] failure" --label "chrysa-error"
 ```
 
-## Observability — Sentry → GitHub issues (norm)
+## Observability — error-tracking → GitHub issues (norm)
 
-Every status:dev repo ships a Sentry project, and **a new Sentry issue automatically opens a
-GitHub issue** via Sentry's native GitHub integration. No relay, no PAT in the repo — the
-integration owns the link, so a Sentry issue maps to exactly one GitHub issue (no duplicates).
+Every status:dev repo ships an error-tracking project, and **a new error-tracking issue
+automatically opens a GitHub issue** via the error-tracking service's native GitHub integration.
+No relay, no PAT in the repo — the integration owns the link, so an error-tracking issue maps to
+exactly one GitHub issue (no duplicates).
 
-Mechanism: a per-project Sentry **issue alert rule** with
+Mechanism: a per-project error-tracking **issue alert rule** with
 condition `FirstSeenEventCondition` (a new issue is created) and action
 `GitHubCreateTicketAction` targeting `chrysa/<repo>`, labels `sentry`, `bug`.
 Provision it across all projects with
@@ -1360,9 +1344,9 @@ Provision it across all projects with
 
 Per-project activation checklist:
 
-1. Org GitHub integration installed once in Sentry (Settings → Integrations → GitHub) with
-   access to the chrysa repos.
-2. The repo has a Sentry project whose slug matches the repo name.
+1. Org GitHub integration installed once in the error-tracking service (Settings → Integrations
+   → GitHub) with access to the chrysa repos.
+2. The repo has an error-tracking project whose slug matches the repo name.
 3. The auto-issue alert rule exists (run the provisioning script, or add it in
    Alerts → Create Alert → Issues → action "Create a GitHub issue").
 4. The GitHub repo has a `sentry` label (CI label sync provides it).
