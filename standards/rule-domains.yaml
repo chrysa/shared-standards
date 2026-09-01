@@ -62,6 +62,7 @@ rules:
   Every tracked file and folder must earn its place — a repo holds only what is useful to it now: architecture
   Everything is machine-agnostic and portable — no rule, repo, or script is bound to one machine: architecture
   Everything is semantic — the markup, the data, and the URLs: frontend
+  Everything runs in a container — the only exception is the slice of a repo genuinely bound to the host OS: containers
   External dependencies are installed in containers, never on the host: containers
   Failures are contained, and observable: code-quality
   'Frontend tests: Vitest + Testing Library + MSW — from the scaffold, not later': testing
