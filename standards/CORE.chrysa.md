@@ -99,7 +99,7 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 ### Observability & operations · `standards/rules/observability.md`
 - Observability & production readiness follow the `STD-OPS-001` contract
 - The container is versioned separately from the application it hosts, and an admin can see what is actually deployed
-- Observability — Sentry → GitHub issues (norm)
+- Observability — error-tracking → GitHub issues (norm)
 
 ### Containers & compose · `standards/rules/containers.md`
 - External dependencies are installed in containers, never on the host
