@@ -25,14 +25,18 @@ class ConfigError(RuntimeError):
     """Raised when required configuration cannot be resolved."""
 
 
-def _repo_root_from(here: Path) -> Path:
-    """Repo root three levels above ``here`` (``<repo>/console/standards_console/x``).
+_REPO_ROOT_DEPTH = 2  # <repo>/console/standards_console/<file> — the repo is 2 parents up
 
-    Falls back to the immediate parent when the package sits too shallow to have three
-    ancestors — e.g. installed at ``/standards_console`` inside a container — so importing
-    this module never raises. Such callers set ``STANDARDS_REPO_ROOT`` explicitly.
+
+def _repo_root_from(here: Path) -> Path:
+    """Repo root ``_REPO_ROOT_DEPTH`` levels above ``here``.
+
+    Layout: ``<repo>/console/standards_console/<file>``. Falls back to the immediate
+    parent when the package sits too shallow to have enough ancestors — e.g. installed
+    at ``/standards_console`` inside a container — so importing this module never raises.
+    Such callers set ``STANDARDS_REPO_ROOT`` explicitly.
     """
-    return here.parents[2] if len(here.parents) > 2 else here.parent
+    return here.parents[_REPO_ROOT_DEPTH] if len(here.parents) > _REPO_ROOT_DEPTH else here.parent
 
 
 def _default_repo_root() -> Path:
