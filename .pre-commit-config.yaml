@@ -26,65 +26,48 @@ repos:
   rev: v0.48.0
 - hooks:
   - id: makefile-check
-  # --- generic (all repos) ---
-  # Never key-sort: GitHub workflows (PyYAML coerces `on:` to True), distributed
-  # templates, authored compose files, machine-generated lock files (reordering
-  # can invalidate dependency resolution), and `.pre-commit-config.yaml` itself —
-  # a hook must not reorder the file that configures it (its order is authored:
-  # repo → rev → hooks).
   - exclude: ^(\.github/|workflows/|templates/|docker-compose)|(^|/)(pnpm-lock|yarn|uv|poetry)\.(yaml|lock)$|(^|/)\.pre-commit-config\.yaml$
     id: yaml-sorter
   - id: json-sorter
   - id: env-file-check
   - id: env-example-sync
   - id: adr-gate
-  # --- claude code assets (all repos) ---
   - id: claude-skill-frontmatter
   - id: claude-agent-frontmatter
   - id: claude-mcp-config
-  # TODO: add detect-duplicated-copilot-instructions after chrysa/pre-commit-tools#163 is merged and released
-  # --- python (all Python repos) ---
   - id: debugger-detection
-    exclude: '(^|/)tests?/|^(README\.md|docs/)'
+    exclude: (^|/)tests?/|^(README\.md|docs/)
   - id: python-print-detection
-    exclude: '(^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/'
+    exclude: (^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/
   - id: python-pprint-detection
-    exclude: '(^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/'
+    exclude: (^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/
   - id: no-bare-except
   - id: python-logger-detection
-    exclude: '(^|/)tests?/|^(README\.md|docs/)'
+    exclude: (^|/)tests?/|^(README\.md|docs/)
   - id: python-unreachable-code
   - id: python-no-unittest-import
-  # Mechanise the code-quality rules of the standards block: typed raises,
-  # lookup table over dispatch ladder, and the mutable-default anti-pattern.
-  # Fixtures deliberately raise builtins as detector input, hence the exclude.
   - id: python-untyped-raise
-    exclude: '(^|/)tests?/'
+    exclude: (^|/)tests?/
   - id: python-mutable-default
   - id: python-dispatch-ladder
-  # The agent loads .claude/ at session start; an empty mirror loads no skill
-  # and says nothing. This is the only guard against that.
   - id: claude-assets-present
   - id: no-hardcoded-localhost
-    exclude: 'tests?/|\.test\.|\.spec\.'
+    exclude: tests?/|\.test\.|\.spec\.
   - id: regression-gate
-    stages: [pre-push]
-  # --- fastapi (FastAPI repos only — remove if not applicable) ---
+    stages:
+    - pre-push
   - id: fastapi-missing-response-model
-    exclude: '(^|/)tests/'
+    exclude: (^|/)tests/
   - id: fastapi-missing-links
-    exclude: '(^|/)tests/'
+    exclude: (^|/)tests/
   - id: no-sync-in-async
-  # --- docker (repos with Dockerfiles — remove if not applicable) ---
   - id: dockerfile-no-latest
-  # --- js/ts (JS/TS repos — remove if not applicable) ---
   - id: console-log-detection
   - id: console-debug-detection
   - id: react-console-error-detection
   - id: no-console-warn
   - id: ts-unreachable-code
   - id: import-no-relative-parent
-  # --- react (React repos only — remove if not applicable) ---
   - id: react-no-async-in-useeffect
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
@@ -95,14 +78,22 @@ repos:
   rev: v8.30.0
 - hooks:
   - id: conventional-pre-commit
-    stages: [commit-msg]
-    args: [feat, fix, docs, style, refactor, test, chore, perf, revert, ci]
+    stages:
+    - commit-msg
+    args:
+    - feat
+    - fix
+    - docs
+    - style
+    - refactor
+    - test
+    - chore
+    - perf
+    - revert
+    - ci
   repo: https://github.com/compilerla/conventional-pre-commit
   rev: v4.4.0
 - hooks:
-  # Canonical-file drift gate (dedup-campaign #108 GitVersion, #109 cliff): the
-  # repo-root source of truth must stay byte-identical to its templates/ copy
-  # that the distribution machinery hands the fleet.
   - id: gitversion-canonical-drift
     name: GitVersion.yml canonical drift
     entry: scripts/check-canonical-drift.sh GitVersion.yml templates/GitVersion.yml
@@ -129,18 +120,25 @@ repos:
     files: ^(standards/domains\.yaml|standards/annexes/GOVERNANCE\.md)$
     additional_dependencies:
     - pyyaml==6.0.2
-  # Managed skill/agent drift gate: the transverse skills (.claude/skills/*) and the
-  # generic agents (templates/claude/agents/*.md, the distribution staging) are a single
-  # source fanned out to the fleet as managed copies. An edit to a copy — or to the agent
-  # staging so it no longer matches the agent-config registry — drifts silently and Claude
-  # then loads something that is not the canon. Enforced here; degrades to a skip when a
-  # sibling source is absent (best-effort locally, enforced in CI over the fleet checkout).
   - id: managed-skills-agents-drift
     name: managed skill/agent copies match their canonical source
     entry: scripts/check-managed-drift.sh
     language: system
     pass_filenames: false
     files: ^(\.claude/skills/|\.claude/agents/|templates/claude/agents/)
+  # The agent views (slim CLAUDE.md core, .claude/rules/<domain>.md, AGENTS.md,
+  # .github/copilot-instructions.md) are GENERATED from standards/STANDARDS.chrysa.md by
+  # scripts/gen_agent_views.py. This gate regenerates them and fails if any committed view
+  # differs — so the canon, the mapping and every view stay one source. Host-native, no
+  # Docker; pyyaml is the only dependency (same as domains-drift).
+  - id: agent-views-drift
+    name: agent views (CLAUDE core / .claude/rules / AGENTS / copilot) match the canon
+    entry: python -m scripts.gen_agent_views --check
+    language: python
+    pass_filenames: false
+    files: ^(standards/(STANDARDS\.chrysa\.md|CORE\.chrysa\.md|rule-domains\.yaml|rules/.*)|scripts/gen_agent_views\.py|CLAUDE\.md|AGENTS\.md|\.github/copilot-instructions\.md)$
+    additional_dependencies:
+    - pyyaml==6.0.2
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan
@@ -150,8 +148,6 @@ repos:
     exclude: ^(graphify|sys|tests/pii/fixtures/|.*(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|poetry\.lock|uv\.lock)$)
     additional_dependencies:
     - presidio-analyzer==2.2.359
-    # spaCy's CLI imports click directly, but typer-slim (pulled by presidio) no
-    # longer depends on it — pin it explicitly so the isolated env is hermetic.
     - click==8.4.2
     - fr_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl
     - en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
@@ -160,6 +156,10 @@ repos:
   rev: v1.30.10
   hooks:
   - id: guideline-check
-    # Adoption baseline: fail only on NEW violations. Regenerate with
-    # `guideline-check check --write-baseline .guideline-baseline.json`.
-    args: [check, --fail-on, error, --baseline, .guideline-baseline.json]
+    args:
+    - check
+    - --fail-on
+    - error
+    - --baseline
+    - .guideline-baseline.json
+exclude: (^|/)quality_gate\.py$|^\.claude/ape/
