@@ -58,6 +58,21 @@ def test_merges_into_existing_glob_keeping_other_codes(tmp_path: Path) -> None:
     assert ig["scripts/*.py"] == ["T201"]  # unrelated ignore untouched
 
 
+def test_merges_into_existing_multiline_array(tmp_path: Path) -> None:
+    # Regression: a multi-line ignore array must be detected, not treated as absent
+    # (which appended a second row → duplicate TOML key → tomllib validation failure).
+    p = tmp_path / "pyproject.toml"
+    p.write_text(
+        '[tool.ruff.lint]\nselect = ["E", "PLR2004"]\n\n'
+        '[tool.ruff.lint.per-file-ignores]\n'
+        '"**/tests/**" = [\n    "S101",\n    "ARG001",\n]\n',
+        encoding="utf-8",
+    )
+    assert M.main([str(p)]) == 0  # no duplicate-key crash
+    ig = _ignores(p.read_text())
+    assert ig["**/tests/**"] == ["S101", "ARG001", "PLR2004"]  # merged in place
+
+
 def test_is_idempotent(tmp_path: Path) -> None:
     p = tmp_path / "pyproject.toml"
     p.write_text('[project]\nname = "x"\n', encoding="utf-8")

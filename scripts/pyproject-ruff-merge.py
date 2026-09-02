@@ -220,7 +220,7 @@ def _ensure_ignores(text: str, missing: dict[str, list[str]]) -> str:
         section = text[start:end]
         appended: list[str] = []
         for glob, codes in missing.items():
-            row = re.search(rf'^"{re.escape(glob)}"\s*=\s*\[(?P<body>.*?)\]', section, re.MULTILINE)
+            row = re.search(rf'^"{re.escape(glob)}"\s*=\s*\[(?P<body>.*?)\]', section, re.MULTILINE | re.DOTALL)
             if row is None:
                 # Glob absent: queue a fresh row to append at the end of the table body.
                 appended.append(f'"{glob}" = [{", ".join(f'"{c}"' for c in codes)}]')
