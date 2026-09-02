@@ -74,7 +74,7 @@ class GitHubGateway:
             resp = self._client.request(method, url, **kwargs)
         except httpx.HTTPError as exc:  # network/timeout
             raise GitHubError(0, str(exc)) from exc
-        if resp.status_code >= 400:
+        if resp.status_code >= httpx.codes.BAD_REQUEST:
             detail = resp.json().get("message", resp.text) if resp.content else resp.text
             raise GitHubError(resp.status_code, detail)
         return resp

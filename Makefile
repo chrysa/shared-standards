@@ -1,17 +1,23 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci
+.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views
 
 help:
 	@echo "Available targets:"
 	@echo "  install     Install pre-commit hooks"
 	@echo "  lint        Run pre-commit hooks"
 	@echo "  pre-commit  Run all pre-commit checks"
+	@echo "  gen-agent-views  Regenerate agent views from the standards canon"
 	@echo "  dev         No dev server — shared-standards is a documentation repo"
 	@echo "  test        No tests — shared-standards is a documentation repo"
 	@echo "  build       No build artefact — shared-standards is a documentation repo"
 
 install:
 	pre-commit install
+
+# Regenerate every agent view (slim CLAUDE.md core, standards/rules/<domain>.md, AGENTS.md,
+# .github/copilot-instructions.md) from the canon. The agent-views-drift gate verifies it.
+gen-agent-views: ## Regenerate the agent views from standards/STANDARDS.chrysa.md
+	python3 -m scripts.gen_agent_views
 
 dev:
 	@echo "No dev server — shared-standards is a documentation-only repo"
@@ -27,7 +33,7 @@ test-cov:
 # the host and their coverage travels to Sonar next to the console coverage — otherwise a
 # scripts/ change is counted as 0% new-code coverage.
 test-scripts: ## Run the scripts test suite with coverage (host)
-	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py' -m pytest tests/scripts -q
+	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/gen_agent_views.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
 	python3 -m coverage xml -o scripts-coverage.xml
 
 # The console app lives in console/ and its suite runs in Docker. CI's `make docker-test` builds its
