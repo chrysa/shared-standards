@@ -1,12 +1,3 @@
-# rule-domains.yaml — the domain taxonomy that classifies every canon rule.
-#
-# Source of truth for HOW standards/STANDARDS.chrysa.md is split into the generated
-# agent views (.claude/rules/<domain>.md + the slim core). A committed side-mapping
-# keeps the canon prose clean (no inline tags). scripts/gen_agent_views.py reads it;
-# a rule or section with no entry falls back to the 'general' domain and is reported.
-#
-# Keys are the EXACT rule title (first bold span of the bullet) / section heading.
-# Ordering here is irrelevant — this file is yaml-sorted; view order comes from the canon.
 domains:
   accessibility: Accessibility
   agents: AI agents & features
@@ -21,18 +12,18 @@ domains:
   dev-loop: Developer loop & tooling
   docs: Documentation & session state
   frontend: Frontend & web semantics
-  general: General (unclassified — classify me in rule-domains.yaml)
+  general: "General (unclassified \u2014 classify me in rule-domains.yaml)"
   governance: Governance, language & compliance
   observability: Observability & operations
   product: Product surfaces
-  scm: SCM — branches, commits & pull requests
+  scm: "SCM \u2014 branches, commits & pull requests"
   security: Security, identity & sessions
   stack: Cross-cutting stack
   testing: Testing
 rules:
   A cache is a correctness contract, not a sprinkle of speed: code-quality
-  A compose file is minimal — declare only what the stack needs, default the rest: containers
-  A floating assistant where it earns its place — never as decoration: product
+  "A compose file is minimal \u2014 declare only what the stack needs, default the rest": containers
+  "A floating assistant where it earns its place \u2014 never as decoration": product
   A game is DRM-free and fully playable solo offline: product
   A real-time backend has channel contracts and never blocks: api
   A session is secured and it expires: security
@@ -40,80 +31,81 @@ rules:
   Agent actions are governed: agents
   An AI feature is evaluated, not just shipped: agents
   An agent writes only where the owner owns: agents
-  App containers ship the app only — the platform layer is the owner's responsibility: containers
-  Avoid lambdas and anonymous constructs — a named function is the default: code-quality
+  "App containers ship the app only \u2014 the platform layer is the owner's responsibility": containers
+  "Avoid lambdas and anonymous constructs \u2014 a named function is the default": code-quality
   Basic optimisations and known anti-patterns are caught in review and in CI: code-quality
-  Branch model — `main` is production, `develop` is the workspace: scm
+  "Branch model \u2014 `main` is production, `develop` is the workspace": scm
   Branches: scm
-  Code is read far more often than it is written — optimise for the reader, and standardise the form: code-quality
+  "Code is read far more often than it is written \u2014 optimise for the reader, and standardise the form": code-quality
   Commits: scm
   Dark mode: accessibility
   Data, persistence & migrations follow the `STD-DATA-001` contract: data
   Decompose into small, independently unit-testable methods: code-quality
+  "Default to dev mode when starting an app locally \u2014 any other mode only when explicitly asked": containers
   Deferred work is a governed job, not a fire-and-forget: architecture
   Dev stage must hot-reload: containers
-  Dockerfiles are multi-stage, with a `production` and a `dev` stage — mandatory: containers
-  Documentation and Notion are maintained in lockstep with the code — a change that leaves them stale is unfinished: docs
-  Every external server the service talks to is addressed through the environment — never hardcoded: architecture
-  Every form is a hostile input surface — validate on the server, always: security
+  "Dockerfiles are multi-stage, with a `production` and a `dev` stage \u2014 mandatory": containers
+  "Documentation and Notion are maintained in lockstep with the code \u2014 a change that leaves them stale is unfinished": docs
+  "Every external server the service talks to is addressed through the environment \u2014 never hardcoded": architecture
+  "Every form is a hostile input surface \u2014 validate on the server, always": security
   Every product that is operated ships a management backoffice: product
   Every repo declares its profile and DDD level: architecture
-  Every site is usable by the majority of disabilities — not only the screen-reader case: accessibility
-  Every tracked file and folder must earn its place — a repo holds only what is useful to it now: architecture
-  Everything is machine-agnostic and portable — no rule, repo, or script is bound to one machine: architecture
-  Everything is semantic — the markup, the data, and the URLs: frontend
-  Everything runs in a container — the only exception is the slice of a repo genuinely bound to the host OS: containers
+  "Every site is usable by the majority of disabilities \u2014 not only the screen-reader case": accessibility
+  "Every tracked file and folder must earn its place \u2014 a repo holds only what is useful to it now": architecture
+  "Everything is machine-agnostic and portable \u2014 no rule, repo, or script is bound to one machine": architecture
+  "Everything is semantic \u2014 the markup, the data, and the URLs": frontend
+  "Everything runs in a container \u2014 the only exception is the slice of a repo genuinely bound to the host OS": containers
   External dependencies are installed in containers, never on the host: containers
   Failures are contained, and observable: code-quality
-  'Frontend tests: Vitest + Testing Library + MSW — from the scaffold, not later': testing
-  Functions and methods are called with named arguments — positional call sites are the exception, not the rule: backend-python
+  "Frontend tests: Vitest + Testing Library + MSW \u2014 from the scaffold, not later": testing
+  "Functions and methods are called with named arguments \u2014 positional call sites are the exception, not the rule": backend-python
   Identity goes through the cluster SSO first: security
   If a user can supply a file, the product accepts an upload: product
-  Import the item, not the module — `from x import y; y()`: backend-python
+  "Import the item, not the module \u2014 `from x import y; y()`": backend-python
   Issues and PRs are type-driven: scm
   Language: governance
-  Local dev runs the code in-container, live, in debug mode — never the production server: containers
+  "Local dev runs the code in-container, live, in debug mode \u2014 never the production server": containers
   Merge: scm
-  No code duplication — the second occurrence is an extraction order: code-quality
+  "No code duplication \u2014 the second occurrence is an extraction order": code-quality
   No hardcoded constants: code-quality
-  No literal HTTP status codes — use the constants the framework already ships: code-quality
-  No virtualenv in a repo — ever: containers
+  "No literal HTTP status codes \u2014 use the constants the framework already ships": code-quality
+  "No virtualenv in a repo \u2014 ever": containers
   Notion logging: docs
   Observability & production readiness follow the `STD-OPS-001` contract: observability
   One PR per issue: scm
-  Only a publicly useful port is published — everything else stays on the container network: containers
-  Per-person data implies a user account — no exceptions dressed up as simplicity: security
+  "Only a publicly useful port is published \u2014 everything else stays on the container network": containers
+  "Per-person data implies a user account \u2014 no exceptions dressed up as simplicity": security
   Prefer a lookup table to a state machine: code-quality
   Projects talk through versioned contracts only: architecture
   Python is written object-oriented, one class per file: backend-python
-  Python packaging — `pyproject.toml` is the single source of truth: backend-python
+  "Python packaging \u2014 `pyproject.toml` is the single source of truth": backend-python
   Raised errors are typed: code-quality
   React is a presentation layer, not the domain: frontend
-  Repo provenance — every code repo depends on `project-init`: architecture
+  "Repo provenance \u2014 every code repo depends on `project-init`": architecture
   Setup wizard & config panel: product
   'Tests: pytest only': testing
-  The JS/TS package manager is `pnpm` — `npm` and `yarn` are forbidden: frontend
+  "The JS/TS package manager is `pnpm` \u2014 `npm` and `yarn` are forbidden": frontend
   The container is versioned separately from the application it hosts, and an admin can see what is actually deployed: observability
   The frontend is reactive and real-time by default: frontend
   The frontend says when the backend is unreachable or unstable: frontend
-  The repository architecture is legible to an agent — optimised for Claude, not only for humans: architecture
+  "The repository architecture is legible to an agent \u2014 optimised for Claude, not only for humans": architecture
   Tool caches & deps never touch the project tree: containers
   TypeScript is strict by contract: frontend
   UI state survives reload & focus: frontend
-  URL-addressable frontend navigation — mandatory: frontend
+  "URL-addressable frontend navigation \u2014 mandatory": frontend
   '`.dockerignore` mandatory & exhaustive': containers
 sections:
   Compliance targets: governance
   Container-runtime policy: containers
-  Cross-cutting stack (settled ADRs — do not relitigate): stack
+  "Cross-cutting stack (settled ADRs \u2014 do not relitigate)": stack
   Design system: design
   Error handling pattern (all automations): code-quality
-  GitHub Actions (reuse first · custom actions centralised · thin workflows): ci-cd
-  Governance — strategic pillars & ADR format: governance
+  "GitHub Actions (reuse first \xB7 custom actions centralised \xB7 thin workflows)": ci-cd
+  "Governance \u2014 strategic pillars & ADR format": governance
   Makefile targets: dev-loop
   Normative annexes: governance
-  Observability — error-tracking → GitHub issues (norm): observability
-  Pre-commit & git hooks (native, via pre-commit.com — never wrapped in make): ci-cd
+  "Observability \u2014 error-tracking \u2192 GitHub issues (norm)": observability
+  "Pre-commit & git hooks (native, via pre-commit.com \u2014 never wrapped in make)": ci-cd
   Quality gates: code-quality
   Release & changelog config (canonical): ci-cd
   Session lifecycle (primer + memory + hindsight): docs
