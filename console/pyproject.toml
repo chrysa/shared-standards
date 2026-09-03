@@ -34,6 +34,7 @@ build-backend = "hatchling.build"
 packages = ["standards_console"]
 
 [tool.ruff]
+extend-exclude = [".claude", "scripts/quality_gate.py"]
 line-length = 100
 target-version = "py312"
 
