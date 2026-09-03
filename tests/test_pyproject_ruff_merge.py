@@ -94,3 +94,41 @@ def test_check_flags_missing_test_ignore(tmp_path: Path) -> None:
     p = tmp_path / "pyproject.toml"
     p.write_text('[tool.ruff.lint]\nselect = ["ALL"]\n', encoding="utf-8")  # rules covered by ALL
     assert M.main([str(p), "--check"]) == 1  # but the canonical test-ignore is still missing
+
+
+def _extend_exclude(text: str) -> list:
+    return tomllib.loads(text)["tool"]["ruff"]["extend-exclude"]
+
+
+def test_extend_exclude_added_when_absent(tmp_path: Path) -> None:
+    # No [tool.ruff] table at all → the canonical excludes are introduced.
+    p = tmp_path / "pyproject.toml"
+    p.write_text('[project]\nname = "x"\n', encoding="utf-8")
+    assert M.main([str(p)]) == 0
+    ee = _extend_exclude(p.read_text())
+    assert ".claude" in ee and "scripts/quality_gate.py" in ee
+
+
+def test_extend_exclude_merges_into_existing_inline_array(tmp_path: Path) -> None:
+    # Existing partial inline array → missing canonical entry appended, existing kept.
+    p = tmp_path / "pyproject.toml"
+    p.write_text('[tool.ruff]\nextend-exclude = ["vendor", ".claude"]\n', encoding="utf-8")
+    assert M.main([str(p)]) == 0
+    ee = _extend_exclude(p.read_text())
+    assert ee == ["vendor", ".claude", "scripts/quality_gate.py"]  # order preserved, no dup
+
+
+def test_extend_exclude_is_idempotent(tmp_path: Path) -> None:
+    p = tmp_path / "pyproject.toml"
+    p.write_text('[tool.ruff]\nextend-exclude = [".claude", "scripts/quality_gate.py"]\n', encoding="utf-8")
+    assert M.main([str(p)]) == 0  # nothing to add
+    first = p.read_text()
+    assert M.main([str(p)]) == 0
+    assert p.read_text() == first
+    assert M.main([str(p), "--check"]) == 0  # --check sees no drift
+
+
+def test_check_flags_missing_extend_exclude(tmp_path: Path) -> None:
+    p = tmp_path / "pyproject.toml"
+    p.write_text('[tool.ruff]\nline-length = 100\n', encoding="utf-8")
+    assert M.main([str(p), "--check"]) == 1  # canonical excludes missing → drift
