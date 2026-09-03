@@ -77,6 +77,14 @@ DELIBERATELY_EXCLUDED: dict[str, str] = {
     "RUF001": "ambiguous-unicode — 493 findings on 4 repos, all French prose; arm locally with allowed-confusables",
 }
 
+# Canonical files DISTRIBUTED into every consumer (not repo-authored): the standards
+# console's `scripts/quality_gate.py` and the `.claude/` tooling (ape hook, generated
+# rules). They already sit in the pre-commit top-level `exclude:` so CI is green — but a
+# bare `ruff check .` (run outside pre-commit) does not honour that exclude and re-flags
+# them fleet-wide. Mirroring the exclude into `[tool.ruff] extend-exclude` aligns
+# ruff-direct with the gate, so the canonical copies stop counting as repo debt.
+CANONICAL_EXTEND_EXCLUDE: tuple[str, ...] = (".claude", "scripts/quality_gate.py")
+
 _SELECT_RE = re.compile(r"(?P<head>^select\s*=\s*\[)(?P<body>.*?)(?P<tail>^\s*\])", re.DOTALL | re.MULTILINE)
 
 
@@ -245,6 +253,54 @@ def _ensure_ignores(text: str, missing: dict[str, list[str]]) -> str:
     return text + block
 
 
+def missing_extend_exclude(data: dict) -> list[str]:
+    """Return canonical exclude paths absent from `[tool.ruff] extend-exclude`."""
+    have = set(data.get("tool", {}).get("ruff", {}).get("extend-exclude", []))
+    return [path for path in CANONICAL_EXTEND_EXCLUDE if path not in have]
+
+
+def _ensure_extend_exclude(text: str, missing: list[str]) -> str:
+    """Idempotently add the canonical excludes to `[tool.ruff] extend-exclude`.
+
+    Handles the three shapes seen in the fleet: an inline array, a multi-line array,
+    and no key/table at all. Touches no existing entry.
+    """
+    if not missing:
+        return text
+    added = ", ".join(f'"{path}"' for path in missing)
+    span = _section_span(text, "tool.ruff")
+    if span is not None:
+        start, end = span
+        section = text[start:end]
+        opening = re.search(r"^extend-exclude\s*=\s*\[", section, re.MULTILINE)
+        if opening is not None:
+            closing = section.find("]", opening.end())
+            body = section[opening.end() : closing]
+            if "\n" not in body:
+                inner = body.strip()
+                prefix = f"{inner}, " if inner and not inner.endswith(",") else f"{inner} " if inner else ""
+                section = section[: opening.end()] + prefix + added + section[closing:]
+            else:
+                body = _with_trailing_comma(body)
+                indent_match = re.search(r"\n(\s+)\S", body)
+                indent = indent_match.group(1) if indent_match else "    "
+                extra = "".join(f'\n{indent}"{path}",' for path in missing)
+                closing_indent = re.search(r"\n([ \t]*)$", body)
+                tail = f"\n{closing_indent.group(1)}" if closing_indent else "\n"
+                section = section[: opening.end()] + body.rstrip("\n") + extra + tail + section[closing:]
+            return text[:start] + section + text[end:]
+        # [tool.ruff] exists without the key — add it right under the header.
+        return text[:start] + f"\nextend-exclude = [{added}]\n" + text[start:end].lstrip("\n") + text[end:]
+    # No bare [tool.ruff] table — insert one before the first [tool.ruff…] table, else append.
+    block = f"[tool.ruff]\nextend-exclude = [{added}]\n\n"
+    first = re.search(r"^\[tool\.ruff", text, re.MULTILINE)
+    if first is not None:
+        return text[: first.start()] + block + text[first.start() :]
+    if not text.endswith("\n"):
+        text += "\n"
+    return text + "\n" + block
+
+
 def _resolve_target(argv: list[str]) -> Path | None:
     """The single positional argument, or None when the usage is wrong."""
     args = [a for a in argv if not a.startswith("--")]
@@ -283,24 +339,33 @@ def main(argv: list[str]) -> int:
     # The canonical test-ignore is the companion of arming PLR2004; only manage it when
     # PLR2004 is in the active set (a --rules= override without it leaves ignores alone).
     ignores = missing_test_ignores(data) if "PLR2004" in rules else {}
+    excludes = missing_extend_exclude(data)
     if "--check" in argv:
         problems = []
         if missing:
             problems.append(f"missing Ruff rules: {', '.join(missing)}")
         if ignores:
             problems.append(f"missing test-ignores: {', '.join(ignores)}")
+        if excludes:
+            problems.append(f"missing extend-exclude: {', '.join(excludes)}")
         if problems:
             sys.stderr.write(f"{target}: " + "; ".join(problems) + "\n")
             return 1
         return 0
-    if not missing and not ignores:
+    if not missing and not ignores and not excludes:
         return 0
-    return _write_merged(target, text, missing, ignores)
+    return _write_merged(target, text, missing, ignores, excludes)
 
 
-def _write_merged(target: Path, text: str, missing: list[str], ignores: dict[str, list[str]]) -> int:
-    """Merge the missing codes + canonical test-ignores, refusing to write invalid TOML."""
-    merged = _ensure_ignores(merge(text, missing), ignores)
+def _write_merged(
+    target: Path,
+    text: str,
+    missing: list[str],
+    ignores: dict[str, list[str]],
+    excludes: list[str],
+) -> int:
+    """Merge missing codes + test-ignores + canonical excludes, refusing invalid TOML."""
+    merged = _ensure_extend_exclude(_ensure_ignores(merge(text, missing), ignores), excludes)
     try:
         tomllib.loads(merged)
     except tomllib.TOMLDecodeError as exc:  # never hand back a broken pyproject
@@ -312,7 +377,9 @@ def _write_merged(target: Path, text: str, missing: list[str], ignores: dict[str
         parts.append(", ".join(missing))
     if ignores:
         parts.append("test-ignores " + ", ".join(ignores))
-    print(f"{target}: added {'; '.join(parts)}")
+    if excludes:
+        parts.append("extend-exclude " + ", ".join(excludes))
+    sys.stdout.write(f"{target}: added {'; '.join(parts)}\n")
     return 0
 
 
