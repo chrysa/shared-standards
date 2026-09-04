@@ -1,14 +1,13 @@
 ---
 name: hunt
 description: "Finds root cause of errors, crashes, unexpected behavior, and failing tests before applying any fix. Not for code review or new features."
-when_to_use: "débugger, investiguer, erreur, ça plante, ne marche pas, c'est faux, ça ne passe pas, debug, why broken, not working, what's wrong, fix error, stack trace"
+when_to_use: "debug, why broken, not working, what's wrong, fix error, stack trace, investigate a failing test, root cause"
 metadata:
   version: "3.15.0"
 ---
 
 # Hunt: Diagnose Before You Fix
 
-Prefix your first line with 🥷 inline, not as its own paragraph.
 
 A patch applied to a symptom creates a new bug somewhere else.
 
