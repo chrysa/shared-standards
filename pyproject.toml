@@ -1,6 +1,9 @@
 [tool.pytest.ini_options]
 addopts = "-p no:query_optimizer -p no:django"
 
+[tool.ruff]
+extend-exclude = [".claude", "scripts/quality_gate.py"]
+
 [tool.ruff.lint]
 select = [
     "C901",
