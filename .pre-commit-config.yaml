@@ -162,4 +162,4 @@ repos:
     - error
     - --baseline
     - .guideline-baseline.json
-exclude: (^|/)quality_gate\.py$|^\.claude/ape/
+exclude: (^|/)quality_gate\.py$|^\.claude/ape/|^\.claude/_extracted/
