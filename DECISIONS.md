@@ -234,3 +234,32 @@ Additive if accepted: repos keep their inlined standards and gain a declared plu
 moving parts; the `.claude/skills` copy is replaced by a `rev`-pinned plugin reference (same model
 as `chrysa/pre-commit-tools` and `chrysa/github-actions`). Debt: one more marketplace to version.
 Blast radius if `Killed`: revert the 2 prototype repos to the copy model — no fleet change made.
+
+## D-0010 — Security scanning as an ecosystem gate (pre-commit + CI)
+
+**Status**: accepted — 2026-09-01. Part of the ecosystem security gate (Shortcut sc-3778).
+
+### Decision
+
+Promote "security scanning is a gate, not an afterthought" to a normative rule in the
+security domain of `standards/STANDARDS.chrysa.md`: every repo scans for leaked secrets
+(gitleaks) and known-vulnerable code/deps (bandit SAST, Trivy fs, hadolint) at both the
+pre-commit and CI boundaries, wired from the scaffold. The gate is centralised, not
+copy-pasted: pre-commit hooks from the `project-init` baseline + `chrysa/pre-commit-tools`;
+CI as reusable workflows in `chrysa/github-actions` (`secret-scan.yml`, new `sast.yml`)
+referenced by a thin, tag-pinned per-repo caller. Disabling a control is a `DECISIONS.md`
+decision, never a silent `--no-verify`.
+
+### Rollout
+
+- `chrysa/github-actions` — new reusable `sast.yml` (PR #283); GitVersion cuts v1.9.0.
+- `chrysa/project-init` — baseline gains bandit + hadolint + promoted pre-commit-tools
+  security hooks + thin `sast.yml` caller (PR #218).
+- Pilot `chrysa/eka` — pre-commit + CI `security` job, ADR-043 (PR #113).
+
+### Note
+
+The `standards/rules/` generated views and `gen_agent_views` are on an unmerged branch
+(`chore/stage-extracted-claude-artifacts`); the split view for the security domain must be
+regenerated once that lands. This PR touches the canon only and is kept as a draft to rebase
+after the view-split merges, avoiding collision with that in-flight refactor.

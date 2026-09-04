@@ -27,6 +27,7 @@ rules:
   A game is DRM-free and fully playable solo offline: product
   A real-time backend has channel contracts and never blocks: api
   A session is secured and it expires: security
+  "Security scanning is a gate, not an afterthought — it runs in pre-commit and in CI": security
   APIs, SDKs & public contracts follow the `STD-API-001` contract: api
   Agent actions are governed: agents
   An AI feature is evaluated, not just shipped: agents
