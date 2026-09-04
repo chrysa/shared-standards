@@ -54,4 +54,4 @@ ______________________________________________________________________
 
 ## Promoted (out of the pen)
 - `skills/hunt/` → promoted to `.claude/skills/hunt/` (cleaned: English-only `when_to_use`, padam gimmick removed).
-- `skills/check/` → DEFERRED: its `agents/reviewer-*.md` persona files trip `claude-agent-frontmatter` (no frontmatter, not registered subagents). Rename `check/agents/` → `check/reviewers/` + update SKILL.md refs before promoting.
+- `skills/check/` → promoted to `.claude/skills/check/` (renamed `agents/`→`reviewers/` so the persona files are skill-internal, not flagged as unregistered subagents; persona-catalog refs updated).
