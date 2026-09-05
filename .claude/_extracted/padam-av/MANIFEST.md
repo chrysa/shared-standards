@@ -51,3 +51,7 @@ ______________________________________________________________________
 - Existing shared-standards hooks that padam has since evolved (`secret-scanner`,
   `memory-consolidate`, `model-debt-scan`, `frustration-detection`, `circuit-breaker`,
   `verifiable-thresholds`, `council`) → **back-port by real diff**, not re-extraction.
+
+## Promoted (out of the pen)
+- `skills/hunt/` → promoted to `.claude/skills/hunt/` (cleaned: English-only `when_to_use`, padam gimmick removed).
+- `skills/check/` → promoted to `.claude/skills/check/` (renamed `agents/`→`reviewers/` so the persona files are skill-internal, not flagged as unregistered subagents; persona-catalog refs updated).

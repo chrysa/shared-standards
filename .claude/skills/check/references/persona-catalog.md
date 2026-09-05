@@ -10,7 +10,7 @@ The base /check skill runs as always-on. Specialist reviewers are additive.
 
 ### Security Reviewer
 
-**Agent file:** `agents/reviewer-security.md`
+**Agent file:** `reviewers/reviewer-security.md`
 **Activate at:** Standard or Deep depth
 
 Activate when the diff touches:
@@ -27,7 +27,7 @@ Activate when the diff touches:
 
 ### Architecture Reviewer
 
-**Agent file:** `agents/reviewer-architecture.md`
+**Agent file:** `reviewers/reviewer-architecture.md`
 **Activate at:** Standard or Deep depth
 
 Activate when the diff:
