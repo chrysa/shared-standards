@@ -59,6 +59,12 @@
             "name": "check-no-env-files",
             "timeout": 5000,
             "type": "command"
+          },
+          {
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/git-safety-guard.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "name": "git-safety-guard",
+            "timeout": 5000,
+            "type": "command"
           }
         ],
         "matcher": "Bash"
