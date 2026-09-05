@@ -34,8 +34,19 @@ function loadConfig() {
  * mentions a git invocation (e.g. a PR body, a heredoc, a hook's own test
  * fixture) without actually running one.
  */
+/**
+ * Blank single/double-quoted spans so a destructive pattern that lives only
+ * inside a quoted argument — a commit message, a PR body, a `-m "…"` string —
+ * is neither split on a separator it contains nor mistaken for the git
+ * operation itself. Applied before splitting, so `;`/`&&`/`|` inside quotes
+ * do not fragment the command.
+ */
+function stripQuoted(command) {
+	return command.replace(/"[^"]*"|'[^']*'/g, " ");
+}
+
 function splitSubcommands(command) {
-	return command
+	return stripQuoted(command)
 		.split(/\r?\n|&&|\|\||;|\|/)
 		.map((s) => s.trim())
 		.filter(Boolean);
