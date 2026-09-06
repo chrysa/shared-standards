@@ -81,9 +81,15 @@ git commit --no-verify -q -m "feat(security): apply ecosystem security gate base
 
 bandit (SAST, [tool.bandit]) + hadolint + pip-audit (pre-push) + promoted
 pre-commit-tools security hooks + CI thin caller sast.yml@v1.9.0.
-gitleaks/secret-scan already present. Part of sc-3778."
+gitleaks/secret-scan already present. Part of sc-3778.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 git push -u origin feat/security-baseline -q
-gh pr create --repo "$SLUG" --base "$DEF" \
-  --title "feat(security): apply ecosystem security gate baseline" \
-  --body "Propagation of the ecosystem security gate (sc-3778) after canary validation. Adds bandit ([tool.bandit], baseline only if legacy findings), hadolint, pip-audit (pre-push), promoted pre-commit-tools security hooks, and CI thin caller sast.yml -> chrysa/github-actions@v1.9.0. gitleaks/secret-scan already present. docker-run-host-user omitted (absent at pinned rev)." \
-  2>&1 | tail -1
+TITLE="feat(security): apply ecosystem security gate baseline"
+BODY="Propagation of the ecosystem security gate (sc-3778) after canary validation. Adds bandit ([tool.bandit], baseline only if legacy findings), hadolint, pip-audit (pre-push), promoted pre-commit-tools security hooks, and CI thin caller sast.yml -> chrysa/github-actions@v1.9.0. gitleaks/secret-scan already present. docker-run-host-user omitted (absent at pinned rev).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+# Some repos' API slug differs from the push remote; fall back to the checkout.
+if ! gh pr create --repo "$SLUG" --base "$DEF" --title "$TITLE" --body "$BODY" 2>&1 | tail -1; then
+  (cd "$LOCAL" && gh pr create --base "$DEF" --head feat/security-baseline --title "$TITLE" --body "$BODY" 2>&1 | tail -1)
+fi
