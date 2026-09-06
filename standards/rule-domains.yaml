@@ -27,7 +27,6 @@ rules:
   A game is DRM-free and fully playable solo offline: product
   A real-time backend has channel contracts and never blocks: api
   A session is secured and it expires: security
-  "Security scanning is a gate, not an afterthought — it runs in pre-commit and in CI": security
   APIs, SDKs & public contracts follow the `STD-API-001` contract: api
   Agent actions are governed: agents
   An AI feature is evaluated, not just shipped: agents
@@ -72,6 +71,7 @@ rules:
   "No literal HTTP status codes \u2014 use the constants the framework already ships": code-quality
   "No virtualenv in a repo \u2014 ever": containers
   Notion logging: docs
+  Numbers are displayed with a space thousands separator: design
   Observability & production readiness follow the `STD-OPS-001` contract: observability
   One PR per issue: scm
   "Only a publicly useful port is published \u2014 everything else stays on the container network": containers
@@ -84,6 +84,7 @@ rules:
   React is a presentation layer, not the domain: frontend
   "Repo provenance \u2014 every code repo depends on `project-init`": architecture
   Rights are resolved against the common directory (LDAP), never re-declared per service: security
+  "Security scanning is a gate, not an afterthought \u2014 it runs in pre-commit and in CI": security
   Setup wizard & config panel: product
   'Tests: pytest only': testing
   "The JS/TS package manager is `pnpm` \u2014 `npm` and `yarn` are forbidden": frontend
