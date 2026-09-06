@@ -1,5 +1,5 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views
+.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views spec-plan-gate-report
 
 help:
 	@echo "Available targets:"
@@ -74,3 +74,8 @@ quality-gate-baseline: ## Record baseline metrics for regression detection
 
 quality-gate-verify: ## Verify no regression since baseline
 	@python3 scripts/quality_gate.py verify
+
+# ── Spec->Plan enforcement gate (ADR D-0011) ───────────────────────────────────
+
+spec-plan-gate-report: ## Kill-test report from reports/.spec-plan-gate.log
+	@python3 scripts/spec_plan_gate_report.py

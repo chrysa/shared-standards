@@ -55,3 +55,12 @@ ______________________________________________________________________
 ## Promoted (out of the pen)
 - `skills/hunt/` → promoted to `.claude/skills/hunt/` (cleaned: English-only `when_to_use`, padam gimmick removed).
 - `skills/check/` → promoted to `.claude/skills/check/` (renamed `agents/`→`reviewers/` so the persona files are skill-internal, not flagged as unregistered subagents; persona-catalog refs updated).
+- `hooks/git-safety-guard.cjs` → promoted to `.claude/hooks/` (#520), wired into `settings.json` (Bash matcher).
+- **spec→plan→implement bundle** (ADR D-0011, Accepted):
+  - `skills/{spec,plan,implement,verification-loop}/` → `.claude/skills/` (genericised: padam/Django/`padam_av/` wording stripped, container-first execution rule pointed at each repo's own `make` targets).
+  - `commands/{plan-start,plan-validate,plan-execute}.md` → `.claude/commands/` (padam paths genericised).
+  - `hooks/enforce-spec-plan.cjs` → `.claude/hooks/` — **generalised**: gated roots + source exts read from `.claude/config/hooks-config.json`, runs only when `enforceSpecPlan.enabled === true` (default **false**). Wired into `settings.json` (Write|Edit|MultiEdit matcher). Kill-test tooling: `scripts/spec_plan_gate_report.py` + `make spec-plan-gate-report`.
+
+## Remaining in the pen
+- `hooks/lib/circuit-breaker.cjs` — back-port candidate against the existing shared-standards `circuit-breaker.cjs`; reconcile by real diff, not promotion.
+- `ape/` — needs its own ADR (disabled-by-default) before any wiring; see governance flag above.

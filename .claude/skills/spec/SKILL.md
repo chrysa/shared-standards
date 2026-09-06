@@ -51,7 +51,8 @@ Why this work exists; the user-facing or system problem being solved.
 - [ ] Measurable, testable criteria (map to tests later).
 
 ## Constraints & dependencies
-Django/PostGIS/RQ specifics, provider integrations, standards from CLAUDE.md.
+Stack specifics, external services and provider integrations, and the standards
+that bind this work (from CLAUDE.md / `standards/`).
 
 ## Risks / open questions
 ```
