@@ -221,6 +221,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - Rights are resolved against the common directory (LDAP), never re-declared per service
 - A session is secured and it expires
 - Every form is a hostile input surface — validate on the server, always
+- Security scanning is a gate, not an afterthought — it runs in pre-commit and in CI
 
 ### Code quality & anti-patterns · `standards/rules/code-quality.md`
 - No hardcoded constants
