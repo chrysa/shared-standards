@@ -82,6 +82,7 @@ rules:
   Raised errors are typed: code-quality
   React is a presentation layer, not the domain: frontend
   "Repo provenance \u2014 every code repo depends on `project-init`": architecture
+  Rights are resolved against the common directory (LDAP), never re-declared per service: security
   Setup wizard & config panel: product
   'Tests: pytest only': testing
   "The JS/TS package manager is `pnpm` \u2014 `npm` and `yarn` are forbidden": frontend
