@@ -314,6 +314,18 @@ That record deliberately names products; where it and this canon disagree, **thi
   *projects talk through versioned contracts only* or *portable data*: identity sits behind an
   adapter, so the product stays independently deployable against an alternative identity provider
   (or a standalone local mode) by configuration, without touching the domain.
+- **Rights are resolved against the common directory (LDAP), never re-declared per service.**
+  The SSO above is the sign-in front door; the **shared LDAP directory is the source of truth for
+  *who may do what*** — the people, the groups, and the group memberships that grant rights. Every
+  service that requires a connection (interactive product, backend service, admin tool, job runner)
+  authorises against that directory: it reads a subject's group/role membership from LDAP and maps
+  those to its own permissions, rather than maintaining a parallel, authoritative list of users or
+  who-is-an-admin. A right granted or revoked in the directory takes effect everywhere; a local
+  role table that shadows the directory is drift, and a security bug. As with sign-in, the directory
+  sits **behind an adapter** (the domain speaks `roles`/`permissions`, not LDAP filters), so the
+  product stays deployable against an alternative directory or a standalone local mode by
+  configuration — but wherever it is deployed in the cluster, the cluster's directory is authoritative.
+  The directory is read for authorisation; it is **not** a datastore for a product's own domain data.
 - **A session is secured and it expires.** Authenticating is not the end of the security
   story: the *session* is the credential from then on, and a session that never ends is a
   password that can never be changed. Every authenticated product declares, in config, how
@@ -1116,6 +1128,15 @@ components. This complements *dark mode + WCAG 2.1 AA* and the `ui-ux` skill.
   focus is mandatory.
 - **Consistent UX writing** — voice-and-tone guide; error messages say what to do (no raw
   codes); action-oriented labels and CTAs; terminology aligned to the domain glossary.
+- **Numbers are displayed with a space thousands separator** — every human-facing number
+  (`1 234 567`, `12 500 €`) groups thousands with a **space**, on every surface: frontend,
+  backoffice, generated documents, reports, and CLI output. The separator is a **non-breaking
+  space** (`U+202F` narrow no-break, or `U+00A0`) so the number never wraps mid-value; the
+  decimal mark stays the locale's own. This is a **display** rule only — stored, serialised,
+  logged, and API-transported numbers stay raw (unseparated), and formatting happens at the
+  view boundary through a shared formatter, never by hand per component (mirrors *no code
+  duplication*). Identifiers, years, ports, and version numbers are not quantities and are
+  never separated.
 - **Standardised motion** — tokenised durations and easing (e.g. 150/250 ms); animation is
   functional (state transition, feedback), never gratuitous; honours `prefers-reduced-motion`.
 - **Mobile-first responsive** — mobile-first design, breakpoints from tokens, touch targets

@@ -91,7 +91,7 @@ jobs:
             # The canonical scripts (quality_gate parser, pre-commit-merge) run as host
             # tools; test them on the host and ship their coverage to Sonar alongside the
             # console report so a scripts/ change is not counted as 0% new-code coverage.
-            - uses: actions/setup-python@v6
+            - uses: actions/setup-python@v7
               with:
                   python-version: "3.14"
 
@@ -125,7 +125,7 @@ jobs:
               with:
                   version: 9
 
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@v7
               with:
                   node-version: 22
                   cache: pnpm
@@ -191,7 +191,7 @@ jobs:
                   name: scripts-coverage
                   path: reports
 
-            - uses: chrysa/github-actions/sonar-scan-python@v1.8.1
+            - uses: chrysa/github-actions/sonar-scan-python@v1.8.2
               with:
                   python-version: "3.14"
                   sonar-token: ${{ secrets.SONAR_TOKEN }}

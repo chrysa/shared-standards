@@ -12,6 +12,8 @@ All hooks are written in Node.js (`.cjs`) and require only the standard library.
 | Secret scanner | `PreToolUse` (Bash → git commit) | `secret-scanner.cjs` | Yes (exit 2) |
 | No-env-files | `PreToolUse` (Bash → git commit) · CLI `--ci` | `check-no-env-files.cjs` | Yes (exit 2) · CI exit 1 |
 | Circuit breaker | `PreToolUse` (Bash → API calls) | `circuit-breaker.cjs` | Yes when open (exit 2) |
+| Git safety guard | `PreToolUse` (Bash → git) | `git-safety-guard.cjs` | Yes (deny: force-push / hard-reset / branch -D) |
+| Enforce spec+plan | `PreToolUse` (Write/Edit/MultiEdit) | `enforce-spec-plan.cjs` | Yes when enabled (exit 2) — opt-in, off by default |
 | Frustration detection | `UserPromptSubmit` | `frustration-detection.cjs` | No (injects context) |
 | Verifiable thresholds | `PostToolUse` (Write/Edit) | `verifiable-thresholds.cjs` | No (warnings only) |
 | Memory consolidation | CLI script | `memory-consolidation.cjs` | N/A |
@@ -276,6 +278,55 @@ node .claude/hooks/check-no-env-files.cjs --ci .
 
 **Allowed, never flagged:** `*.env.example`, `*.env.sample`, `*.env.template`, `*.env.dist`.
 **Allowlist file:** `.claude/no-env-allowlist.json` (JSON array of glob patterns).
+
+## Git Safety Guard
+
+`PreToolUse` (Bash) mechanical backstop for the Git Safety Protocol: it **denies**
+destructive git subcommands before they run — force push (`push --force` / `-f` /
+`--force-with-lease`), hard reset (`reset --hard`), and branch delete (`branch -D`) —
+regardless of what instructed the agent. The decision is carried in a
+`permissionDecision: "deny"` JSON payload (exit 0), so it blocks the tool call without
+killing the shell. Subcommands are split on `\n && || ; |` so a git invocation merely
+*mentioned* in a PR body, heredoc or test fixture is never falsely flagged.
+
+```bash
+# PreToolUse — reads the tool payload on stdin
+echo '{"tool_input":{"command":"git push --force origin main"}}' | node .claude/hooks/git-safety-guard.cjs
+# Expected: JSON with permissionDecision "deny"; a plain `git push origin develop` emits nothing (allow)
+```
+
+Run a genuinely-needed destructive git command **manually, outside Claude**, after
+confirming the intent.
+
+## Enforce spec + plan (`enforce-spec-plan.cjs`) — ADR D-0011
+
+`PreToolUse` (Write/Edit/MultiEdit) gate that **blocks a source edit unless the active
+feature has both an approved spec and an approved plan**. It is **opt-in and off by
+default**: with no config, or `enabled` absent/false, it exits 0 (no-op). Adopting it on
+a repo is a governed, piloted decision — see ADR D-0011.
+
+**Activation** — `.claude/config/hooks-config.json`:
+```json
+{ "enforceSpecPlan": { "enabled": true, "gatedRoots": ["api/"], "sourceExts": [".py"] } }
+```
+With `gatedRoots` empty, nothing is gated. `reports/specs/`, `reports/plans/` and
+`.claude/` are always allowed (needed to bootstrap the workflow). The gated roots and
+source extensions come from config, so the file distributes to the fleet untouched.
+
+**Feature resolution:** `.claude/.active-feature` (single-line slug), else the git branch
+`feature|fix|chore|hotfix|release/<slug>`.
+
+**Workflow:** `/spec <f>` → approve → `/plan <f>` → approve → `/implement <f>`. Approval is
+setting `status: approved` in the artefact frontmatter — a human step.
+
+Every decision is appended to `reports/.spec-plan-gate.log` (JSONL) for the kill-test:
+`make spec-plan-gate-report` tallies time-to-first-edit and weekly block counts.
+
+```bash
+# no-op when disabled
+echo '{"tool_name":"Write","tool_input":{"file_path":"api/x.py"}}' | node .claude/hooks/enforce-spec-plan.cjs
+# Expected: exit 0 (config disabled or absent)
+```
 
 ## Disabling a hook
 
