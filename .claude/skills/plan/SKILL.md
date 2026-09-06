@@ -40,7 +40,7 @@ One paragraph: the implementation approach chosen and why.
 ## Files to touch
 | File | Change |
 | ---- | ------ |
-| padam_av/apps/<app>/… | … |
+| <path/to/module> | … |
 
 ## Steps
 1. Ordered, concrete steps. Each maps to a small commit where possible.

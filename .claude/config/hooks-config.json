@@ -1,0 +1,16 @@
+{
+  "enforceSpecPlan": {
+    "enabled": false,
+    "gatedRoots": [],
+    "sourceExts": [
+      ".py",
+      ".pyi",
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".go",
+      ".rs"
+    ]
+  }
+}
