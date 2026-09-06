@@ -1,6 +1,6 @@
 # D-0011 — Spec→Plan enforcement gate: opt-in, off by default
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-09-05
 - **Series:** D (standards-governance decisions)
 - **Owner:** standards maintainers (`chrysa/shared-standards`)

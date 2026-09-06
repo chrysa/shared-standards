@@ -62,8 +62,8 @@ Red flags in your own output: "should", "probably", "seems to", or any
 "Great!/Perfect!/Done!" *before* the evidence is on screen.
 
 > Gate, table and Iron-Law framing adapted from obra/superpowers
-> (`verification-before-completion`, MIT). Wired to the padam-av
-> Docker-only execution rule below.
+> (`verification-before-completion`, MIT). Wired to the container-first
+> execution rule below.
 
 ## When to Use
 
@@ -76,25 +76,25 @@ Invoke this skill:
 
 ## Verification Phases
 
-> **padam-av execution rule (NON-NEGOTIABLE):** lint / typecheck / tests run via
-> **Docker + `make` ONLY** — never bare on the host. Use the `make` targets this
-> repo ships (`make ruff-check`, `make ruff-format`, `make tests`), or
-> `docker compose run --rm app <target>`. Django has no build step, so Phase 1
-> below reduces to `python manage.py check`. Substitute the project's wrapper if
-> a target name differs.
+> **Execution rule (NON-NEGOTIABLE):** every check runs through the repo's own
+> **`make` targets, in-container** — never bare on the host (containers rule,
+> `standards/rules/containers.md`). Discover the real target names from the repo's
+> `Makefile` (`make help`) and use those; the commands below are the canonical
+> shape, not literal names. A stack with no separate build step folds Phase 1 into
+> its framework's own check command.
 
-### Phase 1: Build / Django Check
+### Phase 1: Build / Framework Check
 
 ```bash
-docker compose run --rm app python manage.py check 2>&1 | tail -20
+make build 2>&1 | tail -20   # or the framework's own check target
 ```
 
-If the system check fails, STOP and fix before continuing.
+If the check fails, STOP and fix before continuing.
 
 ### Phase 2: Type Check
 
 ```bash
-docker compose run --rm app mypy padam_av/ 2>&1 | head -30
+make typecheck 2>&1 | head -30
 ```
 
 Report all type errors. Fix critical ones before continuing.
@@ -102,19 +102,17 @@ Report all type errors. Fix critical ones before continuing.
 ### Phase 3: Lint Check
 
 ```bash
-make ruff-check 2>&1 | head -30
-# format check
-make ruff-format 2>&1 | head -30
+make lint 2>&1 | head -30
+make format-check 2>&1 | head -30
 ```
 
 ### Phase 4: Test Suite
 
 ```bash
-# Runs the pytest suite with coverage
-make tests 2>&1 | tail -50
+# Runs the test suite with coverage
+make test 2>&1 | tail -50
 
-# Check coverage threshold
-# padam-av target: 85% minimum on the modified module
+# Check coverage against the threshold the repo declares
 ```
 
 Report:

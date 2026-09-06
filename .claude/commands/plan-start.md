@@ -16,8 +16,8 @@ ______________________________________________________________________
 ## Steps
 
 1. **Research** — Pre-flight checks: `git status`, `git branch --show-current`
-   (default branch is `develop`), `gh auth status`. Read the relevant Django apps
-   under `padam_av/apps/`, existing `docs/`, and any prior plan files.
+   (default branch is `develop`), `gh auth status`. Read the modules the objective
+   touches, existing `docs/`, and any prior plan files.
 2. **Design** — Break the objective into one-PR-sized steps (3–12 typical). For
    each step assign: dependency edges, parallel/serial ordering, and rollback
    strategy. Keep every step within project standards (function ≤ 40 lines,
