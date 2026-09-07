@@ -572,6 +572,7 @@ tests/
     __init__.py
     test_distribute_standards.py
     test_gen_agent_views.py
+    test_gen_context_files.py
     test_quality_gate_parser.py
   test_pre_commit_merge_exclude.py
   test_pyproject_ruff_merge.py
