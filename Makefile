@@ -1,5 +1,5 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views spec-plan-gate-report
+.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views gen-context-files context-files-report spec-plan-gate-report
 
 help:
 	@echo "Available targets:"
@@ -19,6 +19,24 @@ install:
 gen-agent-views: ## Regenerate the agent views from standards/STANDARDS.chrysa.md
 	python3 -m scripts.gen_agent_views
 
+# Regenerate the per-repo context files (handover, context-map, llms digest, ai-instructions)
+# from this repo's own content (ADR D-0012). The context-files-drift gate verifies it.
+gen-context-files: ## Regenerate the per-repo context files (ADR D-0012)
+	python3 -m scripts.gen_context_files
+
+# Kill-test tally for ADR D-0012: the byte size of each generated context file (empty/garbage
+# output is visible here) and the number of generator-fix commits (churn signal). The ADR marks
+# the decision Killed if churn stays > 3 fix commits/week or > 20% of repos produce empty output.
+context-files-report: ## ADR D-0012 kill-test tally (generated sizes + generator-fix commit count)
+	@echo "context-files-report — $(shell git rev-parse --abbrev-ref HEAD)"
+	@echo "generated file sizes (bytes):"
+	@for f in handover.md context-map.json llms-full.txt ai-instructions.md; do \
+		if [ -f "$$f" ]; then printf '  %-20s %s\n' "$$f" "$$(wc -c < $$f)"; \
+		else printf '  %-20s %s\n' "$$f" "(absent)"; fi; done
+	@echo "generator-fix commits (scripts/gen_context_files.py):"
+	@echo "  total:      $$(git log --oneline -- scripts/gen_context_files.py | wc -l | tr -d ' ')"
+	@echo "  last 28d:   $$(git log --oneline --since='28 days ago' -- scripts/gen_context_files.py | wc -l | tr -d ' ')"
+
 dev:
 	@echo "No dev server — shared-standards is a documentation-only repo"
 
@@ -33,7 +51,7 @@ test-cov:
 # the host and their coverage travels to Sonar next to the console coverage — otherwise a
 # scripts/ change is counted as 0% new-code coverage.
 test-scripts: ## Run the scripts test suite with coverage (host)
-	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/gen_agent_views.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
+	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/gen_agent_views.py,scripts/gen_context_files.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
 	python3 -m coverage xml -o scripts-coverage.xml
 
 # The console app lives in console/ and its suite runs in Docker. CI's `make docker-test` builds its
