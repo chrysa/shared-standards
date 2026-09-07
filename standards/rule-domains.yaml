@@ -50,6 +50,7 @@ rules:
   "Every form is a hostile input surface \u2014 validate on the server, always": security
   Every product that is operated ships a management backoffice: product
   Every repo declares its profile and DDD level: architecture
+  Every repo ships generated context files: docs
   "Every site is usable by the majority of disabilities \u2014 not only the screen-reader case": accessibility
   "Every tracked file and folder must earn its place \u2014 a repo holds only what is useful to it now": architecture
   "Everything is machine-agnostic and portable \u2014 no rule, repo, or script is bound to one machine": architecture

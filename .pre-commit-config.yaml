@@ -139,6 +139,24 @@ repos:
     files: ^(standards/(STANDARDS\.chrysa\.md|CORE\.chrysa\.md|rule-domains\.yaml|rules/.*)|scripts/gen_agent_views\.py|CLAUDE\.md|AGENTS\.md|\.github/copilot-instructions\.md)$
     additional_dependencies:
     - pyyaml==6.0.2
+  - id: gen-context-files-canonical-drift
+    name: gen_context_files.py canonical drift
+    entry: scripts/check-canonical-drift.sh scripts/gen_context_files.py templates/gen_context_files.py
+    language: system
+    pass_filenames: false
+    files: ^(scripts/gen_context_files\.py|templates/gen_context_files\.py)$
+  # The per-repo context files (handover, context-map, llms digest, ai-instructions) are
+  # GENERATED from the repo's own content by scripts/gen_context_files.py (ADR D-0012).
+  # This gate regenerates them and fails if any committed file drifted — mirrors
+  # agent-views-drift. Host-native; pyyaml only reads the in-repo repos.yml when present.
+  - id: context-files-drift
+    name: context files (handover / context-map / llms-full / ai-instructions) match the repo
+    entry: python -m scripts.gen_context_files --check
+    language: python
+    pass_filenames: false
+    files: ^(scripts/gen_context_files\.py|handover\.md|context-map\.json|llms-full\.txt|ai-instructions\.md|README\.md|CLAUDE\.md|CHANGELOG\.md|pyproject\.toml|package\.json|repos\.yml|docs/adr/.*)$
+    additional_dependencies:
+    - pyyaml==6.0.2
   - id: pii-scan
     name: PII (GDPR) detection (Presidio)
     entry: python -m scripts.pii_scan

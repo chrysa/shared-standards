@@ -66,6 +66,14 @@ jobs:
               working-directory: ${{ github.workspace }}
               run: uv run --no-project --with pyyaml==6.0.2 python -m scripts.gen_agent_views --check
 
+            # The per-repo context files (handover, context-map, llms digest, ai-instructions)
+            # are generated from the repo's own content by scripts/gen_context_files.py (ADR
+            # D-0012). Regenerate and fail if any committed file drifted (mirrors the agent
+            # views step + the context-files-drift pre-commit hook).
+            - name: Context files drift
+              working-directory: ${{ github.workspace }}
+              run: uv run --no-project --with pyyaml==6.0.2 python -m scripts.gen_context_files --check
+
     test:
         name: Docker tests
         runs-on: ubuntu-latest
