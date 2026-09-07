@@ -1,0 +1,43 @@
+{
+  "adrs": [
+    "0001-canonical-ci-and-hygiene-baseline.md",
+    "0002-design-personas.md",
+    "0003-brand-themes.md",
+    "0004-scope-git-add-permission.md",
+    "0005-ux-audit-shared-ui-and-cli-standards.md",
+    "0006-decouple-skills-technical-persona.md",
+    "D-0010-standards-id-taxonomy.md",
+    "D-0011-spec-plan-enforcement-gate.md",
+    "D-0012-repo-context-files.md"
+  ],
+  "contracts": [
+    "standards"
+  ],
+  "ddd_level": "(not available)",
+  "dependencies": {},
+  "depends_on_shared_standards": true,
+  "description": "Shared GitHub Copilot instructions, generic workflows, templates, and Claude Code DevEx tooling for the ecosystem.",
+  "entry_points": [],
+  "key_directories": [
+    ".claude",
+    ".github",
+    ".vscode",
+    "compliance",
+    "console",
+    "copilot-instructions",
+    "docs",
+    "legal",
+    "makefiles",
+    "scripts",
+    "standards",
+    "templates",
+    "tests",
+    "workflows"
+  ],
+  "name": "shared-standards",
+  "profiles": [
+    "config",
+    "infra"
+  ],
+  "schema": "chrysa.context-map/1"
+}

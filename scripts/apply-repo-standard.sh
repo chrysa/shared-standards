@@ -132,6 +132,28 @@ deploy_quality_gate() {
     ok "quality_gate.py synced to canonical"
 }
 
+# The context-file generator is a CANONICAL, DISTRIBUTED script (ADR D-0012): the single
+# source of truth is templates/gen_context_files.py; every repo converges on it and runs it
+# ON ITSELF to (re)generate handover.md / context-map.json / llms-full.txt / ai-instructions.md
+# from its own content. We sync the generator, then run it once so the sync PR also carries
+# the freshly-generated files. Vendor-neutral, deterministic, degrades gracefully on a repo
+# lacking a README/pyproject/changelog.
+deploy_context_files() {
+    local repo="$1" src="$TPL/gen_context_files.py" dest="$repo/scripts/gen_context_files.py"
+    [[ -f "$src" ]] || { warn "template missing: gen_context_files.py"; return 0; }
+    if $DRY_RUN; then info "[dry-run] would sync $dest and regenerate the context files"; return 0; fi
+    mkdir -p "$repo/scripts"
+    if ! { [[ -f "$dest" ]] && cmp -s "$src" "$dest"; }; then
+        cp "$src" "$dest"
+        ok "gen_context_files.py synced to canonical"
+    fi
+    if python3 "$dest" >/dev/null 2>&1; then
+        ok "context files regenerated (handover / context-map / llms-full / ai-instructions)"
+    else
+        warn "context files: generator run failed · skipped"
+    fi
+}
+
 # Release tooling + repo meta. Create-if-absent only — never clobber an existing
 # CHANGELOG (real history), opencode.json, AGENTS.md, etc.
 deploy_release_tooling() {
@@ -329,6 +351,7 @@ apply_one() {
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
     deploy_quality_gate "$repo"
+    deploy_context_files "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"
