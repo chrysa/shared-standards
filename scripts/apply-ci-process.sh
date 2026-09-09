@@ -76,7 +76,6 @@ check_templates() {
         "$WF_TEMPLATES/sync-labels.yml" \
         "$WF_TEMPLATES/update-pr-body.yml" \
         "$WF_TEMPLATES/action-check.yml" \
-        "$WF_TEMPLATES/auto-update-pre-commit.yml" \
         "$WF_TEMPLATES/dependabot-auto-merge.yml" \
         "$CFG_TEMPLATES/labels.yml" \
         "$CFG_TEMPLATES/labeler.yml" \
@@ -255,7 +254,7 @@ deploy_one() {
         cp "$wf" "$dest"
         copied=$((copied + 1))
     done
-    ok "Workflows copiés (manquants seulement) : $copied/11"
+    ok "Workflows copiés (manquants seulement) : $copied/10"
 
     # ─── Tier 3 : github-config ─────────────
     mkdir -p "$repo/.github"
