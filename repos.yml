@@ -245,6 +245,10 @@ repos:
   public: false
   runtime: exempt:config
   status: non-dev
+- name: homepage
+  public: true
+  runtime: exempt:native
+  status: non-dev
 - name: lifeos
   public: true
   runtime: exempt:native
