@@ -269,6 +269,10 @@ repos:
   public: false
   runtime: container
   status: dev
+- name: nitro-underground
+  public: false
+  runtime: exempt:native
+  status: dev
 - alias_of: lifeos
   name: my-assistant
   public: false
@@ -318,6 +322,10 @@ repos:
   public: false
   runtime: exempt:native
   status: dev
+- name: skunk-simulator
+  public: false
+  runtime: exempt:native
+  status: dev
 - name: shared-standards
   public: true
   runtime: exempt:config
@@ -345,6 +353,10 @@ repos:
 - name: debian-guardian
   public: false
   runtime: exempt:native
+  status: dev
+- name: dev-kit
+  public: false
+  runtime: exempt:config
   status: dev
 - name: django-migration-analyzer
   public: false
