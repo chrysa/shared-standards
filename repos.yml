@@ -76,6 +76,7 @@ profiles:
   - fastapi-pytest
   - fastapi-query-optimizer
   - fastapi-traceid
+  - guardian-core
   - guideline-checker
   - pre-commit-hooks-changelog
   - pre-commit-tools
@@ -236,6 +237,10 @@ repos:
 - name: github-actions
   public: true
   runtime: exempt:config
+  status: dev
+- name: guardian-core
+  public: false
+  runtime: exempt:lib
   status: dev
 - name: guideline-checker
   public: true
