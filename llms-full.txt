@@ -127,7 +127,6 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     action-check.yml
     approved-label.yml
     auto-assign.yml
-    auto-update-pre-commit.yml
     ci.yml
     dependabot-auto-merge.yml
     dependencies.yml
@@ -328,6 +327,7 @@ scripts/
   gen-skills-agents-audit.sh
   gen_agent_views.py
   gen_context_files.py
+  gen_context_pack.py
   gh-device-token.sh
   github_actions_pin.py
   lib/
@@ -444,6 +444,8 @@ templates/
       reviewpr.md
       test.md
   cliff.toml
+  context-pack/
+    README.md
   contract.css
   copilot-instructions.md
   dependabot.yml
@@ -549,7 +551,6 @@ templates/
     action-check.yml
     approved-label.yml
     auto-assign.yml
-    auto-update-pre-commit.yml
     dependabot-auto-merge.yml
     detect-conflicts.yml
     labeler.yml
@@ -579,6 +580,7 @@ tests/
 workflows/
   ci-node.yml
   ci-python.yml
+  context-pack-check.yml
   contract-testing.yml
   enforce-feature-branch.yml
   enforce-issue-link.yml
@@ -640,6 +642,6 @@ scripts/ci_pin_actions_sha.py — Pin third-party GitHub Actions by commit SHA (
 scripts/ci_secrets_explicit.py — Replace `secrets: inherit` with the explicit list the callee actually declares (CI-021).
 scripts/gen_agent_views.py — Generate the agent views from the canonical standards corpus.
 scripts/gen_context_files.py — Generate the standardised per-repo context files from the repo's own content.
+scripts/gen_context_pack.py
 scripts/github_actions_pin.py — Keep the fleet's `chrysa/github-actions` pins on a single, current tag.
 scripts/pii/__init__.py — PII (GDPR) detection package: Presidio recognizers, config, and scanner.
-scripts/pii/config.py — Load PII scan configuration and false-positive allowlist.
