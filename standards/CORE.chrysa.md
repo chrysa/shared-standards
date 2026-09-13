@@ -22,6 +22,7 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 - Branch model — `main` is production, `develop` is the workspace
 - Merge
 - One PR per issue
+- Every PR references a Shortcut story
 - Issues and PRs are type-driven
 
 ### Architecture, decoupling & portability · `standards/rules/architecture.md`
