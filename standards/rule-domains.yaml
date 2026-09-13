@@ -75,6 +75,7 @@ rules:
   Numbers are displayed with a space thousands separator: design
   Observability & production readiness follow the `STD-OPS-001` contract: observability
   One PR per issue: scm
+  Every PR references a Shortcut story: scm
   "Only a publicly useful port is published \u2014 everything else stays on the container network": containers
   "Per-person data implies a user account \u2014 no exceptions dressed up as simplicity": security
   Prefer a lookup table to a state machine: code-quality
