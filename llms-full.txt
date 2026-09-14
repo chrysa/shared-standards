@@ -134,6 +134,7 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     distribute-standards.yml
     enforce-feature-branch.yml
     enforce-issue-link.yml
+    enforce-shortcut-link.yml
     labeler.yml
     pr-dependencies.yml
     pull-request-size.yml
