@@ -3,7 +3,7 @@
 # Source : chrysa/shared-standards/scripts/apply-ci-process.sh
 #
 # Ce que le script fait :
-#   Tier 1 · 10 workflows process-only (non stack-specific) dans .github/workflows/
+#   Tier 1 · 11 workflows process-only (non stack-specific) dans .github/workflows/
 #   Tier 2 · dependabot.yml généré selon stack détectée (pip/npm/docker)
 #   Tier 3 · config github (.github/labeler.yml, labels.yml, auto_assign.yml, actionlint.yaml)
 #   Bonus · fragment pre-commit common (à fusionner manuellement)
@@ -76,8 +76,8 @@ check_templates() {
         "$WF_TEMPLATES/sync-labels.yml" \
         "$WF_TEMPLATES/update-pr-body.yml" \
         "$WF_TEMPLATES/action-check.yml" \
-        "$WF_TEMPLATES/auto-update-pre-commit.yml" \
         "$WF_TEMPLATES/dependabot-auto-merge.yml" \
+        "$WF_TEMPLATES/enforce-shortcut-link.yml" \
         "$CFG_TEMPLATES/labels.yml" \
         "$CFG_TEMPLATES/labeler.yml" \
         "$CFG_TEMPLATES/auto_assign.yml" \
@@ -255,7 +255,7 @@ deploy_one() {
         cp "$wf" "$dest"
         copied=$((copied + 1))
     done
-    ok "Workflows copiés (manquants seulement) : $copied/11"
+    ok "Workflows copiés (manquants seulement) : $copied/10"
 
     # ─── Tier 3 : github-config ─────────────
     mkdir -p "$repo/.github"

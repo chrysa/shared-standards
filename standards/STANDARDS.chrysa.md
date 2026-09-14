@@ -82,6 +82,14 @@ That record deliberately names products; where it and this canon disagree, **thi
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
+- **Every PR references a Shortcut story.** The story is the unit of work tracking; a PR
+  with no story is invisible to the fleet's planning surface and is a defect. Carry the
+  reference as `sc-<id>` (or the `app.shortcut.com/.../story/<id>` URL) in the branch name
+  (`feat/sc-1234-short-desc`), the PR title, or the PR body — the PR template has a required
+  field for it. dependabot is exempt; a genuinely story-less PR must carry the `no-story`
+  label, which records the waiver. The `enforce-shortcut-link` workflow is a blocking status
+  check. A story beyond `In Progress` must itself link the branch/commit (native VCS
+  integration), so the thread reads both ways.
 - **Issues and PRs are type-driven.** Every issue declares exactly one **type** from a fixed
   taxonomy (bug · feature · enhancement · chore · docs · ci · security · research · epic),
   carried as a canonical label and backed by a committed per-type issue form; every PR's type is
@@ -646,6 +654,12 @@ That record deliberately names products; where it and this canon disagree, **thi
 - **Tool caches & deps never touch the project tree.** `__pycache__`, `.pytest_cache`,
   `.ruff_cache`, `.mypy_cache`, `.benchmarks`, `node_modules`, and pip/npm/uv download caches
   are regenerable machine artifacts — they must be **invisible in the repo working copy**.
+  **Fewest cache files possible is the target:** a cache that earns nothing is disabled outright
+  (e.g. `PYTEST_ADDOPTS: -p no:cacheprovider`), and wherever a tool exposes a cache-dir env var it
+  is redirected to an **ephemeral out-of-tree location** — `/tmp` for host/CI runs
+  (`RUFF_CACHE_DIR: /tmp/ruff_cache`, `MYPY_CACHE_DIR: /tmp/mypy_cache`,
+  `PYTHONPYCACHEPREFIX: /tmp/pycache`), a named volume under `/caches` in-container (below). A repo
+  or working copy that accumulates cache directories is a defect, not a convenience.
   Enforcement is three-layered and all three are mandatory:
   1. **`.gitignore`** carries the managed canonical block (`templates/gitignore.canonical`) so
      they are never tracked. Appended, not hand-maintained.
