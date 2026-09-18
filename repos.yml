@@ -417,9 +417,9 @@ repos:
   status: dev
 - name: content-organizer
   public: false
-  runtime: container
+  runtime: exempt:native
   status: dev
 - name: logos
   public: false
-  runtime: container
+  runtime: exempt:lib
   status: dev
