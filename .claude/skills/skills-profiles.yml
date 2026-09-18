@@ -1,0 +1,42 @@
+profiles:
+  accessibility:
+  - front
+  agent-patterns:
+  - ai
+  - back
+  api-design:
+  - back
+  async-patterns:
+  - back
+  check:
+  - all
+  clean-architecture:
+  - back
+  contract-testing:
+  - back
+  - lib
+  council:
+  - all
+  dockerfile-multistage:
+  - back
+  - infra
+  error-handling:
+  - back
+  gitnexus:
+  - all
+  hunt:
+  - all
+  implement:
+  - all
+  plan:
+  - all
+  spec:
+  - all
+  standards-authoring:
+  - all
+  testing-pytest:
+  - back
+  ui-ux:
+  - front
+  verification-loop:
+  - all

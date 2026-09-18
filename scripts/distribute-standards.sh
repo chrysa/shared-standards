@@ -208,6 +208,47 @@ deploy_dir() {
     done < <(find "$src" -type f -print0)
 }
 
+# Techno-aware skill deployment. Mirror only the skill subdirectories whose
+# profiles intersect the target repo's profiles (repos.yml), plus every skill
+# tagged `all`. A skill absent from skills-profiles.yml defaults to `all`
+# (fail-open: an unclassified skill still reaches every repo). The map file
+# itself is a top-level file, never a skill dir, so it never travels.
+deploy_skills() {
+    local src="$1" dest="$2" name="$3"
+    [[ -d "$src" ]] || { warn "source dir missing: $src · skip"; return 0; }
+    local included
+    included="$(python3 - "$STD_ROOT/repos.yml" "$src/skills-profiles.yml" "$src" "$name" <<'PY'
+import os, sys
+try:
+    import yaml
+except Exception:
+    # No pyyaml: fail open, deploy every skill dir (previous behaviour).
+    src = sys.argv[3]
+    for d in sorted(os.listdir(src)):
+        if os.path.isdir(os.path.join(src, d)):
+            print(d)
+    sys.exit(0)
+repos_yml, map_yml, src, name = sys.argv[1:5]
+rd = yaml.safe_load(open(repos_yml)) or {}
+repo_profiles = {p for p, rs in (rd.get('profiles') or {}).items() if name in (rs or [])}
+pm = {}
+if os.path.exists(map_yml):
+    pm = (yaml.safe_load(open(map_yml)) or {}).get('profiles', {}) or {}
+for d in sorted(os.listdir(src)):
+    if not os.path.isdir(os.path.join(src, d)):
+        continue
+    want = pm.get(d, ['all'])
+    if 'all' in want or (set(want) & repo_profiles):
+        print(d)
+PY
+)"
+    local sn
+    while IFS= read -r sn; do
+        [[ -n "$sn" ]] || continue
+        deploy_dir "$src/$sn" "$dest/$sn"
+    done <<< "$included"
+}
+
 # Remove the legacy vendored copy + old import block (migration from the old mechanism).
 purge_legacy() {
     local repo="$1" claude="$2"
@@ -317,8 +358,8 @@ main() {
         log "done (standards-only)"; return 0
     fi
 
-    # 3. Shared skills (managed copies).
-    deploy_dir "$SKILLS_SRC" "$repo/.claude/skills"
+    # 3. Shared skills (managed copies), scoped to the repo's profiles.
+    deploy_skills "$SKILLS_SRC" "$repo/.claude/skills" "${REPO_NAME:-$(basename "$repo")}"
 
     # 4. Shared agents + commands (managed copies).
     deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
