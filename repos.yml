@@ -137,6 +137,14 @@ repos:
   public: false
   runtime: container
   status: dev
+- name: dev-focus
+  public: false
+  runtime: container
+  status: dev
+- name: dev-kit
+  public: false
+  runtime: exempt:config
+  status: dev
 - name: dev-nexus
   public: false
   runtime: container
@@ -236,6 +244,10 @@ repos:
 - name: github-actions
   public: true
   runtime: exempt:config
+  status: dev
+- name: guardian-core
+  public: false
+  runtime: exempt:lib
   status: dev
 - name: guideline-checker
   public: true
