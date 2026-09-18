@@ -92,6 +92,7 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
       SKILL.md
     plan/
       SKILL.md
+    skills-profiles.yml
     spec/
       SKILL.md
     standards-authoring/
@@ -262,6 +263,7 @@ docs/
     D-0010-standards-id-taxonomy.md
     D-0011-spec-plan-enforcement-gate.md
     D-0012-repo-context-files.md
+    D-0013-techno-aware-skill-distribution.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md

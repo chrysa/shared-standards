@@ -21,6 +21,7 @@
 - `D-0010-standards-id-taxonomy.md` — D-0010 — Standards ID taxonomy: `STD-*` domains over `XX-nnn` rules (Accepted)
 - `D-0011-spec-plan-enforcement-gate.md` — D-0011 — Spec→Plan enforcement gate: opt-in, off by default (Accepted)
 - `D-0012-repo-context-files.md` — D-0012 — Standardised, auto-generated per-repo context files (Proposed)
+- `D-0013-techno-aware-skill-distribution.md` — D-0013: Scope the skill fan-out to each repo's profiles (Proposed)
 
 ## Notion links
 
