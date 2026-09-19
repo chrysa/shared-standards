@@ -264,6 +264,7 @@ docs/
     D-0011-spec-plan-enforcement-gate.md
     D-0012-repo-context-files.md
     D-0013-techno-aware-skill-distribution.md
+    D-0014-local-ai-orchestration-standard.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md
@@ -374,6 +375,7 @@ standards/
   STANDARDS.chrysa.md
   annexes/
     AGENTIC-CAPABILITIES.md
+    AI-ORCHESTRATION.md
     API-CONTRACTS.md
     ARCHITECTURE-DDD.md
     CI-CD.md
@@ -394,6 +396,7 @@ standards/
     README.md
     accessibility.md
     agents.md
+    ai-orchestration.md
     api.md
     architecture.md
     backend-python.md

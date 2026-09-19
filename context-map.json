@@ -9,7 +9,8 @@
     "D-0010-standards-id-taxonomy.md",
     "D-0011-spec-plan-enforcement-gate.md",
     "D-0012-repo-context-files.md",
-    "D-0013-techno-aware-skill-distribution.md"
+    "D-0013-techno-aware-skill-distribution.md",
+    "D-0014-local-ai-orchestration-standard.md"
   ],
   "contracts": [
     "standards"

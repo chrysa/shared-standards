@@ -22,6 +22,7 @@
 - `D-0011-spec-plan-enforcement-gate.md` — D-0011 — Spec→Plan enforcement gate: opt-in, off by default (Accepted)
 - `D-0012-repo-context-files.md` — D-0012 — Standardised, auto-generated per-repo context files (Proposed)
 - `D-0013-techno-aware-skill-distribution.md` — D-0013: Scope the skill fan-out to each repo's profiles (Proposed)
+- `D-0014-local-ai-orchestration-standard.md` — D-0014: Migrate the local-AI-orchestration doctrine into the canon (STD-AIORCH-001) (Accepted)
 
 ## Notion links
 
