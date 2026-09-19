@@ -1,6 +1,7 @@
 domains:
   accessibility: Accessibility
   agents: AI agents & features
+  ai-orchestration: Local AI orchestration & local-first
   api: APIs, contracts & real-time
   architecture: Architecture, decoupling & portability
   backend-python: Backend Python
@@ -46,6 +47,7 @@ rules:
   Dev stage must hot-reload: containers
   "Dockerfiles are multi-stage, with a `production` and a `dev` stage \u2014 mandatory": containers
   "Documentation and Notion are maintained in lockstep with the code \u2014 a change that leaves them stale is unfinished": docs
+  Every PR references a Shortcut story: scm
   "Every external server the service talks to is addressed through the environment \u2014 never hardcoded": architecture
   "Every form is a hostile input surface \u2014 validate on the server, always": security
   Every product that is operated ships a management backoffice: product
@@ -75,7 +77,6 @@ rules:
   Numbers are displayed with a space thousands separator: design
   Observability & production readiness follow the `STD-OPS-001` contract: observability
   One PR per issue: scm
-  Every PR references a Shortcut story: scm
   "Only a publicly useful port is published \u2014 everything else stays on the container network": containers
   "Per-person data implies a user account \u2014 no exceptions dressed up as simplicity": security
   Prefer a lookup table to a state machine: code-quality
@@ -100,6 +101,7 @@ rules:
   "URL-addressable frontend navigation \u2014 mandatory": frontend
   '`.dockerignore` mandatory & exhaustive': containers
 sections:
+  AI orchestration & local-first: ai-orchestration
   Compliance targets: governance
   Container-runtime policy: containers
   "Cross-cutting stack (settled ADRs \u2014 do not relitigate)": stack
