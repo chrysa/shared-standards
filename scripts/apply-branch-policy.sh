@@ -2,15 +2,18 @@
 # apply-branch-policy.sh · Bring a repo (or the fleet) onto the chrysa branch model.
 # Source: chrysa/shared-standards/scripts/apply-branch-policy.sh
 #
-# Standard (standards/STANDARDS.chrysa.md, "Branch model"):
+# Standard (standards/STANDARDS.chrysa.md, "Branch model"; ADR D-0015):
 #   `main` = production, protected (PR only, no force-push, no deletion).
-#   `develop` = default branch and integration target for every feature PR.
+#   `develop` = default branch and integration target for every feature PR,
+#     protected with the SAME gate as main (ADR D-0015 gated develop that was
+#     previously open to direct pushes).
 #   `main` is fed only by a PR from `develop` (or a `hotfix/`); production ships on release.
 #
 # Idempotent, three steps per repo:
 #   1. create `develop` from the current default branch when it is missing;
 #   2. set `develop` as the repository default branch;
-#   3. protect `main`: pull request required, force-push and deletion blocked.
+#   3. protect BOTH `main` and `develop`: pull request required, force-push and
+#      deletion blocked.
 #
 # `enforce_admins` stays FALSE on purpose (see setup-branch-protection.sh): a solo owner
 # cannot approve their own PR, and enforce_admins=true also disables `gh pr merge --admin`.
@@ -121,23 +124,34 @@ for repo in "${REPOS[@]}"; do
         fi
     fi
 
-    if ! $has_main; then
-        echo "   main · absent — nothing to protect"
-    elif $DRY_RUN; then
-        echo "   [dry-run] would protect main (PR required, no force-push, no deletion)"
-    else
-        prot_err="$(gh api "repos/$full/branches/main/protection" -X PUT \
+    # Both integration branches carry the same gate (ADR D-0015): main is the
+    # production line, develop the shared integration target. A PR is required on
+    # each, force-push and deletion are blocked; enforce_admins stays false so the
+    # solo owner can still admin-merge.
+    protect_targets=()
+    $has_main && protect_targets+=(main)
+    gh api "repos/$full/branches/develop" >/dev/null 2>&1 && protect_targets+=(develop)
+
+    if [ "${#protect_targets[@]}" -eq 0 ]; then
+        echo "   protect · no main/develop to protect"
+    fi
+    for br in "${protect_targets[@]}"; do
+        if $DRY_RUN; then
+            echo "   [dry-run] would protect $br (PR required, no force-push, no deletion)"
+            continue
+        fi
+        prot_err="$(gh api "repos/$full/branches/$br/protection" -X PUT \
                         --input - <<<"$PROTECTION_PAYLOAD" 2>&1 >/dev/null)"
         if [ -z "$prot_err" ]; then
-            echo "   main · protected (PR required · no force-push · no deletion)"
+            echo "   $br · protected (PR required · no force-push · no deletion)"
         elif grep -q 'Upgrade to GitHub Pro' <<<"$prot_err"; then
             # Branch protection on a PRIVATE repo needs a paid plan. Not a repo defect:
             # the owner either upgrades the plan or makes the repo public.
-            echo "   ⚠ main · protection unavailable (private repo on a free plan)"
+            echo "   ⚠ $br · protection unavailable (private repo on a free plan)"
         else
-            echo "   ❌ main · protection failed: ${prot_err%%$'\n'*}"; failed=$((failed + 1))
+            echo "   ❌ $br · protection failed: ${prot_err%%$'\n'*}"; failed=$((failed + 1))
         fi
-    fi
+    done
 done
 
 if [ "$failed" -gt 0 ]; then
