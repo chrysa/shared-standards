@@ -15,7 +15,7 @@
 
 | Layer            | Decision                                                        |
 |------------------|----------------------------------------------------------------|
-| Python           | 3.14 target (CI matrix 3.12 + 3.14)                            |
+| Python           | 3.14 runtime · ruff target py313 (ruff py314 bug) · CI 3.12+3.14 — ADR D-0015 |
 | FastAPI          | >= 0.115 + Pydantic v2                                          |
 | Frontend         | React 19 + TypeScript 7 + Vite 8                                |
 | UI               | shadcn/ui + Tailwind CSS                                        |

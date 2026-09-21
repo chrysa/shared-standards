@@ -38,7 +38,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "..."
 version = "..."
-requires-python = ">=3.14"        # minimum 3.12 for legacy packages
+requires-python = ">=3.14"        # 3.12 floor allowed only for legacy pkgs (ADR D-0015)
 dependencies = [...]
 
 [project.optional-dependencies]
@@ -50,7 +50,7 @@ addopts = "-v --tb=short --cov=src --cov-report=xml --cov-report=term-missing"
 
 [tool.ruff]
 line-length = 120
-target-version = "py314"          # match requires-python
+target-version = "py313"          # NOT py314: ruff py314 is broken fleet-wide (ADR D-0015); runtime stays 3.14
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "S", "RUF"]
