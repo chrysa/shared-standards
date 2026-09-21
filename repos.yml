@@ -9,6 +9,8 @@ profiles:
   - coach
   - daedalus-document-factory
   - dev-nexus
+  - noesis
+  - content-extractor
   back:
   - ai-aggregator
   - audit-platform
@@ -23,6 +25,8 @@ profiles:
   - content-organizer
   - wsmqtt-monitor
   - daedalus-document-factory
+  - noesis
+  - content-extractor
   config:
   - agent-config
   - catalog
@@ -82,6 +86,14 @@ profiles:
   - pre-commit-tools
   - project-init
 repos:
+- name: noesis
+  public: false
+  runtime: container
+  status: dev
+- name: content-extractor
+  public: false
+  runtime: container
+  status: dev
 - name: agent-config
   public: false
   runtime: exempt:config
