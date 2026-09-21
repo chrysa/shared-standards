@@ -13,7 +13,9 @@
 #   1. create `develop` from the current default branch when it is missing;
 #   2. set `develop` as the repository default branch;
 #   3. protect BOTH `main` and `develop`: pull request required, force-push and
-#      deletion blocked.
+#      deletion blocked, and — on repos that expose them — the canonical status checks
+#      `Docker tests` + `SonarCloud` required (ADR D-0016; detected per repo, so a repo
+#      without that CI is never gated on a context that cannot report).
 #
 # `enforce_admins` stays FALSE on purpose (see setup-branch-protection.sh): a solo owner
 # cannot approve their own PR, and enforce_admins=true also disables `gh pr merge --admin`.
@@ -135,13 +137,35 @@ for repo in "${REPOS[@]}"; do
     if [ "${#protect_targets[@]}" -eq 0 ]; then
         echo "   protect · no main/develop to protect"
     fi
+
+    # Required status checks (ADR D-0015 / ADR-0001): the canonical CI exposes the jobs
+    # `Docker tests` (name of the `test` job) and `SonarCloud`. They become required
+    # contexts ONLY on repos that actually run both — a repo with a different CI shape
+    # (Unity, guardian shell, no CI) would otherwise be gated on a check that never
+    # reports, blocking every non-admin merge forever. Detected from the default
+    # branch's recent check-runs; absent → the PR gate stands alone (checks null).
+    checks_json='null'
+    if [ "${#protect_targets[@]}" -gt 0 ]; then
+        default_sha="$(gh api "repos/$full/commits/$default" -q .sha 2>/dev/null)"
+        if [ -n "$default_sha" ]; then
+            runs="$(gh api "repos/$full/commits/$default_sha/check-runs" \
+                        -q '.check_runs[].name' 2>/dev/null)"
+            if grep -qx 'Docker tests' <<<"$runs" && grep -qx 'SonarCloud' <<<"$runs"; then
+                checks_json='{"strict":false,"contexts":["Docker tests","SonarCloud"]}'
+                echo "   checks · required: Docker tests + SonarCloud"
+            fi
+        fi
+    fi
+    repo_payload="$(jq -c --argjson c "$checks_json" \
+        '.required_status_checks = $c' <<<"$PROTECTION_PAYLOAD")"
+
     for br in "${protect_targets[@]}"; do
         if $DRY_RUN; then
             echo "   [dry-run] would protect $br (PR required, no force-push, no deletion)"
             continue
         fi
         prot_err="$(gh api "repos/$full/branches/$br/protection" -X PUT \
-                        --input - <<<"$PROTECTION_PAYLOAD" 2>&1 >/dev/null)"
+                        --input - <<<"$repo_payload" 2>&1 >/dev/null)"
         if [ -z "$prot_err" ]; then
             echo "   $br · protected (PR required · no force-push · no deletion)"
         elif grep -q 'Upgrade to GitHub Pro' <<<"$prot_err"; then
