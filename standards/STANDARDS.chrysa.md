@@ -83,7 +83,11 @@ That record deliberately names products; where it and this canon disagree, **thi
   block force-push and deletion (ADR D-0015), applied by `scripts/apply-branch-policy.sh`
   and machine-checked across the fleet by `scripts/audit-branch-policy.sh`. The gate is
   "a PR exists" (0 required approvals) with `enforce_admins=false`, so the solo owner can
-  still admin-merge.
+  still admin-merge. On repos that run the canonical CI, the status checks **`Docker
+  tests`** and **`SonarCloud`** are additionally required (ADR D-0016) — required only
+  where those contexts actually report, so a repo with a different CI shape is never
+  gated on a check that cannot run; `enforce_admins=false` keeps admin-merge as the
+  escape hatch when CI is red for infra reasons (Actions billing, SonarCloud LOC cap).
 - **Merge**: squash merge only (exception: the `develop` → `main` release promotion, merged
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
