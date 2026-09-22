@@ -1,3 +1,7 @@
+---
+paths: "**/*.{yaml,yml}"
+---
+
 # Strategic Pillars — chrysa non-negotiables
 
 ______________________________________________________________________

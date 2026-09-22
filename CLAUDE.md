@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # shared-standards
 
 <!-- @[claude-sonnet-4-6] -->
@@ -104,6 +106,23 @@ When compacting, always preserve:
 3. Any uncommitted / unpushed changes
 4. Open blockers and errors not yet resolved
 
+## Documentation map
+
+Where to look first (all paths from repo root):
+
+| Need | Read |
+|------|------|
+| How the repo works as a project (canon→views→distribution pipeline, testing, enforcement) | `ARCHITECTURE.md` |
+| The standards canon (source of truth — owner-only) | `standards/STANDARDS.chrysa.md`, `standards/README.md` |
+| Generated agent views (never hand-edit) | `standards/CORE.chrysa.md`, `standards/rules/`, `AGENTS.md`, `.github/copilot-instructions.md` |
+| Repo-local decisions / deviations | `DECISIONS.md` (`D-XXXX`) · standards & tooling ADRs → `docs/adr/` |
+| ADR format · strategic pillars · per-folder README rule | `.claude/rules/adr.md`, `pillars.md`, `folder-readme.md` |
+| Contributing (branch/commit/verify workflow) | `CONTRIBUTING.md` |
+| Assets to copy into consumer repos | `workflows/`, `templates/`, `copilot-instructions/` |
+| Fleet apply/audit/distribution automation | `scripts/` (`apply-*`, `audit-*`, `check-*`, `distribute-standards.sh`) |
+| Topic deep-dives (design system, makefile, quality gates, packaging, testing workflow) | `docs/` |
+| Generated per-repo context (do not edit) | `handover.md`, `ai-instructions.md`, `context-map.json`, `llms-full.txt` |
+
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
@@ -137,17 +156,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 
 ## CLI
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->
-
+Follow the /cli skill.
 
 <!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->
 # chrysa — Transverse Standards (core)
