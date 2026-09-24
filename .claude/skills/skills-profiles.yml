@@ -30,6 +30,8 @@ profiles:
   - all
   plan:
   - all
+  rollout-status:
+  - all
   spec:
   - all
   standards-authoring:
