@@ -117,25 +117,3 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   retry, and cancel it from the backoffice (*every product ships a management backoffice*). Jobs are
   deferred *work*; a real-time *stream* is `EVENTING.md` — related, not the same. The queue/broker
   is reached through an adapter (pillar 5), its endpoint from the environment.
-
-- **Every component owns an explicit, governed lifecycle — nothing is born, changed, or removed by
-  accident.** A *component* is any independently reasoned-about unit: a repo, a deployable service,
-  a library, a bounded context/module, a public contract or API version, a background job or
-  scheduler, a data store or migration, a UI component, an AI agent/skill, a feature flag. Each one
-  has a **declared lifecycle** — the states it can be in and the governed transitions between them —
-  covering, at minimum: **creation/init** (a component is *created by* the sanctioned mechanism, not
-  improvised — a repo by `project-init`, a schema by a migration, a version by the contract process),
-  **active/maintained** (a named **owner**, so no component is orphaned), **deprecated** (a
-  superseded component is marked deprecated with a replacement and a removal horizon, never left to
-  rot in place), and **retirement** (removal is a deliberate, reversible step with the references
-  repointed in the same change — *every tracked file must earn its place*). The transitions are
-  **governed and traced**: a state change that matters is an ADR / `DECISIONS.md` entry, and the
-  approval-then-execution rule (`GV-*`) applies — declaring a retirement is not performing it. This
-  is the umbrella the other lifecycles instantiate: a **repo's** provenance (*created by and kept in
-  sync with `project-init`*), a **contract's** versioned deprecation (`API-CONTRACTS.md`), a
-  **schema's** migration path (`DATA-MIGRATIONS.md`), a **job's** governed run (*deferred work is a
-  governed job*), a **session's** continuity (*Session lifecycle*), an **agent action's** budget and
-  STOP. The test is mechanical: for any component, an agent must be able to answer *who owns it, what
-  state it is in, how it got here, and how it is retired* from committed files alone (its README,
-  ADRs, `repos.yml`/manifest, migration history) — a component whose lifecycle is implicit, ownerless,
-  or undeclared is a defect, not a simplification.
