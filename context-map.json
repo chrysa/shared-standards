@@ -11,7 +11,9 @@
     "D-0012-repo-context-files.md",
     "D-0013-techno-aware-skill-distribution.md",
     "D-0014-local-ai-orchestration-standard.md",
-    "D-0015-python-version-freeze.md"
+    "D-0015-gate-develop-branch.md",
+    "D-0015-python-version-freeze.md",
+    "D-0016-required-status-checks.md"
   ],
   "contracts": [
     "standards"

@@ -26,6 +26,7 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     general-solution-architect.md
     general-technical-project-lead.md
     general-technical-writer.md
+    standards-drift-auditor.md
   commands/
     adr-new.md
     commit.md
@@ -42,9 +43,11 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
   hooks/
     check-no-env-files.cjs
     circuit-breaker.cjs
+    claude-config-drift.cjs
     enforce-spec-plan.cjs
     frustration-detection.cjs
     git-safety-guard.cjs
+    graphify-auto-update.cjs
     memory-consolidation.cjs
     model-debt-inventory.cjs
     secret-scanner.cjs
@@ -91,6 +94,8 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     implement/
       SKILL.md
     plan/
+      SKILL.md
+    rollout-status/
       SKILL.md
     skills-profiles.yml
     spec/
@@ -155,6 +160,7 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
 .vscode/
   extensions.json
 AGENTS.md
+ARCHITECTURE.md
 CHANGELOG.md
 CLAUDE.md
 CODEOWNERS
@@ -265,7 +271,9 @@ docs/
     D-0012-repo-context-files.md
     D-0013-techno-aware-skill-distribution.md
     D-0014-local-ai-orchestration-standard.md
+    D-0015-gate-develop-branch.md
     D-0015-python-version-freeze.md
+    D-0016-required-status-checks.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md
@@ -282,6 +290,9 @@ docs/
     sonar-coverage-config.md
     spec-v1.md
     standards-mcp.md
+  superpowers/
+    specs/
+      2026-09-25-opencode-multiprovider-fleet-design.md
   ui-ux.SKILL.md
   wire-ui-ux-skill.sh
 legal/
