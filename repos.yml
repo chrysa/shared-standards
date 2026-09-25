@@ -29,7 +29,6 @@ profiles:
   - content-extractor
   config:
   - agent-config
-  - catalog
   - chrysa-skills
   - claude-config
   - chrysa-claude-template
@@ -57,8 +56,6 @@ profiles:
   - wsmqtt-monitor
   - guideline-checker
   infra:
-  - catalog
-  - server
   - github-actions
   - shared-standards
   - dotfiles
@@ -113,7 +110,7 @@ repos:
 - name: catalog
   public: false
   runtime: exempt:config
-  status: dev
+  status: migrated  # moved to Forge-Stack-Workshop/plateform_service_catalog
 - name: cdn-explorer
   public: true
   runtime: container
@@ -342,7 +339,7 @@ repos:
 - name: server
   public: false
   runtime: exempt:native
-  status: dev
+  status: migrated  # moved to Forge-Stack-Workshop/plateform_socle
 - name: skunk-simulator
   public: false
   runtime: exempt:native
