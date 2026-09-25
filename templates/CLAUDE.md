@@ -32,10 +32,10 @@
 
 | Step | Command | When |
 |------|---------|------|
-| Start session | `make prepare` or `/prepare` | Always — loads primer + git context |
-| End session | `make hindsight` or `/hindsight` | Always — updates primer + memory |
-| Init memory | `make memory-init` | Once per repo |
-| Export to Obsidian | `make hindsight OBSIDIAN=<path>` | Optional |
+| Start session | `/prepare` | Always — loads primer + git context |
+| End session | `/hindsight` | Always — updates primer + memory |
+| Init memory | `/chrysa-init` (scaffolds `primer.md` + `.claude/memory/`) | Once per repo |
+| Export to Obsidian | `/hindsight <vault-path>` | Optional |
 
 **Files:**
 - `primer.md` — current state, next actions, blockers (read before CLAUDE.md)
@@ -45,7 +45,7 @@
 
 ```bash
 make install             # Install dependencies
-make memory-init         # Initialize primer.md + .claude/memory/
+/chrysa-init             # Scaffold primer.md + .claude/memory/ (once per repo)
 make lint                # Run linter
 make test                # Run tests
 make build               # Build (if applicable)
