@@ -278,6 +278,7 @@ purge_legacy() {
 
 # Upsert the opencode provider env vars into <repo>/.env.example (managed block).
 # Only documents variable NAMES + safe defaults — never secret values.
+# @tag @[claude-opus-4-8]  opencode multi-provider fleet block (PR #570)
 sync_env_example() {
     local repo="$1"
     local target="$repo/.env.example"
