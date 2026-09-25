@@ -2,6 +2,8 @@
   "_comment": "sha256 content-only fingerprints (entity + file + matched text, line-independent) of reviewed false positives (synthetic fixtures, loopback addresses, dev-only origins, doc examples, the owner's own contact email). Line-independent so an unrelated edit that shifts a match up or down the file keeps it allowlisted. Add with: pii_scan.py --print-fingerprint <file>",
   "allow": [
     "0071464ea609d1228d6a4fbd9cb8f7d4ceed0decedd9f2e62b04b692a0cd489a",
+    "a17e1e0ca26dfb220d90702f873a6546aff0de99232b4f6fc61b35a762847128",
+    "60ff98cef8907a52b9c004fa614c507b182d1d601e9bad5875d32a7e27a437f3",
     "01298bcd9ea310894abcff5612a5319bae87022453d8e9bdd4deca71dcb8d12e",
     "0cdd5daeb6c8b2adf312e8d67dbc919e0e50c58ac86d2a6eb0a9e9bec929efd7",
     "1425a2340a95407aa1355dde740bb8da21d5c1d91b59dbd8d3380c13211e3e42",
