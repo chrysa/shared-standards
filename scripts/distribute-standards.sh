@@ -59,6 +59,9 @@ SKILLS_SRC="$STD_ROOT/.claude/skills"
 AGENTS_SRC="$STD_ROOT/templates/claude/agents"
 COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
 CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
+# opencode agent config (multi-provider: ollama default, claude/chatgpt opt-in).
+# Managed copy — overwritten on every run to keep the fleet aligned.
+OPENCODE_TPL="$STD_ROOT/templates/opencode.json"
 
 MARK_START='<!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->'
 MARK_END='<!-- chrysa:standards:end -->'
@@ -69,6 +72,10 @@ AGENTS_MARK_START='<!-- chrysa:standards-agents:start · generated · DO NOT EDI
 AGENTS_MARK_END='<!-- chrysa:standards-agents:end -->'
 COPILOT_MARK_START='<!-- chrysa:standards-copilot:start · generated · DO NOT EDIT -->'
 COPILOT_MARK_END='<!-- chrysa:standards-copilot:end -->'
+# opencode provider env vars — managed block inside each repo's .env.example.
+# Repo-specific vars outside the block are preserved.
+OPENCODE_ENV_MARK_START='# chrysa:opencode-env:start · managed by distribute-standards.sh · DO NOT EDIT'
+OPENCODE_ENV_MARK_END='# chrysa:opencode-env:end'
 
 # Legacy artefacts from the vendored-copy mechanism (removed on migration).
 OLD_MARK_START='<!-- chrysa:standards-import:start -->'
@@ -269,6 +276,22 @@ purge_legacy() {
     ok "stripped legacy import block in $claude"
 }
 
+# Upsert the opencode provider env vars into <repo>/.env.example (managed block).
+# Only documents variable NAMES + safe defaults — never secret values.
+sync_env_example() {
+    local repo="$1"
+    local target="$repo/.env.example"
+    local body; body="$(mktemp)"
+    cat > "$body" <<'ENVBODY'
+# --- opencode LLM providers ---
+OLLAMA_URL=http://127.0.0.1:11434   # local default, offline-first (opencode default model)
+ANTHROPIC_API_KEY=                  # opt-in: Claude (cloud)
+OPENAI_API_KEY=                     # opt-in: ChatGPT (cloud)
+ENVBODY
+    upsert_block "$target" "$OPENCODE_ENV_MARK_START" "$OPENCODE_ENV_MARK_END" "$body" "opencode-env"
+    rm -f "$body"
+}
+
 # Ensure the managed inline standards block exists + is current in <repo>/CLAUDE.md.
 inject_standards() {
     local repo="$1"
@@ -364,6 +387,11 @@ main() {
     # 4. Shared agents + commands (managed copies).
     deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
     deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
+
+    # 4b. opencode agent config (managed copy — ollama default, claude/chatgpt opt-in).
+    deploy_file "$OPENCODE_TPL" "$repo/opencode.json"
+    # 4c. opencode provider env vars (managed block, preserves repo-specific vars).
+    sync_env_example "$repo"
 
     # 5. Workflows + lint/quality + pre-commit — reuse the existing apply layer.
     if $NO_APPLY; then

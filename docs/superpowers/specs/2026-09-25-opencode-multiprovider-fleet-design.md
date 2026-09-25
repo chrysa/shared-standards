@@ -161,8 +161,18 @@ fichier).
 - `opencode --version` (1.18.32 ✓).
 - Spike syntaxe env `{env:VAR}` ✓ (confirmé docs opencode).
 - `jq .` valide sur template + repos touchés.
-- Pilote noesis : lancement réel opencode, 3 providers listés.
+- Pilote noesis : lancement réel opencode, 4 providers listés.
 - Scan secrets (règle CLAUDE.md) sur diff avant merge.
+
+## Gotchas (constatés au pilote)
+
+- **`instructions` doit être un array** en opencode 1.18 (l'ancien template string
+  était rejeté `Configuration is invalid`). Corrigé.
+- **Ollama models à pull** : `opencode models` liste `ollama/qwen2.5-coder` mais le
+  serveur local peut n'avoir aucun modèle (`{"models":[]}`). Prérequis run :
+  `ollama pull qwen2.5-coder`. À documenter dans README/onboarding.
+- Pilote validé hors-repo (répertoire scratchpad jetable) car noesis working tree
+  sale — pas de pollution du vrai repo.
 
 ## Hors scope
 
