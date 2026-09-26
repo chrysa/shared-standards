@@ -110,6 +110,7 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
       SKILL.md
   thresholds.json
 .editorconfig
+.env.example
 .gitattributes
 .github/
   CODEOWNERS
