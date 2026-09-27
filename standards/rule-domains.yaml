@@ -26,8 +26,10 @@ rules:
   "A compose file is minimal \u2014 declare only what the stack needs, default the rest": containers
   "A floating assistant where it earns its place \u2014 never as decoration": product
   A game is DRM-free and fully playable solo offline: product
-  "A public web surface is legally compliant, consent-respecting, and operable — before it ships": product
+  A mass-mutation batch returns the explicit list of what it changed: agents
+  "A public web surface is legally compliant, consent-respecting, and operable \u2014 before it ships": product
   A real-time backend has channel contracts and never blocks: api
+  A retryable operation proves the retry has no external effects: agents
   A session is secured and it expires: security
   APIs, SDKs & public contracts follow the `STD-API-001` contract: api
   Agent actions are governed: agents
