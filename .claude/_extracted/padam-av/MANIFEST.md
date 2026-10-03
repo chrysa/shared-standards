@@ -1,6 +1,6 @@
 # Extracted from padam-av — staging area (INERT, not wired)
 
-**Status:** staged for triage. Nothing here is wired into `.claude/settings.json`,
+**Status:** staged for triage. Nothing here is wired into `.claude/settings.json <!-- ⚠️ file not found — verify reference -->`,
 the shared-skills list, or the distribution — copying these files changed **no**
 runtime behaviour. This is a holding pen; the decision of *what to promote into the
 canon / send to claude-graft* is made later, per artifact.
@@ -59,7 +59,7 @@ ______________________________________________________________________
 - **spec→plan→implement bundle** (ADR D-0011, Accepted):
   - `skills/{spec,plan,implement,verification-loop}/` → `.claude/skills/` (genericised: padam/Django/`padam_av/` wording stripped, container-first execution rule pointed at each repo's own `make` targets).
   - `commands/{plan-start,plan-validate,plan-execute}.md` → `.claude/commands/` (padam paths genericised).
-  - `hooks/enforce-spec-plan.cjs` → `.claude/hooks/` — **generalised**: gated roots + source exts read from `.claude/config/hooks-config.json`, runs only when `enforceSpecPlan.enabled === true` (default **false**). Wired into `settings.json` (Write|Edit|MultiEdit matcher). Kill-test tooling: `scripts/spec_plan_gate_report.py` + `make spec-plan-gate-report`.
+  - `hooks/enforce-spec-plan.cjs` → `.claude/hooks/` — **generalised**: gated roots + source exts read from `.claude/config/hooks-config.json <!-- ⚠️ file not found — verify reference -->`, runs only when `enforceSpecPlan.enabled === true` (default **false**). Wired into `settings.json` (Write|Edit|MultiEdit matcher). Kill-test tooling: `scripts/spec_plan_gate_report.py` + `make spec-plan-gate-report`.
 
 ## Remaining in the pen
 - `hooks/lib/circuit-breaker.cjs` — back-port candidate against the existing shared-standards `circuit-breaker.cjs`; reconcile by real diff, not promotion.

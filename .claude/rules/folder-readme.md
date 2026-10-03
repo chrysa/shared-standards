@@ -24,7 +24,7 @@ The README **must** answer, in this order:
    dependencies allowed/forbidden, ownership, test requirements).
 
 Keep it short and scannable. Link to the relevant rule files
-(`.claude/rules/thresholds.md`, `class-design.md`, …) instead of repeating them.
+(`.claude/rules/thresholds.md <!-- ⚠️ file not found — verify reference -->`, `class-design.md`, …) instead of repeating them.
 
 ______________________________________________________________________
 

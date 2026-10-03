@@ -48,7 +48,7 @@ echo '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' \
 
 **Disable for a line:** Add `# nosecret` or `// nosecret` on the line.
 
-**Allowlist file:** `.claude/secret-scanner-allowlist.json`
+**Allowlist file:** `.claude/secret-scanner-allowlist.json <!-- ⚠️ file not found — verify reference -->`
 ```json
 {
   "patterns": ["sk-test-placeholder"],
@@ -135,7 +135,7 @@ echo '{"prompt":"implement a function to sort a list"}' | node .claude/hooks/fru
 
 **Purpose:** Warn (not block) when written files exceed measurable quality thresholds.
 
-**Thresholds config:** `.claude/thresholds.json`
+**Thresholds config:** `.claude/thresholds.json <!-- ⚠️ file not found — verify reference -->`
 ```json
 {
   "max_function_lines": 50,
@@ -216,7 +216,7 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
 ## Installation in a repository
 
 1. Copy the hooks to `.claude/hooks/` in your target repository
-2. Merge with your existing `.claude/settings.json`:
+2. Merge with your existing `.claude/settings.json <!-- ⚠️ file not found — verify reference -->`:
 
 ```json
 {
@@ -249,8 +249,8 @@ node .claude/hooks/model-debt-inventory.cjs --dir /path/to/repo
 }
 ```
 
-3. Adjust `.claude/thresholds.json` for your project standards
-4. Add `.claude/secret-scanner-allowlist.json` if you have test fixtures with example tokens
+3. Adjust `.claude/thresholds.json <!-- ⚠️ file not found — verify reference -->` for your project standards
+4. Add `.claude/secret-scanner-allowlist.json <!-- ⚠️ file not found — verify reference -->` if you have test fixtures with example tokens
 
 > **Always use the guarded command form** shown above
 > (`sh -c 'f="$CLAUDE_PROJECT_DIR/.claude/hooks/<hook>.cjs"; [ ! -f "$f" ] || node "$f"'`),
@@ -277,7 +277,7 @@ node .claude/hooks/check-no-env-files.cjs --ci .
 ```
 
 **Allowed, never flagged:** `*.env.example`, `*.env.sample`, `*.env.template`, `*.env.dist`.
-**Allowlist file:** `.claude/no-env-allowlist.json` (JSON array of glob patterns).
+**Allowlist file:** `.claude/no-env-allowlist.json <!-- ⚠️ file not found — verify reference -->` (JSON array of glob patterns).
 
 ## Git Safety Guard
 
@@ -305,7 +305,7 @@ feature has both an approved spec and an approved plan**. It is **opt-in and off
 default**: with no config, or `enabled` absent/false, it exits 0 (no-op). Adopting it on
 a repo is a governed, piloted decision — see ADR D-0011.
 
-**Activation** — `.claude/config/hooks-config.json`:
+**Activation** — `.claude/config/hooks-config.json <!-- ⚠️ file not found — verify reference -->`:
 ```json
 { "enforceSpecPlan": { "enabled": true, "gatedRoots": ["api/"], "sourceExts": [".py"] } }
 ```

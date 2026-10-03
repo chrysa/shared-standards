@@ -54,7 +54,7 @@ metadata:
       only the standards block refreshes, no error. State the blast radius in the PR body.
 - [ ] Branch `feat/standards-<domain>`, Conventional Commit, one issue, `Closes #N`, base `develop`.
 - [ ] PII: the loopback doc example fingerprint shifts when line numbers move — allowlist the new
-      hash in `.pii-allowlist.json` if `pii-scan` fails.
+      hash in `.pii-allowlist.json <!-- ⚠️ file not found — verify reference -->` if `pii-scan` fails.
 
 ## Tooling
 - `python -m scripts.check_domains_drift` — GV-015 ↔ domains.yaml gate.

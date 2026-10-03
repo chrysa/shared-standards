@@ -27,12 +27,59 @@ workflows/              # Reusable GitHub Actions workflow templates
 ```bash
 make install  # Install pre-commit hooks
 make lint     # Run pre-commit on all files
+make gen-agent-views  # Regenerate CLAUDE.md + AGENTS.md + copilot-instructions
+make gen-context-files  # Regenerate handover.md + context-map.json + llms-full.txt
 ```
+
+## Skills (On-Demand Expertise)
+
+Invoke with `/skill-name` or auto-triggered by context:
+
+| Skill | When | Purpose |
+|-------|------|---------|
+| **adr-new** | `@mention ADR` | Scaffold falsifiable ADR (fatal hypothesis + kill-test + gate) |
+| **cli** | CLI work | Procedure: command-line app patterns |
+| **commit** | Before commit | Conventional Commit with atomic-commit analysis |
+| **custom-init** | New repo | Generate CLAUDE.md by analyzing project |
+| **help-commands** | `?` | Show all available skills + commands |
+| **implement** | After spec + plan | Implement feature end-to-end |
+| **issue** | GitHub issue | Resolve issue via GitHub Flow |
+| **plan** | After spec | Write step-by-step construction plan |
+| **plan-execute** | During build | Execute validated step from plan |
+| **plan-start** | New feature | Turn objective into PR-sized plan |
+| **plan-validate** | Before build | Adversarial review of plan |
+| **review-changes** | Before commit | Review uncommitted diff for bugs + security |
+| **reviewpr** | PR review | Thorough structured PR feedback |
+| **spec** | New feature | Write feature specification |
+| **standards-authoring** | New standard | Add/edit transverse standard domain |
+| **test** | Test suite | Run + improve tests (Docker / pre-commit) |
+| **verification-loop** | Complex task | Comprehensive verification system |
 
 ## Adding a new skill
 1. Create `.claude/skills/<name>/SKILL.md`
 2. Define: when to auto-invoke, concrete rules, code patterns, forbidden patterns
 3. Reference it from the project's CLAUDE.md under `## Skills`
+
+## Agents (Specialized Multi-Step Work)
+
+Delegate complex tasks to agents. Available types in `.claude/agents/`:
+
+| Agent | Purpose | Use when |
+|-------|---------|----------|
+| **code-reviewer** | Code quality + correctness | PR review, diff audit |
+| **security-auditor** | Security scanning + threat modeling | Pre-release security audit |
+| **test-runner** | Test suite execution | Running + diagnosing tests |
+| **general-backend-developer** | Backend API + database design | Building scalable backend |
+| **general-frontend-developer** | UI/UX + accessibility | Frontend implementation |
+| **general-fullstack-developer** | End-to-end feature across layers | Complete feature spanning DB→UI |
+| **general-devops** | Infrastructure + CI/CD + monitoring | Deployment + observability |
+| **general-qa** | Quality assurance + test planning | Test coverage + regression |
+| **general-solution-architect** | System design + technology choices | Architecture decisions |
+
+**Model tier assignment** (see `.claude/rules/pillars.md`):
+- **Sonnet** (default): Fast iteration, API design, review, testing, refactor
+- **Opus** (complex): Multi-agent orchestration, threat modeling, security audit
+- **Haiku** (simple): Typo fixes, renames, format cleanups
 
 ## Adding a new hook
 1. Create `hooks/<name>.cjs` in `.claude/hooks/`
@@ -74,6 +121,26 @@ make lint     # Run pre-commit on all files
 | `NOTION_PROJECT_BLOCK_ID` | repo | only for changelog sync | table row block UUID (same as `notion-roadmap-sync.yml`) |
 
 **Secrets required (org level):** `NOTION_TOKEN`, `GITHUB_TOKEN` (auto-provided by Actions)
+
+## Standards Governance
+
+**Five strategic pillars** (see `.claude/rules/pillars.md`):
+1. **LLM-provider independence** — ≥2 real implementations (Claude + local), no vendor lock-in
+2. **GAFAM independence** — exit path for every managed service (S3→MinIO, RDS→Postgres)
+3. **Portable personalisation** — user data exportable to open format (JSON/SQLite/CSV)
+4. **k8s config in-project** — manifests in `deploy/k8s/`, not in cluster
+5. **Adaptation layer** — every dependency behind a vendor-agnostic port
+
+**ADR format** (falsifiable decisions): [`adr.md`](.claude/rules/adr.md)
+- Fatal hypothesis (the one belief that breaks the decision if false)
+- Kill-test (observable signal proving hypothesis wrong, with threshold + cadence)
+- Validation gate (pre-agreed condition unlocking the next step)
+
+**Standards domains** (15 rule sets, one file each):
+- **Transverse**: governance, stack, SCM, architecture, testing, frontend, APIs, a11y, docs, agents, security, code-quality
+- **Domain-specific**: product, Python, data, observability, containers, design, dev-loop, CI/CD, AI-orchestration
+
+Read full standards in `standards/STANDARDS.chrysa.md` (canon) or per-domain in `standards/rules/*.md`.
 
 ## Code Standards
 - All YAML files sorted (via yaml-sorter) except `.github/` workflows

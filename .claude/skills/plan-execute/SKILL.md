@@ -21,7 +21,7 @@ ______________________________________________________________________
 4. Implement the task list. Respect project standards
    (function ≤ 40 lines, ≤ 5 args, complexity ≤ 10, file ≤ 300 lines; business
    logic in service classes, DB logic in managers/QuerySets; one class per file).
-   Consult `.claude/rules/*.md` before editing.
+   Consult `.claude/rules/*.md <!-- ⚠️ file not found — verify reference -->` before editing.
 5. Verify with Docker Makefile targets: `make format-code`, `make ruff-check`,
    `make mypy`, `make tests`. Fix all new violations (never `# noqa` / `# type: ignore`).
 6. Confirm the step's exit criteria are met.
