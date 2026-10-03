@@ -52,6 +52,51 @@ Named stages present · a distinct production target exists · non-root runtime 
 documented otherwise · no build/dev tooling in the final image · vulnerability, size, and
 content analysis · required targets built and tested before publish.
 
+### CT-004 — Healthchecks are native and language-agnostic
+
+A `HEALTHCHECK` / compose `healthcheck.test` never invokes the project's language runtime
+(`python`, `node`, `php`, `ruby`, `java`, a `manage.py` or `npm` script). Pick the first that
+applies:
+
+1. **Service's own probe** — `pg_isready`, `redis-cli ping`, `mysqladmin ping`,
+   `rabbitmq-diagnostics -q ping`.
+2. **Shell** — `bash` `/dev/tcp` (Debian/Ubuntu-slim: bash present, no `curl`/`wget`).
+3. **HTTP client already in the base image** — busybox `wget` (Alpine), `curl` when present.
+   Installing `curl` solely for the probe is forbidden when step 2 works.
+4. **No shell** (distroless, `scratch`) — static probe binary `COPY --from` a build stage, or
+   the compiled binary's own `healthcheck` subcommand. Never an interpreter.
+
+Target `127.0.0.1`, not `localhost` (resolves to `::1` first on many images).
+
+```dockerfile
+# HTTP — bash only (python:*-slim, node:*-slim, debian:*-slim)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000 && printf 'GET /health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"]
+
+# TCP only — bash
+HEALTHCHECK CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/5432"]
+
+# Alpine — busybox wget, no bash needed
+HEALTHCHECK CMD ["wget", "-q", "--spider", "http://127.0.0.1:8000/health"]
+```
+
+```yaml
+services:
+    database:
+        image: postgres:16
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\""]
+    cache:
+        image: redis:7
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+```
+
+**Forbidden:** `CMD python -c "import urllib.request; urllib.request.urlopen(…)"`,
+`CMD node -e "fetch(…)"`, `CMD ["npm", "run", "health"]`, `CMD php artisan …` — they tie the
+probe to the stack, start an interpreter every interval, and fail on import errors unrelated to
+the service's health. `audit-docker-compliance.sh` flags them (`HEALTHCHECK-runtime`).
+
 ______________________________________________________________________
 
 ## 2. Container responsibility
@@ -216,7 +261,7 @@ services:
         env_file: .env
         depends_on: [database]
         healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+            test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000"]   # native (CT-004)
         restart: unless-stopped
         ports:
             - "8000:8000"      # the one public surface (CT-015)
