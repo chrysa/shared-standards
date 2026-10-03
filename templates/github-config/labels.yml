@@ -81,6 +81,9 @@
 - name: 'hotfix'
   color: 'E11D21'
   description: 'Urgent production fix'
+- name: 'no-story'
+  color: 'BFD4F2'
+  description: 'Waives the Shortcut story link (enforce-shortcut-link)'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # LANGUAGE — Blue variants
