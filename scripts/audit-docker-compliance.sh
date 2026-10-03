@@ -68,7 +68,8 @@ has_runtime_healthcheck() {
         | sed -e ':a' -e '/\\$/N; s/\\\n//; ta' \
         | grep -iE '^[[:space:]]*HEALTHCHECK' | grep -qE "$re" && return 0
     find "$1" "${PRUNE[@]}" -type f \( -iname 'docker-compose*.y*ml' -o -iname 'compose*.y*ml' \) \
-        -exec grep -hiE '^[[:space:]]*test:' {} + 2>/dev/null | grep -qE "$re"
+        -exec awk '/^[[:space:]]*test:/ { t = 1; print; next } t && /^[[:space:]]*- / { print; next } { t = 0 }' {} + \
+        2>/dev/null | grep -qE "$re"
 }
 
 # ── audit a single repo ──────────────────────────────────────────────────────────

@@ -890,20 +890,11 @@ That record deliberately names products; where it and this canon disagree, **thi
   `.env*`, `*.log`. Base images pin an explicit version or digest (never a bare `FROM …:latest`);
   no secret in build args or image layers (BuildKit secrets or runtime env only). Every application
   Dockerfile declares a `HEALTHCHECK`, and compose services set `restart: unless-stopped`.
-- **Healthchecks are language-agnostic and native.** A Dockerfile `HEALTHCHECK` or a compose
-  `healthcheck.test` **never calls the project's language runtime**: no `python -c "import
-  urllib…"`, `node -e "fetch(…)"`, `php -r`, `ruby -e`, `manage.py`/`npm run` script. It uses
-  what the image already provides, in this order: (1) the service's own probe tool when it ships
-  one (`pg_isready`, `redis-cli ping`, `mysqladmin ping`); (2) the shell — `bash` `/dev/tcp`
-  (TCP open, or a raw `GET /health` checked for ` 200 `), which works on Debian-slim images that
-  carry no `curl`/`wget`; (3) an HTTP client already in the base image (`wget -q --spider` from
-  busybox on Alpine, `curl -fsS`). Never install `curl` only to probe when the shell can do it.
-  Probe `127.0.0.1`, not `localhost` (IPv6 resolution trap). A shell-less image (distroless,
-  `scratch`) probes with a static binary copied from a build stage or the compiled app's own
-  `healthcheck` subcommand — never an interpreter. Why: the probe stays identical across stacks,
-  survives a language/framework change, doesn't boot an interpreter every interval, and doesn't
-  report "unhealthy" because of an import error rather than the service. Detail and snippets:
-  CT-004 in `annexes/CONTAINERS-K3S.md`.
+- **Healthchecks are language-agnostic and native.** A Dockerfile `HEALTHCHECK` or compose
+  `healthcheck.test` never calls the project's language runtime (`python -c`, `node -e`, `npm run`,
+  `manage.py`): use the service's own probe (`pg_isready`, `redis-cli ping`), else `bash`
+  `/dev/tcp`, else an HTTP client already in the base image — never install `curl` just to probe.
+  Probe order, snippets and the shell-less case: annexe `CONTAINERS-K3S.md` CT-004.
 - **Setup wizard & config panel** (deployable web apps/services — not libs, CLIs, utilities). A
   first-run **setup wizard** (CLI or web) covers DB, admin user, integrations, secrets and locale;
   it is **idempotent**, detects missing prerequisites with explicit fixes, and offers a CI skip
