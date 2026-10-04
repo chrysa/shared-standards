@@ -53,10 +53,9 @@ has_compose() {
 has_make_target() {  # has_make_target <repo> <target>
     [[ -f "$1/Makefile" ]] && grep -qE "^$2:" "$1/Makefile" 2>/dev/null
 }
+# CT-004: the healthcheck lives in the Dockerfile; a compose healthcheck: alone does not count.
 has_healthcheck() {
-    find "$1" "${PRUNE[@]}" -type f -iname 'Dockerfile*' -exec grep -qiE 'HEALTHCHECK' {} + 2>/dev/null && return 0
-    find "$1" "${PRUNE[@]}" -type f \( -iname 'docker-compose*.y*ml' -o -iname 'compose*.y*ml' \) \
-        -exec grep -qiE '^[[:space:]]*healthcheck:' {} + 2>/dev/null
+    find "$1" "${PRUNE[@]}" -type f -iname 'Dockerfile*' -exec grep -qiE '^[[:space:]]*HEALTHCHECK' {} + 2>/dev/null
 }
 
 # CT-004: a healthcheck must not boot the project's language runtime (python/node/php/ruby/java,

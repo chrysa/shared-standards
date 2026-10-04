@@ -836,8 +836,8 @@ That record deliberately names products; where it and this canon disagree, **thi
   Detail: annexe `CONTAINERS-K3S.md` CT-015.
 - **A compose file is minimal — declare only what the stack needs, default the rest.** A
   `docker-compose*.yml` is a description of *this* stack, not a copy of Compose's defaults. It
-  declares the services, their `build.target`/`image`, `depends_on`, `environment`, volumes,
-  `healthcheck` and `restart` — and **nothing Compose already does for you**. Forbidden as
+  declares the services, their `build.target`/`image`, `depends_on`, `environment`, volumes
+  and `restart` — and **nothing Compose already does for you**. Forbidden as
   noise: an explicit `networks:` block re-declaring the default bridge and wiring every service
   to it (Compose already puts all services on a shared default network with service-name DNS —
   see the ports rule), a redundant `container_name`, a `version:` top-level key (obsolete in
@@ -890,11 +890,12 @@ That record deliberately names products; where it and this canon disagree, **thi
   `.env*`, `*.log`. Base images pin an explicit version or digest (never a bare `FROM …:latest`);
   no secret in build args or image layers (BuildKit secrets or runtime env only). Every application
   Dockerfile declares a `HEALTHCHECK`, and compose services set `restart: unless-stopped`.
-- **Healthchecks are language-agnostic and native.** A Dockerfile `HEALTHCHECK` or compose
-  `healthcheck.test` never calls the project's language runtime (`python -c`, `node -e`, `npm run`,
-  `manage.py`): use the service's own probe (`pg_isready`, `redis-cli ping`), else `bash`
-  `/dev/tcp`, else an HTTP client already in the base image — never install `curl` just to probe.
-  Probe order, snippets and the shell-less case: annexe `CONTAINERS-K3S.md` CT-004.
+- **Healthchecks live in the Dockerfile, and are language-agnostic and native.** The probe is
+  the image's `HEALTHCHECK`; a compose `healthcheck:` exists only to override it locally (dev
+  port, interval) or for a third-party image that ships none. It never calls the project's
+  language runtime (`python -c`, `node -e`, `npm run`, `manage.py`): use the service's own probe
+  (`pg_isready`, `redis-cli ping`), else `bash` `/dev/tcp`, else an HTTP client already in the
+  base image — never install `curl` just to probe. Detail: annexe `CONTAINERS-K3S.md` CT-004.
 - **Setup wizard & config panel** (deployable web apps/services — not libs, CLIs, utilities). A
   first-run **setup wizard** (CLI or web) covers DB, admin user, integrations, secrets and locale;
   it is **idempotent**, detects missing prerequisites with explicit fixes, and offers a CI skip

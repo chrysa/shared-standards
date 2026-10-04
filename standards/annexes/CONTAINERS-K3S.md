@@ -52,9 +52,21 @@ Named stages present · a distinct production target exists · non-root runtime 
 documented otherwise · no build/dev tooling in the final image · vulnerability, size, and
 content analysis · required targets built and tested before publish.
 
-### CT-004 — Healthchecks are native and language-agnostic
+### CT-004 — Healthchecks live in the Dockerfile, native and language-agnostic
 
-A `HEALTHCHECK` / compose `healthcheck.test` never invokes the project's language runtime
+**Placement.** The healthcheck belongs to the image: every service image built from the repo
+declares a `HEALTHCHECK` in its Dockerfile, so it travels with the image (compose, k8s probes
+derived from it, `docker run`). A compose `healthcheck:` is allowed **only** to:
+
+- **override locally** what the image declares (a dev-only port, a shorter interval, a longer
+  `start_period` for a hot-reloading dev server) — in `docker-compose.override.yml` / `*.dev.yml`;
+- **supply a probe for a third-party image that ships none** (`postgres`, `redis`, …), when a
+  `depends_on: condition: service_healthy` needs it.
+
+A compose `healthcheck:` that repeats the Dockerfile's probe for a built service is duplication
+— delete it. `depends_on: condition: service_healthy` works on the image's `HEALTHCHECK` as is.
+
+**Probe.** A `HEALTHCHECK` (or an allowed compose override) never invokes the project's language runtime
 (`python`, `node`, `php`, `ruby`, `java`, a `manage.py` or `npm` script). Pick the first that
 applies:
 
@@ -81,6 +93,7 @@ HEALTHCHECK CMD ["wget", "-q", "--spider", "http://127.0.0.1:8000/health"]
 ```
 
 ```yaml
+# compose: only third-party images without a HEALTHCHECK get one here
 services:
     database:
         image: postgres:16
@@ -229,13 +242,15 @@ obscure ways.
 ### CT-019 — The compose file is minimal — it declares intent, not defaults
 
 A `docker-compose*.yml` describes **this** stack: its services, their build target or image,
-`depends_on`, `environment`/`env_file`, volumes, `healthcheck`, and `restart`. It declares
+`depends_on`, `environment`/`env_file`, volumes, and `restart`. It declares
 nothing Compose already provides. A line that only restates a Compose default is noise, and
 noise hides the one line that matters.
 
 **Removed as noise:**
 
 - **`version:`** — obsolete under Compose v2; its presence only emits a warning.
+- **A `healthcheck:` on a service built from the repo** — the probe is the Dockerfile's
+  `HEALTHCHECK` (CT-004); compose only overrides it locally or covers a third-party image.
 - **An explicit default network.** Compose puts every service on a shared default network
   with service-name DNS. A `networks:` block that re-declares that bridge and attaches each
   service to it re-states a default (and misleads about CT-015). Declare a network **only**
@@ -260,9 +275,7 @@ services:
             target: production
         env_file: .env
         depends_on: [database]
-        healthcheck:
-            test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000"]   # native (CT-004)
-        restart: unless-stopped
+        restart: unless-stopped   # healthcheck: the image's HEALTHCHECK (CT-004)
         ports:
             - "8000:8000"      # the one public surface (CT-015)
     database:

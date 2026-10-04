@@ -128,7 +128,7 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 - Local dev runs the code in-container, live, in debug mode — never the production server
 - Default to dev mode when starting an app locally — any other mode only when explicitly asked
 - `.dockerignore` mandatory & exhaustive
-- Healthchecks are language-agnostic and native
+- Healthchecks live in the Dockerfile, and are language-agnostic and native
 - Container-runtime policy
 
 ### Design system · `standards/rules/design.md`
