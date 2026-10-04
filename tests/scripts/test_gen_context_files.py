@@ -149,6 +149,10 @@ class TestFileBuilders:
         assert "1.2.0" in text
         assert "An older entry" not in text  # only the latest changelog section
         assert "https://www.notion.so/sample-page-abc123" in text
+        # markdownlint-clean output: autolinked URL (MD034), banner is a comment
+        # rather than a "#" heading ending in a period (MD026).
+        assert "<https://www.notion.so/sample-page-abc123>" in text
+        assert text.splitlines()[0].startswith("<!--")
 
     def test_context_map_is_valid_json_with_stable_keys(self, tmp_path):
         root = _full_repo(tmp_path)

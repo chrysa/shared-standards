@@ -416,7 +416,8 @@ def build_handover(root: Path, pyproject: dict, pkg: dict) -> str:
     depends = "yes" if depends_on_shared_standards(root) else "no"
 
     out: list[str] = [
-        _generated_banner("#"),
+        # An HTML comment, not a "#" heading: keeps the markdown lint-clean (MD026/MD001).
+        f"<!-- {_generated_banner('').lstrip()} -->",
         "",
         f"# Handover — {name}",
         "",
@@ -437,7 +438,7 @@ def build_handover(root: Path, pyproject: dict, pkg: dict) -> str:
         out.append(f"- {NA}")
     out += ["", "## Notion links", ""]
     if links:
-        out.extend(f"- {link}" for link in links)
+        out.extend(f"- <{link}>" for link in links)  # autolink: no bare URL (MD034)
     else:
         out.append(f"- {NA}")
     out += ["", "## Current state (latest changelog entry)", "", "```", latest_changelog(root), "```", ""]
