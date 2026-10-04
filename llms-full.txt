@@ -311,6 +311,7 @@ scripts/
   apply-ci-process.sh
   apply-gitignore-canonical.sh
   apply-lean-ci.sh
+  apply-repo-settings.sh
   apply-repo-standard.sh
   apply-security-gate.sh
   audit-branch-policy.sh
@@ -547,6 +548,7 @@ templates/
     labeler.yml
     labels.yml
     pre-commit-common.yaml
+    repo-settings.json
   gitignore.canonical
   issue-templates/
     bug.md
