@@ -33,7 +33,7 @@ USER app
 EXPOSE 8765
 ENV CONSOLE_HOST=0.0.0.0
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/api/health').status==200 else 1)"
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8765 && printf 'GET /api/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"]
 CMD ["standards-console"]
 
 # ── dev: include dev deps + source for live work ───────────────────────────────
