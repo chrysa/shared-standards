@@ -8,15 +8,6 @@ services:
       GUIDELINE_CENTRAL_API_KEY: ${GUIDELINE_CENTRAL_API_KEY:-}
       GUIDELINE_CENTRAL_URL: ${GUIDELINE_CENTRAL_URL:-}
       STANDARDS_ORG: ${STANDARDS_ORG:-chrysa}
-    healthcheck:
-      interval: 30s
-      retries: 3
-      test:
-      - CMD
-      - bash
-      - -c
-      - "exec 3<>/dev/tcp/127.0.0.1/8765 && printf 'GET /api/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"
-      timeout: 5s
     image: chrysa/standards-console:dev
     ports:
     - 8765:8765
