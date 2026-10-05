@@ -16,8 +16,10 @@
 # Emits a TSV table to stdout AND persists a machine-readable ledger at
 # shared-standards/compliance/makefile-conformance.json.
 #
-# Usage: bash audit-makefile-conformance.sh [--all | <repo_path>]
-# Env:   CHRYSA_ROOT (default: parent of shared-standards)
+# Usage: bash audit-makefile-conformance.sh [--fresh] [--all | <repo_path>]
+#   --fresh  shallow-clone each repo's default branch from origin before auditing
+#            (origin-accurate; local sibling checkouts drift → stale false positives)
+# Env:   CHRYSA_ROOT (default: parent of shared-standards) · GH_ORG (default: chrysa)
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,8 +56,21 @@ ci_runs_precommit() {
 JSON_ROWS=()
 
 audit_one() {
-    local repo="$1" name; name="$(basename "$repo")"
+    local repo="$1" runtime="${2:-}" name; name="$(basename "$repo")"
     [[ -e "$repo/.git" ]] || return 0
+
+    # Archetype exemption (mirrors audit-main.sh §2.1): a repo with no build
+    # toolchain is not held to the dev-tier Makefile target set. exempt:config
+    # never ships a package; exempt:native only when it ships no manifest
+    # (a native bundle that DOES carry pyproject/package.json is still audited).
+    local has_manifest=false
+    { [[ -f "$repo/pyproject.toml" ]] || [[ -f "$repo/package.json" ]]; } && has_manifest=true
+    if [[ "$runtime" == "exempt:config" ]] || { [[ "$runtime" == "exempt:native" ]] && ! $has_manifest; }; then
+        printf '%-34s %-3s %-11s %-24s %-3s %-5s %-4s %-4s\n' \
+            "$name" "-" "exempt" "($runtime)" "-" "exempt" "-" "-"
+        JSON_ROWS+=("$(printf '{"repo":"%s","tier":"exempt","runtime":"%s","gate":"exempt"}' "$name" "$runtime")")
+        return 0
+    fi
 
     local tier template
     IFS=$'\t' read -r tier template < <(classify_makefile "$repo")
@@ -96,15 +111,36 @@ header() {
     printf '%s\n' "-------------------------------------------------------------------------------------------"
 }
 
+# Resolve the path to audit for a repo. In --fresh mode, shallow-clone the
+# repo's default branch from origin into a scratch dir (origin-accurate — local
+# sibling checkouts drift and produce stale false positives); otherwise use the
+# local sibling under CHRYSA_ROOT (fast, but only as fresh as your last pull).
+FRESH=false
+FRESH_ROOT=""
+repo_path() {
+    local name="$1"
+    if ! $FRESH; then echo "$CHRYSA_ROOT/$name"; return; fi
+    local dest="$FRESH_ROOT/$name"
+    [[ -e "$dest/.git" ]] && { echo "$dest"; return; }
+    git clone -q --depth 1 "https://github.com/${GH_ORG:-chrysa}/$name.git" "$dest" 2>/dev/null || return 0
+    echo "$dest"
+}
+
 main() {
+    if [[ "${1:-}" == "--fresh" ]]; then
+        FRESH=true; shift
+        FRESH_ROOT="$(mktemp -d)"
+        # shellcheck disable=SC2064
+        trap "rm -rf '$FRESH_ROOT'" EXIT
+    fi
     [[ -f "$MAKEFILE_CHECK" ]] || \
         echo "warning: makefile-check not found at $MAKEFILE_CHECK — GATE column will be '?'" >&2
     header
     if [[ "${1:-}" == "--all" || -z "${1:-}" ]]; then
-        while read -r name st; do
+        while read -r name st rt; do
             [[ "$st" == "dev" ]] || continue
-            audit_one "$CHRYSA_ROOT/$name"
-        done < <(awk '$1=="-" && $2=="name:"{n=$3} $1=="status:"{print n, $2}' "$REPOS_YML")
+            audit_one "$(repo_path "$name")" "$rt"
+        done < <(awk '$1=="-" && $2=="name:"{n=$3} $1=="runtime:"{rt=$2} $1=="status:"{print n, $2, rt}' "$REPOS_YML")
         write_ledger
     else
         audit_one "$1"

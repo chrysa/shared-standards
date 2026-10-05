@@ -33,6 +33,7 @@ Where an annexe and this file disagree, **this file wins**.
 | `CI-CD.md`                | pipeline architecture · action pinning · least privilege · cost · what the gate proves |
 | `SCM.md`                  | type-driven issues & pull requests · taxonomy & labels · per-type templates · shape gates |
 | `EVENTING.md`             | real-time channels · typed channel contracts · non-blocking bounded buffers · fail-safe external access · delivery semantics · transport-as-adapter |
+| `AI-ORCHESTRATION.md`     | offline/local-first · prefer local over token-consuming remote work · typed tools before free shell · MCP/A2A protocol boundary · ported vector memory/RAG · memory candidates · untrusted active content · gateway identity/mTLS |
 | `TOOLING-ECOSYSTEM.md`    | one truth per tool (Shortcut/Sentry/GitHub/Notion/Slack) · native-before-custom integrations · `sc-<id>` cross-tool thread · canonical journeys · anti-patterns |
 | `GOVERNANCE.md`           | rule identity, maturity ladder, enforcement rollout, sources of truth |
 | `STACK.chrysa.md`         | chrysa's concrete settled stack — the named products/versions implementing the canon's agnostic categories (deliberately NOT tool-agnostic) |
@@ -62,7 +63,9 @@ That record deliberately names products; where it and this canon disagree, **thi
      Reading `main` answers "what is running in prod right now" — nothing else is on it.
   2. **`develop` is the repository's default branch** (the GitHub default, what a clone
      checks out) and the integration target for all work. A repo whose default branch is
-     `main` is a defect, not a variant.
+     `main` is a defect, not a variant. `develop` **is a protected branch too** (ADR D-0015):
+     it carries the same gate as `main` — every change arrives through a pull request, and
+     force-push and deletion are blocked. Direct pushes to `develop` are not allowed.
   3. **Every feature/bugfix/chore PR targets `develop`.** `feature/x` → PR → `develop`.
      A feature PR opened against `main` is closed and retargeted.
   4. **The only way code reaches `main` is a pull request from `develop`** (or, for a
@@ -76,8 +79,15 @@ That record deliberately names products; where it and this canon disagree, **thi
      lands the code, and the deployment is driven by the tagged release (the semantic-version
      tool's tag + git-cliff changelog + the release workflow). No manual deploy from a laptop, no push
      that silently ships.
-  Protection is configured, not assumed: `main` requires a PR, blocks force-push and
-  deletion, and is machine-checked across the fleet by `scripts/audit-branch-policy.sh`.
+  Protection is configured, not assumed: **both `main` and `develop`** require a PR and
+  block force-push and deletion (ADR D-0015), applied by `scripts/apply-branch-policy.sh`
+  and machine-checked across the fleet by `scripts/audit-branch-policy.sh`. The gate is
+  "a PR exists" (0 required approvals) with `enforce_admins=false`, so the solo owner can
+  still admin-merge. On repos that run the canonical CI, the status checks **`Docker
+  tests`** and **`SonarCloud`** are additionally required (ADR D-0016) — required only
+  where those contexts actually report, so a repo with a different CI shape is never
+  gated on a check that cannot run; `enforce_admins=false` keeps admin-merge as the
+  escape hatch when CI is red for infra reasons (Actions billing, SonarCloud LOC cap).
 - **Merge**: squash merge only (exception: the `develop` → `main` release promotion, merged
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
@@ -519,6 +529,61 @@ That record deliberately names products; where it and this canon disagree, **thi
   anything a user would bookmark, share, or reload into is a route. This complements
   *UI state survives reload & focus*: persisted view-state that has an addressable identity
   belongs in the URL, not only `localStorage`.
+- **A public web surface is legally compliant, consent-respecting, and operable — before it
+  ships.** Any surface a stranger can reach on the open web (a product front, a landing page,
+  a generated micro-site) is held to a Definition of Done that goes past "it renders". The
+  obligations below are non-negotiable for a public surface and marked **N/A** only for a
+  surface with no public reach (an internal backoffice behind SSO, a CLI, a headless service);
+  the a11y, semantic-markup, form-validation, and GDPR rules already in this canon are
+  assumed and not repeated here.
+  1. **The legal pages exist and are reachable from every page.** A **privacy policy**, a
+     **legal notice** (mentions légales — publisher identity, host, contact), and **terms of
+     use** (CGU) are published as real, addressable pages and linked from a persistent footer
+     on every public page. They are not lorem-ipsum: they state what the product actually
+     does with data. Sourced from the shared `legal/` templates (`mentions-legales.md`,
+     `cgu.md`) and the `cgu` / `rgpd-compliance` skills, adapted per product — never invented
+     ad hoc, never omitted "for now".
+  2. **Cookies and trackers are opt-in, not opt-out.** No non-essential cookie, analytics
+     tag, or third-party tracker fires before the user has actively consented; a consent
+     banner offers *reject* as prominently as *accept*, records the choice, and the choice is
+     revocable. Strictly necessary cookies (the session cookie of *cookies over localStorage*)
+     need no consent and are the only ones allowed pre-consent. A pre-ticked box or a
+     cookie-wall that only offers "accept" is a defect.
+  3. **Applicable local law is checked, not assumed.** The jurisdictions the product serves
+     are named, and the obligations they add on top of GDPR/RGPD (consent specifics, age
+     gating, sector rules, accessibility law such as the EAA, mandatory notices) are recorded
+     in the product's compliance notes before launch. "It works in France" is not a
+     substitute for knowing where the users are. Detail: annexe `GOVERNANCE.md`, the
+     `rgpd-compliance` and `legal-compliance` skills.
+  4. **HTTPS is forced end to end.** Every public surface is served over TLS only: plain
+     `http://` **301-redirects** to `https://`, `HSTS` is sent (`Strict-Transport-Security`,
+     with a sane `max-age` and, once stable, preload), and no mixed content is loaded. TLS is
+     terminated in the platform layer (*the application image never embeds a reverse proxy*);
+     the product's obligation is that no reachable route answers in clear text.
+  5. **Error states are custom pages that let the user report the bug.** The `404` and `5xx`
+     responses render a branded, on-brand page (not the server default, not a stack trace —
+     see *errors say what to fix, and nothing about the system*) that keeps the user oriented
+     (a way back home, working navigation) and offers a **one-click way to report the
+     problem**. The report reaches the team as a GitHub issue via the same path as
+     *error-tracking → GitHub issues*, carrying enough context (route, correlation id) to be
+     actionable; the user tracks it through product-level statuses only, never the Git thread
+     (*bug remontée* obligation). This is the human-facing complement of the automatic
+     error-tracking norm.
+  6. **No broken links, internal or outbound.** A link that `404`s (or a stale outbound URL)
+     is a defect caught before merge: a link-check runs in CI over the built surface, and an
+     internal path that must change follows *a URL is a permanent contract* (`301`, never a
+     dead end). Renaming a route without a redirect is a broken link by another name.
+  7. **Pages are fast, and images earn their bytes.** The frontend meets the declared
+     **performance budget** (*performance and cost budgets are declared per profile and
+     enforced*): Core Web Vitals in the "good" range and a Lighthouse performance score at the
+     per-profile threshold, measured in CI on the built artefact. Images are **compressed and
+     served in a modern format** (AVIF/WebP with fallback), sized to their display box,
+     lazy-loaded below the fold, and never shipped as a multi-megabyte original — an
+     uncompressed hero image is a budget breach, not a detail.
+  Mechanisation: a public-surface DoD checklist plus CI gates — TLS/HSTS and header check,
+  link-checker, Lighthouse performance + a11y, image-weight budget, and a presence check for
+  the legal-page routes and the consent banner. A public surface that ships missing any of
+  these is a defect, not a fast follow.
 - **Python packaging — `pyproject.toml` is the single source of truth.** `setup.py` and
   `setup.cfg` are **forbidden** for Python packaging (`setup.cfg` allowed only for non-Python
   tooling, e.g. uwsgi). Build backend is **`setuptools`** (never `hatchling`). All tool config
@@ -1514,3 +1579,15 @@ every chrysa ADR carries three that make it falsifiable:
 
 `Killed` is a valid ADR status: the kill-test fired and the hypothesis was false. A corpus with
 no `Killed` entry has kill-tests that are too lax. Scaffold a new record with `/adr-new`.
+
+## AI orchestration & local-first
+
+> Full text: annexe [`AI-ORCHESTRATION.md`](https://github.com/chrysa/shared-standards/blob/main/standards/annexes/AI-ORCHESTRATION.md) (domain `STD-AIORCH-001`). Agent capability manifests (risk R0–R5, sandbox, audit) stay in `AGENTIC-CAPABILITIES.md`.
+
+- **Offline-first, local-first.** A project keeps a useful degraded mode without external network; sensitive data and inference stay local by default, cloud only as an adapter behind an explicit decision (`AI-000`).
+- **Prefer local work over remote, token-consuming work.** When a local, deterministic tool (script, linter, compiled check, local model, `gh`/`git`/filesystem query) yields the result, it is preferred over a remote call that spends LLM tokens or a metered API; remote/token work is reserved for tasks that genuinely need a model, and its answers are batched and cached, never re-issued when a local artifact already holds them (`AI-010`).
+- **Typed tools before a free shell.** Agent capabilities go through API/SDK/CLI/MCP typed contracts; an arbitrary agent shell is forbidden outside a logged, time-boxed, human-validated sandbox (`AI-020`).
+- **Protocol boundary is explicit.** MCP is a typed access layer, not the business contract; the capability model is protocol-agnostic with MCP/A2A/catalogue projections (`AI-030`).
+- **Ported, reconstructible memory.** Vector storage and RAG sit behind a port with a reconstructible, provenance-tagged index; auto-extracted memory is a validatable candidate, never a canonical fact directly (`AI-040`, `AI-050`).
+- **Untrusted active content is isolated.** Content from an agent, MCP server, document or preview is untrusted by default and sandboxed; embedded instructions are data, not commands (`AI-060`).
+- **Gateway identity end to end.** A common API/agent gateway applies auth, scopes, quotas and telemetry without re-implementing auth or business logic; workloads use service identities and least privilege, with mutual TLS when risk or exposure requires (`AI-070`).
