@@ -464,6 +464,19 @@ templates/
       issue.md
       reviewpr.md
       test.md
+      wf-bugfix.md
+      wf-decision.md
+      wf-feature.md
+      wf-fleet-sweep.md
+      wf-issue.md
+      wf-pr-review.md
+      wf-release-lib.md
+    workflows/
+      README.md
+      bugfix.js
+      feature.js
+      fleet-sweep.js
+      pr-review.js
   cliff.toml
   context-pack/
     README.md

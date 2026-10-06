@@ -19,7 +19,7 @@
 #   2.  Legacy migration       remove any old `.chrysa/standards-import` block + the vendored
 #                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
 #   3.  Shared skills          .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
-#   4.  Shared agents+commands templates/claude/{agents,commands}/* -> <repo>/.claude/
+#   4.  Shared agents+commands+workflows templates/claude/{agents,commands,workflows}/* -> <repo>/.claude/
 #   5.  Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
 # Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md / AGENTS.md /
@@ -58,6 +58,7 @@ COPILOT_VIEW_SRC="$STD_ROOT/.github/copilot-instructions.md"
 SKILLS_SRC="$STD_ROOT/.claude/skills"
 AGENTS_SRC="$STD_ROOT/templates/claude/agents"
 COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
+WORKFLOWS_SRC="$STD_ROOT/templates/claude/workflows"
 CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
 # opencode agent config (multi-provider: ollama default, claude/chatgpt opt-in).
 # Managed copy — overwritten on every run to keep the fleet aligned.
@@ -385,9 +386,10 @@ main() {
     # 3. Shared skills (managed copies), scoped to the repo's profiles.
     deploy_skills "$SKILLS_SRC" "$repo/.claude/skills" "${REPO_NAME:-$(basename "$repo")}"
 
-    # 4. Shared agents + commands (managed copies).
+    # 4. Shared agents + commands + workflows (managed copies).
     deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
     deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
+    deploy_dir "$WORKFLOWS_SRC" "$repo/.claude/workflows"
 
     # 4b. opencode agent config (managed copy — ollama default, claude/chatgpt opt-in).
     deploy_file "$OPENCODE_TPL" "$repo/opencode.json"
