@@ -53,7 +53,7 @@ Your role is to write clean, maintainable, idiomatic, and secure code.
 
 ### Docker
 - **Always use multi-stage builds** (`AS deps`, `AS builder`, `AS production` or equivalent). Never ship build tools in the final image.
-- **Always add a `HEALTHCHECK`** to every production image. Use the service's own health endpoint (e.g. `CMD curl -f http://localhost:PORT/health || exit 1`).
+- **Always add a `HEALTHCHECK`** to every production image. Use the service's own health endpoint, probed **natively** — never through the project's language runtime (no `python -c`, `node -e`, `npm run`). Order: service probe tool (`pg_isready`, `redis-cli ping`) → `bash` `/dev/tcp` (e.g. `CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/PORT"]`) → `wget`/`curl` only if already in the base image (CT-004).
 - Use official or usefull-containers images for tooling.
 - Pin image versions explicitly (e.g. `python:3.14-slim`, not `python:latest`).
 - Non-root user in the final stage (`USER nonroot` or equivalent).
