@@ -29,4 +29,4 @@
 | `UserPage` |  | `templates/docs-structure/examples/node/perfect-page.tsx` |
 | `ReportBugButton` | `ReportBugButtonProps` | `templates/feedback/ReportBugButton.tsx` |
 
-_Limits: every exported PascalCase `const` in a `.tsx` file is treated as a component; components exported via `export { X }`, re-exports, `React.memo`/`forwardRef` wrapped components assigned without `export const`, and `.jsx`/`.js` files are not listed._
+_Limits: components are `export function`, `export default function` and `export const` initialised with an arrow function, a function, `memo`/`forwardRef`/`lazy` or typed `FC`; `export default class`, default arrow functions, `export { X }` re-exports, styled or other wrappers and `.jsx`/`.js` files are not listed; the props type is a best guess (first `*Props` name in the declaration signature)._

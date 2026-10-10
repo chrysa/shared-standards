@@ -444,3 +444,41 @@ def test_components_detect_and_covers(tmp_path: Path) -> None:
     assert x.COMPONENTS.covers("ui/util.ts") is False
     assert x.BY_NAME["components"] is x.COMPONENTS
     assert [e.name for e in x.EXTRACTORS] == ["components", "data-model", "routes", "structure"]
+
+
+def test_components_constants_are_not_listed_but_real_forms_are(tmp_path: Path) -> None:
+    src = textwrap.dedent('''\
+        export const API_URL = "http://x";
+        export const MAX = 3;
+        export const ROUTES = ["a"];
+        export const Tpl = `hello ${1}`;
+        export const Re = /x/;
+        export const Map = new Map();
+        export const Arrow = () => null;
+        export const Async = async (a: number) => null;
+        export const Single = x => x;
+        export const Memo = memo(function Memo() { return null; });
+        export const Fwd = React.forwardRef<HTMLDivElement, FwdProps>((p, r) => null);
+        export const Lazy = React.lazy(() => import("./x"));
+        export const Typed: React.FC<TypedProps> = (p) => null;
+        export const TD = ({ a }: TDProps) => <td>{a}</td>;
+    ''')
+    _write_tsx(tmp_path, "ui/A.tsx", src)
+    out = x.render_components(tmp_path, ["ui/A.tsx"])
+    for bad in ("API_URL", "MAX", "ROUTES", "Tpl", "Re", "Map"):
+        assert f"| `{bad}` |" not in out
+    for good in ("Arrow", "Async", "Single", "Memo", "Fwd", "Lazy", "Typed", "TD"):
+        assert f"| `{good}` |" in out
+    assert "| `TD` | `TDProps` |" in out
+    assert "| `Typed` | `TypedProps` |" in out
+
+
+def test_components_props_are_taken_from_the_signature_only(tmp_path: Path) -> None:
+    src = (
+        "export const Two = () => { const t: OneProps = x; return null; };\n"
+        "export function Three() { const t: OneProps = x; return null; }\n"
+    )
+    _write_tsx(tmp_path, "ui/A.tsx", src)
+    out = x.render_components(tmp_path, ["ui/A.tsx"])
+    assert "| `Two` |  |" in out
+    assert "| `Three` |  |" in out

@@ -305,6 +305,7 @@ docs/
     sonar-coverage-config.md
     standards-mcp.md
   reference/
+    components.md
     github-inspiration.md
     routes.md
     structure.md

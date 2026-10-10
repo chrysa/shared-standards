@@ -514,7 +514,21 @@ DATA_MODEL = Extractor(
 # ── components (React) ────────────────────────────────────────────────────────────────────
 
 _EXPORT_FUNCTION = re.compile(r"^export\s+(?:default\s+)?function\s+([A-Z]\w*)\s*\(", re.MULTILINE)
-_EXPORT_CONST = re.compile(r"^export\s+const\s+([A-Z]\w*)\s*[:=]", re.MULTILINE)
+_EXPORT_CONST = re.compile(r"^export\s+const\s+([A-Z]\w*)\b", re.MULTILINE)
+# Positive criteria for ``export const Name``: a component type annotation ...
+_COMPONENT_TYPE = re.compile(
+    r"\s*:\s*(?:React\.)?(?:FC|FunctionComponent|VFC|ComponentType)\b[^=]*=(?!>)"
+)
+# ... or an initialiser that is an arrow function, a function, or memo/forwardRef/lazy.
+_COMPONENT_INIT = re.compile(
+    r"""\s*(?::[^=]*?)?=(?!=)\s*(?:
+        (?:async\s+)?(?:<[^()]*?>\s*)?\((?:[^()]|\([^()]*\))*\)\s*(?::\s*[^=;]+?)?\s*=>
+      | (?:async\s+)?[A-Za-z_$][\w$]*\s*=>
+      | (?:async\s+)?function\b
+      | (?:React\.)?(?:memo|forwardRef|lazy)\s*(?:<[^()]*>)?\s*\(
+    )""",
+    re.VERBOSE,
+)
 _NEXT_EXPORT = re.compile(r"^export\b", re.MULTILINE)
 _PROPS_NEAR = re.compile(r"([A-Z]\w*Props)\b")
 _PROPS_WINDOW = 200
@@ -526,9 +540,11 @@ _JS_TOKEN = re.compile(
     re.DOTALL,
 )
 _COMPONENTS_LIMITS = (
-    "_Limits: every exported PascalCase `const` in a `.tsx` file is treated as a component; "
-    "components exported via `export { X }`, re-exports, `React.memo`/`forwardRef` wrapped "
-    "components assigned without `export const`, and `.jsx`/`.js` files are not listed._"
+    "_Limits: components are `export function`, `export default function` and `export const` "
+    "initialised with an arrow function, a function, `memo`/`forwardRef`/`lazy` or typed `FC`; "
+    "`export default class`, default arrow functions, `export { X }` re-exports, styled or other "
+    "wrappers and `.jsx`/`.js` files are not listed; the props type is a best guess (first "
+    "`*Props` name in the declaration signature)._"
 )
 
 
@@ -544,22 +560,44 @@ def _strip_js_comments(text: str) -> str:
     return _JS_TOKEN.sub(lambda match: match.group(1) or " ", text)
 
 
-def _props_type(text: str, start: int) -> str:
-    """First ``*Props`` name after a declaration, never reaching into the next ``export``."""
-    end = start + _PROPS_WINDOW
+def _signature_end(text: str, start: int, depth: int) -> int:
+    """End of the declaration signature: the ``=>`` or body ``{`` (a ``{`` at paren depth 0 or
+    right after a ``)``), at most ``_PROPS_WINDOW`` chars, never reaching the next ``export``."""
+    end = min(len(text), start + _PROPS_WINDOW)
     following = _NEXT_EXPORT.search(text, start)
     if following is not None:
         end = min(end, following.start())
-    match = _PROPS_NEAR.search(text, start, end)
+    previous = ""
+    for index in range(start, end):
+        char = text[index]
+        if char == "=" and text[index + 1 : index + 2] == ">":
+            return index
+        if char == "{" and (depth <= 0 or previous == ")"):
+            return index
+        depth += (char == "(") - (char == ")")
+        if not char.isspace():
+            previous = char
+    return end
+
+
+def _props_type(text: str, start: int, depth: int) -> str:
+    """First ``*Props`` name in the signature after a declaration (a best guess)."""
+    match = _PROPS_NEAR.search(text, start, _signature_end(text, start, depth))
     return match.group(1) if match else ""
+
+
+def _is_component_const(code: str, end: int) -> bool:
+    return bool(_COMPONENT_TYPE.match(code, end) or _COMPONENT_INIT.match(code, end))
 
 
 def _components_in(text: str, rel: str) -> list[tuple[str, str, str]]:
     code = _strip_js_comments(text)
     found: list[tuple[str, str, str]] = []
-    for pattern in (_EXPORT_FUNCTION, _EXPORT_CONST):
-        for match in pattern.finditer(code):
-            found.append((match.group(1), _props_type(code, match.end()), rel))
+    for match in _EXPORT_FUNCTION.finditer(code):
+        found.append((match.group(1), _props_type(code, match.end(), 1), rel))
+    for match in _EXPORT_CONST.finditer(code):
+        if _is_component_const(code, match.end()):
+            found.append((match.group(1), _props_type(code, match.end(), 0), rel))
     return found
 
 
