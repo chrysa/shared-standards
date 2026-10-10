@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
-from pathlib import Path
+from collections.abc import Iterator
+from pathlib import Path, PurePosixPath
 from typing import NamedTuple
 
 from scripts import gen_context_files
@@ -47,6 +49,8 @@ _BLOCK = re.compile(
     r"(?P<tail><!-- chrysa:docs:(?P=name):end -->)",
     re.DOTALL,
 )
+SOURCE_SUFFIXES = (".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".java", ".cs")
+SKIP_PARTS = frozenset({"node_modules", ".venv", "venv", "dist", "build", "__pycache__", "vendor"})
 
 
 class Expected(NamedTuple):
@@ -172,9 +176,91 @@ def drift(root: Path) -> list[str]:
     return lines
 
 
-def check(root: Path, base: str | None = None) -> int:  # noqa: ARG001  (base used from Task 4)
+# ── git-aware checks ─────────────────────────────────────────────────────────────────────
+
+
+def _git_lines(root: Path, *args: str) -> list[str] | None:
+    """Non-empty stdout lines of ``git -C root <args>``, or None when git fails/is absent."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args], capture_output=True, text=True, check=True
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return [line for line in result.stdout.splitlines() if line]
+
+
+def _diff_names(root: Path, base: str | None, kind: str) -> list[str] | None:
+    """Paths of the change set filtered by ``kind`` (``A`` added, ``AM`` added/modified)."""
+    scope = ["--cached"] if base is None else [base, "HEAD"]
+    return _git_lines(root, "diff", "--name-only", f"--diff-filter={kind}", *scope)
+
+
+def is_source(path: str) -> bool:
+    """A source file outside vendored, hidden and build directories."""
+    parent_parts = path.split("/")[:-1]
+    if any(part in SKIP_PARTS or part.startswith(".") for part in parent_parts):
+        return False
+    return path.endswith(SOURCE_SUFFIXES)
+
+
+def _ancestors(path: str) -> Iterator[str]:
+    """Every parent directory of ``path`` (``a/b/c.py`` yields ``a/b`` then ``a``)."""
+    for parent in PurePosixPath(path).parents:
+        if str(parent) != ".":
+            yield str(parent)
+
+
+def _dirs_at(root: Path, ref: str) -> set[str]:
+    """Every directory that held a tracked file at ``ref`` (empty when ref does not exist)."""
+    tracked = _git_lines(root, "ls-tree", "-r", "--name-only", ref) or []
+    return {parent for rel in tracked for parent in _ancestors(rel)}
+
+
+def new_dirs_missing_readme(root: Path, base: str | None = None) -> list[str]:
+    """Newly created directories that directly hold a source file and carry no README.md."""
+    added = _diff_names(root, base, "A")
+    if added is None:
+        return []
+    existing = _dirs_at(root, base or "HEAD")
+    missing: set[str] = set()
+    for rel in added:
+        directory = str(PurePosixPath(rel).parent)
+        if directory == "." or directory in existing or not is_source(rel):
+            continue
+        if not (root / directory / "README.md").is_file():
+            missing.add(directory)
+    return sorted(missing)
+
+
+def changed_files(root: Path, base: str | None = None) -> list[str]:
+    """Added or modified paths in the change set (empty when git is unavailable)."""
+    return _diff_names(root, base, "AM") or []
+
+
+def docs_warning(changed: list[str], active: list[Extractor]) -> str | None:
+    """Non-blocking hint: covered source changed while no documentation did."""
+    covered = sorted(path for path in changed if any(item.covers(path) for item in active))
+    touched_docs = any(path.endswith(".md") or path.startswith("docs/") for path in changed)
+    if not covered or touched_docs:
+        return None
+    return (
+        f"warning: {len(covered)} source file(s) covered by the reference docs changed but no "
+        f"documentation was touched (first: {covered[0]})"
+    )
+
+
+def check(root: Path, base: str | None = None) -> int:
     """Run the gate: print problems to stderr and return the process exit code."""
     problems = drift(root)
+    problems += [
+        f"new folder without README.md: {directory}/"
+        for directory in new_dirs_missing_readme(root, base)
+    ]
+    active = [item for item, _ in select(root, project_files(root))]
+    warning = docs_warning(changed_files(root, base), active)
+    if warning:
+        sys.stderr.write(warning + "\n")
     if not problems:
         return 0
     sys.stderr.write("reference docs check failed:\n")
