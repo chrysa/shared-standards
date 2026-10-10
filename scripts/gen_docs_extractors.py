@@ -16,6 +16,7 @@ timestamps or absolute paths. Anything unreadable degrades to ``(not available)`
 from __future__ import annotations
 
 import ast
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -510,6 +511,90 @@ DATA_MODEL = Extractor(
 )
 
 
+# ── components (React) ────────────────────────────────────────────────────────────────────
+
+_EXPORT_FUNCTION = re.compile(r"^export\s+(?:default\s+)?function\s+([A-Z]\w*)\s*\(", re.MULTILINE)
+_EXPORT_CONST = re.compile(r"^export\s+const\s+([A-Z]\w*)\s*[:=]", re.MULTILINE)
+_NEXT_EXPORT = re.compile(r"^export\b", re.MULTILINE)
+_PROPS_NEAR = re.compile(r"([A-Z]\w*Props)\b")
+_PROPS_WINDOW = 200
+_SKIPPED_DIRS = frozenset({"node_modules", "dist", "build", "__tests__"})
+_NOT_COMPONENT_MARKERS = (".test.", ".spec.", ".stories.")
+# Strings are matched first so a ``//`` inside a literal is not taken for a comment.
+_JS_TOKEN = re.compile(
+    r"""("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`)|//[^\n]*|/\*.*?\*/""",
+    re.DOTALL,
+)
+_COMPONENTS_LIMITS = (
+    "_Limits: every exported PascalCase `const` in a `.tsx` file is treated as a component; "
+    "components exported via `export { X }`, re-exports, `React.memo`/`forwardRef` wrapped "
+    "components assigned without `export const`, and `.jsx`/`.js` files are not listed._"
+)
+
+
+def _is_component_file(rel: str) -> bool:
+    parts = rel.split("/")
+    if not rel.endswith(".tsx") or _SKIPPED_DIRS.intersection(parts[:-1]):
+        return False
+    return not any(marker in parts[-1] for marker in _NOT_COMPONENT_MARKERS)
+
+
+def _strip_js_comments(text: str) -> str:
+    """``text`` without ``//`` and ``/* */`` comments (string literals are left intact)."""
+    return _JS_TOKEN.sub(lambda match: match.group(1) or " ", text)
+
+
+def _props_type(text: str, start: int) -> str:
+    """First ``*Props`` name after a declaration, never reaching into the next ``export``."""
+    end = start + _PROPS_WINDOW
+    following = _NEXT_EXPORT.search(text, start)
+    if following is not None:
+        end = min(end, following.start())
+    match = _PROPS_NEAR.search(text, start, end)
+    return match.group(1) if match else ""
+
+
+def _components_in(text: str, rel: str) -> list[tuple[str, str, str]]:
+    code = _strip_js_comments(text)
+    found: list[tuple[str, str, str]] = []
+    for pattern in (_EXPORT_FUNCTION, _EXPORT_CONST):
+        for match in pattern.finditer(code):
+            found.append((match.group(1), _props_type(code, match.end()), rel))
+    return found
+
+
+def detect_components(root: Path, files: list[str]) -> bool:  # noqa: ARG001
+    return any(_is_component_file(rel) for rel in files)
+
+
+def covers_components(path: str) -> bool:
+    return _is_component_file(path)
+
+
+def render_components(root: Path, files: list[str]) -> str:
+    """Component inventory: name, props type (when named ``*Props``), file, plus the limits."""
+    rows: list[tuple[str, str, str]] = []
+    for rel in files:
+        text = read_source(root, rel) if _is_component_file(rel) else None
+        if text is not None:
+            rows += _components_in(text, rel)
+    if not rows:
+        return NA + "\n"
+    lines = ["| Component | Props | File |", "| --- | --- | --- |"]
+    for name, props, rel in sorted(set(rows), key=lambda row: (row[2], row[0])):
+        cell = f"`{_cell(props)}`" if props else ""
+        lines.append(f"| `{name}` | {cell} | `{_cell(rel)}` |")
+    return "\n".join([*lines, "", _COMPONENTS_LIMITS]) + "\n"
+
+
+COMPONENTS = Extractor(
+    name="components",
+    detect=detect_components,
+    render=render_components,
+    covers=covers_components,
+)
+
+
 # ── registry ──────────────────────────────────────────────────────────────────────────────
 
 STRUCTURE = Extractor(
@@ -519,5 +604,5 @@ STRUCTURE = Extractor(
     covers=covers_structure,
 )
 
-EXTRACTORS: tuple[Extractor, ...] = (DATA_MODEL, ROUTES, STRUCTURE)
+EXTRACTORS: tuple[Extractor, ...] = (COMPONENTS, DATA_MODEL, ROUTES, STRUCTURE)
 BY_NAME: dict[str, Extractor] = {extractor.name: extractor for extractor in EXTRACTORS}

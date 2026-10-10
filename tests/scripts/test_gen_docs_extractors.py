@@ -338,3 +338,109 @@ def test_data_model_excludes_tests_and_migrations(tmp_path: Path) -> None:
     assert x.render_data_model(tmp_path, files).startswith(x.NA)
     assert x.DATA_MODEL.detect(tmp_path, files) is False
     assert x.DATA_MODEL.covers("app/migrations/models.py") is False
+
+
+# ── components ────────────────────────────────────────────────────────────────────────────
+
+TSX_SRC = textwrap.dedent('''\
+    import React from "react";
+
+    interface ButtonProps { label: string }
+
+    export function Button({ label }: ButtonProps) {
+      return <button>{label}</button>;
+    }
+
+    export const Card = ({ title }: CardProps) => <div>{title}</div>;
+
+    export const helper = 3;
+
+    export default function Page() {
+      return <main />;
+    }
+''')
+
+
+def _write_tsx(root: Path, rel: str, text: str) -> None:
+    path = root / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def test_components_lists_exported_pascal_case_components(tmp_path: Path) -> None:
+    _write_tsx(tmp_path, "ui/Button.tsx", TSX_SRC)
+    out = x.render_components(tmp_path, ["ui/Button.tsx"])
+    assert "| `Button` | `ButtonProps` | `ui/Button.tsx` |" in out
+    assert "| `Card` | `CardProps` | `ui/Button.tsx` |" in out
+    assert "| `Page` |  | `ui/Button.tsx` |" in out
+    assert "helper" not in out
+    assert x._COMPONENTS_LIMITS in out
+
+
+def test_components_ignore_tests_stories_and_vendored(tmp_path: Path) -> None:
+    rels = ["ui/Button.test.tsx", "ui/Button.stories.tsx", "node_modules/x/Y.tsx"]
+    rels += ["ui/__tests__/Z.tsx", "dist/A.tsx", "build/B.tsx", "ui/C.spec.tsx"]
+    for rel in rels:
+        _write_tsx(tmp_path, rel, TSX_SRC)
+    assert x.render_components(tmp_path, rels) == x.NA + "\n"
+
+
+def test_components_exclusion_is_per_path_component_not_substring(tmp_path: Path) -> None:
+    rels = ["rebuild/Foo.tsx", "distribution/Bar.tsx", "node_modules_ui/Baz.tsx"]
+    for rel in rels:
+        _write_tsx(tmp_path, rel, "export function Foo() { return null; }\n")
+    out = x.render_components(tmp_path, rels)
+    assert all(f"`{rel}`" in out for rel in rels)
+    assert x.COMPONENTS.covers("rebuild/Foo.tsx") is True
+
+
+def test_components_unreadable_file_is_skipped(tmp_path: Path) -> None:
+    (tmp_path / "ui").mkdir()
+    (tmp_path / "ui" / "Bad.tsx").write_bytes(b"\xff\xfe\x00")
+    assert x.render_components(tmp_path, ["ui/Bad.tsx"]) == x.NA + "\n"
+
+
+def test_components_skip_commented_out_code(tmp_path: Path) -> None:
+    src = textwrap.dedent('''\
+        // export function Old() {}
+        /* export const Gone = () => null;
+           export function AlsoGone() {} */
+        const url = "http://example.com"; export function Live() { return null; }
+        export function Real() { return null; }
+    ''')
+    _write_tsx(tmp_path, "ui/A.tsx", src)
+    out = x.render_components(tmp_path, ["ui/A.tsx"])
+    assert "Old" not in out and "Gone" not in out
+    assert "`Real`" in out
+
+
+def test_components_props_are_not_taken_from_the_next_declaration(tmp_path: Path) -> None:
+    src = (
+        "export function First() { return null; }\n"
+        "export function Second({ a }: SecondProps) { return null; }\n"
+    )
+    _write_tsx(tmp_path, "ui/A.tsx", src)
+    out = x.render_components(tmp_path, ["ui/A.tsx"])
+    assert "| `First` |  | `ui/A.tsx` |" in out
+    assert "| `Second` | `SecondProps` | `ui/A.tsx` |" in out
+
+
+def test_components_output_is_sorted_and_deduplicated(tmp_path: Path) -> None:
+    _write_tsx(tmp_path, "b/B.tsx", "export function B() { return null; }\n")
+    _write_tsx(tmp_path, "a/A.tsx", "export function Z() {}\nexport function A() {}\n")
+    out = x.render_components(tmp_path, ["b/B.tsx", "a/A.tsx", "a/A.tsx"])
+    assert out.count("`A`") == 1
+    assert out.index("`a/A.tsx`") < out.index("`b/B.tsx`")
+    assert out.index("| `A` |") < out.index("| `Z` |")
+
+
+def test_components_detect_and_covers(tmp_path: Path) -> None:
+    _write_tsx(tmp_path, "ui/Button.tsx", TSX_SRC)
+    assert x.COMPONENTS.detect(tmp_path, ["ui/Button.tsx"]) is True
+    assert x.COMPONENTS.detect(tmp_path, ["ui/Button.test.tsx"]) is False
+    assert x.COMPONENTS.detect(tmp_path, ["ui/util.ts", "a.py"]) is False
+    assert x.COMPONENTS.covers("ui/Button.tsx") is True
+    assert x.COMPONENTS.covers("ui/Button.test.tsx") is False
+    assert x.COMPONENTS.covers("ui/util.ts") is False
+    assert x.BY_NAME["components"] is x.COMPONENTS
+    assert [e.name for e in x.EXTRACTORS] == ["components", "data-model", "routes", "structure"]
