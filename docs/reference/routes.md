@@ -14,4 +14,4 @@
 | POST | `/api/standard` | `edit_standard` | `StandardEditResponse` | `console/standards_console/app.py` |
 | POST | `/feedback` | `submit_feedback` | `FeedbackResponse` | `templates/feedback/feedback_router.py` |
 
-_Limits: router prefixes passed to `include_router(...)` are not resolved; non-literal paths are omitted._
+_Limits: router prefixes passed to `include_router(...)` are not resolved; `api_route`, websocket and non-literal routes are not listed._

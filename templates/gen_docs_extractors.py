@@ -141,7 +141,7 @@ _HTTP_METHODS = frozenset({"get", "post", "put", "patch", "delete", "head", "opt
 _ROUTE_HINTS = ("route", "api", "endpoint", "view", "main", "app")
 _ROUTES_LIMITS = (
     "_Limits: router prefixes passed to `include_router(...)` are not resolved; "
-    "non-literal paths are omitted._"
+    "`api_route`, websocket and non-literal routes are not listed._"
 )
 
 
@@ -155,30 +155,44 @@ class Route(NamedTuple):
     file: str
 
 
-def _router_prefixes(tree: ast.AST) -> dict[str, str]:
-    """``name = APIRouter(prefix="/x")`` assignments: variable name -> literal prefix."""
-    prefixes: dict[str, str] = {}
+class _UnresolvedPrefix(Exception):
+    """A route hangs off a router whose prefix cannot be known statically."""
+
+
+def _router_prefixes(tree: ast.AST) -> dict[str, str | None]:
+    """``name = APIRouter(prefix="/x")``: variable -> literal prefix, None when unresolvable.
+
+    A non-literal ``prefix=`` or a name assigned to a router more than once is ambiguous.
+    """
+    prefixes: dict[str, str | None] = {}
     for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
-            if _callee_name(node.value) != "APIRouter":
+        if not (isinstance(node, ast.Assign) and isinstance(node.value, ast.Call)):
+            continue
+        if _callee_name(node.value) != "APIRouter":
+            continue
+        has_prefix = any(keyword.arg == "prefix" for keyword in node.value.keywords)
+        prefix = _keyword_literal(node.value, "prefix")
+        for target in node.targets:
+            if not isinstance(target, ast.Name):
                 continue
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    prefixes[target.id] = _keyword_literal(node.value, "prefix") or ""
+            ambiguous = target.id in prefixes or (has_prefix and prefix is None)
+            prefixes[target.id] = None if ambiguous else (prefix or "")
     return prefixes
 
 
 def _literal_path(decorator: ast.Call) -> str | None:
-    if not decorator.args:
-        return None
-    first = decorator.args[0]
+    first = decorator.args[0] if decorator.args else None
+    if first is None:
+        for keyword in decorator.keywords:
+            if keyword.arg == "path":
+                first = keyword.value
     if isinstance(first, ast.Constant) and isinstance(first.value, str):
         return first.value
     return None
 
 
 def _route_of(
-    decorator: ast.expr, handler: str, rel: str, prefixes: dict[str, str]
+    decorator: ast.expr, handler: str, rel: str, prefixes: dict[str, str | None]
 ) -> Route | None:
     """The route declared by one decorator, or None when it is not a literal HTTP route."""
     if not isinstance(decorator, ast.Call) or not isinstance(decorator.func, ast.Attribute):
@@ -188,29 +202,56 @@ def _route_of(
     path = _literal_path(decorator)
     if method not in _HTTP_METHODS or not isinstance(owner, ast.Name) or path is None:
         return None
+    prefix = prefixes.get(owner.id, "")
+    if prefix is None:
+        raise _UnresolvedPrefix
     response = _keyword_source(decorator, "response_model")
-    return Route(prefixes.get(owner.id, "") + path, method.upper(), handler, response, rel)
+    return Route(prefix + path, method.upper(), handler, response, rel)
 
 
-def _routes_in(tree: ast.AST, rel: str) -> list[Route]:
+def _routes_in(tree: ast.AST, rel: str) -> tuple[list[Route], bool]:
+    """Routes of one file, and whether some were dropped for an unresolvable router prefix."""
     prefixes = _router_prefixes(tree)
     found: list[Route] = []
+    unresolved = False
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
         for decorator in node.decorator_list:
-            route = _route_of(decorator, node.name, rel, prefixes)
+            try:
+                route = _route_of(decorator, node.name, rel, prefixes)
+            except _UnresolvedPrefix:
+                unresolved = True
+                continue
             if route is not None:
                 found.append(route)
-    return found
+    return found, unresolved
 
 
-def _mentions_fastapi(text: str | None) -> bool:
-    return text is not None and "fastapi" in text.lower()
+def _imports_fastapi(tree: ast.AST) -> bool:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name.split(".")[0] == "fastapi" for alias in node.names):
+                return True
+        elif isinstance(node, ast.ImportFrom) and node.level == 0:
+            if (node.module or "").split(".")[0] == "fastapi":
+                return True
+    return False
+
+
+def _fastapi_state(root: Path, rel: str) -> tuple[ast.AST | None, bool]:
+    """(tree, relevant): relevant when it imports fastapi, or is unparsable and mentions it."""
+    text = read_source(root, rel)
+    if text is None or "fastapi" not in text.lower():
+        return None, False
+    tree = _parse(text)
+    if tree is None:
+        return None, True
+    return tree, _imports_fastapi(tree)
 
 
 def detect_routes(root: Path, files: list[str]) -> bool:
-    return any(_mentions_fastapi(read_source(root, rel)) for rel in _python_files(files))
+    return any(_fastapi_state(root, rel)[1] for rel in _python_files(files))
 
 
 def covers_routes(path: str) -> bool:
@@ -222,15 +263,18 @@ def render_routes(root: Path, files: list[str]) -> str:
     """Route table (method, path, handler, response model, file) plus the documented limits."""
     routes: list[Route] = []
     unparsed: list[str] = []
+    unresolved: list[str] = []
     for rel in _python_files(files):
-        text = read_source(root, rel)
-        if not _mentions_fastapi(text):
+        tree, relevant = _fastapi_state(root, rel)
+        if not relevant:
             continue
-        tree = _parse(text or "")
         if tree is None:
             unparsed.append(rel)
             continue
-        routes.extend(_routes_in(tree, rel))
+        found, dropped = _routes_in(tree, rel)
+        routes.extend(found)
+        if dropped:
+            unresolved.append(rel)
     lines: list[str] = []
     if routes:
         lines += ["| Method | Path | Handler | Response model | File |", "| --- | --- | --- | --- | --- |"]
@@ -242,7 +286,8 @@ def render_routes(root: Path, files: list[str]) -> str:
             )
     else:
         lines.append(NA)
-    lines += ["", _ROUTES_LIMITS, *_unparsed_lines(unparsed)]
+    unresolved_lines = [f"- unresolved router prefix: `{rel}`" for rel in sorted(set(unresolved))]
+    lines += ["", _ROUTES_LIMITS, *unresolved_lines, *_unparsed_lines(unparsed)]
     return "\n".join(lines) + "\n"
 
 

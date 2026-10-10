@@ -43,6 +43,7 @@ BANNER = (
     "Regenerate with `make gen-docs`. -->"
 )
 _MARKED = "chrysa:docs:"
+MIN_PYTHON = (3, 12)
 _BLOCK = re.compile(
     r"(?P<head><!-- chrysa:docs:(?P<name>[a-z-]+):start -->\r?\n)"
     r"(?P<body>(?:(?!<!-- chrysa:docs:[a-z-]+:start -->).)*?)"
@@ -118,13 +119,43 @@ def read_raw(root: Path, rel: str) -> str | None:
         return None
 
 
+_FENCE = re.compile(r"^[ \t]*(?P<fence>`{3,}|~{3,})[^\n]*$", re.MULTILINE)
+
+
+def fenced_regions(text: str) -> list[tuple[int, int]]:
+    """Character spans of fenced code blocks (``` or ~~~); an unterminated fence runs to EOF.
+
+    A fence closes on a line of the same character, at least as long, with nothing after it.
+    """
+    regions: list[tuple[int, int]] = []
+    opened: tuple[int, str] | None = None
+    for match in _FENCE.finditer(text):
+        fence = match.group("fence")
+        if opened is None:
+            opened = (match.start(), fence)
+        elif fence[0] == opened[1][0] and len(fence) >= len(opened[1]) and match.group(0).strip() == fence:
+            regions.append((opened[0], match.end()))
+            opened = None
+    if opened is not None:
+        regions.append((opened[0], len(text)))
+    return regions
+
+
+def _in_regions(position: int, regions: list[tuple[int, int]]) -> bool:
+    return any(start <= position < end for start, end in regions)
+
+
 def splice_blocks(text: str, bodies: dict[str, str]) -> str:
-    """Replace the body of every complete marker block whose name has a generated body."""
+    """Replace the body of every complete marker block whose name has a generated body.
+
+    Marker pairs inside fenced code blocks are examples, never live blocks, and are left alone.
+    """
     out: list[str] = []
     last = 0
+    fenced = fenced_regions(text)
     for match in _BLOCK.finditer(text):
         body = bodies.get(match.group("name"))
-        if body is None:
+        if body is None or _in_regions(match.start(), fenced):
             continue
         out.append(text[last : match.start("body")])
         out.append(body.replace("\n", "\r\n") if "\r\n" in text else body)
@@ -313,6 +344,12 @@ def main(argv: list[str] | None = None, root: Path = _ROOT) -> int:
     parser.add_argument("--check", action="store_true", help="fail on drift instead of writing")
     parser.add_argument("--base", default=None, help="base ref for the new-folder check")
     args = parser.parse_args(argv)
+    if sys.version_info < MIN_PYTHON:
+        sys.stderr.write(
+            "gen_docs needs Python >= 3.12 (frozen runtime is 3.14): output depends on the "
+            "grammar that parses the target's sources.\n"
+        )
+        return 2
     if not args.check:
         write_all(root)
         return 0

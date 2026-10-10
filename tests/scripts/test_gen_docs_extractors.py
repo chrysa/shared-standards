@@ -126,3 +126,67 @@ def test_routes_escape_pipe_in_cells(tmp_path: Path) -> None:
     _write(tmp_path, "api/pipe.py", src)
     out = x.render_routes(tmp_path, ["api/pipe.py"])
     assert "| GET | `/a\\|b` | `pipe` | `int \\| None` | `api/pipe.py` |" in out
+
+
+def test_routes_unresolved_prefix_variable_is_omitted_and_listed(tmp_path: Path) -> None:
+    src = (
+        "from fastapi import APIRouter\n"
+        "PREFIX = '/v1'\n"
+        "router = APIRouter(prefix=PREFIX)\n\n\n"
+        "@router.get('/x')\ndef x():\n    return 1\n"
+    )
+    _write(tmp_path, "api/a.py", src)
+    out = x.render_routes(tmp_path, ["api/a.py"])
+    assert "`x`" not in out
+    assert "- unresolved router prefix: `api/a.py`" in out
+
+
+def test_routes_router_assigned_twice_is_ambiguous(tmp_path: Path) -> None:
+    src = (
+        "from fastapi import APIRouter\n"
+        "router = APIRouter(prefix='/a')\n"
+        "router = APIRouter(prefix='/b')\n\n\n"
+        "@router.get('/x')\ndef x():\n    return 1\n"
+    )
+    _write(tmp_path, "api/a.py", src)
+    out = x.render_routes(tmp_path, ["api/a.py"])
+    assert "/a/x" not in out and "/b/x" not in out
+    assert out.count("- unresolved router prefix: `api/a.py`") == 1
+
+
+def test_routes_same_router_name_in_two_files_stays_per_file(tmp_path: Path) -> None:
+    for rel, prefix in (("api/a.py", "/a"), ("api/b.py", "/b")):
+        _write(
+            tmp_path,
+            rel,
+            f"from fastapi import APIRouter\nrouter = APIRouter(prefix='{prefix}')\n\n\n"
+            "@router.get('/x')\ndef x():\n    return 1\n",
+        )
+    out = x.render_routes(tmp_path, ["api/a.py", "api/b.py"])
+    assert "`/a/x`" in out and "`/b/x`" in out
+    assert "unresolved" not in out
+
+
+def test_routes_path_keyword_is_supported(tmp_path: Path) -> None:
+    src = "from fastapi import FastAPI\napp = FastAPI()\n\n\n@app.get(path='/kw')\ndef kw():\n    return 1\n"
+    _write(tmp_path, "api/k.py", src)
+    assert "| GET | `/kw` | `kw` |" in x.render_routes(tmp_path, ["api/k.py"])
+
+
+def test_routes_fastapi_word_without_import_is_ignored(tmp_path: Path) -> None:
+    _write(tmp_path, "api/doc.py", "# fastapi is great\nNAME = 'fastapi'\n")
+    assert x.ROUTES.detect(tmp_path, ["api/doc.py"]) is False
+    assert x.render_routes(tmp_path, ["api/doc.py"]).startswith(x.NA)
+
+
+def test_routes_unparsable_file_mentioning_fastapi_is_detected_and_listed(tmp_path: Path) -> None:
+    _write(tmp_path, "api/bad.py", "import fastapi\ndef broken(:\n")
+    assert x.ROUTES.detect(tmp_path, ["api/bad.py"]) is True
+    assert "- not parsed: `api/bad.py`" in x.render_routes(tmp_path, ["api/bad.py"])
+
+
+def test_routes_import_forms_are_detected(tmp_path: Path) -> None:
+    _write(tmp_path, "a.py", "import fastapi.routing\n")
+    _write(tmp_path, "b.py", "from fastapi.routing import APIRouter\n")
+    assert x.ROUTES.detect(tmp_path, ["a.py"]) is True
+    assert x.ROUTES.detect(tmp_path, ["b.py"]) is True

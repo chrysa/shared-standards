@@ -78,7 +78,7 @@ jobs:
             # Regenerate and fail if any committed file drifted (mirrors the docs-drift hook).
             - name: Reference docs drift
               working-directory: ${{ github.workspace }}
-              run: uv run --no-project --with pyyaml==6.0.2 python -m scripts.gen_docs --check
+              run: uv run --python 3.14 --no-project --with pyyaml==6.0.2 python -m scripts.gen_docs --check
 
     test:
         name: Docker tests

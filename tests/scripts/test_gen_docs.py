@@ -167,3 +167,51 @@ def test_crlf_file_with_current_block_is_untouched(tmp_path: Path) -> None:
     assert g.drift(root) == []
     g.write_all(root)
     assert (root / "ARCHITECTURE.md").read_bytes() == before
+
+
+def _fence_repo(tmp_path: Path, doc: str) -> Path:
+    root = _repo(tmp_path)
+    (root / "doc.md").write_text(doc, encoding="utf-8")
+    return root
+
+
+_EXAMPLE = "<!-- chrysa:docs:structure:start -->\nold\n<!-- chrysa:docs:structure:end -->\n"
+
+
+def test_fenced_marker_example_is_left_untouched_and_not_drift(tmp_path: Path) -> None:
+    doc = f"# D\n\n```markdown\n{_EXAMPLE}```\n"
+    root = _fence_repo(tmp_path, doc)
+    g.write_all(root)
+    assert (root / "doc.md").read_text(encoding="utf-8") == doc
+    assert g.drift(root) == []
+
+
+def test_real_block_outside_the_fence_is_still_updated(tmp_path: Path) -> None:
+    doc = f"```markdown\n{_EXAMPLE}```\n\n{_EXAMPLE}"
+    root = _fence_repo(tmp_path, doc)
+    g.write_all(root)
+    out = (root / "doc.md").read_text(encoding="utf-8")
+    head, tail = out.split("```\n\n", 1)
+    assert "old" in head
+    assert "old" not in tail and "| Directory |" in tail
+
+
+def test_tilde_fence_is_respected(tmp_path: Path) -> None:
+    doc = f"~~~markdown\n{_EXAMPLE}~~~\n"
+    root = _fence_repo(tmp_path, doc)
+    g.write_all(root)
+    assert (root / "doc.md").read_text(encoding="utf-8") == doc
+
+
+def test_unterminated_fence_covers_rest_of_file(tmp_path: Path) -> None:
+    doc = f"```markdown\n{_EXAMPLE}"
+    root = _fence_repo(tmp_path, doc)
+    g.write_all(root)
+    assert (root / "doc.md").read_text(encoding="utf-8") == doc
+    assert g.drift(root) == []
+
+
+def test_main_refuses_old_python(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    monkeypatch.setattr(g.sys, "version_info", (3, 9, 0))
+    assert g.main([], root=_repo(tmp_path)) == 2
+    assert "Python >= 3.12" in capsys.readouterr().err

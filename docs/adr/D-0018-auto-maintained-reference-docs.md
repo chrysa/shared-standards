@@ -56,6 +56,11 @@ Before any fleet distribution: the generator runs clean and idempotently on
   each generated block states what it could not resolve.
 - **Gains:** reference docs cannot silently rot; the lockstep rule becomes mechanical for the
   deterministic part.
+- **Interpreter dependence:** output depends on the Python grammar that parses the target's
+  sources (a PEP 695 file parses on 3.13+, not on 3.9). The generator is pinned to the frozen
+  runtime (3.14, ADR D-0015) in CI, the `docs-drift` hook should run on it too, and
+  `gen_docs` refuses to run below 3.12. Kill-test: the same tree producing different docs on
+  two supported interpreters is a determinism failure and Kills the ADR's drift gate as written.
 - **Debt:** heuristic code-without-doc detection stays a warning until proven precise.
 - **Blast radius if Killed:** remove the `docs-drift` hook, `scripts/gen_docs*.py`, the
   `deploy_docs_generator` step in `apply-repo-standard.sh`, and the canon bullet.
