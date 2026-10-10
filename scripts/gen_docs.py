@@ -42,8 +42,8 @@ BANNER = (
 )
 _MARKED = "chrysa:docs:"
 _BLOCK = re.compile(
-    r"(?P<head><!-- chrysa:docs:(?P<name>[a-z-]+):start -->\n)"
-    r"(?P<body>.*?)"
+    r"(?P<head><!-- chrysa:docs:(?P<name>[a-z-]+):start -->\r?\n)"
+    r"(?P<body>(?:(?!<!-- chrysa:docs:[a-z-]+:start -->).)*?)"
     r"(?P<tail><!-- chrysa:docs:(?P=name):end -->)",
     re.DOTALL,
 )
@@ -106,6 +106,14 @@ def render_file(extractor: Extractor, root: Path, files: list[str]) -> str:
     return f"{BANNER}\n\n# {_title(extractor.name)}\n\n{extractor.render(root, files)}"
 
 
+def read_raw(root: Path, rel: str) -> str | None:
+    """File text decoded as UTF-8 with newlines untouched, or None if missing/undecodable."""
+    try:
+        return (root / rel).read_bytes().decode("utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
 def splice_blocks(text: str, bodies: dict[str, str]) -> str:
     """Replace the body of every complete marker block whose name has a generated body."""
     out: list[str] = []
@@ -115,7 +123,7 @@ def splice_blocks(text: str, bodies: dict[str, str]) -> str:
         if body is None:
             continue
         out.append(text[last : match.start("body")])
-        out.append(body)
+        out.append(body.replace("\n", "\r\n") if "\r\n" in text else body)
         last = match.end("body")
     out.append(text[last:])
     return "".join(out)
@@ -131,7 +139,7 @@ def generate(root: Path) -> dict[str, Expected]:
         for item, explicit in chosen
     }
     for rel in files:
-        text = extractors.read_source(root, rel) if rel.endswith(".md") else None
+        text = read_raw(root, rel) if rel.endswith(".md") else None
         if text is None or _MARKED not in text:
             continue
         spliced = splice_blocks(text, bodies)
@@ -155,7 +163,7 @@ def drift(root: Path) -> list[str]:
     """Drift lines (empty when every owned file is current)."""
     lines = [f"unknown extractor in {PROFILE}: {name}" for name in unknown_extractors(root)]
     for rel, item in sorted(generate(root).items()):
-        actual = extractors.read_source(root, rel)
+        actual = read_raw(root, rel)
         if actual is None:
             if item.required:
                 lines.append(f"missing: {rel}")

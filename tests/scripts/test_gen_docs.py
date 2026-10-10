@@ -124,3 +124,46 @@ def test_main_check_exit_codes(tmp_path: Path) -> None:
     assert g.main(["--check"], root=root) == 1
     assert g.main([], root=root) == 0
     assert g.main(["--check"], root=root) == 0
+
+
+def test_stray_start_marker_does_not_swallow_prose() -> None:
+    text = (
+        "<!-- chrysa:docs:structure:start -->\nUSER PROSE\n## Heading\n"
+        "<!-- chrysa:docs:structure:start -->\nO\n<!-- chrysa:docs:structure:end -->\nC\n"
+    )
+    assert g.splice_blocks(text, {"structure": "NEW\n"}) == (
+        "<!-- chrysa:docs:structure:start -->\nUSER PROSE\n## Heading\n"
+        "<!-- chrysa:docs:structure:start -->\nNEW\n<!-- chrysa:docs:structure:end -->\nC\n"
+    )
+
+
+def _crlf(root: Path, body: str) -> bytes:
+    raw = (
+        "# Arch\r\n\r\nintro\r\n<!-- chrysa:docs:structure:start -->\r\n"
+        + body
+        + "<!-- chrysa:docs:structure:end -->\r\noutro\r\n"
+    ).encode()
+    (root / "ARCHITECTURE.md").write_bytes(raw)
+    return raw
+
+
+def test_crlf_file_keeps_its_newlines_outside_markers(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    _crlf(root, "OLD\r\n")
+    assert g.drift(root) == ["stale: ARCHITECTURE.md"]
+    g.write_all(root)
+    data = (root / "ARCHITECTURE.md").read_bytes()
+    assert data.startswith(b"# Arch\r\n\r\nintro\r\n<!-- chrysa:docs:structure:start -->\r\n")
+    assert data.endswith(b"<!-- chrysa:docs:structure:end -->\r\noutro\r\n")
+    assert b"\n" not in data.replace(b"\r\n", b"")
+    assert g.drift(root) == []
+
+
+def test_crlf_file_with_current_block_is_untouched(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    _crlf(root, "OLD\r\n")
+    g.write_all(root)
+    before = (root / "ARCHITECTURE.md").read_bytes()
+    assert g.drift(root) == []
+    g.write_all(root)
+    assert (root / "ARCHITECTURE.md").read_bytes() == before
