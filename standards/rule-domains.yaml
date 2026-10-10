@@ -89,6 +89,7 @@ rules:
   "Python packaging \u2014 `pyproject.toml` is the single source of truth": backend-python
   Raised errors are typed: code-quality
   React is a presentation layer, not the domain: frontend
+  Reference documentation is generated from the code and drift-gated: docs
   "Repo provenance \u2014 every code repo depends on `project-init`": architecture
   Rights are resolved against the common directory (LDAP), never re-declared per service: security
   "Security scanning is a gate, not an afterthought \u2014 it runs in pre-commit and in CI": security

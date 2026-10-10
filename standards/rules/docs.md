@@ -33,6 +33,18 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   the standards corpus itself (this repo): there the repo is canon and Notion is only a
   governance view (`GV-000`).
 
+- **Reference documentation is generated from the code and drift-gated.** Repository
+  structure, routes, data model and the component inventory are facts, not prose: they are
+  produced by `scripts/gen_docs.py` (ADR D-0018) from the source by **static extraction** (the
+  target's code is never imported or executed) into `docs/reference/` or between
+  `<!-- chrysa:docs:<name>:start/end -->` markers, and are **never hand-edited**. The
+  `docs-drift` pre-commit hook regenerates them and **fails** when a committed file is stale,
+  and **fails** when a newly created folder that holds source has no `README.md`. A change to
+  covered source with no documentation change is only a **warning**. A repo opts in through the
+  `docs:` list of `project-profile.yml`; without it, stack detection chooses the extractors and a
+  missing generated file is not a failure. Prose (README introduction, ADR rationale, runbooks)
+  stays human-written and remains under the lockstep rule above.
+
 - **Every repo ships generated context files.** A standard, vendor-neutral context set makes
   every repo self-describing for a fresh agent or the returning owner: `handover.md` (what the
   repo is, its place in the ecosystem, its `shared-standards` dependency, its ADRs, and current

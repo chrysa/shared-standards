@@ -100,6 +100,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 ### Documentation & session state · `standards/rules/docs.md`
 - Notion logging
 - Documentation and Notion are maintained in lockstep with the code — a change that leaves them stale is unfinished
+- Reference documentation is generated from the code and drift-gated
 - Every repo ships generated context files
 - Session lifecycle (primer + memory + hindsight)
 
