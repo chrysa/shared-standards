@@ -145,3 +145,33 @@ def test_warning_never_changes_the_exit_code(repo: Path) -> None:
     _write(repo, "src/old/d.py")
     _git(repo, "add", "-A")
     assert g.main(["--check"], root=repo) == 0
+
+
+def test_non_ascii_directory_is_not_bypassed(repo: Path) -> None:
+    _write(repo, "src/né w/mod.py")
+    _git(repo, "add", "-A")
+    assert g.new_dirs_missing_readme(repo) == ["src/né w"]
+
+
+def test_unknown_base_ref_raises_and_check_fails(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(g.BaseRefError):
+        g.new_dirs_missing_readme(repo, "no-such-ref")
+    assert g.main(["--check", "--base", "no-such-ref"], root=repo) == 1
+    assert "cannot resolve base ref: no-such-ref" in capsys.readouterr().err
+
+
+def test_moved_file_counts_as_added(repo: Path) -> None:
+    (repo / "src/new").mkdir()
+    _git(repo, "mv", "src/old/a.py", "src/new/a.py")
+    assert g.new_dirs_missing_readme(repo) == ["src/new"]
+    _git(repo, "commit", "-q", "-m", "move")
+    assert g.new_dirs_missing_readme(repo, "HEAD~1") == ["src/new"]
+
+
+def test_untracked_readme_does_not_satisfy_the_gate(repo: Path) -> None:
+    _write(repo, "n/a.py")
+    _write(repo, "n/README.md", "# n\n")
+    _git(repo, "add", "n/a.py")
+    assert g.new_dirs_missing_readme(repo) == ["n"]
+    _git(repo, "add", "n/README.md")
+    assert g.new_dirs_missing_readme(repo) == []

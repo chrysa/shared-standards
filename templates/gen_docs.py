@@ -179,21 +179,43 @@ def drift(root: Path) -> list[str]:
 # ── git-aware checks ─────────────────────────────────────────────────────────────────────
 
 
-def _git_lines(root: Path, *args: str) -> list[str] | None:
-    """Non-empty stdout lines of ``git -C root <args>``, or None when git fails/is absent."""
+class BaseRefError(ValueError):
+    """The ``--base`` ref does not resolve to a commit (not fetched, or misspelled)."""
+
+
+def _git_lines(root: Path, *args: str, sep: str = "\n") -> list[str] | None:
+    """Non-empty output records of ``git -C root <args>`` split on ``sep`` (None on failure).
+
+    Pass ``-z`` to git and ``sep="\0"`` for path lists: without it git quotes non-ASCII names.
+    """
     try:
         result = subprocess.run(
             ["git", "-C", str(root), *args], capture_output=True, text=True, check=True
         )
     except (OSError, subprocess.CalledProcessError):
         return None
-    return [line for line in result.stdout.splitlines() if line]
+    return [line for line in result.stdout.split(sep) if line]
+
+
+def _paths(root: Path, *args: str) -> list[str] | None:
+    return _git_lines(root, *args, sep="\0")
 
 
 def _diff_names(root: Path, base: str | None, kind: str) -> list[str] | None:
-    """Paths of the change set filtered by ``kind`` (``A`` added, ``AM`` added/modified)."""
+    """Paths of the change set filtered by ``kind`` (``A`` added, ``AM`` added/modified).
+
+    None when ``root`` is not a git work tree; BaseRefError when ``base`` does not resolve.
+    ``base`` is compared to HEAD directly, so it should be the merge-base of the branch.
+    Renames are disabled so a moved file counts as added at its new path.
+    """
+    if _git_lines(root, "rev-parse", "--is-inside-work-tree") is None:
+        return None
+    if base is not None and _git_lines(root, "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}") is None:
+        raise BaseRefError(base)
     scope = ["--cached"] if base is None else [base, "HEAD"]
-    return _git_lines(root, "diff", "--name-only", f"--diff-filter={kind}", *scope)
+    return _paths(
+        root, "diff", "-z", "--name-only", "--no-renames", f"--diff-filter={kind}", *scope
+    )
 
 
 def is_source(path: str) -> bool:
@@ -211,24 +233,33 @@ def _ancestors(path: str) -> Iterator[str]:
             yield str(parent)
 
 
+def _tracked(root: Path, ref: str) -> list[str]:
+    """Tracked paths in the tree of ``ref`` (empty when ref does not exist, e.g. no commit yet)."""
+    return _paths(root, "ls-tree", "-r", "-z", "--name-only", ref) or []
+
+
 def _dirs_at(root: Path, ref: str) -> set[str]:
-    """Every directory that held a tracked file at ``ref`` (empty when ref does not exist)."""
-    tracked = _git_lines(root, "ls-tree", "-r", "--name-only", ref) or []
-    return {parent for rel in tracked for parent in _ancestors(rel)}
+    """Every directory that held a tracked file at ``ref``."""
+    return {parent for rel in _tracked(root, ref) for parent in _ancestors(rel)}
 
 
 def new_dirs_missing_readme(root: Path, base: str | None = None) -> list[str]:
-    """Newly created directories that directly hold a source file and carry no README.md."""
+    """Newly created directories that directly hold a source file and carry no README.md.
+
+    A README counts only when it belongs to the compared change set (staged index, or the HEAD
+    tree in base mode), never a stray untracked file. Raises BaseRefError on an unknown base.
+    """
     added = _diff_names(root, base, "A")
     if added is None:
         return []
     existing = _dirs_at(root, base or "HEAD")
+    present = set(_paths(root, "ls-files", "-z") or []) if base is None else set(_tracked(root, "HEAD"))
     missing: set[str] = set()
     for rel in added:
         directory = str(PurePosixPath(rel).parent)
         if directory == "." or directory in existing or not is_source(rel):
             continue
-        if not (root / directory / "README.md").is_file():
+        if f"{directory}/README.md" not in present:
             missing.add(directory)
     return sorted(missing)
 
@@ -253,12 +284,16 @@ def docs_warning(changed: list[str], active: list[Extractor]) -> str | None:
 def check(root: Path, base: str | None = None) -> int:
     """Run the gate: print problems to stderr and return the process exit code."""
     problems = drift(root)
-    problems += [
-        f"new folder without README.md: {directory}/"
-        for directory in new_dirs_missing_readme(root, base)
-    ]
-    active = [item for item, _ in select(root, project_files(root))]
-    warning = docs_warning(changed_files(root, base), active)
+    warning = None
+    try:
+        problems += [
+            f"new folder without README.md: {directory}/"
+            for directory in new_dirs_missing_readme(root, base)
+        ]
+        active = [item for item, _ in select(root, project_files(root))]
+        warning = docs_warning(changed_files(root, base), active)
+    except BaseRefError as error:
+        problems.append(f"cannot resolve base ref: {error}")
     if warning:
         sys.stderr.write(warning + "\n")
     if not problems:
