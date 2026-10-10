@@ -296,6 +296,133 @@ ROUTES = Extractor(
 )
 
 
+# ── data model (Django) ───────────────────────────────────────────────────────────────────
+
+_RELATION_FIELDS = frozenset({"ForeignKey", "OneToOneField", "ManyToManyField"})
+_DATA_MODEL_LIMITS = (
+    "_Limits: models inheriting from non-`Model` bases are not listed; "
+    "non-literal relation targets are shown as source text._"
+)
+
+
+class FieldRow(NamedTuple):
+    """One declared model field."""
+
+    name: str
+    kind: str
+    relation: str
+
+
+def _is_model_file(rel: str) -> bool:
+    parts = rel.split("/")
+    return rel.endswith(".py") and (parts[-1] == "models.py" or "models" in parts[:-1])
+
+
+def _is_model_class(node: ast.ClassDef) -> bool:
+    """A class deriving from ``Model`` or ``<module>.Model``."""
+    for base in node.bases:
+        if isinstance(base, ast.Name) and base.id == "Model":
+            return True
+        if isinstance(base, ast.Attribute) and base.attr == "Model":
+            return True
+    return False
+
+
+def _relation_source(call: ast.Call) -> str:
+    """Source text of the relation target (first argument, else ``to=``), or empty."""
+    if call.args:
+        return ast.unparse(call.args[0])
+    return _keyword_source(call, "to")
+
+
+def _field_of(statement: ast.stmt) -> FieldRow | None:
+    """The field declared by ``name = models.XField(...)``, or None."""
+    if not isinstance(statement, ast.Assign) or not isinstance(statement.value, ast.Call):
+        return None
+    if len(statement.targets) != 1 or not isinstance(statement.targets[0], ast.Name):
+        return None
+    call = statement.value
+    kind = _callee_name(call)
+    if not kind.endswith("Field") and kind not in _RELATION_FIELDS:
+        return None
+    relation = _relation_source(call) if kind in _RELATION_FIELDS else ""
+    return FieldRow(statement.targets[0].id, kind, relation)
+
+
+def _model_section(node: ast.ClassDef, rel: str) -> list[str]:
+    lines = [f"### `{node.name}` — `{rel}`", ""]
+    fields = [row for row in map(_field_of, node.body) if row is not None]
+    if not fields:
+        return [*lines, "_no declared fields_", ""]
+    lines += ["| Field | Type | Relation |", "| --- | --- | --- |"]
+    for row in fields:
+        relation = f"`{_cell(row.relation)}`" if row.relation else ""
+        lines.append(f"| `{row.name}` | `{row.kind}` | {relation} |")
+    return [*lines, ""]
+
+
+def _imports_django(tree: ast.AST) -> bool:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name.split(".")[0] == "django" for alias in node.names):
+                return True
+        elif isinstance(node, ast.ImportFrom) and node.level == 0:
+            if (node.module or "").split(".")[0] == "django":
+                return True
+    return False
+
+
+def _django_state(root: Path, rel: str) -> tuple[ast.AST | None, bool]:
+    """(tree, relevant): relevant when it imports django, or is unparsable and mentions it."""
+    text = read_source(root, rel)
+    if text is None or "django" not in text.lower():
+        return None, False
+    tree = _parse(text)
+    if tree is None:
+        return None, True
+    return tree, _imports_django(tree)
+
+
+def detect_data_model(root: Path, files: list[str]) -> bool:
+    return any(_django_state(root, rel)[1] for rel in files if _is_model_file(rel))
+
+
+def covers_data_model(path: str) -> bool:
+    return _is_model_file(path)
+
+
+def _model_classes(tree: ast.AST) -> list[ast.ClassDef]:
+    """Model classes of one tree, ordered by source line."""
+    found = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef) and _is_model_class(n)]
+    return sorted(found, key=lambda node: node.lineno)
+
+
+def render_data_model(root: Path, files: list[str]) -> str:
+    """One section per Django model class, in file then source-line order."""
+    sections: list[str] = []
+    unparsed: list[str] = []
+    for rel in sorted(rel for rel in files if _is_model_file(rel)):
+        tree, relevant = _django_state(root, rel)
+        if not relevant:
+            continue
+        if tree is None:
+            unparsed.append(rel)
+            continue
+        for node in _model_classes(tree):
+            sections += _model_section(node, rel)
+    lines = sections if sections else [NA, ""]
+    lines += [_DATA_MODEL_LIMITS, *_unparsed_lines(unparsed)]
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+DATA_MODEL = Extractor(
+    name="data-model",
+    detect=detect_data_model,
+    render=render_data_model,
+    covers=covers_data_model,
+)
+
+
 # ── registry ──────────────────────────────────────────────────────────────────────────────
 
 STRUCTURE = Extractor(
@@ -305,5 +432,5 @@ STRUCTURE = Extractor(
     covers=covers_structure,
 )
 
-EXTRACTORS: tuple[Extractor, ...] = (ROUTES, STRUCTURE)
+EXTRACTORS: tuple[Extractor, ...] = (DATA_MODEL, ROUTES, STRUCTURE)
 BY_NAME: dict[str, Extractor] = {extractor.name: extractor for extractor in EXTRACTORS}

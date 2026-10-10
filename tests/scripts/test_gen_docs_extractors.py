@@ -190,3 +190,100 @@ def test_routes_import_forms_are_detected(tmp_path: Path) -> None:
     _write(tmp_path, "b.py", "from fastapi.routing import APIRouter\n")
     assert x.ROUTES.detect(tmp_path, ["a.py"]) is True
     assert x.ROUTES.detect(tmp_path, ["b.py"]) is True
+
+
+DJANGO_SRC = textwrap.dedent('''\
+    from django.db import models
+
+
+    class Order(models.Model):
+        title = models.CharField(max_length=10)
+        owner = models.ForeignKey("auth.User", on_delete=models.CASCADE)
+        tags = models.ManyToManyField("Tag")
+        note = "not a field"
+
+        class Meta:
+            ordering = ["title"]
+
+
+    class Helper:
+        name = models.CharField(max_length=3)
+
+
+    class Tag(models.Model):
+        pass
+''')
+
+
+def test_data_model_lists_models_fields_and_relations(tmp_path: Path) -> None:
+    _write(tmp_path, "shop/models.py", DJANGO_SRC)
+    out = x.render_data_model(tmp_path, ["shop/models.py"])
+    assert "### `Order` — `shop/models.py`" in out
+    assert "| `title` | `CharField` |  |" in out
+    assert "| `owner` | `ForeignKey` | `'auth.User'` |" in out
+    assert "| `tags` | `ManyToManyField` | `'Tag'` |" in out
+    assert "note" not in out
+    assert "Helper" not in out
+    assert "Meta" not in out
+    assert "### `Tag` — `shop/models.py`" in out
+    assert "_no declared fields_" in out
+    assert "not listed" in out
+
+
+def test_data_model_reads_a_models_package(tmp_path: Path) -> None:
+    _write(tmp_path, "shop/models/order.py", DJANGO_SRC)
+    assert "### `Order`" in x.render_data_model(tmp_path, ["shop/models/order.py"])
+
+
+def test_data_model_unparsable_and_unreadable_files(tmp_path: Path) -> None:
+    _write(tmp_path, "a/models.py", "from django.db import models\nclass X(:\n")
+    (tmp_path / "b").mkdir()
+    (tmp_path / "b" / "models.py").write_bytes(b"\xff\x00")
+    out = x.render_data_model(tmp_path, ["a/models.py", "b/models.py"])
+    assert "- not parsed: `a/models.py`" in out
+    assert "b/models.py" not in out
+    assert out.startswith(x.NA)
+
+
+def test_data_model_detect_and_covers(tmp_path: Path) -> None:
+    _write(tmp_path, "shop/models.py", DJANGO_SRC)
+    _write(tmp_path, "pkg/models.py", "class Plain:\n    pass\n")
+    assert x.DATA_MODEL.detect(tmp_path, ["shop/models.py"]) is True
+    assert x.DATA_MODEL.detect(tmp_path, ["pkg/models.py"]) is False
+    assert x.DATA_MODEL.covers("shop/models.py") is True
+    assert x.DATA_MODEL.covers("shop/views.py") is False
+    assert x.BY_NAME["data-model"] is x.DATA_MODEL
+
+
+def test_data_model_comment_mentioning_django_does_not_detect(tmp_path: Path) -> None:
+    _write(tmp_path, "pkg/models.py", "# django-like\nclass Model:\n    pass\n")
+    assert x.DATA_MODEL.detect(tmp_path, ["pkg/models.py"]) is False
+
+
+def test_data_model_escapes_pipes_and_shows_non_literal_source(tmp_path: Path) -> None:
+    src = (
+        "from django.db import models\n\n\n"
+        "class A(models.Model):\n"
+        '    one = models.ForeignKey("a|b", on_delete=models.CASCADE)\n'
+        "    two = models.ForeignKey(TARGET, on_delete=models.CASCADE)\n"
+    )
+    _write(tmp_path, "app/models.py", src)
+    out = x.render_data_model(tmp_path, ["app/models.py"])
+    assert "`'a\\|b'`" in out
+    assert "| `two` | `ForeignKey` | `TARGET` |" in out
+
+
+def test_data_model_sections_sorted_by_file_then_line_with_nested(tmp_path: Path) -> None:
+    src = (
+        "from django.db import models\n\n\n"
+        "class Outer(models.Model):\n"
+        "    class Inner(models.Model):\n"
+        "        pass\n\n\n"
+        "class Later(models.Model):\n"
+        "    pass\n"
+    )
+    _write(tmp_path, "b/models.py", src)
+    _write(tmp_path, "a/models.py", "from django.db import models\n\n\nclass Z(models.Model):\n    pass\n")
+    out = x.render_data_model(tmp_path, ["b/models.py", "a/models.py"])
+    order = [out.index(f"### `{name}`") for name in ("Z", "Outer", "Inner", "Later")]
+    assert order == sorted(order)
