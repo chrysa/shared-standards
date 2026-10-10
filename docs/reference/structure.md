@@ -49,7 +49,7 @@
 | `templates/mcp/` | 4 | yes |
 | `templates/vscode/` | 3 | yes |
 | `templates/workflows-process/` | 11 | no |
-| `tests/` | 19 | no |
+| `tests/` | 20 | no |
 | `tests/pii/` | 7 | no |
-| `tests/scripts/` | 9 | no |
+| `tests/scripts/` | 10 | no |
 | `workflows/` | 20 | no |

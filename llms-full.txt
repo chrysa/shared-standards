@@ -633,6 +633,7 @@ tests/
     test_scanner.py
   scripts/
     __init__.py
+    test_apply_docs_generator.py
     test_distribute_standards.py
     test_gen_agent_views.py
     test_gen_context_files.py
