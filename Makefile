@@ -1,5 +1,5 @@
 # makefile-tier: lib
-.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views gen-context-files context-files-report spec-plan-gate-report
+.PHONY: help install dev test test-cov test-scripts docker-test lint format typecheck build clean pre-commit ci gen-agent-views gen-context-files gen-docs context-files-report spec-plan-gate-report
 
 help:
 	@echo "Available targets:"
@@ -23,6 +23,11 @@ gen-agent-views: ## Regenerate the agent views from standards/STANDARDS.chrysa.m
 # from this repo's own content (ADR D-0012). The context-files-drift gate verifies it.
 gen-context-files: ## Regenerate the per-repo context files (ADR D-0012)
 	python3 -m scripts.gen_context_files
+
+# Regenerate the reference docs (structure, routes, data model, components) from this repo's
+# source (ADR D-0018). The docs-drift gate verifies it.
+gen-docs: ## Regenerate the reference docs under docs/reference (ADR D-0018)
+	python3 -m scripts.gen_docs
 
 # Kill-test tally for ADR D-0012: the byte size of each generated context file (empty/garbage
 # output is visible here) and the number of generator-fix commits (churn signal). The ADR marks
@@ -51,7 +56,7 @@ test-cov:
 # the host and their coverage travels to Sonar next to the console coverage — otherwise a
 # scripts/ change is counted as 0% new-code coverage.
 test-scripts: ## Run the scripts test suite with coverage (host)
-	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/gen_agent_views.py,scripts/gen_context_files.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
+	python3 -m coverage run --include='scripts/quality_gate.py,scripts/pre-commit-merge.py,scripts/pyproject-ruff-merge.py,scripts/gen_agent_views.py,scripts/gen_context_files.py,scripts/gen_docs.py,scripts/gen_docs_extractors.py,scripts/pii/*.py' -m pytest tests/scripts tests/pii tests/test_pyproject_ruff_merge.py tests/test_pre_commit_merge_exclude.py -q
 	python3 -m coverage xml -o scripts-coverage.xml
 
 # The console app lives in console/ and its suite runs in Docker. CI's `make docker-test` builds its

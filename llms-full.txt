@@ -306,6 +306,7 @@ docs/
     standards-mcp.md
   reference/
     github-inspiration.md
+    structure.md
   specs/
     sonar-coverage-config.md
     spec-v1.md
@@ -368,6 +369,8 @@ scripts/
   gen_agent_views.py
   gen_context_files.py
   gen_context_pack.py
+  gen_docs.py
+  gen_docs_extractors.py
   gh-device-token.sh
   github_actions_pin.py
   lib/
@@ -575,6 +578,8 @@ templates/
     consoleTail.ts
     feedback_router.py
   gen_context_files.py
+  gen_docs.py
+  gen_docs_extractors.py
   github-config/
     actionlint.yaml
     auto_assign.yml
@@ -631,6 +636,10 @@ tests/
     test_distribute_standards.py
     test_gen_agent_views.py
     test_gen_context_files.py
+    test_gen_docs.py
+    test_gen_docs_extractors.py
+    test_gen_docs_parity.py
+    test_gen_docs_readme.py
     test_quality_gate_parser.py
   test_pre_commit_merge_exclude.py
   test_pyproject_ruff_merge.py
@@ -701,4 +710,4 @@ scripts/ci_secrets_explicit.py — Replace `secrets: inherit` with the explicit 
 scripts/gen_agent_views.py — Generate the agent views from the canonical standards corpus.
 scripts/gen_context_files.py — Generate the standardised per-repo context files from the repo's own content.
 scripts/gen_context_pack.py
-scripts/github_actions_pin.py — Keep the fleet's `chrysa/github-actions` pins on a single, current tag.
+scripts/gen_docs.py — Generate a repo's reference documentation from its own source (ADR D-0018).
