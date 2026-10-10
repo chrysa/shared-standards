@@ -67,9 +67,9 @@ code, and a deterministic gate fails when it has drifted.** Prose stays human-wr
   between markers inside an existing file:
 
   ```markdown
-  <!-- chrysa:docs:routes:start -->
+  <!-- chrysa:docs:<name>:start -->
   ...generated...
-  <!-- chrysa:docs:routes:end -->
+  <!-- chrysa:docs:<name>:end -->
   ```
 
   The generator writes only inside these markers or inside its own `docs/reference/` files.
