@@ -27,6 +27,7 @@
 - `D-0015-python-version-freeze.md` — D-0015: Freeze the Python version policy (runtime 3.14 · ruff target py313) (Accepted)
 - `D-0016-required-status-checks.md` — D-0016: Require `Docker tests` + `SonarCloud` as branch-protection status checks (Accepted)
 - `D-0017-realtime-first-ui.md` — D-0017: Real-time by default for any project with a UI (Accepted)
+- `D-0018-auto-maintained-reference-docs.md` — D-0018 — Reference documentation is generated from the code and drift-gated (Proposed)
 
 ## Notion links
 
