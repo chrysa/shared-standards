@@ -226,7 +226,7 @@ def test_data_model_lists_models_fields_and_relations(tmp_path: Path) -> None:
     assert "Helper" not in out
     assert "Meta" not in out
     assert "### `Tag` — `shop/models.py`" in out
-    assert "_no declared fields_" in out
+    assert "_no fields detected_" in out
     assert "not listed" in out
 
 
@@ -287,3 +287,54 @@ def test_data_model_sections_sorted_by_file_then_line_with_nested(tmp_path: Path
     out = x.render_data_model(tmp_path, ["b/models.py", "a/models.py"])
     order = [out.index(f"### `{name}`") for name in ("Z", "Outer", "Inner", "Later")]
     assert order == sorted(order)
+
+
+def test_data_model_marks_abstract_and_lists_inheritance_to_fixpoint(tmp_path: Path) -> None:
+    _write(
+        tmp_path,
+        "app/models.py",
+        "from django.db import models\n\n\n"
+        "class Leaf(Mid):\n    z = models.IntegerField()\n\n\n"
+        "class Mid(Base):\n    pass\n\n\n"
+        "class Base(models.Model):\n"
+        "    class Meta:\n        abstract = True\n\n\n"
+        "class Other(TimeStampedModel):\n    pass\n",
+    )
+    _write(tmp_path, "app/models/x.py", "from django.db import models\n\n\nclass Far(Leaf):\n    pass\n")
+    out = x.render_data_model(tmp_path, ["app/models.py", "app/models/x.py"])
+    assert "### `Base` — `app/models.py` (abstract)" in out
+    assert "### `Mid` — `app/models.py`\n\n_inherits: `Base`_" in out
+    assert "### `Leaf` — `app/models.py`\n\n_inherits: `Mid`_" in out
+    assert "### `Far` — `app/models/x.py`\n\n_inherits: `Leaf`_" in out
+    assert "Other" not in out
+    assert out.index("### `Leaf`") < out.index("### `Mid`") < out.index("### `Base`")
+    assert "non-literal" in out and "tuple unpacking" in out
+
+
+def test_data_model_annotated_and_conditional_fields(tmp_path: Path) -> None:
+    _write(
+        tmp_path,
+        "app/models.py",
+        "from django.db import models\n\n\n"
+        "class A(models.Model):\n"
+        "    a: models.CharField = models.CharField(max_length=1)\n"
+        "    if DEBUG:\n        b = models.IntegerField()\n"
+        "    try:\n        c = models.TextField()\n    except Exception:\n        pass\n"
+        "    d = models.CharField() if DEBUG else None\n"
+        "    e, f = models.CharField(), models.CharField()\n"
+        "    class Inner:\n        g = models.CharField()\n",
+    )
+    out = x.render_data_model(tmp_path, ["app/models.py"])
+    for name in ("a", "b", "c"):
+        assert f"| `{name}` |" in out
+    for name in ("d", "e", "f", "g"):
+        assert f"| `{name}` |" not in out
+
+
+def test_data_model_excludes_tests_and_migrations(tmp_path: Path) -> None:
+    files = ["tests/models.py", "app/migrations/models.py", "app/test/models.py"]
+    for rel in files:
+        _write(tmp_path, rel, DJANGO_SRC)
+    assert x.render_data_model(tmp_path, files).startswith(x.NA)
+    assert x.DATA_MODEL.detect(tmp_path, files) is False
+    assert x.DATA_MODEL.covers("app/migrations/models.py") is False

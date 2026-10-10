@@ -299,9 +299,12 @@ ROUTES = Extractor(
 # ── data model (Django) ───────────────────────────────────────────────────────────────────
 
 _RELATION_FIELDS = frozenset({"ForeignKey", "OneToOneField", "ManyToManyField"})
+_NON_MODEL_DIRS = frozenset({"tests", "test", "migrations"})
 _DATA_MODEL_LIMITS = (
-    "_Limits: models inheriting from non-`Model` bases are not listed; "
-    "non-literal relation targets are shown as source text._"
+    "_Limits: models whose bases are not `Model` or a model class found in the scanned files "
+    "are not listed; inherited fields are not repeated; fields declared through tuple "
+    "unpacking or inside expressions are not listed; non-literal relation targets are shown "
+    "as source text._"
 )
 
 
@@ -313,18 +316,54 @@ class FieldRow(NamedTuple):
     relation: str
 
 
+class ModelEntry(NamedTuple):
+    """A recognised model class: where it is, the model bases it inherits from."""
+
+    rel: str
+    node: ast.ClassDef
+    inherits: tuple[str, ...]
+
+
 def _is_model_file(rel: str) -> bool:
     parts = rel.split("/")
-    return rel.endswith(".py") and (parts[-1] == "models.py" or "models" in parts[:-1])
+    if not rel.endswith(".py") or _NON_MODEL_DIRS.intersection(parts[:-1]):
+        return False
+    return parts[-1] == "models.py" or "models" in parts[:-1]
 
 
-def _is_model_class(node: ast.ClassDef) -> bool:
-    """A class deriving from ``Model`` or ``<module>.Model``."""
-    for base in node.bases:
-        if isinstance(base, ast.Name) and base.id == "Model":
-            return True
-        if isinstance(base, ast.Attribute) and base.attr == "Model":
-            return True
+def _base_name(base: ast.expr) -> str:
+    """``Model`` -> ``Model``; ``models.Model`` -> ``Model``; anything else -> empty string."""
+    if isinstance(base, ast.Name):
+        return base.id
+    if isinstance(base, ast.Attribute):
+        return base.attr
+    return ""
+
+
+def _model_bases(node: ast.ClassDef, known: set[str]) -> tuple[str, ...]:
+    """Bases of ``node`` that are a model class already recognised (``Model`` excluded)."""
+    names = [_base_name(base) for base in node.bases]
+    return tuple(name for name in names if name in known)
+
+
+def _is_model_class(node: ast.ClassDef, known: set[str]) -> bool:
+    """A class deriving from ``Model``/``<module>.Model`` or from a known model class."""
+    names = {_base_name(base) for base in node.bases}
+    return "Model" in names or bool(names & known)
+
+
+def _is_abstract(node: ast.ClassDef) -> bool:
+    """True when the class body has ``class Meta`` with ``abstract = True``."""
+    for meta in node.body:
+        if not (isinstance(meta, ast.ClassDef) and meta.name == "Meta"):
+            continue
+        for item in meta.body:
+            if not isinstance(item, ast.Assign):
+                continue
+            value = item.value
+            names = [t.id for t in item.targets if isinstance(t, ast.Name)]
+            if "abstract" in names and isinstance(value, ast.Constant) and value.value is True:
+                return True
     return False
 
 
@@ -336,24 +375,49 @@ def _relation_source(call: ast.Call) -> str:
 
 
 def _field_of(statement: ast.stmt) -> FieldRow | None:
-    """The field declared by ``name = models.XField(...)``, or None."""
-    if not isinstance(statement, ast.Assign) or not isinstance(statement.value, ast.Call):
+    """The field declared by ``name = models.XField(...)`` (annotated or not), or None."""
+    if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
+        target: ast.expr = statement.targets[0]
+    elif isinstance(statement, ast.AnnAssign):
+        target = statement.target
+    else:
         return None
-    if len(statement.targets) != 1 or not isinstance(statement.targets[0], ast.Name):
+    if not isinstance(target, ast.Name) or not isinstance(statement.value, ast.Call):
         return None
     call = statement.value
     kind = _callee_name(call)
     if not kind.endswith("Field") and kind not in _RELATION_FIELDS:
         return None
     relation = _relation_source(call) if kind in _RELATION_FIELDS else ""
-    return FieldRow(statement.targets[0].id, kind, relation)
+    return FieldRow(target.id, kind, relation)
 
 
-def _model_section(node: ast.ClassDef, rel: str) -> list[str]:
-    lines = [f"### `{node.name}` — `{rel}`", ""]
-    fields = [row for row in map(_field_of, node.body) if row is not None]
+def _body_statements(body: list[ast.stmt]) -> list[ast.stmt]:
+    """Statements of a class body, descending into ``if``/``try`` blocks only."""
+    out: list[ast.stmt] = []
+    for statement in body:
+        if isinstance(statement, ast.If):
+            out += _body_statements(statement.body) + _body_statements(statement.orelse)
+        elif isinstance(statement, ast.Try):
+            out += _body_statements(statement.body)
+            for handler in statement.handlers:
+                out += _body_statements(handler.body)
+            out += _body_statements(statement.orelse) + _body_statements(statement.finalbody)
+        else:
+            out.append(statement)
+    return out
+
+
+def _model_section(entry: ModelEntry) -> list[str]:
+    node = entry.node
+    marker = " (abstract)" if _is_abstract(node) else ""
+    lines = [f"### `{node.name}` — `{entry.rel}`{marker}", ""]
+    if entry.inherits:
+        bases = ", ".join(f"`{name}`" for name in entry.inherits)
+        lines += [f"_inherits: {bases}_", ""]
+    fields = [row for row in map(_field_of, _body_statements(node.body)) if row is not None]
     if not fields:
-        return [*lines, "_no declared fields_", ""]
+        return [*lines, "_no fields detected_", ""]
     lines += ["| Field | Type | Relation |", "| --- | --- | --- |"]
     for row in fields:
         relation = f"`{_cell(row.relation)}`" if row.relation else ""
@@ -391,15 +455,36 @@ def covers_data_model(path: str) -> bool:
     return _is_model_file(path)
 
 
-def _model_classes(tree: ast.AST) -> list[ast.ClassDef]:
-    """Model classes of one tree, ordered by source line."""
-    found = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef) and _is_model_class(n)]
-    return sorted(found, key=lambda node: node.lineno)
+def _models_of(trees: dict[str, ast.AST]) -> list[ModelEntry]:
+    """Model classes of all scanned files, resolved by simple name until a fixpoint."""
+    classes = [
+        (rel, node)
+        for rel, tree in trees.items()
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef)
+    ]
+    known: set[str] = set()
+    recognised: set[tuple[str, int]] = set()
+    changed = True
+    while changed:
+        changed = False
+        for rel, node in classes:
+            key = (rel, node.lineno)
+            if key not in recognised and _is_model_class(node, known):
+                recognised.add(key)
+                known.add(node.name)
+                changed = True
+    entries = [
+        ModelEntry(rel, node, _model_bases(node, known))
+        for rel, node in classes
+        if (rel, node.lineno) in recognised
+    ]
+    return sorted(entries, key=lambda entry: (entry.rel, entry.node.lineno))
 
 
 def render_data_model(root: Path, files: list[str]) -> str:
     """One section per Django model class, in file then source-line order."""
-    sections: list[str] = []
+    trees: dict[str, ast.AST] = {}
     unparsed: list[str] = []
     for rel in sorted(rel for rel in files if _is_model_file(rel)):
         tree, relevant = _django_state(root, rel)
@@ -408,8 +493,10 @@ def render_data_model(root: Path, files: list[str]) -> str:
         if tree is None:
             unparsed.append(rel)
             continue
-        for node in _model_classes(tree):
-            sections += _model_section(node, rel)
+        trees[rel] = tree
+    sections: list[str] = []
+    for entry in _models_of(trees):
+        sections += _model_section(entry)
     lines = sections if sections else [NA, ""]
     lines += [_DATA_MODEL_LIMITS, *_unparsed_lines(unparsed)]
     return "\n".join(lines).rstrip("\n") + "\n"
