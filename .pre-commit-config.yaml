@@ -159,13 +159,15 @@ repos:
     - pyyaml==6.0.2
   # Reference docs (docs/reference + chrysa:docs markers) are generated from the source by
   # scripts/gen_docs.py (ADR D-0018). Fails on a stale file, and on a newly created folder that
-  # holds source but no README.md. Host-native; pyyaml only reads project-profile.yml.
+  # holds source but no README.md. structure.md counts every tracked file (any extension), so no
+  # `files:` filter: always_run makes any add/delete/rename trip the gate at commit time.
+  # Host-native; pyyaml only reads project-profile.yml.
   - id: docs-drift
     name: reference docs match the code, new folders carry a README
     entry: python -m scripts.gen_docs --check
     language: python
     pass_filenames: false
-    files: \.(py|tsx?|jsx?|go|rs|java|cs|md)$|^project-profile\.yml$
+    always_run: true
     additional_dependencies:
     - pyyaml==6.0.2
   - id: pii-scan
