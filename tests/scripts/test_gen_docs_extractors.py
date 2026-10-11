@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts import gen_docs_extractors as x
 
 
@@ -224,7 +226,7 @@ def test_data_model_lists_models_fields_and_relations(tmp_path: Path) -> None:
     assert "| `tags` | `ManyToManyField` | `'Tag'` |" in out
     assert "note" not in out
     assert "Helper" not in out
-    assert "Meta" not in out
+    assert "`Meta`" not in out
     assert "### `Tag` — `shop/models.py`" in out
     assert "_no fields detected_" in out
     assert "not listed" in out
@@ -482,3 +484,31 @@ def test_components_props_are_taken_from_the_signature_only(tmp_path: Path) -> N
     out = x.render_components(tmp_path, ["ui/A.tsx"])
     assert "| `Two` |  |" in out
     assert "| `Three` |  |" in out
+
+
+def test_read_source_never_follows_symlinks(tmp_path: Path) -> None:
+    root = tmp_path / "r"
+    root.mkdir()
+    outside = tmp_path / "o.py"
+    outside.write_text("x = 1\n", encoding="utf-8")
+    try:
+        (root / "a.py").symlink_to(outside)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks not supported here")
+    assert x.read_source(root, "a.py") is None
+
+
+def test_component_regexes_are_linear_on_pathological_input(tmp_path: Path) -> None:
+    import time
+
+    for body in ("export const A: FC xxxx\n" * 4000, "export const A : x\n" * 4000):
+        _write_tsx(tmp_path, "ui/A.tsx", body)
+        started = time.perf_counter()
+        x.render_components(tmp_path, ["ui/A.tsx"])
+        assert time.perf_counter() - started < 1.0
+
+
+def test_components_multiline_forward_ref_is_listed(tmp_path: Path) -> None:
+    src = "export const Fwd = React.forwardRef<\n  HTMLDivElement,\n  FwdProps\n>((p, r) => null);\n"
+    _write_tsx(tmp_path, "ui/A.tsx", src)
+    assert "| `Fwd` |" in x.render_components(tmp_path, ["ui/A.tsx"])

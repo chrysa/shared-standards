@@ -172,10 +172,11 @@ deploy_docs_generator() {
             ok "$name synced to canonical"
         fi
     done
-    if (cd "$repo" && python3 -m scripts.gen_docs >/dev/null 2>&1); then
+    local out
+    if out=$(cd "$repo" && python3 -m scripts.gen_docs 2>&1); then
         ok "reference docs generated (docs/reference)"
     else
-        warn "reference docs: generator run failed · skipped"
+        warn "reference docs: generator run failed · skipped (${out##*$'\n'})"
     fi
 }
 

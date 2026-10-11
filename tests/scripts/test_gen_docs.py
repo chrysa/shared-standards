@@ -215,3 +215,49 @@ def test_main_refuses_old_python(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     monkeypatch.setattr(g.sys, "version_info", (3, 9, 0))
     assert g.main([], root=_repo(tmp_path)) == 2
     assert "Python >= 3.12" in capsys.readouterr().err
+
+
+# ── symlink safety ────────────────────────────────────────────────────────────────────────
+
+
+def _symlink(link: Path, target: Path) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target.is_dir())
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks not supported here")
+
+
+def test_marked_md_symlink_to_outside_file_is_never_rewritten(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _repo(tmp_path)
+    outside = tmp_path / "outside.md"
+    original = "<!-- chrysa:docs:structure:start -->\nold\n<!-- chrysa:docs:structure:end -->\n"
+    outside.write_text(original, encoding="utf-8")
+    _symlink(root / "LINK.md", outside)
+    real = g.project_files
+    monkeypatch.setattr(g, "project_files", lambda r: [*real(r), "LINK.md"])
+    g.write_all(root)
+    assert outside.read_text(encoding="utf-8") == original
+    assert g.drift(root) == ["unsafe path: LINK.md"]
+
+
+def test_symlinked_reference_dir_writes_nothing_outside(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _repo(tmp_path)
+    outside = tmp_path / "outside_dir"
+    outside.mkdir()
+    (root / "docs").mkdir()
+    _symlink(root / "docs" / "reference", outside)
+    g.write_all(root)
+    assert list(outside.iterdir()) == []
+    assert "skipped symlinked path: docs/reference/structure.md" in capsys.readouterr().err
+    assert "unsafe path: docs/reference/structure.md" in g.drift(root)
+
+
+def test_normal_repo_is_unaffected_by_symlink_guard(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    g.write_all(root)
+    assert (root / STRUCTURE_MD).is_file()
+    assert g.drift(root) == []

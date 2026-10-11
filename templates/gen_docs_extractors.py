@@ -36,8 +36,28 @@ class Extractor:
     covers: Callable[[str], bool]
 
 
+def is_safe_path(root: Path, rel: str) -> bool:
+    """False when ``rel`` (or one of its parent directories under ``root``) is a symlink, or
+    resolves outside ``root``. Symlinks are never followed, read or written through."""
+    current = root
+    for part in rel.split("/"):
+        current = current / part
+        if current.is_symlink():
+            return False
+    try:
+        current.resolve().relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
+
+
 def read_source(root: Path, rel: str) -> str | None:
-    """UTF-8 text of ``rel`` with ``\\n`` newlines, or None when it cannot be read."""
+    """UTF-8 text of ``rel`` with ``\\n`` newlines, or None when it cannot be read.
+
+    A symlinked path, or one resolving outside ``root``, is never read.
+    """
+    if not is_safe_path(root, rel):
+        return None
     try:
         text = (root / rel).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
@@ -305,7 +325,9 @@ _DATA_MODEL_LIMITS = (
     "_Limits: models whose bases are not `Model` or a model class found in the scanned files "
     "are not listed; inherited fields are not repeated; fields declared through tuple "
     "unpacking or inside expressions are not listed; non-literal relation targets are shown "
-    "as source text._"
+    "as source text; base classes are matched by simple name, so a same-named class in another "
+    "file can be reported as the parent; `abstract` is detected only from a literal "
+    "`abstract = True` in `class Meta`._"
 )
 
 
@@ -517,15 +539,15 @@ _EXPORT_FUNCTION = re.compile(r"^export\s+(?:default\s+)?function\s+([A-Z]\w*)\s
 _EXPORT_CONST = re.compile(r"^export\s+const\s+([A-Z]\w*)\b", re.MULTILINE)
 # Positive criteria for ``export const Name``: a component type annotation ...
 _COMPONENT_TYPE = re.compile(
-    r"\s*:\s*(?:React\.)?(?:FC|FunctionComponent|VFC|ComponentType)\b[^=]*=(?!>)"
+    r"\s*:\s*(?:React\.)?(?:FC|FunctionComponent|VFC|ComponentType)\b[^=\n;]{0,200}=(?!>)"
 )
 # ... or an initialiser that is an arrow function, a function, or memo/forwardRef/lazy.
 _COMPONENT_INIT = re.compile(
-    r"""\s*(?::[^=]*?)?=(?!=)\s*(?:
-        (?:async\s+)?(?:<[^()]*?>\s*)?\((?:[^()]|\([^()]*\))*\)\s*(?::\s*[^=;]+?)?\s*=>
+    r"""\s*(?::[^=\n;]{0,200})?=(?!=)\s*(?:
+        (?:async\s+)?(?:<[^()]{0,200}>\s*)?\((?:[^()]|\([^()]{0,200}\)){0,400}\)\s*(?::\s*[^=;\n]{1,100})?\s*=>
       | (?:async\s+)?[A-Za-z_$][\w$]*\s*=>
       | (?:async\s+)?function\b
-      | (?:React\.)?(?:memo|forwardRef|lazy)\s*(?:<[^()]*>)?\s*\(
+      | (?:React\.)?(?:memo|forwardRef|lazy)\s*(?:<[^()]{0,200}>)?\s*\(
     )""",
     re.VERBOSE,
 )
