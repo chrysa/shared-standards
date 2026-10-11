@@ -512,3 +512,14 @@ def test_components_multiline_forward_ref_is_listed(tmp_path: Path) -> None:
     src = "export const Fwd = React.forwardRef<\n  HTMLDivElement,\n  FwdProps\n>((p, r) => null);\n"
     _write_tsx(tmp_path, "ui/A.tsx", src)
     assert "| `Fwd` |" in x.render_components(tmp_path, ["ui/A.tsx"])
+
+
+def test_components_multiline_fc_annotation_is_listed(tmp_path):
+    src = (
+        "export const Wide: React.FC<\n"
+        "  WideProps\n"
+        "> = (p) => null;\n"
+    )
+    _write_tsx(tmp_path, "ui/W.tsx", src)
+    out = x.render_components(tmp_path, ["ui/W.tsx"])
+    assert "| `Wide` |" in out

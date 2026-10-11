@@ -539,11 +539,11 @@ _EXPORT_FUNCTION = re.compile(r"^export\s+(?:default\s+)?function\s+([A-Z]\w*)\s
 _EXPORT_CONST = re.compile(r"^export\s+const\s+([A-Z]\w*)\b", re.MULTILINE)
 # Positive criteria for ``export const Name``: a component type annotation ...
 _COMPONENT_TYPE = re.compile(
-    r"\s*:\s*(?:React\.)?(?:FC|FunctionComponent|VFC|ComponentType)\b[^=\n;]{0,200}=(?!>)"
+    r"\s*:\s*(?:React\.)?(?:FC|FunctionComponent|VFC|ComponentType)\b[^=;]{0,200}=(?!>)"
 )
 # ... or an initialiser that is an arrow function, a function, or memo/forwardRef/lazy.
 _COMPONENT_INIT = re.compile(
-    r"""\s*(?::[^=\n;]{0,200})?=(?!=)\s*(?:
+    r"""\s*(?::[^=;]{0,200})?=(?!=)\s*(?:
         (?:async\s+)?(?:<[^()]{0,200}>\s*)?\((?:[^()]|\([^()]{0,200}\)){0,400}\)\s*(?::\s*[^=;\n]{1,100})?\s*=>
       | (?:async\s+)?[A-Za-z_$][\w$]*\s*=>
       | (?:async\s+)?function\b
