@@ -1322,6 +1322,14 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
   states why a current version breaks a foundational component (e.g. a transitive wheel missing
   for a new Python like `torch` on 3.14), and the freeze is **temporary and dated with its
   lift condition** — it is revisited, not left to rot.
+- **Support window — only the current version, the previous one, or an LTS.** For every
+  language, runtime, framework and platform, a project supports at most: the **current**
+  release, the **immediately previous** release (a major, or a minor for languages that
+  release by minor), and any **LTS** line still inside its vendor support. Anything older
+  is dropped: not tested, not declared in `requires-python` / `engines` / the CI matrix, and
+  no compatibility shim is kept for it. A version that reaches end-of-life is removed from
+  the matrix in the same change. The version-policy exception (a dated, ADR-backed freeze)
+  is the only way to stay on an older line.
 
 ## GitHub Actions (reuse first · custom actions centralised · thin workflows)
 
