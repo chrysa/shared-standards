@@ -74,6 +74,12 @@ jobs:
               working-directory: ${{ github.workspace }}
               run: uv run --no-project --with pyyaml==6.0.2 python -m scripts.gen_context_files --check
 
+            # Reference docs are generated from the source by scripts/gen_docs.py (ADR D-0018).
+            # Regenerate and fail if any committed file drifted (mirrors the docs-drift hook).
+            - name: Reference docs drift
+              working-directory: ${{ github.workspace }}
+              run: uv run --python 3.14 --no-project --with pyyaml==6.0.2 python -m scripts.gen_docs --check
+
     test:
         name: Docker tests
         runs-on: ubuntu-latest

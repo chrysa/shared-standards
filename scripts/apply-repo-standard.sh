@@ -154,6 +154,32 @@ deploy_context_files() {
     fi
 }
 
+# The reference-docs generator is a CANONICAL, DISTRIBUTED script pair (ADR D-0018): the single
+# source of truth is templates/gen_docs.py + templates/gen_docs_extractors.py; every repo
+# converges on them and runs the generator ON ITSELF so the sync PR also carries the first
+# docs/reference output. A repo that has not opted in via project-profile.yml is never blocked
+# by a missing generated file (only a stale one), see gen_docs.py. The LF pin for docs/reference
+# ships with templates/.gitattributes (deploy_hygiene) so the byte-exact drift check is stable.
+deploy_docs_generator() {
+    local repo="$1" name src dest
+    if $DRY_RUN; then info "[dry-run] would sync gen_docs.py + gen_docs_extractors.py and generate docs/reference"; return 0; fi
+    mkdir -p "$repo/scripts"
+    for name in gen_docs.py gen_docs_extractors.py; do
+        src="$TPL/$name"; dest="$repo/scripts/$name"
+        [[ -f "$src" ]] || { warn "template missing: $name"; return 0; }
+        if ! { [[ -f "$dest" ]] && cmp -s "$src" "$dest"; }; then
+            cp "$src" "$dest"
+            ok "$name synced to canonical"
+        fi
+    done
+    local out
+    if out=$(cd "$repo" && python3 -m scripts.gen_docs 2>&1); then
+        ok "reference docs generated (docs/reference)"
+    else
+        warn "reference docs: generator run failed · skipped (${out##*$'\n'})"
+    fi
+}
+
 # Release tooling + repo meta. Create-if-absent only — never clobber an existing
 # CHANGELOG (real history), opencode.json, AGENTS.md, etc.
 deploy_release_tooling() {
@@ -352,6 +378,7 @@ apply_one() {
     deploy_release_tooling "$repo"
     deploy_quality_gate "$repo"
     deploy_context_files "$repo"
+    deploy_docs_generator "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
     merge_precommit "$repo"

@@ -45,3 +45,6 @@ yarn.lock         linguist-generated=true -diff
 *.zip   binary
 *.gz    binary
 *.db    binary
+
+# Generated reference docs are compared byte-exactly by the docs-drift gate
+docs/reference/** text eol=lf
