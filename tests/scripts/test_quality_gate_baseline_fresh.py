@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.quality_gate import DEFAULT_GATES, CommandSpec, QualityGate
+from scripts.quality_gate import DEFAULT_GATES, QualityGate
 
 # Placeholder digests: never real values, only shapes detect-secrets would emit.
 H1 = "0" * 40
@@ -47,11 +47,9 @@ def _finding(
 
 
 def _write_baseline(
-    tmp_path: Path,
-    results: dict[str, list[dict[str, object]]],
-    filters: list[dict[str, object]] | None = None,
+    tmp_path: Path, results: dict[str, list[dict[str, object]]]
 ) -> None:
-    data = {"version": "1.5.0", "filters_used": filters or [], "results": results}
+    data = {"version": "1.5.0", "filters_used": [], "results": results}
     (tmp_path / QualityGate.SECRETS_BASELINE_FILE).write_text(
         json.dumps(data), encoding="utf-8"
     )
@@ -104,7 +102,7 @@ class TestSecretCount:
         assert _gate()._parse_secret_count("Secrets found: 3") == 3
 
 
-class TestSecretsOperatorAndSpec:
+class TestSecretsOperator:
     def test_secrets_gate_compares_with_at_most(self) -> None:
         row = next(gate for gate in DEFAULT_GATES if gate[0] == "Secrets")
         assert row[3] == "≤"
@@ -113,77 +111,11 @@ class TestSecretsOperatorAndSpec:
         assert _gate()._compare(SCAN_FINDINGS_AFTER_FIX, PILOT_BASELINE, "≤") is True
         assert _gate()._compare(PILOT_BASELINE + 1, PILOT_BASELINE, "≤") is False
 
-    def test_baseline_exclusions_are_replayed_without_a_shell(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-        filters: list[dict[str, object]] = [
-            {
-                "path": "detect_secrets.filters.regex.should_exclude_file",
-                "pattern": ["^tests/fixtures/"],
-            }
-        ]
-        _write_baseline(tmp_path, {}, filters)
-        default = next(gate for gate in DEFAULT_GATES if gate[0] == "Secrets")[4]
-        spec = _gate()._secrets_spec(default)
-        assert spec.alternatives == (
-            ("detect-secrets", "scan", "--exclude-files", "^tests/fixtures/"),
-        )
-        assert spec.swallow_exit is True
-
-    @pytest.mark.parametrize(
-        ("filter_path", "pattern"),
-        [
-            ("detect_secrets.filters.regex.should_exclude_file", ".*"),
-            ("detect_secrets.filters.regex.should_exclude_file", "^"),
-            ("detect_secrets.filters.regex.should_exclude_file", ""),
-            ("detect_secrets.filters.regex.should_exclude_file", "["),
-            ("detect_secrets.filters.regex.should_exclude_file", r"\.py$"),
-            ("detect_secrets.filters.regex.should_exclude_line", "="),
-            ("detect_secrets.filters.regex.should_exclude_line", "password"),
-            ("detect_secrets.filters.regex.should_exclude_secret", "[a-z]"),
-            ("detect_secrets.filters.regex.should_exclude_secret", "x*"),
-        ],
-    )
-    def test_broad_exclusion_patterns_are_ignored(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        capsys: pytest.CaptureFixture[str],
-        filter_path: str,
-        pattern: str,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-        _write_baseline(tmp_path, {}, [{"path": filter_path, "pattern": [pattern]}])
-        default = CommandSpec((("detect-secrets", "scan"),), swallow_exit=True)
-        assert _gate()._secrets_spec(default) is default
-        assert (
-            "WARNING|Secrets|ignored broad exclusion pattern" in capsys.readouterr().out
-        )
-
-    def test_targeted_pattern_kept_next_to_a_broad_one(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-        filters: list[dict[str, object]] = [
-            {
-                "path": "detect_secrets.filters.regex.should_exclude_file",
-                "pattern": ["^tests/fixtures/", ".*"],
-            }
-        ]
-        _write_baseline(tmp_path, {}, filters)
-        default = CommandSpec((("detect-secrets", "scan"),), swallow_exit=True)
-        spec = _gate()._secrets_spec(default)
-        assert spec.alternatives == (
-            ("detect-secrets", "scan", "--exclude-files", "^tests/fixtures/"),
-        )
-
-    def test_spec_unchanged_without_filters(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-        default = CommandSpec((("detect-secrets", "scan"),), swallow_exit=True)
-        assert _gate()._secrets_spec(default) is default
+    def test_scan_takes_no_argument_from_the_repo(self) -> None:
+        # .secrets.baseline is editable by any PR: its filters_used are deliberately
+        # NOT replayed, so the repo cannot widen what the scan skips.
+        row = next(gate for gate in DEFAULT_GATES if gate[0] == "Secrets")
+        assert row[4].alternatives == (("detect-secrets", "scan"),)
 
 
 class TestCoverageReportFreshness:

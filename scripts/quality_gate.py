@@ -143,40 +143,6 @@ DEFAULT_GATES: list[GateSpec] = [
 ]
 
 
-# Filters recorded in .secrets.baseline that the default scan must replay, so the gate
-# scans with the same exclusions the repo's own detect-secrets hook uses.
-_SECRETS_FILTER_FLAGS: dict[str, str] = {
-    "detect_secrets.filters.regex.should_exclude_file": "--exclude-files",
-    "detect_secrets.filters.regex.should_exclude_line": "--exclude-lines",
-    "detect_secrets.filters.regex.should_exclude_secret": "--exclude-secrets",
-}
-
-# Generic samples an exclusion pattern must NOT match, per flag. .secrets.baseline is
-# editable by any PR: a pattern such as ".*", "^" or "" would exclude everything and
-# silently neutralise the gate. A pattern that matches one of these samples is too
-# broad to be a targeted exclusion and is ignored (fail closed: the filter is dropped).
-_BROAD_PATTERN_SAMPLES: dict[str, tuple[str, ...]] = {
-    "--exclude-files": ("", "a", "src/app.py", "README.md", "app/settings.py"),
-    "--exclude-lines": ("", "a", "password = 'x'", 'api_key = "abc123"', "token: x"),
-    "--exclude-secrets": ("", "a", "x", "abc123", "hunter2"),
-}
-
-
-def _is_targeted_pattern(flag: str, pattern: object) -> bool:
-    """Whether ``pattern`` is a usable, targeted exclusion for ``flag``.
-
-    Rejected: non-strings, empty patterns, patterns that do not compile, and
-    patterns that match any generic sample for the filter type. Never raises.
-    """
-    if not isinstance(pattern, str) or not pattern:
-        return False
-    try:
-        compiled = re.compile(pattern)
-    except re.error:
-        return False
-    return not any(compiled.search(sample) for sample in _BROAD_PATTERN_SAMPLES[flag])
-
-
 class QualityGate:
     CONFIG_FILE = ".quality-gate.json"
     BASELINE_FILE = ".quality-gate-baseline.json"
@@ -377,28 +343,6 @@ class QualityGate:
             if isinstance(item, dict)
         }
 
-    def _secrets_spec(self, default_spec: CommandSpec) -> CommandSpec:
-        """The default scan, plus the exclusion filters the repo's baseline records."""
-        baseline = self._load_secrets_baseline()
-        if baseline is None or len(default_spec.alternatives) != 1:
-            return default_spec
-        extra: list[str] = []
-        for entry in baseline.get("filters_used", []):
-            flag = _SECRETS_FILTER_FLAGS.get(str(entry.get("path", ""))) if isinstance(entry, dict) else None
-            if flag is None:
-                continue
-            patterns = entry.get("pattern", [])
-            if not isinstance(patterns, list):
-                patterns = [patterns]
-            for pattern in patterns:
-                if not _is_targeted_pattern(flag, pattern):
-                    print(f"WARNING|Secrets|ignored broad exclusion pattern: {pattern!r}")
-                    continue
-                extra += [flag, str(pattern)]
-        if not extra:
-            return default_spec
-        return CommandSpec((default_spec.alternatives[0] + tuple(extra),), swallow_exit=default_spec.swallow_exit)
-
     def _parse_secret_count(self, output: str) -> int:
         """Findings the scan reports that .secrets.baseline does not acknowledge.
 
@@ -475,8 +419,6 @@ class QualityGate:
         # not silently change whether its exit code gates. Moving security_vulns
         # into config dropped it once, and pip-audit finding a CVE failed the gate.
         spec = CommandSpec.parse(raw, swallow_exit=default_spec.swallow_exit) if raw is not None else default_spec
-        if raw is None and key == "security_secrets":
-            spec = self._secrets_spec(spec)
         print(f"RUN_GATE|{gate_name}|{spec.display()}")
         # Read back by _parse_coverage_report: a report older than this is stale.
         self._gate_started_at = time.time()
