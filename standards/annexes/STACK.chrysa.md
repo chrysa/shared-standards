@@ -34,6 +34,6 @@
 | Monitoring       | Sentry + Uptime Kuma (self-hosted)                            |
 | Agents           | Claude API (primary) · Ollama (fallback)                       |
 | Orchestration    | LangGraph (stateful) · PydanticAI (structured outputs)         |
-| Registry         | GHCR private `ghcr.io/chrysa/{repo}` — never public            |
+| Registry         | GHCR private `ghcr.io/chrysa/{repo}` for internal images · open-source repos: public Docker Hub image `docker.io/chrysa/{repo}` + PyPI via Trusted Publishing (OIDC) — DEC-V3-010 (2026-10-28) |
 | Docs             | MkDocs → GitHub Pages (`pages.yml`) · ADRs in `docs/adr/`       |
 | Changelog        | [git-cliff](https://git-cliff.org/) (`cliff.toml`) · Keep a Changelog |
