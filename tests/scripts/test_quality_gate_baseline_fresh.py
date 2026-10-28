@@ -131,6 +131,53 @@ class TestSecretsOperatorAndSpec:
         )
         assert spec.swallow_exit is True
 
+    @pytest.mark.parametrize(
+        ("filter_path", "pattern"),
+        [
+            ("detect_secrets.filters.regex.should_exclude_file", ".*"),
+            ("detect_secrets.filters.regex.should_exclude_file", "^"),
+            ("detect_secrets.filters.regex.should_exclude_file", ""),
+            ("detect_secrets.filters.regex.should_exclude_file", "["),
+            ("detect_secrets.filters.regex.should_exclude_file", r"\.py$"),
+            ("detect_secrets.filters.regex.should_exclude_line", "="),
+            ("detect_secrets.filters.regex.should_exclude_line", "password"),
+            ("detect_secrets.filters.regex.should_exclude_secret", "[a-z]"),
+            ("detect_secrets.filters.regex.should_exclude_secret", "x*"),
+        ],
+    )
+    def test_broad_exclusion_patterns_are_ignored(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
+        filter_path: str,
+        pattern: str,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        _write_baseline(tmp_path, {}, [{"path": filter_path, "pattern": [pattern]}])
+        default = CommandSpec((("detect-secrets", "scan"),), swallow_exit=True)
+        assert _gate()._secrets_spec(default) is default
+        assert (
+            "WARNING|Secrets|ignored broad exclusion pattern" in capsys.readouterr().out
+        )
+
+    def test_targeted_pattern_kept_next_to_a_broad_one(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        filters: list[dict[str, object]] = [
+            {
+                "path": "detect_secrets.filters.regex.should_exclude_file",
+                "pattern": ["^tests/fixtures/", ".*"],
+            }
+        ]
+        _write_baseline(tmp_path, {}, filters)
+        default = CommandSpec((("detect-secrets", "scan"),), swallow_exit=True)
+        spec = _gate()._secrets_spec(default)
+        assert spec.alternatives == (
+            ("detect-secrets", "scan", "--exclude-files", "^tests/fixtures/"),
+        )
+
     def test_spec_unchanged_without_filters(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:

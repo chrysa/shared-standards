@@ -151,6 +151,31 @@ _SECRETS_FILTER_FLAGS: dict[str, str] = {
     "detect_secrets.filters.regex.should_exclude_secret": "--exclude-secrets",
 }
 
+# Generic samples an exclusion pattern must NOT match, per flag. .secrets.baseline is
+# editable by any PR: a pattern such as ".*", "^" or "" would exclude everything and
+# silently neutralise the gate. A pattern that matches one of these samples is too
+# broad to be a targeted exclusion and is ignored (fail closed: the filter is dropped).
+_BROAD_PATTERN_SAMPLES: dict[str, tuple[str, ...]] = {
+    "--exclude-files": ("", "a", "src/app.py", "README.md", "app/settings.py"),
+    "--exclude-lines": ("", "a", "password = 'x'", 'api_key = "abc123"', "token: x"),
+    "--exclude-secrets": ("", "a", "x", "abc123", "hunter2"),
+}
+
+
+def _is_targeted_pattern(flag: str, pattern: object) -> bool:
+    """Whether ``pattern`` is a usable, targeted exclusion for ``flag``.
+
+    Rejected: non-strings, empty patterns, patterns that do not compile, and
+    patterns that match any generic sample for the filter type. Never raises.
+    """
+    if not isinstance(pattern, str) or not pattern:
+        return False
+    try:
+        compiled = re.compile(pattern)
+    except re.error:
+        return False
+    return not any(compiled.search(sample) for sample in _BROAD_PATTERN_SAMPLES[flag])
+
 
 class QualityGate:
     CONFIG_FILE = ".quality-gate.json"
@@ -363,7 +388,12 @@ class QualityGate:
             if flag is None:
                 continue
             patterns = entry.get("pattern", [])
-            for pattern in [patterns] if isinstance(patterns, str) else patterns:
+            if not isinstance(patterns, list):
+                patterns = [patterns]
+            for pattern in patterns:
+                if not _is_targeted_pattern(flag, pattern):
+                    print(f"WARNING|Secrets|ignored broad exclusion pattern: {pattern!r}")
+                    continue
                 extra += [flag, str(pattern)]
         if not extra:
             return default_spec
