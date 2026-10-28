@@ -3,7 +3,7 @@
 # Source of truth for the distribute-standards workflow matrix.
 #
 # Usage:
-#   list-dev-repos.sh            # JSON array: ["agent-config","ai-aggregator",...]
+#   list-dev-repos.sh            # JSON array: ["ai-aggregator","ai-config",...]
 #   list-dev-repos.sh --lines    # one repo name per line
 #   list-dev-repos.sh --only a,b # filter to a comma-separated subset (still must be status:dev)
 #

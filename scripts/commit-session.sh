@@ -8,7 +8,6 @@
 # Categories:
 #   ui-ux repos       any repo with the ui-ux CLAUDE.md change -> chore/ui-ux-skill-ref
 #   shared-standards  docs/ scripts/ workflows/ template/ skill -> feat/ui-ux-standard
-#   claude-config     claude/agents/*                           -> feat/deploy-validated-agents
 #
 # Usage:
 #   ./commit-session.sh                       # dry-run plan
@@ -130,7 +129,7 @@ echo "APPLY=$APPLY PUSH=$PUSH PR=$PR  issue=${ISSUE:-$([ $MK_ISSUE -eq 1 ] && ec
 echo "── ui-ux repos (CLAUDE.md) ─────────────────────────────"
 while IFS= read -r g; do
   repo="$(dirname "$g")"; rel="${repo#./}"
-  case "$rel" in shared-standards|claude-config) continue;; *) ;; esac
+  case "$rel" in shared-standards) continue;; *) ;; esac
   is_excluded "$rel" && continue
   do_repo "$repo" "chore/ui-ux-skill-ref" \
     "chore(ui-ux): reference ui-ux skill in CLAUDE.md" \
@@ -146,12 +145,6 @@ do_repo "./shared-standards" "feat/ui-ux-standard" \
   "scripts/check-ui-ux-skill.sh" "scripts/check-skills-agents.sh" \
   "scripts/gen-skills-agents-audit.sh" "scripts/commit-session.sh" \
   "workflows/ui-ux-skill-check.yml" "workflows/skills-agents-audit.yml"
-
-echo "── claude-config (deployed agents) ─────────────────────"
-do_repo "./claude-config" "feat/deploy-validated-agents" \
-  "feat(agents): deploy 12 validated agents from agent-config" \
-  "Deploy 12 validated agents from agent-config" \
-  "claude/agents"
 
 echo "────────────────────────────────────────────────────────"
 echo "done."
