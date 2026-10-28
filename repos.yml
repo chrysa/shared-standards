@@ -28,14 +28,12 @@ profiles:
   - noesis
   - content-extractor
   config:
-  - agent-config
+  - ai-config
   - chrysa-skills
-  - claude-config
   - chrysa-claude-template
   - dotfiles
   - github-actions
   - homeassistant-config
-  - projects-claude-config
   - usefull-containers
   - shared-standards
   front:
@@ -60,9 +58,7 @@ profiles:
   - shared-standards
   - dotfiles
   - project-init
-  - agent-config
-  - claude-config
-  - projects-claude-config
+  - ai-config
   - chrysa-claude-template
   lib:
   - chrysa-lib
@@ -94,10 +90,14 @@ repos:
 - name: agent-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: ai-aggregator
   public: false
   runtime: container
+  status: dev
+- name: ai-config
+  public: false
+  runtime: exempt:config
   status: dev
 - name: audit-platform
   public: false
@@ -134,7 +134,7 @@ repos:
 - name: claude-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: coach
   public: false
   runtime: exempt:lib
@@ -391,7 +391,7 @@ repos:
 - name: projects-claude-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: forge-studio-core
   public: false
   runtime: exempt:config

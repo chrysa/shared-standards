@@ -11,12 +11,13 @@
 #
 # Canonical sources (overridable by env):
 #   skills  -> $STD_ROOT/.claude/skills            (shared-standards)
-#   agents  -> $AGENTS_REGISTRY/.claude/agents     (agent-config registry)
+#   agents  -> $STD_ROOT/templates/claude/agents   (shared-standards; the source
+#              distribute-standards.sh fans out — agent-config is archived, see ai-config)
 #
 # Source resolution (first hit wins), so it works from any repo in the fleet layout:
 #   1. explicit env (STD_ROOT / AGENTS_REGISTRY)
 #   2. the current repo itself, when it IS the source (self-compare is skipped)
-#   3. a sibling checkout next to the repo root (../shared-standards, ../agent-config)
+#   3. a sibling checkout next to the repo root (../shared-standards)
 #
 # Host-native & graceful: if a source cannot be located, the corresponding check is
 # SKIPPED with a message (best-effort locally; enforced in CI where the fleet is checked
@@ -38,7 +39,7 @@ resolve() { # name env_override -> echoes path or empty
 }
 
 std_root="$(resolve shared-standards "${STD_ROOT:-}")"
-agents_root="$(resolve agent-config "${AGENTS_REGISTRY:-}")"
+agents_root="${AGENTS_REGISTRY:-$std_root}"
 
 rc=0
 
@@ -83,11 +84,11 @@ fi
 for adir in "$repo_root/.claude/agents" "$repo_root/templates/claude/agents"; do
     [[ -d "$adir" ]] || continue
     if [[ -z "$agents_root" ]]; then
-        echo "skip [agents]: registry (agent-config) not found — enforced in CI" >&2
+        echo "skip [agents]: canonical source (shared-standards) not found — enforced in CI" >&2
         break
     fi
-    src="$agents_root/.claude/agents"
-    [[ -d "$src" ]] || src="$agents_root/agents"
+    src="$agents_root/templates/claude/agents"
+    [[ -d "$src" ]] || src="$agents_root/.claude/agents"
     [[ -d "$src" ]] || { echo "skip [agents]: registry has no agents dir" >&2; break; }
     [[ "$src" == "$adir" ]] && continue            # self, skip
     diff_files agents "$adir" "$src"
@@ -96,7 +97,7 @@ done
 if [[ $rc -ne 0 ]]; then
     echo "" >&2
     echo "A managed copy was edited instead of its source." >&2
-    echo "Edit the SOURCE (shared-standards/.claude/skills or agent-config/.claude/agents)," >&2
+    echo "Edit the SOURCE (shared-standards/.claude/skills or shared-standards/templates/claude/agents)," >&2
     echo "then re-run: shared-standards/scripts/distribute-standards.sh   (or check-skills-agents.sh --sync)" >&2
 fi
 exit "$rc"
