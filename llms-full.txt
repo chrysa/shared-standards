@@ -43,7 +43,10 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     graphify-auto-update.cjs
     memory-consolidation.cjs
     model-debt-inventory.cjs
+    pre-compact.sh
+    read_guard.py
     secret-scanner.cjs
+    session-context.sh
     verifiable-thresholds.cjs
   rules/
     adr.md
@@ -599,6 +602,8 @@ templates/
     README.md
     tasks.fullstack.json
     tasks.python.json
+  workflows-oss/
+    enforce-shortcut-link.yml
   workflows-process/
     action-check.yml
     approved-label.yml
@@ -660,6 +665,7 @@ workflows/
 
 .claude/_extracted/padam-av/ape/ape_hook.py
 .claude/hooks/format.py
+.claude/hooks/read_guard.py
 conftest.py — Root conftest: ensures repo root is on sys.path so `scripts.*` imports resolve.
 console/standards_console/__init__.py — Local management console for the chrysa shared standards fleet.
 console/standards_console/__main__.py — ``python -m standards_console`` entrypoint.
@@ -697,4 +703,3 @@ scripts/ci_secrets_explicit.py — Replace `secrets: inherit` with the explicit 
 scripts/gen_agent_views.py — Generate the agent views from the canonical standards corpus.
 scripts/gen_context_files.py — Generate the standardised per-repo context files from the repo's own content.
 scripts/gen_context_pack.py
-scripts/github_actions_pin.py — Keep the fleet's `chrysa/github-actions` pins on a single, current tag.

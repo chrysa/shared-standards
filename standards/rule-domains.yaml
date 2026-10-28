@@ -50,7 +50,7 @@ rules:
   Dev stage must hot-reload: containers
   "Dockerfiles are multi-stage, with a `production` and a `dev` stage \u2014 mandatory": containers
   "Documentation and Notion are maintained in lockstep with the code \u2014 a change that leaves them stale is unfinished": docs
-  Every PR references a Shortcut story: scm
+  "Every PR references a Shortcut story \u2014 except in public open-source repos (DEC-V3-006), where a linked GitHub issue is enough; Shortcut stays the internal tracker": scm
   "Every external server the service talks to is addressed through the environment \u2014 never hardcoded": architecture
   "Every form is a hostile input surface \u2014 validate on the server, always": security
   Every product that is operated ships a management backoffice: product

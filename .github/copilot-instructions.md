@@ -86,7 +86,7 @@
 - Branch model — `main` is production, `develop` is the workspace
 - Merge
 - One PR per issue
-- Every PR references a Shortcut story
+- Every PR references a Shortcut story — except in public open-source repos (DEC-V3-006), where a linked GitHub issue is enough; Shortcut stays the internal tracker
 - Issues and PRs are type-driven
 
 ### Architecture, decoupling & portability · `standards/rules/architecture.md`
