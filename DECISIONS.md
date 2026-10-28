@@ -39,15 +39,17 @@ per-project compliance task (tracked in Notion `📦 Projets chrysa`). Manifest 
 ## D-0003 — Artifact distribution: public PyPI (packages) + private GHCR (images)
 
 **Date**: 2026-06-08
-**Status**: accepted
+**Status**: accepted — item 2 amended 2026-10-28 (DEC-V3-010: public Docker Hub image for open-source repositories)
 
 Portfolio-wide standard formalizing how build artifacts are distributed:
 
 1. **Python-installable projects** (libraries / distributable packages) are published to **public PyPI**,
    triggered by CI on a git tag `v*.*.*`, via Trusted Publishing (PyPI OIDC) — no API token in plaintext.
    Applications without distribution are not published to PyPI.
-2. **Docker images** are pushed to a **private registry** — **GHCR** under the chrysa org
-   (`ghcr.io/chrysa/<repo>`, package visibility **private**, never public). CI auth via `GITHUB_TOKEN`.
+2. **Docker images**: GHCR private for internal images — **GHCR** under the chrysa org
+   (`ghcr.io/chrysa/<repo>`, package visibility **private**), CI auth via `GITHUB_TOKEN`.
+   Open-source repositories: public image on **Docker Hub** `docker.io/chrysa/<repo>` and PyPI
+   package through Trusted Publishing (OIDC) — DEC-V3-010 of 2026-10-28.
 
 Codified in `standards/STANDARDS.chrysa.md` (Container-runtime policy · Release & changelog config) and
 `docs/PYTHON-PACKAGING-STANDARD.md` (Distribution), reflected in `build-image.yml` / `release.yml`. Workflow implementation lives in

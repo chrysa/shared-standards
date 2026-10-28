@@ -1312,7 +1312,10 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
 - **Registry** — application images publish to the **private container registry** (`ghcr.io/chrysa/{repo}`, tags mirror
   the git tag + `:latest`); CI authenticates with the workflow `GITHUB_TOKEN` (or least-privilege
   `packages:write`), never a plaintext PAT. Distributable libraries publish to public PyPI via
-  Trusted Publishing (OIDC), never a token in plaintext.
+  Trusted Publishing (OIDC), never a token in plaintext. **Open-source repositories** also publish a
+  public image on Docker Hub (`docker.io/chrysa/{repo}`, version tag + `:latest`) and their PyPI
+  package through Trusted Publishing (OIDC); GHCR stays private for internal images (DEC-V3-010,
+  2026-10-28).
 - **Version policy — latest stable, latest LTS where an LTS track exists.** Every project targets
   the **latest stable version** of each language, runtime, package and dependency. Where an
   ecosystem ships Long-Term-Support releases (Node, Python per its support policy, base OS
