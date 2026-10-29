@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from pathlib import Path
 
@@ -101,6 +102,22 @@ class TestSecretCount:
         monkeypatch.chdir(tmp_path)
         assert _gate()._parse_secret_count("Secrets found: 3") == 3
 
+    def test_malformed_items_count_instead_of_resetting_to_zero(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # One non-object item used to raise, and the text fallback then reported 0.
+        monkeypatch.chdir(tmp_path)
+        out = json.dumps({"results": {"a.py": [1, 2], "b.py": [3]}})
+        assert _gate()._parse_secret_count(out) == 3
+
+    def test_malformed_item_next_to_an_acknowledged_one(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        _write_baseline(tmp_path, {"a.py": [_finding(H1)]})
+        out = json.dumps({"results": {"a.py": [_finding(H1), "garbage"]}})
+        assert _gate()._parse_secret_count(out) == 1
+
 
 class TestSecretsOperator:
     def test_secrets_gate_compares_with_at_most(self) -> None:
@@ -113,9 +130,26 @@ class TestSecretsOperator:
 
     def test_scan_takes_no_argument_from_the_repo(self) -> None:
         # .secrets.baseline is editable by any PR: its filters_used are deliberately
-        # NOT replayed, so the repo cannot widen what the scan skips.
+        # NOT replayed, so the repo cannot widen what the scan skips. The only
+        # exclusion is a constant: the baseline file itself.
         row = next(gate for gate in DEFAULT_GATES if gate[0] == "Secrets")
-        assert row[4].alternatives == (("detect-secrets", "scan"),)
+        assert row[4].alternatives == (
+            ("detect-secrets", "scan", "--exclude-files", r"^\.secrets\.baseline$"),
+        )
+
+    def test_exclusion_matches_only_the_baseline_file(self) -> None:
+        # Each acknowledged entry adds a hashed_secret line to the baseline, which
+        # detect-secrets flags twice: scanning the file made acknowledging a false
+        # positive raise the count. Nothing else may match the pattern.
+        row = next(gate for gate in DEFAULT_GATES if gate[0] == "Secrets")
+        pattern = re.compile(row[4].alternatives[0][3])
+        assert pattern.search(QualityGate.SECRETS_BASELINE_FILE)
+        for other in (
+            "src/.secrets.baseline",
+            ".secrets.baseline.bak",
+            "a.secrets.baseline",
+        ):
+            assert not pattern.search(other)
 
 
 class TestCoverageReportFreshness:
