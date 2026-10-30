@@ -6,32 +6,30 @@
 #   One truth per tool, native integrations before custom glue, `sc-<id>` as the single
 #   cross-tool thread. This script seeds the P0->P2 rollout stories once, idempotently.
 #
-# Usage:
-#   SHORTCUT_API_TOKEN=... [WORKFLOW_STATE_ID=...] ./seed-tooling-ecosystem-stories.sh [--dry-run]
+# Shortcut is reached through the chrysa-portfolio-viz gateway (ADR-PVIZ-063), never
+# directly: no Shortcut token here. The gateway's story creation is idempotent (an open
+# story with the same name and labels is returned, not duplicated).
 #
-# The token is read from the environment only (never hardcoded — see STANDARDS: "every
-# external server addressed through the environment"). Get one at:
-#   Shortcut -> Settings -> API Tokens.
+# Usage:
+#   PORTFOLIO_VIZ_URL=... PORTFOLIO_VIZ_TOKEN=... [STATE="Backlog"] ./seed-tooling-ecosystem-stories.sh [--dry-run]
+#
+# PORTFOLIO_VIZ_TOKEN is a service token granted the shortcut.story.create scope (or an
+# admin session). Both values come from the environment only.
 set -euo pipefail
 
-API="https://api.app.shortcut.com/api/v3"
 DRY_RUN="${1:-}"
 LABEL="tooling-ecosystem"
 
-: "${SHORTCUT_API_TOKEN:?set SHORTCUT_API_TOKEN in the environment}"
+: "${PORTFOLIO_VIZ_URL:?set PORTFOLIO_VIZ_URL in the environment}"
+: "${PORTFOLIO_VIZ_TOKEN:?set PORTFOLIO_VIZ_TOKEN in the environment}"
+GATEWAY="${PORTFOLIO_VIZ_URL%/}/api/gateway/shortcut"
 
-api() { # method path [json-body]
-  curl -sf -X "$1" "$API$2" \
+create_story() { # json-body
+  curl -sf -X POST "$GATEWAY/stories" \
     -H "Content-Type: application/json" \
-    -H "Shortcut-Token: $SHORTCUT_API_TOKEN" \
-    ${3:+-d "$3"}
+    -H "Authorization: Bearer $PORTFOLIO_VIZ_TOKEN" \
+    -d "$1"
 }
-
-# Resolve a default workflow state id if not provided (first state of first workflow).
-if [ -z "${WORKFLOW_STATE_ID:-}" ]; then
-  WORKFLOW_STATE_ID="$(api GET /workflows | python3 -c \
-    'import sys,json;w=json.load(sys.stdin);print(w[0]["states"][0]["id"])')"
-fi
 
 # name|type|description  — one story per line, keyed by name for idempotency.
 STORIES='P0 · GitHub<->Shortcut state event handlers|feature|Add event handlers in Shortcut (Settings -> Integrations -> GitHub): PR opened -> In Review, PR merged -> Done. Ref TE-030.
@@ -42,20 +40,13 @@ P1 · Sentry<->Shortcut native link|feature|Enable Sentry Shortcut integration (
 P1 · Notion<->Shortcut linking|chore|Epic <-> Notion idea page native link on the four canonical journeys. Ref TE-030.
 P2 · Objective->Notion state sync|feature|Custom webhook syncing Shortcut Objective progress to the Notion governance view (Objective granularity, not per story). Ref TE-000, TE-010.'
 
-echo "workflow_state_id=$WORKFLOW_STATE_ID"
-existing="$(api GET "/search/stories?query=label:$LABEL" 2>/dev/null || echo '{}')"
-
 while IFS='|' read -r name type desc; do
   [ -z "$name" ] && continue
-  if printf '%s' "$existing" | grep -Fq "$name"; then
-    echo "skip (exists): $name"; continue
-  fi
-  body="$(python3 -c 'import json,sys;n,t,d,s,g=sys.argv[1:6];p={"name":n,"story_type":t,"description":d,"labels":[{"name":"tooling-ecosystem"}],"workflow_state_id":int(s)};g and p.update(group_id=g);print(json.dumps(p))' \
-    "$name" "$type" "$desc" "$WORKFLOW_STATE_ID" "${GROUP_ID:-}")"
+  body="$(python3 -c 'import json,sys;n,t,d,l,s=sys.argv[1:6];p={"name":n,"type":t,"description":d,"labels":[l]};s and p.update(state=s);print(json.dumps(p))' \
+    "$name" "$type" "$desc" "$LABEL" "${STATE:-}")"
   if [ "$DRY_RUN" = "--dry-run" ]; then
     echo "DRY: would create [$type] $name"
   else
-    id="$(api POST /stories "$body" | python3 -c 'import sys,json;print(json.load(sys.stdin)["id"])')"
-    echo "created sc-$id · $name"
+    create_story "$body" | python3 -c 'import sys,json;r=json.load(sys.stdin);print(("created" if r["created"] else "skip (exists)"), "sc-%s" % r["story"]["id"], "·", r["story"]["name"])'
   fi
 done <<< "$STORIES"
