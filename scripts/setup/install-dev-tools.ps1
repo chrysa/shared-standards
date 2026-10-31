@@ -82,6 +82,10 @@ $RTK_VERSION = if ($env:RTK_VERSION) { $env:RTK_VERSION } else { (Invoke-RestMet
 if (-not $RTK_VERSION) {
     die "Impossible de recuperer la version rtk depuis GitHub API"
 }
+# La version entre telle quelle dans l'URL : un format libre (ex. "../") pourrait viser un autre depot.
+if ($RTK_VERSION -cnotmatch '\Av[0-9]+\.[0-9]+\.[0-9]+\z') {
+    die "RTK_VERSION invalide (attendu vX.Y.Z) : $RTK_VERSION"
+}
 
 $RTK_DIR = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $RTK_DIR | Out-Null
@@ -90,21 +94,37 @@ $RTK_ASSET = "rtk-oss-x86_64-pc-windows-msvc.zip"
 $RTK_BASE = "https://github.com/rtk-ai/rtk/releases/download/$RTK_VERSION"
 $RTK_TMP = Join-Path ([System.IO.Path]::GetTempPath()) ("rtk-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Force -Path $RTK_TMP | Out-Null
+# Tous les echecs passent par throw : le finally nettoie le dossier temporaire, puis die (transcript ferme).
+$rtkError = $null
 try {
-    Invoke-WebRequest -Uri "$RTK_BASE/$RTK_ASSET" -OutFile "$RTK_TMP\$RTK_ASSET" -UseBasicParsing
-    Invoke-WebRequest -Uri "$RTK_BASE/checksums.txt" -OutFile "$RTK_TMP\checksums.txt" -UseBasicParsing
+    try {
+        Invoke-WebRequest -Uri "$RTK_BASE/$RTK_ASSET" -OutFile "$RTK_TMP\$RTK_ASSET" -UseBasicParsing
+        Invoke-WebRequest -Uri "$RTK_BASE/checksums.txt" -OutFile "$RTK_TMP\checksums.txt" -UseBasicParsing
+    } catch {
+        throw "Telechargement rtk echoue — verifier les assets sur github.com/rtk-ai/rtk/releases"
+    }
+    # Nom d'asset compare a l'identique (pas de regex) ; exactement une entree attendue.
+    $lines = @(Get-Content -LiteralPath "$RTK_TMP\checksums.txt" | Where-Object {
+        $f = @(($_ -replace "`r", '').Trim() -split '\s+')
+        $f.Count -eq 2 -and $f[1] -ceq $RTK_ASSET
+    })
+    if ($lines.Count -ne 1) { throw "checksums.txt : entree $RTK_ASSET absente ou ambigue — telechargement refuse" }
+    $expected = (@($lines[0].Trim() -split '\s+')[0]).ToLower()
+    $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath "$RTK_TMP\$RTK_ASSET").Hash.ToLower()
+    if ($expected -ne $actual) { throw "Somme de controle rtk invalide — telechargement refuse" }
+    $RTK_X = Join-Path $RTK_TMP "x"
+    Expand-Archive -LiteralPath "$RTK_TMP\$RTK_ASSET" -DestinationPath $RTK_X
+    $rtkExe = Get-Item -LiteralPath (Join-Path $RTK_X "rtk.exe") -Force -ErrorAction SilentlyContinue
+    if (-not $rtkExe -or $rtkExe.PSIsContainer -or ($rtkExe.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+        throw "Membre rtk.exe invalide (absent, dossier ou lien) — installation refusee"
+    }
+    Copy-Item -Force -LiteralPath $rtkExe.FullName -Destination "$RTK_DIR\rtk.exe"
 } catch {
-    die "Telechargement rtk echoue — verifier les assets sur github.com/rtk-ai/rtk/releases"
+    $rtkError = $_.Exception.Message
+} finally {
+    Remove-Item -Recurse -Force -LiteralPath $RTK_TMP -ErrorAction SilentlyContinue
 }
-$expected = (Select-String -Path "$RTK_TMP\checksums.txt" -Pattern "  $([regex]::Escape($RTK_ASSET))$").Line -split '\s+' | Select-Object -First 1
-$actual = (Get-FileHash -Algorithm SHA256 "$RTK_TMP\$RTK_ASSET").Hash.ToLower()
-if (-not $expected -or $expected -ne $actual) {
-    Remove-Item -Recurse -Force $RTK_TMP
-    die "Somme de controle rtk invalide — telechargement refuse"
-}
-Expand-Archive -Path "$RTK_TMP\$RTK_ASSET" -DestinationPath $RTK_TMP -Force
-Copy-Item -Force "$RTK_TMP\rtk.exe" "$RTK_DIR\rtk.exe"
-Remove-Item -Recurse -Force $RTK_TMP
+if ($rtkError) { die $rtkError }
 
 if ($env:PATH -notlike "*$RTK_DIR*") {
     $env:PATH = "$RTK_DIR;$env:PATH"

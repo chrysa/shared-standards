@@ -77,6 +77,10 @@ RTK_VERSION="${RTK_VERSION:-$(curl -sSf https://api.github.com/repos/rtk-ai/rtk/
 if [[ -z "${RTK_VERSION}" ]]; then
     die "Impossible de récupérer la version rtk depuis GitHub API"
 fi
+# La version entre telle quelle dans l'URL : un format libre (ex. « ../ ») pourrait viser un autre dépôt.
+if [[ ! "${RTK_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    die "RTK_VERSION invalide (attendu vX.Y.Z) : ${RTK_VERSION}"
+fi
 
 case "$(uname -m)" in
     x86_64)  RTK_TARGET="x86_64-unknown-linux-musl" ;;
@@ -92,9 +96,15 @@ curl -sSfL "${RTK_BASE}/${RTK_ASSET}" -o "${RTK_TMP}/${RTK_ASSET}" \
     || die "Téléchargement rtk échoué — vérifier les assets sur github.com/rtk-ai/rtk/releases"
 curl -sSfL "${RTK_BASE}/checksums.txt" -o "${RTK_TMP}/checksums.txt" \
     || die "checksums.txt introuvable pour rtk ${RTK_VERSION}"
-(cd "$RTK_TMP" && grep -E "  ${RTK_ASSET}\$" checksums.txt | sha256sum -c --status) \
-    || die "Somme de contrôle rtk invalide — téléchargement refusé"
-tar -xzf "${RTK_TMP}/${RTK_ASSET}" -C "$RTK_TMP" rtk
+# Nom d'asset comparé à l'identique (pas de regex) ; exactement une entrée attendue.
+(cd "$RTK_TMP" && tr -d '\r' < checksums.txt \
+    | awk -v a="$RTK_ASSET" 'NF == 2 && $2 == a { print; n++ } END { exit n != 1 }' \
+    | sha256sum -c --status) \
+    || die "Somme de contrôle rtk invalide ou entrée ${RTK_ASSET} absente/ambiguë — téléchargement refusé"
+tar -xzf "${RTK_TMP}/${RTK_ASSET}" -C "$RTK_TMP" --no-same-owner --no-same-permissions rtk \
+    || die "Archive rtk inattendue (membre « rtk » absent à la racine)"
+[[ -f "${RTK_TMP}/rtk" && ! -L "${RTK_TMP}/rtk" ]] \
+    || die "Membre rtk invalide (lien symbolique ou non-fichier) — installation refusée"
 install -m 0755 "${RTK_TMP}/rtk" "$HOME/.local/bin/rtk"
 
 if ! has_cmd rtk; then
