@@ -76,7 +76,9 @@ ok "pipx pret"
 #          Le rtk chrysa vient de github.com/rtk-ai/rtk
 info "Installation rtk depuis github.com/rtk-ai/rtk..."
 
-$RTK_VERSION = (Invoke-RestMethod "https://api.github.com/repos/rtk-ai/rtk/releases/latest").tag_name
+# Edition rtk-oss : Apache-2.0 seule. Depuis la 1.0 (13/10/2026), l'edition par defaut "rtk" embarque le moteur
+# engine/ sous BUSL-1.1 (non open source) ; rtk-oss garde le meme binaire et les memes hooks, sans ce moteur.
+$RTK_VERSION = if ($env:RTK_VERSION) { $env:RTK_VERSION } else { (Invoke-RestMethod "https://api.github.com/repos/rtk-ai/rtk/releases/latest").tag_name }
 if (-not $RTK_VERSION) {
     die "Impossible de recuperer la version rtk depuis GitHub API"
 }
@@ -84,19 +86,32 @@ if (-not $RTK_VERSION) {
 $RTK_DIR = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $RTK_DIR | Out-Null
 
-$RTK_URL = "https://github.com/rtk-ai/rtk/releases/download/$RTK_VERSION/rtk-x86_64-pc-windows-msvc.exe"
+$RTK_ASSET = "rtk-oss-x86_64-pc-windows-msvc.zip"
+$RTK_BASE = "https://github.com/rtk-ai/rtk/releases/download/$RTK_VERSION"
+$RTK_TMP = Join-Path ([System.IO.Path]::GetTempPath()) ("rtk-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Force -Path $RTK_TMP | Out-Null
 try {
-    Invoke-WebRequest -Uri $RTK_URL -OutFile "$RTK_DIR\rtk.exe" -UseBasicParsing
+    Invoke-WebRequest -Uri "$RTK_BASE/$RTK_ASSET" -OutFile "$RTK_TMP\$RTK_ASSET" -UseBasicParsing
+    Invoke-WebRequest -Uri "$RTK_BASE/checksums.txt" -OutFile "$RTK_TMP\checksums.txt" -UseBasicParsing
 } catch {
     die "Telechargement rtk echoue — verifier les assets sur github.com/rtk-ai/rtk/releases"
 }
+$expected = (Select-String -Path "$RTK_TMP\checksums.txt" -Pattern "  $([regex]::Escape($RTK_ASSET))$").Line -split '\s+' | Select-Object -First 1
+$actual = (Get-FileHash -Algorithm SHA256 "$RTK_TMP\$RTK_ASSET").Hash.ToLower()
+if (-not $expected -or $expected -ne $actual) {
+    Remove-Item -Recurse -Force $RTK_TMP
+    die "Somme de controle rtk invalide — telechargement refuse"
+}
+Expand-Archive -Path "$RTK_TMP\$RTK_ASSET" -DestinationPath $RTK_TMP -Force
+Copy-Item -Force "$RTK_TMP\rtk.exe" "$RTK_DIR\rtk.exe"
+Remove-Item -Recurse -Force $RTK_TMP
 
 if ($env:PATH -notlike "*$RTK_DIR*") {
     $env:PATH = "$RTK_DIR;$env:PATH"
 }
 
 if (-not (has_cmd "rtk")) { die "rtk introuvable apres installation" }
-ok "rtk $RTK_VERSION installe"
+ok "rtk-oss $RTK_VERSION installe"
 
 info "Initialisation rtk (hook global Claude Code)..."
 rtk init -g --auto-patch
