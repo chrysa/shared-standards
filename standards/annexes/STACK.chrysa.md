@@ -33,6 +33,7 @@
 | Hosting          | Kimsufi · Docker Compose (local) · Nginx · Certbot · Tailscale  |
 | Monitoring       | Sentry + Uptime Kuma (self-hosted)                            |
 | Agents           | Claude API (primary) · Ollama (fallback)                       |
+| LLM endpoint     | Ollama, OpenAI-compatible API: `LLM_BASE_URL=http://localhost:11434/v1` (AI-080) |
 | Orchestration    | LangGraph (stateful) · PydanticAI (structured outputs)         |
 | Registry         | GHCR private `ghcr.io/chrysa/{repo}` for internal images · open-source repos: public Docker Hub image `docker.io/chrysa/{repo}` + PyPI via Trusted Publishing (OIDC) — DEC-V3-010 (2026-10-28) |
 | Docs             | MkDocs → GitHub Pages (`pages.yml`) · ADRs in `docs/adr/`       |
