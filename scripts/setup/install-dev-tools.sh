@@ -92,9 +92,9 @@ RTK_BASE="https://github.com/rtk-ai/rtk/releases/download/${RTK_VERSION}"
 RTK_TMP="$(mktemp -d)"
 trap 'rm -rf "$RTK_TMP"' EXIT
 
-curl -sSfL "${RTK_BASE}/${RTK_ASSET}" -o "${RTK_TMP}/${RTK_ASSET}" \
+curl --proto '=https' --proto-redir '=https' -sSfL "${RTK_BASE}/${RTK_ASSET}" -o "${RTK_TMP}/${RTK_ASSET}" \
     || die "Téléchargement rtk échoué — vérifier les assets sur github.com/rtk-ai/rtk/releases"
-curl -sSfL "${RTK_BASE}/checksums.txt" -o "${RTK_TMP}/checksums.txt" \
+curl --proto '=https' --proto-redir '=https' -sSfL "${RTK_BASE}/checksums.txt" -o "${RTK_TMP}/checksums.txt" \
     || die "checksums.txt introuvable pour rtk ${RTK_VERSION}"
 # Nom d'asset comparé à l'identique (pas de regex) ; exactement une entrée attendue.
 (cd "$RTK_TMP" && tr -d '\r' < checksums.txt \
