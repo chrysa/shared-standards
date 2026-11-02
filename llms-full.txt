@@ -634,6 +634,7 @@ tests/
     test_gen_context_files.py
     test_quality_gate_baseline_fresh.py
     test_quality_gate_parser.py
+    test_quality_gate_verify_exit.py
   test_pre_commit_merge_exclude.py
   test_pyproject_ruff_merge.py
 workflows/
