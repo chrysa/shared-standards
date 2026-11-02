@@ -1,0 +1,8 @@
+{
+  "name": "chrysa-standards",
+  "version": "0.1.0",
+  "description": "Shared chrysa agents, commands and skills, generated from shared-standards",
+  "author": { "name": "chrysa" },
+  "repository": "https://github.com/chrysa/shared-standards",
+  "license": "MIT"
+}
