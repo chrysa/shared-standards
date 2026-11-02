@@ -7,6 +7,8 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
 
 ## Structure
 
+.claude-plugin/
+  marketplace.json
 .claude/
   .active-feature
   HOOKS_README.md
@@ -323,6 +325,62 @@ legal/
 makefiles/
   quality-gate.Makefile
 opencode.json
+plugins/
+  chrysa-standards/
+    .claude-plugin/
+      plugin.json
+    agents/
+      general-backend-developer.md
+      general-code-quality-debugger.md
+      general-devops.md
+      general-frontend-developer.md
+      general-fullstack-developer.md
+      general-pm.md
+      general-qa.md
+      general-solution-architect.md
+      general-technical-project-lead.md
+      general-technical-writer.md
+    commands/
+      wf-bugfix.md
+      wf-decision.md
+      wf-feature.md
+      wf-fleet-sweep.md
+      wf-issue.md
+      wf-pr-review.md
+      wf-release-lib.md
+    skills/
+      accessibility/
+      adr-new/
+      agent-patterns/
+      api-design/
+      async-patterns/
+      check/
+      clean-architecture/
+      cli/
+      commit/
+      contract-testing/
+      council/
+      custom-init/
+      dockerfile-multistage/
+      error-handling/
+      gitnexus/
+      help-commands/
+      hunt/
+      implement/
+      issue/
+      plan-execute/
+      plan-start/
+      plan-validate/
+      plan/
+      review-changes/
+      reviewpr/
+      rollout-status/
+      spec/
+      standards-authoring/
+      test/
+      testing-pytest/
+      ui-ux/
+      verification-loop/
 pyproject.toml
 repos.yml
 scripts/
@@ -343,6 +401,7 @@ scripts/
   audit-quality-gate-repos.sh
   audit-repo-standard.sh
   batch-normalize-quality-gate.sh
+  build-claude-plugin.sh
   check-canonical-drift.sh
   check-managed-drift.sh
   check-repos-archived-drift.py
@@ -629,6 +688,7 @@ tests/
     test_scanner.py
   scripts/
     __init__.py
+    test_claude_plugin_manifest.py
     test_distribute_standards.py
     test_gen_agent_views.py
     test_gen_context_files.py
