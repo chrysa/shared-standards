@@ -19,14 +19,17 @@ build() {
     cp "$f" "$dst/commands/"
   done
   for f in "$ROOT"/.claude/skills/*/; do cp -R "$f" "$dst/skills/"; done
+  # Keys sorted: the json-sorter pre-commit hook rewrites this file otherwise.
   cat > "$dst/.claude-plugin/plugin.json" <<JSON
 {
-  "name": "chrysa-standards",
-  "version": "$VERSION",
+  "author": {
+    "name": "chrysa"
+  },
   "description": "Shared chrysa agents, commands and skills, generated from shared-standards",
-  "author": { "name": "chrysa" },
+  "license": "MIT",
+  "name": "chrysa-standards",
   "repository": "https://github.com/chrysa/shared-standards",
-  "license": "MIT"
+  "version": "$VERSION"
 }
 JSON
 }
