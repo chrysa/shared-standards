@@ -56,7 +56,7 @@ function.
 ### DC-009 — Interchangeable external integrations go through a validated registry
 
 When a product integrates **several interchangeable external systems of the same kind** — payment
-providers, LLM providers (the `chrysa-LLM` gateway is the fleet instance of this), map/telemetry
+providers, LLM providers (behind the `AI-080` contract; an optional gateway is one instance), map/telemetry
 vendors, notification channels, identity providers — the set is a **registry**, not a switch
 statement. Each integration is:
 
