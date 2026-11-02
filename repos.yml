@@ -432,3 +432,54 @@ repos:
   public: false
   runtime: exempt:lib
   status: dev
+# Registered 2026-11-02: active repos that had no Dependabot config. status:dev puts them
+# in the distribute-standards matrix, whose apply-ci-process.sh writes the canonical
+# .github/dependabot.yml (weekly, Friday 04:00 cron) when the file is absent.
+- name: ops-monitoring
+  public: false
+  runtime: pending  # no application code yet (only .github/)
+  status: dev
+- name: local-knowledge-hub
+  public: false
+  runtime: container
+  status: dev
+- name: prism-ai-lint
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: herdr-cockpit
+  public: true
+  runtime: exempt:native  # herdr plugins, run inside the host terminal multiplexer
+  status: dev
+- name: ancrage
+  public: false
+  runtime: container
+  status: dev
+- name: graph-core
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: pc-doctor
+  public: false
+  runtime: exempt:native  # audits and repairs the host itself
+  status: dev
+- name: gource-live
+  public: false
+  runtime: pending  # no manifest at the root yet
+  status: dev
+- name: transport-simulator
+  public: false
+  runtime: exempt:native  # Unity project, like skunk-simulator
+  status: dev
+- name: poc-openwebui
+  public: false
+  runtime: container
+  status: dev
+- name: dataflow-architect
+  public: false
+  runtime: pending  # web platform, container layout not decided yet
+  status: dev
+- name: agent-panel
+  public: true
+  runtime: exempt:native
+  status: non-dev  # fork of flowy11/agent-panel: not served by the fleet distribution
