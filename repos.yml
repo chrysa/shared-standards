@@ -75,7 +75,6 @@ profiles:
   - fastapi-traceid
   - guardian-core
   - guideline-checker
-  - pre-commit-hooks-changelog
   - pre-commit-tools
   - project-init
 repos:
@@ -311,10 +310,6 @@ repos:
 - name: PO-GO-DEX
   public: false
   runtime: container
-  status: dev
-- name: pre-commit-hooks-changelog
-  public: true
-  runtime: exempt:lib
   status: dev
 - name: pre-commit-tools
   public: true
