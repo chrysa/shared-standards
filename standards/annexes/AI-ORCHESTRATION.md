@@ -82,6 +82,31 @@ implementation of auth, approval, the event bus, or business logic. Workloads us
 identities and least privilege; **mutual TLS** is used when the risk or exposure requires it.
 Identity and trace are preserved end-to-end from the user or workload to the owning service.
 
+## AI-080 — One common LLM contract, read from the environment
+
+A product that calls a language model reaches it through **one contract**, not through its own
+provider wiring:
+
+| Variable        | Required | Meaning                                                              |
+|-----------------|----------|----------------------------------------------------------------------|
+| `LLM_BASE_URL`  | yes      | Base URL of an **OpenAI-compatible** API (`/v1/chat/completions`, `/v1/embeddings`). |
+| `LLM_MODEL`     | yes      | Model identifier sent as `model`.                                    |
+| `LLM_API_KEY`   | no       | Bearer token, only when the endpoint requires one; never committed.  |
+
+- **Local default.** When `LLM_BASE_URL` is unset the product uses the local endpoint of the
+  settled stack ([`STACK.chrysa.md`](STACK.chrysa.md), row *LLM endpoint*), so a fresh checkout
+  works offline (AI-000). `.env.example` documents the three variables with that default.
+- **Switching is configuration.** A cloud model, a self-hosted vLLM/TGI server or a gateway is a
+  different `LLM_BASE_URL`/`LLM_MODEL`, never a code change. Business code imports no vendor SDK.
+- **No facade by default.** A shared gateway service is introduced only when a measured need
+  (routing between models, central cost/token budget, shared cache) is recorded in an ADR; until
+  then the contract above is the integration point. Products that already have a local LLM
+  module keep it as their adapter and read these variables on their next change.
+- **Legacy names.** `OLLAMA_URL`, `OLLAMA_HOST`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL` are accepted as
+  deprecated fallbacks during migration; new code reads `LLM_*` first.
+- **Degraded mode.** When the endpoint is unreachable the product shows a documented no-AI
+  fallback; it does not crash or silently call another provider.
+
 ## Manual verification
 
 No single linter covers this annexe. In review, check: a degraded/offline path exists and is tested
@@ -90,4 +115,5 @@ agents reach effects through typed tools, not a raw shell (AI-020); the capabili
 protocol-agnostic with MCP/A2A as projections (AI-030); vector/RAG sit behind a port with a
 reconstructible index (AI-040); auto-extracted memory is a validatable candidate (AI-050); fetched
 active content is sandboxed (AI-060); gateway-mediated calls keep identity and least privilege end
-to end (AI-070).
+to end (AI-070); the model endpoint comes from `LLM_BASE_URL`/`LLM_MODEL` with a local default
+and no vendor SDK in business code (AI-080).
