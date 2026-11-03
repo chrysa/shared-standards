@@ -5,7 +5,8 @@
 # Standard (standards/STANDARDS.chrysa.md, "Branch model"):
 #   1. `main` = the code deployed in production, protected (PR required, no force-push,
 #      no deletion).
-#   2. `develop` exists and is the repository's DEFAULT branch.
+#   2. `develop` exists, is the repository's DEFAULT branch, and is protected with the
+#      same gate as `main` (ADR D-0015): PR required, no force-push, no deletion.
 #   3. Feature PRs target `develop`; `main` is fed only by a PR from `develop` (or a
 #      `hotfix/`), and production is triggered by a release.
 #
@@ -13,7 +14,7 @@
 # audit costs a handful of requests and never trips GitHub's secondary rate limit.
 #
 # Columns: main · develop (branches exist) · default_is_develop · main_protected ·
-#          pr_only (protection requires a PR and blocks force-push + deletion).
+#          develop_protected · pr_only (protection requires a PR and blocks force-push + deletion).
 #
 # Emits a TSV table on stdout and a machine-readable ledger under compliance/.
 # Read-only: never writes to any repo. Fix drift with apply-branch-policy.sh.
@@ -85,6 +86,7 @@ ROWS="$(jq -c --arg only "$ONLY" '
   ($only | if . == "" then [] else split(",") end) as $filter
   | select($filter == [] or (.name as $n | $filter | index($n)))
   | ([.branchProtectionRules.nodes[]? | select(.pattern == "main" or .pattern == "*")] | first) as $r
+  | ([.branchProtectionRules.nodes[]? | select(.pattern == "develop" or .pattern == "*")] | first) as $d
   | {
       repo: .name,
       default: (.defaultBranchRef.name // "?"),
@@ -92,13 +94,15 @@ ROWS="$(jq -c --arg only "$ONLY" '
       develop: (.develop != null),
       default_is_develop: ((.defaultBranchRef.name // "") == "develop"),
       main_protected: ($r != null),
+      develop_protected: ($d != null and $d.allowsForcePushes == false and $d.allowsDeletions == false),
       pr_only: ($r != null and $r.allowsForcePushes == false and $r.allowsDeletions == false)
     }' <<<"$RAW")" || { echo "failed to project the audit rows" >&2; exit 2; }
 [ -n "$ROWS" ] || { echo "no repository matched (bad --only filter?)" >&2; exit 2; }
 
-printf 'repo\tdefault\tmain\tdevelop\tdefault_is_develop\tmain_protected\tpr_only\n'
+printf 'repo\tdefault\tmain\tdevelop\tdefault_is_develop\tmain_protected\tdevelop_protected\tpr_only\n'
 jq -r '[.repo, .default, (.main|tostring), (.develop|tostring),
-        (.default_is_develop|tostring), (.main_protected|tostring), (.pr_only|tostring)]
+        (.default_is_develop|tostring), (.main_protected|tostring),
+        (.develop_protected|tostring), (.pr_only|tostring)]
        | @tsv' <<<"$ROWS"
 
 mkdir -p "$LEDGER_DIR"
@@ -106,5 +110,5 @@ jq -s '{audited: length, repos: .}' <<<"$ROWS" > "$LEDGER"
 echo "ledger: $LEDGER" >&2
 
 DRIFT="$(jq -s '[.[] | select(.main and .develop and .default_is_develop
-                              and .main_protected and .pr_only | not)] | length' <<<"$ROWS")"
+                              and .main_protected and .develop_protected and .pr_only | not)] | length' <<<"$ROWS")"
 [ "$DRIFT" -eq 0 ] || { echo "drift: $DRIFT repo(s) off the branch model" >&2; exit 1; }

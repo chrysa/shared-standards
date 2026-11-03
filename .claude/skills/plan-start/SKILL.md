@@ -1,4 +1,5 @@
 ---
+name: plan-start
 description: Turn an objective into a step-by-step, PR-sized construction plan
 argument-hint: <objective>
 ---

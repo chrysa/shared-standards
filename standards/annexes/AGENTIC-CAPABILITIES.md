@@ -106,6 +106,50 @@ Consequences:
 - Each agent declares its layer and autonomy tier (`high` | `assisted`) in its manifest
   (AG-001), so the grading is auditable, not implicit.
 
+______________________________________________________________________
+
+### AG-017 — A retryable operation proves the retry has no external effects
+
+Any operation that may be retried **must demonstrate that the retry does not reproduce its
+external effects** — a network delivery, a timeout after commit, a redelivered message, or a
+process restart must not double-apply. Demonstration means one of:
+
+- **Idempotency key.** A mutation exposed for retry carries a key the server verifies, so a
+  redelivered call is a no-op (extends AG-004 · AP-012). A retry never silently replays a
+  non-idempotent mutation.
+- **Compensation.** A non-idempotent operation declares its compensating action up front, so
+  a partial effect can be reversed rather than re-run.
+- **Data / runtime separation.** Tearing down or re-initialising a runtime (uninstall, reset,
+  reprovision) never touches user data; the two lifecycles are independent.
+- **Confirmed destruction.** No deletion of personal data without an explicit confirmation and
+  a prior backup (ties to AG-006 · R5).
+- **External-effects journal.** Every call that reaches outside the system is logged — what,
+  when, under which identity (extends AG-008).
+
+An operation that satisfies none of these is marked **non-retryable**: its failure surfaces
+to the user rather than being auto-retried. The contract tests cover network loss, timeout
+after commit, process restart, and redelivery.
+
+______________________________________________________________________
+
+### AG-018 — A mass-mutation batch returns the explicit list of what it changed
+
+Any session that mutates a **batch** of pages, records, or repositories **must return the
+explicit list of the identifiers it actually changed** — one id per touched element, with the
+nature of the change. The announced count and the number of returned ids must match. The rules:
+
+- **No list, no execution.** A batch declared done without this list is deemed **not done**; a
+  blanket claim ("all N records were updated") is never proof of execution.
+- **Skipped is stated, not silent.** Elements deliberately left out are listed separately with
+  their reason. Silence on an element is non-treatment, never implicit exclusion.
+- **Independently verifiable.** A third party must be able to replay a mechanical check (exact
+  search, a data-source query, a git audit) and recover exactly the same set.
+- **Written to the tracker.** The list is recorded in the batch's tracking record (Notion or
+  the relevant card), not only in the conversation.
+- **Partial is honest.** On interruption, the session returns the real partial state (ids done,
+  ids remaining). A documented partial batch is conform; a partial batch announced as complete
+  is not.
+
 ## 2. CI gates (progressive rollout)
 
 Add as `info`, promote to `warning`, then `error` once existing debt is cleared:
@@ -118,4 +162,6 @@ Add as `info`, promote to `warning`, then `error` once existing debt is cleared:
 - R3–R5 actions requiring the expected confirmation;
 - evaluation-set non-regression on critical AI tasks (AG-013);
 - agent manifest declares layer + autonomy tier, non-deterministic layers stay `assisted` (AG-016);
+- retryable operations carry an idempotency key / compensation, or are marked non-retryable (AG-017);
+- mass-mutation batches emit the explicit list of changed ids, count matching the claim (AG-018);
 - `.env` secret files staged or present in the tree (AG-005, `check-no-env-files.cjs --ci`).

@@ -19,7 +19,7 @@
 #   2.  Legacy migration       remove any old `.chrysa/standards-import` block + the vendored
 #                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
 #   3.  Shared skills          .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
-#   4.  Shared agents+commands templates/claude/{agents,commands}/* -> <repo>/.claude/
+#   4.  Shared agents+commands+workflows templates/claude/{agents,commands,workflows}/* -> <repo>/.claude/
 #   5.  Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
 # Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md / AGENTS.md /
@@ -58,7 +58,11 @@ COPILOT_VIEW_SRC="$STD_ROOT/.github/copilot-instructions.md"
 SKILLS_SRC="$STD_ROOT/.claude/skills"
 AGENTS_SRC="$STD_ROOT/templates/claude/agents"
 COMMANDS_SRC="$STD_ROOT/templates/claude/commands"
+WORKFLOWS_SRC="$STD_ROOT/templates/claude/workflows"
 CLAUDE_TPL="$STD_ROOT/templates/CLAUDE.md"
+# opencode agent config (multi-provider: ollama default, claude/chatgpt opt-in).
+# Managed copy — overwritten on every run to keep the fleet aligned.
+OPENCODE_TPL="$STD_ROOT/templates/opencode.json"
 
 MARK_START='<!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->'
 MARK_END='<!-- chrysa:standards:end -->'
@@ -69,6 +73,10 @@ AGENTS_MARK_START='<!-- chrysa:standards-agents:start · generated · DO NOT EDI
 AGENTS_MARK_END='<!-- chrysa:standards-agents:end -->'
 COPILOT_MARK_START='<!-- chrysa:standards-copilot:start · generated · DO NOT EDIT -->'
 COPILOT_MARK_END='<!-- chrysa:standards-copilot:end -->'
+# opencode provider env vars — managed block inside each repo's .env.example.
+# Repo-specific vars outside the block are preserved.
+OPENCODE_ENV_MARK_START='# chrysa:opencode-env:start · managed by distribute-standards.sh · DO NOT EDIT'
+OPENCODE_ENV_MARK_END='# chrysa:opencode-env:end'
 
 # Legacy artefacts from the vendored-copy mechanism (removed on migration).
 OLD_MARK_START='<!-- chrysa:standards-import:start -->'
@@ -208,6 +216,47 @@ deploy_dir() {
     done < <(find "$src" -type f -print0)
 }
 
+# Techno-aware skill deployment. Mirror only the skill subdirectories whose
+# profiles intersect the target repo's profiles (repos.yml), plus every skill
+# tagged `all`. A skill absent from skills-profiles.yml defaults to `all`
+# (fail-open: an unclassified skill still reaches every repo). The map file
+# itself is a top-level file, never a skill dir, so it never travels.
+deploy_skills() {
+    local src="$1" dest="$2" name="$3"
+    [[ -d "$src" ]] || { warn "source dir missing: $src · skip"; return 0; }
+    local included
+    included="$(python3 - "$STD_ROOT/repos.yml" "$src/skills-profiles.yml" "$src" "$name" <<'PY'
+import os, sys
+try:
+    import yaml
+except Exception:
+    # No pyyaml: fail open, deploy every skill dir (previous behaviour).
+    src = sys.argv[3]
+    for d in sorted(os.listdir(src)):
+        if os.path.isdir(os.path.join(src, d)):
+            print(d)
+    sys.exit(0)
+repos_yml, map_yml, src, name = sys.argv[1:5]
+rd = yaml.safe_load(open(repos_yml)) or {}
+repo_profiles = {p for p, rs in (rd.get('profiles') or {}).items() if name in (rs or [])}
+pm = {}
+if os.path.exists(map_yml):
+    pm = (yaml.safe_load(open(map_yml)) or {}).get('profiles', {}) or {}
+for d in sorted(os.listdir(src)):
+    if not os.path.isdir(os.path.join(src, d)):
+        continue
+    want = pm.get(d, ['all'])
+    if 'all' in want or (set(want) & repo_profiles):
+        print(d)
+PY
+)"
+    local sn
+    while IFS= read -r sn; do
+        [[ -n "$sn" ]] || continue
+        deploy_dir "$src/$sn" "$dest/$sn"
+    done <<< "$included"
+}
+
 # Remove the legacy vendored copy + old import block (migration from the old mechanism).
 purge_legacy() {
     local repo="$1" claude="$2"
@@ -226,6 +275,23 @@ purge_legacy() {
         $0==s {skip=1; next} $0==e {skip=0; next} !skip {print}' "$claude" > "$tmp"
     mv "$tmp" "$claude"
     ok "stripped legacy import block in $claude"
+}
+
+# Upsert the opencode provider env vars into <repo>/.env.example (managed block).
+# Only documents variable NAMES + safe defaults — never secret values.
+# @tag @[claude-opus-4-8]  opencode multi-provider fleet block (PR #570)
+sync_env_example() {
+    local repo="$1"
+    local target="$repo/.env.example"
+    local body; body="$(mktemp)"
+    cat > "$body" <<'ENVBODY'
+# --- opencode LLM providers ---
+OLLAMA_URL=http://127.0.0.1:11434   # local default, offline-first (opencode default model)
+ANTHROPIC_API_KEY=                  # opt-in: Claude (cloud)
+OPENAI_API_KEY=                     # opt-in: ChatGPT (cloud)
+ENVBODY
+    upsert_block "$target" "$OPENCODE_ENV_MARK_START" "$OPENCODE_ENV_MARK_END" "$body" "opencode-env"
+    rm -f "$body"
 }
 
 # Ensure the managed inline standards block exists + is current in <repo>/CLAUDE.md.
@@ -317,12 +383,18 @@ main() {
         log "done (standards-only)"; return 0
     fi
 
-    # 3. Shared skills (managed copies).
-    deploy_dir "$SKILLS_SRC" "$repo/.claude/skills"
+    # 3. Shared skills (managed copies), scoped to the repo's profiles.
+    deploy_skills "$SKILLS_SRC" "$repo/.claude/skills" "${REPO_NAME:-$(basename "$repo")}"
 
-    # 4. Shared agents + commands (managed copies).
+    # 4. Shared agents + commands + workflows (managed copies).
     deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
     deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
+    deploy_dir "$WORKFLOWS_SRC" "$repo/.claude/workflows"
+
+    # 4b. opencode agent config (managed copy — ollama default, claude/chatgpt opt-in).
+    deploy_file "$OPENCODE_TPL" "$repo/opencode.json"
+    # 4c. opencode provider env vars (managed block, preserves repo-specific vars).
+    sync_env_example "$repo"
 
     # 5. Workflows + lint/quality + pre-commit — reuse the existing apply layer.
     if $NO_APPLY; then

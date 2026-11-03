@@ -83,4 +83,10 @@ domains:
   priority: P2
   status: Adopted
   title: Eventing & real-time streaming
+- home: standards/annexes/AI-ORCHESTRATION.md
+  id: STD-AIORCH-001
+  prefix: AI-
+  priority: P1
+  status: Adopted
+  title: Local AI orchestration & agent protocols
 version: 1

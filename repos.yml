@@ -9,6 +9,8 @@ profiles:
   - coach
   - daedalus-document-factory
   - dev-nexus
+  - noesis
+  - content-extractor
   back:
   - ai-aggregator
   - audit-platform
@@ -23,16 +25,15 @@ profiles:
   - content-organizer
   - wsmqtt-monitor
   - daedalus-document-factory
+  - noesis
+  - content-extractor
   config:
-  - agent-config
-  - catalog
+  - ai-config
   - chrysa-skills
-  - claude-config
   - chrysa-claude-template
   - dotfiles
   - github-actions
   - homeassistant-config
-  - projects-claude-config
   - usefull-containers
   - shared-standards
   front:
@@ -53,15 +54,11 @@ profiles:
   - wsmqtt-monitor
   - guideline-checker
   infra:
-  - catalog
-  - server
   - github-actions
   - shared-standards
   - dotfiles
   - project-init
-  - agent-config
-  - claude-config
-  - projects-claude-config
+  - ai-config
   - chrysa-claude-template
   lib:
   - chrysa-lib
@@ -78,17 +75,28 @@ profiles:
   - fastapi-traceid
   - guardian-core
   - guideline-checker
-  - pre-commit-hooks-changelog
   - pre-commit-tools
   - project-init
 repos:
+- name: noesis
+  public: false
+  runtime: container
+  status: dev
+- name: content-extractor
+  public: false
+  runtime: container
+  status: dev
 - name: agent-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: ai-aggregator
   public: false
   runtime: container
+  status: dev
+- name: ai-config
+  public: false
+  runtime: exempt:config
   status: dev
 - name: audit-platform
   public: false
@@ -101,7 +109,7 @@ repos:
 - name: catalog
   public: false
   runtime: exempt:config
-  status: dev
+  status: migrated  # moved to Forge-Stack-Workshop/plateform_service_catalog
 - name: cdn-explorer
   public: true
   runtime: container
@@ -125,7 +133,7 @@ repos:
 - name: claude-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: coach
   public: false
   runtime: exempt:lib
@@ -135,6 +143,10 @@ repos:
   runtime: container
   status: dev
 - name: D-D
+  public: false
+  runtime: container
+  status: dev
+- name: dev-focus
   public: false
   runtime: container
   status: dev
@@ -299,10 +311,6 @@ repos:
   public: false
   runtime: container
   status: dev
-- name: pre-commit-hooks-changelog
-  public: true
-  runtime: exempt:lib
-  status: dev
 - name: pre-commit-tools
   public: true
   runtime: exempt:lib
@@ -326,7 +334,7 @@ repos:
 - name: server
   public: false
   runtime: exempt:native
-  status: dev
+  status: migrated  # moved to Forge-Stack-Workshop/plateform_socle
 - name: skunk-simulator
   public: false
   runtime: exempt:native
@@ -378,7 +386,7 @@ repos:
 - name: projects-claude-config
   public: false
   runtime: exempt:config
-  status: dev
+  status: archived
 - name: forge-studio-core
   public: false
   runtime: exempt:config
@@ -413,9 +421,60 @@ repos:
   status: dev
 - name: content-organizer
   public: false
-  runtime: container
+  runtime: exempt:native
   status: dev
 - name: logos
   public: false
+  runtime: exempt:lib
+  status: dev
+# Registered 2026-11-02: active repos that had no Dependabot config. status:dev puts them
+# in the distribute-standards matrix, whose apply-ci-process.sh writes the canonical
+# .github/dependabot.yml (weekly, Friday 04:00 cron) when the file is absent.
+- name: ops-monitoring
+  public: false
+  runtime: pending  # no application code yet (only .github/)
+  status: dev
+- name: local-knowledge-hub
+  public: false
   runtime: container
   status: dev
+- name: prism-ai-lint
+  public: true
+  runtime: exempt:lib
+  status: dev
+- name: herdr-cockpit
+  public: true
+  runtime: exempt:native  # herdr plugins, run inside the host terminal multiplexer
+  status: dev
+- name: ancrage
+  public: false
+  runtime: container
+  status: dev
+- name: graph-core
+  public: false
+  runtime: exempt:lib
+  status: dev
+- name: pc-doctor
+  public: false
+  runtime: exempt:native  # audits and repairs the host itself
+  status: dev
+- name: gource-live
+  public: false
+  runtime: pending  # no manifest at the root yet
+  status: dev
+- name: transport-simulator
+  public: false
+  runtime: exempt:native  # Unity project, like skunk-simulator
+  status: dev
+- name: poc-openwebui
+  public: false
+  runtime: container
+  status: dev
+- name: dataflow-architect
+  public: false
+  runtime: pending  # web platform, container layout not decided yet
+  status: dev
+- name: agent-panel
+  public: true
+  runtime: exempt:native
+  status: non-dev  # fork of flowy11/agent-panel: not served by the fleet distribution

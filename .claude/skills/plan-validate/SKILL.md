@@ -1,4 +1,5 @@
 ---
+name: plan-validate
 description: Adversarially review a construction plan before execution
 argument-hint: <plan-file>
 ---

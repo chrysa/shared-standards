@@ -7,7 +7,8 @@
 #
 #   container     -> FAIL if it cannot run containerized at all (no Dockerfile AND no compose).
 #                    WARN if it runs in a container but misses §6 polish
-#                    (compose / HEALTHCHECK / docker-up / docker-down / docker-test targets).
+#                    (compose / HEALTHCHECK / docker-up / docker-down / docker-test targets),
+#                    or its healthcheck boots the language runtime (CT-004: HEALTHCHECK-runtime).
 #   exempt:lib    -> WARN if neither docker-test target nor Dockerfile.test (suite would run on host).
 #   exempt:config -> EXEMPT (nothing to run).
 #   exempt:native -> EXEMPT (host/device/cloud/editor bound; a container cannot give host access).
@@ -52,10 +53,22 @@ has_compose() {
 has_make_target() {  # has_make_target <repo> <target>
     [[ -f "$1/Makefile" ]] && grep -qE "^$2:" "$1/Makefile" 2>/dev/null
 }
+# CT-004: the healthcheck lives in the Dockerfile; a compose healthcheck: alone does not count.
 has_healthcheck() {
-    find "$1" "${PRUNE[@]}" -type f -iname 'Dockerfile*' -exec grep -qiE 'HEALTHCHECK' {} + 2>/dev/null && return 0
+    find "$1" "${PRUNE[@]}" -type f -iname 'Dockerfile*' -exec grep -qiE '^[[:space:]]*HEALTHCHECK' {} + 2>/dev/null
+}
+
+# CT-004: a healthcheck must not boot the project's language runtime (python/node/php/ruby/java,
+# npm/pnpm/yarn script, manage.py). Matches HEALTHCHECK lines in Dockerfiles and compose `test:`.
+has_runtime_healthcheck() {
+    local re='(^|[^[:alnum:]_-])(python[0-9.]*|node|php|ruby|java|deno|bun|npm|pnpm|yarn|manage\.py)([" ,]|$)'
+    # join `\` continuations so a multi-line HEALTHCHECK is matched as one instruction
+    find "$1" "${PRUNE[@]}" -type f -iname 'Dockerfile*' -exec cat {} + 2>/dev/null \
+        | sed -e ':a' -e '/\\$/N; s/\\\n//; ta' \
+        | grep -iE '^[[:space:]]*HEALTHCHECK' | grep -qE "$re" && return 0
     find "$1" "${PRUNE[@]}" -type f \( -iname 'docker-compose*.y*ml' -o -iname 'compose*.y*ml' \) \
-        -exec grep -qiE '^[[:space:]]*healthcheck:' {} + 2>/dev/null
+        -exec awk '/^[[:space:]]*test:/ { t = 1; print; next } t && /^[[:space:]]*- / { print; next } { t = 0 }' {} + \
+        2>/dev/null | grep -qE "$re"
 }
 
 # ── audit a single repo ──────────────────────────────────────────────────────────
@@ -78,6 +91,7 @@ audit_one() {
             [[ "$df" == true ]] || gaps+=("Dockerfile")
             [[ "$cf" == true ]] || gaps+=("compose")
             has_healthcheck "$repo"             || gaps+=("HEALTHCHECK")
+            has_runtime_healthcheck "$repo"     && gaps+=("HEALTHCHECK-runtime")
             has_make_target "$repo" docker-up   || gaps+=("docker-up")
             has_make_target "$repo" docker-down || gaps+=("docker-down")
             has_make_target "$repo" docker-test || gaps+=("docker-test")

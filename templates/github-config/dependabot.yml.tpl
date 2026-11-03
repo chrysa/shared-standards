@@ -4,6 +4,8 @@
 #
 # Schedule unifié : vendredi 04h00 UTC cron (évite PR en cours de sprint)
 # Cooldown 7j sur ecosystems bruyants · groups pour réduire volume PR
+# Chaque ecosystem a un groupe filet ("*") : seule une majeure ouvre une PR seule.
+# Groupe chrysa-socles en tête (GA + pre-commit) : socles chrysa mis à jour ensemble.
 #
 # Marqueurs {{ ... }} à remplacer par le script apply-ci-process.sh selon stack détectée.
 # Ecosystems possibles : pip, npm, docker, docker-compose, github-actions, pre-commit, cargo
@@ -28,6 +30,12 @@ updates:
           interval: cron
           cronjob: "0 4 * * 5"
       groups:
+          # Socles chrysa (workflows réutilisables chrysa/github-actions, actions
+          # chrysa/*) : une PR groupée dédiée, pour que leur montée de version ne
+          # soit jamais bloquée par une action tierce. Premier groupe qui matche.
+          chrysa-socles:
+              patterns:
+                  - chrysa/*
           actions-official:
               patterns:
                   - actions/*
@@ -57,6 +65,18 @@ updates:
       schedule:
           interval: cron
           cronjob: "0 4 * * 5"
+      # Un seul PR hebdo pour tous les hooks : sans groupe, chaque hook
+      # ouvrait sa propre PR (et le plafond de 2 les étalait sur des semaines).
+      groups:
+          # Hooks des socles chrysa (guideline-checker, pre-commit-tools…) à part.
+          chrysa-socles:
+              patterns:
+                  - "*chrysa/*"
+          pre-commit-hooks:
+              patterns:
+                  - "*"
+      cooldown:
+          default-days: 7
 
 # {{ECOSYSTEM_PYTHON_START}}
     # ═══ Python · pip ═══
@@ -91,6 +111,15 @@ updates:
                   - ruff*
                   - black*
                   - flake8*
+          # Filet : tout le reste en minor/patch dans une seule PR. Les groupes
+          # ci-dessus gagnent (premier groupe qui matche) ; les majeures
+          # restent en PR individuelles pour être relues.
+          minor-and-patch:
+              patterns:
+                  - "*"
+              update-types:
+                  - minor
+                  - patch
       cooldown:
           default-days: 7
 # {{ECOSYSTEM_PYTHON_END}}
@@ -130,6 +159,15 @@ updates:
                   - typescript
                   - "@typescript-eslint/*"
                   - eslint*
+          # Filet : tout le reste en minor/patch dans une seule PR. Les groupes
+          # ci-dessus gagnent (premier groupe qui matche) ; les majeures
+          # restent en PR individuelles pour être relues.
+          minor-and-patch:
+              patterns:
+                  - "*"
+              update-types:
+                  - minor
+                  - patch
       cooldown:
           default-days: 7
 # {{ECOSYSTEM_NPM_END}}

@@ -84,6 +84,7 @@ source in two forms.
 | `STD-TEST-001`       | `TESTING.md`                              | `TS-`       |
 | `STD-PERF-001`       | `CI-CD.md` (CI-053)                       | `CI-`       |
 | `STD-AI-QUALITY-001` | `AGENTIC-CAPABILITIES.md`                 | `AG-`       |
+| `STD-AIORCH-001`     | `AI-ORCHESTRATION.md`                     | `AI-`       |
 | `STD-SCM-001`        | `SCM.md`                                  | `SC-`       |
 | `STD-EVENTING-001`   | `EVENTING.md`                             | `EV-`       |
 

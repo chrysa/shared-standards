@@ -1,4 +1,5 @@
 ---
+name: plan-execute
 description: Execute a single validated step from a construction plan
 argument-hint: <plan-file> <step-number>
 ---

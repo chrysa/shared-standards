@@ -15,7 +15,7 @@
 
 | Layer            | Decision                                                        |
 |------------------|----------------------------------------------------------------|
-| Python           | 3.14 target (CI matrix 3.12 + 3.14)                            |
+| Python           | 3.14 runtime · ruff target py313 (ruff py314 bug) · CI 3.12+3.14 — ADR D-0015 |
 | FastAPI          | >= 0.115 + Pydantic v2                                          |
 | Frontend         | React 19 + TypeScript 7 + Vite 8                                |
 | UI               | shadcn/ui + Tailwind CSS                                        |
@@ -33,7 +33,8 @@
 | Hosting          | Kimsufi · Docker Compose (local) · Nginx · Certbot · Tailscale  |
 | Monitoring       | Sentry + Uptime Kuma (self-hosted)                            |
 | Agents           | Claude API (primary) · Ollama (fallback)                       |
+| LLM endpoint     | Ollama, OpenAI-compatible API: `LLM_BASE_URL=http://localhost:11434/v1` (AI-080) |
 | Orchestration    | LangGraph (stateful) · PydanticAI (structured outputs)         |
-| Registry         | GHCR private `ghcr.io/chrysa/{repo}` — never public            |
+| Registry         | GHCR private `ghcr.io/chrysa/{repo}` for internal images · open-source repos: public Docker Hub image `docker.io/chrys4/{repo}` (owner account `chrys4`, cockpit 2026-11-01) + PyPI via Trusted Publishing (OIDC) — DEC-V3-010 (2026-10-28) |
 | Docs             | MkDocs → GitHub Pages (`pages.yml`) · ADRs in `docs/adr/`       |
 | Changelog        | [git-cliff](https://git-cliff.org/) (`cliff.toml`) · Keep a Changelog |
