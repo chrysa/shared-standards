@@ -102,7 +102,7 @@ repos:
   public: false
   runtime: container
   status: dev
-- name: automations
+- name: n8n-automations  # renamed from `automations` on GitHub (chrysa/automations redirects here)
   public: false
   runtime: exempt:native
   status: dev
@@ -478,3 +478,12 @@ repos:
   public: true
   runtime: exempt:native
   status: non-dev  # fork of flowy11/agent-panel: not served by the fleet distribution
+# Registered 2026-11-04 (STD-08): the last active repos still missing from the registry.
+- name: arena-techno
+  public: false
+  runtime: exempt:native  # Unity 6 project, like transport-simulator
+  status: dev
+- name: personal-cfo
+  public: false
+  runtime: container
+  status: dev
