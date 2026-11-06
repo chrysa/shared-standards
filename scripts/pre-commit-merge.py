@@ -145,11 +145,9 @@ HOOK_GROUPS = {
         "claude-mcp-config",
     },
     "python": {
-        "debugger-detection",
+        # Kept until ruff T201 is armed: its fleet backlog is not cleared yet
+        # (pyproject-ruff-merge.py DELIBERATELY_EXCLUDED).
         "python-print-detection",
-        "python-pprint-detection",
-        "no-bare-except",
-        "python-logger-detection",
         "python-unreachable-code",
         "no-hardcoded-localhost",
         "regression-gate",
@@ -159,10 +157,8 @@ HOOK_GROUPS = {
         # in tests, hence the baseline exclude), 5 dispatch ladders, 0 mutable defaults.
         # Remediated to 0 in product code on 2026-08-05, re-verified on fresh clones.
         "python-untyped-raise",
-        "python-mutable-default",
         "python-dispatch-ladder",
     },
-    "docker": {"dockerfile-no-latest"},
     "jsts": {
         "console-log-detection",
         "console-debug-detection",
@@ -175,10 +171,27 @@ HOOK_GROUPS = {
     "fastapi": {
         "fastapi-missing-response-model",
         "fastapi-missing-links",
-        "no-sync-in-async",
     },
 }
 GOVERNED = set().union(*HOOK_GROUPS.values())
+
+# chrysa/pre-commit-tools hooks deprecated upstream because Ruff or hadolint ships the
+# same rule natively (pre-commit-tools DEPRECATIONS.md). merge() is a union where the
+# existing config wins, so dropping them from the baseline alone would never reach the
+# fleet: they are pruned explicitly, and --check reports their presence as drift. The
+# Ruff codes are armed by pyproject-ruff-merge.py (LOT 2), hadolint by the baseline.
+# The JS/TS console/any/unreachable hooks are deprecated too but stay governed until a
+# canonical ESLint config is distributed — pruning them now would drop the coverage.
+DEPRECATED_HOOK_IDS: dict[str, str] = {
+    "debugger-detection": "ruff T100",
+    "python-pprint-detection": "ruff T203",
+    "no-bare-except": "ruff E722",
+    "python-mutable-default": "ruff B006",
+    "python-logger-detection": "ruff LOG015",
+    "no-sync-in-async": "ruff ASYNC2xx",
+    "dockerfile-no-latest": "hadolint DL3006/DL3007",
+}
+DEPRECATION_PRUNED_REPOS = {"https://github.com/chrysa/pre-commit-tools"}
 
 # Repos whose pinned rev must track the canonical baseline (not "existing wins"):
 # the hook *implementation* carries fixes the campaign depends on. Example: the
@@ -226,10 +239,7 @@ def rev_regresses(baseline_rev: object, existing_rev: object) -> bool:
 # not propagate to the 57 repos that already carried the hook. Keep this set small — every id
 # here gives up the right to tune its own exclude.
 EXCLUDE_ALIGNED_IDS = {
-    "debugger-detection",
     "python-print-detection",
-    "python-pprint-detection",
-    "python-logger-detection",
     "python-untyped-raise",
     "fastapi-missing-response-model",
     "fastapi-missing-links",
@@ -311,13 +321,46 @@ def describe_actions(gaps: list[str]) -> str:
     overwritten. Reporting an overwrite as an addition hides what actually changed.
     """
     aligned = sum(1 for gap in gaps if gap.endswith("!exclude"))
-    added = len(gaps) - aligned
+    removed = sum(1 for gap in gaps if gap.endswith("!deprecated"))
+    added = len(gaps) - aligned - removed
     parts = []
     if added:
         parts.append(f"added {added} baseline item(s)")
     if aligned:
         parts.append(f"aligned {aligned} policy exclude(s)")
+    if removed:
+        parts.append(f"removed {removed} deprecated hook(s)")
     return ", ".join(parts)
+
+
+def deprecated_present(target: dict) -> list[str]:
+    """Deprecated hook ids still declared in the target, as `url#id!deprecated` gaps."""
+    return [
+        f"{repo.get('repo')}#{hook.get('id')}!deprecated"
+        for repo in target.get("repos", [])
+        if repo.get("repo") in DEPRECATION_PRUNED_REPOS
+        for hook in repo.get("hooks", [])
+        if hook.get("id") in DEPRECATED_HOOK_IDS
+    ]
+
+
+def prune_deprecated(target: dict) -> None:
+    """Drop deprecated hooks from the target; a repo entry emptied by it goes too.
+
+    Deletes in place (by index, from the end) instead of rebuilding the lists, so the
+    ruamel round-trip keeps the surrounding comments and layout byte-identical.
+    """
+    repos = target.get("repos") or []
+    for repo_index in range(len(repos) - 1, -1, -1):
+        repo = repos[repo_index]
+        if repo.get("repo") not in DEPRECATION_PRUNED_REPOS:
+            continue
+        hooks = repo.get("hooks") or []
+        for hook_index in range(len(hooks) - 1, -1, -1):
+            if hooks[hook_index].get("id") in DEPRECATED_HOOK_IDS:
+                del hooks[hook_index]
+        if not hooks:
+            del repos[repo_index]
 
 
 def exclude_drifts(target_hook: dict, baseline_hook: dict) -> bool:
@@ -366,6 +409,7 @@ def missing_items(baseline: dict, target: dict, allowed: set[str]) -> list[str]:
     if canon_py and target_python(target) not in (None, canon_py):
         gaps.append(f"default_language_version.python={canon_py}")
     gaps.extend(f"exclude:{pattern}" for pattern in _exclude_gaps(target))
+    gaps.extend(deprecated_present(target))
     return gaps
 
 
@@ -420,6 +464,7 @@ def merge(baseline: dict, target: dict, allowed: set[str]) -> dict:
     if canon_py and target_python(target) not in (None, canon_py):
         target["default_language_version"]["python"] = canon_py
     ensure_top_level_exclude(target)
+    prune_deprecated(target)
     return target
 
 

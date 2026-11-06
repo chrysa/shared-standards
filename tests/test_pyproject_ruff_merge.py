@@ -39,9 +39,9 @@ def test_appends_canonical_ignore_table_when_absent(tmp_path: Path) -> None:
     p.write_text('[project]\nname = "x"\n', encoding="utf-8")
     assert M.main([str(p)]) == 0
     ig = _ignores(p.read_text())
-    assert ig["**/tests/**"] == ["PLR2004"]
-    assert ig["**/test_*.py"] == ["PLR2004"]
-    assert ig["**/conftest.py"] == ["PLR2004"]
+    assert ig["**/tests/**"] == ["PLR2004", "T203"]
+    assert ig["**/test_*.py"] == ["PLR2004", "T203"]
+    assert ig["**/conftest.py"] == ["PLR2004", "T203"]
 
 
 def test_merges_into_existing_glob_keeping_other_codes(tmp_path: Path) -> None:
@@ -54,7 +54,7 @@ def test_merges_into_existing_glob_keeping_other_codes(tmp_path: Path) -> None:
     )
     assert M.main([str(p)]) == 0
     ig = _ignores(p.read_text())
-    assert ig["**/tests/**"] == ["S101", "PLR2004"]  # existing code preserved
+    assert ig["**/tests/**"] == ["S101", "PLR2004", "T203"]  # existing code preserved
     assert ig["scripts/*.py"] == ["T201"]  # unrelated ignore untouched
 
 
@@ -70,7 +70,7 @@ def test_merges_into_existing_multiline_array(tmp_path: Path) -> None:
     )
     assert M.main([str(p)]) == 0  # no duplicate-key crash
     ig = _ignores(p.read_text())
-    assert ig["**/tests/**"] == ["S101", "ARG001", "PLR2004"]  # merged in place
+    assert ig["**/tests/**"] == ["S101", "ARG001", "PLR2004", "T203"]  # merged in place
 
 
 def test_is_idempotent(tmp_path: Path) -> None:
@@ -132,3 +132,21 @@ def test_check_flags_missing_extend_exclude(tmp_path: Path) -> None:
     p = tmp_path / "pyproject.toml"
     p.write_text('[tool.ruff]\nline-length = 100\n', encoding="utf-8")
     assert M.main([str(p), "--check"]) == 1  # canonical excludes missing → drift
+
+
+def test_lot2_codes_replace_deprecated_hooks() -> None:
+    for code in ("T100", "T203", "E722", "B006", "LOG015", "ASYNC251"):
+        assert code in M.CANONICAL_RULES
+
+
+def test_t201_is_deferred_with_a_documented_reason() -> None:
+    assert "T201" not in M.CANONICAL_RULES
+    assert "T201" in M.DELIBERATELY_EXCLUDED
+
+
+def test_rules_override_only_manages_ignores_of_armed_codes(tmp_path: Path) -> None:
+    p = tmp_path / "pyproject.toml"
+    p.write_text('[tool.ruff.lint]\nselect = ["E"]\n', encoding="utf-8")
+    assert M.main([str(p), "--rules=PLR2004"]) == 0
+    ig = _ignores(p.read_text())
+    assert ig["**/tests/**"] == ["PLR2004"]  # T203 not in the override -> not ignored

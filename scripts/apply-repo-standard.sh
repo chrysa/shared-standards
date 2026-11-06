@@ -322,6 +322,19 @@ merge_ruff_rules() {
     fi
     local merger="$SCRIPT_DIR/pyproject-ruff-merge.py"
     [[ -f "$merger" ]] || { warn "pyproject-ruff-merge.py missing · ruff rules skipped"; return 0; }
+    # LOT 2 arms the Ruff codes of the deprecated pre-commit-tools hooks; their legacy
+    # `# <hook>: disable` comments must become `# noqa: <code>` first or CI breaks.
+    local comments="$SCRIPT_DIR/migrate-deprecated-hook-comments.py"
+    if $CHECK; then
+        python3 "$comments" "$repo" --check && ok "no legacy hook opt-out comment" \
+            || warn "legacy hook opt-out comments to convert (see above)"
+    elif $DRY_RUN; then
+        python3 "$comments" "$repo" --check >/dev/null 2>&1 \
+            && info "[dry-run] no legacy hook opt-out comment" \
+            || info "[dry-run] would convert legacy hook opt-out comments to noqa"
+    else
+        python3 "$comments" "$repo" && ok "legacy hook opt-out comments converted"
+    fi
     local target rel
     while IFS= read -r target; do
         [[ -n "$target" ]] || continue
