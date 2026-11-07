@@ -63,3 +63,75 @@ def test_merge_is_idempotent_after_pruning() -> None:
 def test_print_hook_stays_governed_until_t201_is_armed() -> None:
     assert "python-print-detection" not in M.DEPRECATED_HOOK_IDS
     assert "python-print-detection" in M.HOOK_GROUPS["python"]
+
+
+_RUFF = {"repo": "https://github.com/astral-sh/ruff-pre-commit", "hooks": [{"id": "ruff-check"}]}
+_HADOLINT = {"repo": "https://github.com/hadolint/hadolint", "hooks": [{"id": "hadolint-docker"}]}
+
+
+def _policy(tmp_path: Path, pyproject: str | None, *extra_repos: dict):
+    if pyproject is not None:
+        (tmp_path / "pyproject.toml").write_text(pyproject, encoding="utf-8")
+    target = _target("debugger-detection", "no-bare-except", "dockerfile-no-latest")
+    target["repos"].extend(extra_repos)
+    return M.replacement_policy(tmp_path, {"repos": []}, target), target
+
+
+def test_hook_kept_when_replacement_code_not_selected(tmp_path: Path) -> None:
+    can_prune, target = _policy(tmp_path, '[tool.ruff.lint]\nselect = ["E", "F"]\n', _RUFF)
+    assert not can_prune("debugger-detection")
+    assert can_prune("no-bare-except")  # E722 is covered by "E"
+    merged = M.merge({"repos": []}, target, set(), can_prune)
+    ids = [h["id"] for h in merged["repos"][0]["hooks"]]
+    assert "debugger-detection" in ids and "no-bare-except" not in ids
+
+
+def test_hook_kept_when_code_is_ignored(tmp_path: Path) -> None:
+    can_prune, _ = _policy(
+        tmp_path, '[tool.ruff.lint]\nextend-select = ["T10"]\nignore = ["T100"]\n', _RUFF
+    )
+    assert not can_prune("debugger-detection")
+
+
+def test_more_specific_select_beats_broad_ignore(tmp_path: Path) -> None:
+    can_prune, _ = _policy(
+        tmp_path, '[tool.ruff.lint]\nextend-select = ["T100"]\nignore = ["T"]\n', _RUFF
+    )
+    assert can_prune("debugger-detection")
+
+
+def test_hook_kept_without_pyproject(tmp_path: Path) -> None:
+    can_prune, _ = _policy(tmp_path, None, _RUFF)
+    assert not can_prune("no-bare-except")
+
+
+def test_hook_kept_without_ruff_hook(tmp_path: Path) -> None:
+    can_prune, _ = _policy(tmp_path, '[tool.ruff.lint]\nselect = ["ALL"]\n')
+    assert not can_prune("no-bare-except")
+
+
+def test_hook_kept_on_invalid_pyproject(tmp_path: Path) -> None:
+    can_prune, _ = _policy(tmp_path, "[tool.ruff.lint\nselect = [", _RUFF)
+    assert not can_prune("no-bare-except")
+
+
+def test_nested_pyproject_must_also_arm_the_code(tmp_path: Path) -> None:
+    (tmp_path / "backend").mkdir()
+    (tmp_path / "backend" / "pyproject.toml").write_text(
+        '[tool.ruff.lint]\nselect = ["F"]\n', encoding="utf-8"
+    )
+    can_prune, _ = _policy(tmp_path, '[tool.ruff.lint]\nselect = ["ALL"]\n', _RUFF)
+    assert not can_prune("no-bare-except")
+
+
+def test_dockerfile_hook_needs_hadolint(tmp_path: Path) -> None:
+    without, _ = _policy(tmp_path, None)
+    with_hadolint, _ = _policy(tmp_path, None, _HADOLINT)
+    assert not without("dockerfile-no-latest")
+    assert with_hadolint("dockerfile-no-latest")
+
+
+def test_check_does_not_report_unprunable_hook_as_drift(tmp_path: Path) -> None:
+    can_prune, target = _policy(tmp_path, '[tool.ruff.lint]\nselect = ["F"]\n', _RUFF)
+    gaps = M.missing_items({"repos": []}, target, set(), can_prune)
+    assert not [g for g in gaps if g.endswith("!deprecated")]

@@ -360,15 +360,17 @@ apply_one() {
     # `.git` is a directory in a normal clone but a file in a worktree; -e covers both.
     [[ -e "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
     log "═══ $name ═══"
-    if $CHECK; then merge_precommit "$repo"; merge_ruff_rules "$repo"; return 0; fi
+    # Ruff before pre-commit: a deprecated hook is pruned only once the Ruff code that
+    # replaces it is armed in pyproject.toml (pre-commit-merge.py replacement_policy).
+    if $CHECK; then merge_ruff_rules "$repo"; merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
     deploy_quality_gate "$repo"
     deploy_context_files "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
-    merge_precommit "$repo"
     merge_ruff_rules "$repo"
+    merge_precommit "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"
     if [[ -x "$proc" || -f "$proc" ]]; then
         local flags=""; $DRY_RUN && flags="--dry-run"
