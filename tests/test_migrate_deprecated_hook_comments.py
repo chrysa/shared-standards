@@ -111,3 +111,50 @@ def test_untokenizable_file_is_left_alone_and_reported(tmp_path: Path) -> None:
     repo = _repo(tmp_path, {"bad.py": 'x = """unterminated  # debugger-detection: disable\n'})
     converted, manual = M.migrate(repo, write=True)
     assert converted == [] and len(manual) == 1
+
+
+def test_crlf_line_endings_are_preserved(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, {})
+    target = repo / "a.py"
+    target.write_bytes(b"x = 1\r\npprint(x)  # pprint-detection: disable\r\n")
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    M.migrate(repo, write=True)
+    assert target.read_bytes() == b"x = 1\r\npprint(x)  # noqa: T203\r\n"
+
+
+def test_form_feed_does_not_shift_lines_onto_a_string(tmp_path: Path) -> None:
+    # str.splitlines() would split on \x0c and shift every later line by one,
+    # applying the comment column to the fixture string below.
+    source = (
+        "\x0c\n"
+        "x = 1  # no-bare-except: disable\n"
+        "FIXTURE = 'except:  # no-bare-except: disable'\n"
+    )
+    repo = _repo(tmp_path, {"a.py": source})
+    M.migrate(repo, write=True)
+    assert (repo / "a.py").read_text(encoding="utf-8") == (
+        "\x0c\n"
+        "x = 1  # noqa: E722\n"
+        "FIXTURE = 'except:  # no-bare-except: disable'\n"
+    )
+
+
+def test_tracked_symlink_is_not_followed(tmp_path: Path) -> None:
+    outside = tmp_path / "outside.py"
+    outside.write_text("pprint(x)  # pprint-detection: disable\n", encoding="utf-8")
+    repo = _repo(tmp_path / "repo", {"keep.py": "x = 1\n"})
+    (repo / "link.py").symlink_to(outside)
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    converted, _ = M.migrate(repo, write=True)
+    assert converted == []
+    assert "pprint-detection: disable" in outside.read_text(encoding="utf-8")
+
+
+def test_unknown_flag_is_a_usage_error_and_writes_nothing(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, {"a.py": "pprint(x)  # pprint-detection: disable\n"})
+    assert M.main([str(repo), "--chek"]) == 2
+    assert "pprint-detection: disable" in (repo / "a.py").read_text(encoding="utf-8")
+
+
+def test_not_a_git_repo_is_a_usage_error(tmp_path: Path) -> None:
+    assert M.main([str(tmp_path)]) == 2

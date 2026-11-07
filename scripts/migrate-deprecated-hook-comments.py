@@ -25,6 +25,7 @@ Exit: 0 ok / 1 pending conversions (with --check) / 2 usage error.
 from __future__ import annotations
 
 import io
+import os
 import re
 import subprocess
 import tokenize
@@ -46,6 +47,7 @@ PYTHON_MARKERS: dict[str, str] = {
 REPORT_ONLY_MARKERS = ("no-sync-in-async",)
 DOCKER_MARKER = "dockerfile-no-latest"
 DOCKER_REPLACEMENT = "# hadolint ignore=DL3007"
+KNOWN_FLAGS = ("--check",)
 
 _NOQA_RE = re.compile(r"#\s*noqa:\s*(?P<codes>[A-Z]+[0-9]+(?:\s*,\s*[A-Z]+[0-9]+)*)")
 _DOCKERFILE_RE = re.compile(r"(^|/)Dockerfile[^/]*$")
@@ -132,7 +134,19 @@ def tracked_files(repo: Path) -> list[Path]:
         capture_output=True,
         check=True,
     )
-    return [repo / name for name in result.stdout.decode("utf-8").split("\0") if name]
+    return [repo / os.fsdecode(name) for name in result.stdout.split(b"\0") if name]
+
+
+def _lines(text: str) -> list[str]:
+    """Split like the tokenizer does (on `\\n` only), so line numbers always agree."""
+    return io.StringIO(text).readlines()
+
+
+def _is_rewritable(path: Path, repo: Path) -> bool:
+    """A regular file inside the repo: symlinks are never followed out of the tree."""
+    if path.is_symlink() or not path.is_file():
+        return False
+    return path.resolve().is_relative_to(repo.resolve())
 
 
 def _scan_python(
@@ -144,7 +158,7 @@ def _scan_python(
     if columns is None:
         return text, [], [Finding(rel, 0, "not tokenizable, legacy comments left as is")]
     out: list[str] = []
-    for number, line in enumerate(text.splitlines(keepends=True), start=1):
+    for number, line in enumerate(_lines(text), start=1):
         col = columns.get(number)
         new = line if col is None else convert_python_line(line, col)
         if new != line:
@@ -164,7 +178,7 @@ def _scan_dockerfile(rel: str, text: str) -> tuple[str, list[Finding], list[Find
     converted: list[Finding] = []
     manual: list[Finding] = []
     out: list[str] = []
-    for number, line in enumerate(text.splitlines(keepends=True), start=1):
+    for number, line in enumerate(_lines(text), start=1):
         if _DOCKER_PATTERN.search(line):
             if line.lstrip().startswith("#"):
                 indent = line[: len(line) - len(line.lstrip())]
@@ -189,10 +203,13 @@ def migrate(repo: Path, *, write: bool) -> tuple[list[Finding], list[Finding]]:
     for path in tracked_files(repo):
         rel = path.relative_to(repo).as_posix()
         is_python = path.suffix == ".py"
-        if not (is_python or _DOCKERFILE_RE.search(rel)) or not path.is_file():
+        if not (is_python or _DOCKERFILE_RE.search(rel)):
+            continue
+        if not _is_rewritable(path, repo):
             continue
         try:
-            text = path.read_text(encoding="utf-8")
+            # Bytes I/O: no newline translation, so CRLF / CR endings survive the round-trip.
+            text = path.read_bytes().decode("utf-8")
         except (OSError, UnicodeDecodeError):
             continue
         if is_python:
@@ -202,17 +219,25 @@ def migrate(repo: Path, *, write: bool) -> tuple[list[Finding], list[Finding]]:
         converted.extend(done)
         manual.extend(todo)
         if write and new != text:
-            path.write_text(new, encoding="utf-8")
+            path.write_bytes(new.encode("utf-8"))
     return converted, manual
 
 
 def main(argv: list[str]) -> int:
+    flags = [a for a in argv if a.startswith("--")]
     args = [a for a in argv if not a.startswith("--")]
-    if len(args) != 1 or not Path(args[0]).is_dir():
+    unknown = [f for f in flags if f not in KNOWN_FLAGS]
+    if unknown or len(args) != 1 or not Path(args[0]).is_dir():
+        if unknown:
+            sys.stderr.write(f"unknown option(s): {' '.join(unknown)}\n")
         sys.stderr.write(__doc__ or "")
         return 2
-    check = "--check" in argv
-    converted, manual = migrate(Path(args[0]), write=not check)
+    check = "--check" in flags
+    try:
+        converted, manual = migrate(Path(args[0]), write=not check)
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(f"git ls-files failed in {args[0]}: {exc}\n")
+        return 2
     for finding in manual:
         sys.stderr.write(f"{finding.path}:{finding.line}: {finding.detail}\n")
     if check:
