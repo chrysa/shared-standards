@@ -347,6 +347,10 @@ repos:
   public: false
   runtime: container
   status: dev
+- name: steamdeck-config
+  public: false
+  runtime: exempt:native
+  status: dev
 - name: studioverse
   public: false
   runtime: container
