@@ -189,6 +189,7 @@ CLAUDE.md
 CODEOWNERS
 CONTRIBUTING.md
 DECISIONS.md
+DESIGN.md
 GitVersion.yml
 LICENSE
 Makefile
@@ -519,6 +520,7 @@ templates/
   CLAUDE.md
   CODEOWNERS
   CONTRIBUTING.md
+  DESIGN.md
   DESIGN.template.md
   GitVersion.yml
   LICENSE.mit
