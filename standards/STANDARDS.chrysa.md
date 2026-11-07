@@ -1220,6 +1220,31 @@ That record deliberately names products; where it and this canon disagree, **thi
 
 ## Design system
 
+
+Every repository with a graphical user interface MUST maintain a root `DESIGN.md` as its
+versioned product design contract. Repositories without a graphical interface do not need
+an empty placeholder. Existing shared tokens and component libraries remain canonical;
+`DESIGN.md` references them rather than duplicating their values.
+
+- Define users, priority tasks, navigation, visual identity, semantic token sources,
+  typography, spacing, responsive behaviour, component variants and interaction states.
+- Specify loading, empty, error, offline, stale-data and reconnect states. Real-time updates
+  preserve input, keyboard focus and scroll position.
+- Reference the applicable accessibility standard, UX acceptance scenarios, asset provenance
+  and licences; prefer locally served assets. External design inspirations are not official
+  brand systems and must be adapted into an original product identity.
+- Agent instructions (`AGENTS.md` / `CLAUDE.md`) MUST explicitly direct agents to consult
+  `DESIGN.md` before UI work. It is not automatically loaded by its filename. Prefer an
+  on-demand reference; use a Claude `@DESIGN.md` import only when always-loaded context is
+  justified. Keep detailed journeys and acceptance scenarios in linked documents.
+- Update the contract with UI changes and verify representative journeys in a browser,
+  including keyboard, responsive layouts and failure states. Static lint cannot certify
+  visual quality, ergonomics or accessibility compliance.
+- `prism-ai-lint` MUST recognise an existing `DESIGN.md` as an agent-consumable instruction
+  document, checking its size, imports and dead local references. Generic Prism must not
+  impose CHRYSA policy or require a design file in repositories without a UI.
+
+
 Every human-facing surface is built from a shared design system — no ad-hoc style values in
 components. This complements *dark mode + WCAG 2.1 AA* and the `ui-ux` skill.
 
