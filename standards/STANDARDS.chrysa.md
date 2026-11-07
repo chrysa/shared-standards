@@ -1241,7 +1241,8 @@ an empty placeholder. Existing shared tokens and component libraries remain cano
   including keyboard, responsive layouts and failure states. Static lint cannot certify
   visual quality, ergonomics or accessibility compliance.
 - `prism-ai-lint` MUST recognise an existing `DESIGN.md` as an agent-consumable instruction
-  document, checking its size, imports and dead local references. Generic Prism must not
+  document at the root or in nested UI directories, checking its size, imports and dead
+  local references. Generic Prism must not
   impose CHRYSA policy or require a design file in repositories without a UI.
 
 

@@ -186,3 +186,9 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 ### Local AI orchestration & local-first · `standards/rules/ai-orchestration.md`
 - AI orchestration & local-first
 <!-- chrysa:standards-agents:end -->
+
+## Product design contract
+
+Before UI, component, style, navigation or asset work, read [DESIGN.md](DESIGN.md)
+and any product-specific specification it links. Keep the contract and acceptance
+evidence aligned with UI changes. Load it on demand; do not duplicate its tokens here.
