@@ -17,8 +17,9 @@
 #     [WARN]  unknown @ref      — (opt-in --agent-refs) an `@name` in a CLAUDE.md that matches no
 #                                 agent and is not a known routing/framework token.
 #
-# Source of truth: per Notion ("agent-config = le registre de l'écosystème"), the SOURCE registry
-# defaults to the dir ending in agent-config/agents (else the first detected). Drift is reported
+# Source of truth: the SOURCE registry defaults to shared-standards/templates/claude/agents, the
+# roster distribute-standards.sh fans out (agent-config, the former registry, is archived and
+# consolidated in ai-config); else the first detected. Drift is reported
 # DIRECTIONALLY against it. Agent types: native (.md, invocable @name) vs reference-only (.json).
 #
 # Usage:
@@ -33,7 +34,7 @@
 #   check-skills-agents.sh --exclude '*_archived*' (repeatable)
 #   check-skills-agents.sh --skills-dir DIR        # canonical shared skills dir (else auto-detect)
 #   check-skills-agents.sh --agents-dir DIR        # an agent registry dir (repeatable; else auto)
-#   check-skills-agents.sh --agent-source DIR      # source-of-truth registry (else auto agent-config)
+#   check-skills-agents.sh --agent-source DIR      # source-of-truth registry (else auto shared-standards)
 #   check-skills-agents.sh --full-mirror DIR        # treat DIR as FULL mirror (warn missing agents; default: subset summary)
 #
 # Env: SKILL_GLOB (default '*/.claude/skills'), known-token allowlist via AGENT_REF_ALLOW (space-sep).
@@ -149,11 +150,11 @@ check_agents() {
     while IFS= read -r base; do [ -n "$base" ] && SET_ALL["$base"]=1; done < <(reg_names "$dir")
   done
 
-  # Source-of-truth registry (Notion: agent-config is "le registre de l'écosystème").
+  # Source-of-truth registry: shared-standards/templates/claude/agents (distributed roster).
   # Drift is reported DIRECTIONALLY against this source, not as O(n²) all-pairs noise.
   local SOURCE="$AGENT_SOURCE"
   if [ -z "$SOURCE" ]; then
-    for dir in "${AGENT_DIRS[@]}"; do case "$dir" in */agent-config/agents) SOURCE="$dir"; break;; esac; done
+    for dir in "${AGENT_DIRS[@]}"; do case "$dir" in */shared-standards/templates/claude/agents) SOURCE="$dir"; break;; esac; done
     [ -z "$SOURCE" ] && SOURCE="${AGENT_DIRS[0]}"
   fi
   log "source of truth: $(reg_label "$SOURCE")"

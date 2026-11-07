@@ -69,29 +69,48 @@ ok "pipx prêt"
 #     Le rtk chrysa vient de github.com/rtk-ai/rtk
 info "Installation rtk depuis github.com/rtk-ai/rtk..."
 
-RTK_VERSION=$(curl -sSf https://api.github.com/repos/rtk-ai/rtk/releases/latest \
-    | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")
+# Édition rtk-oss : Apache-2.0 seule. Depuis la 1.0 (13/10/2026), l'édition par défaut « rtk » embarque le moteur
+# engine/ sous BUSL-1.1 (non open source) ; rtk-oss garde le même binaire et les mêmes hooks, sans ce moteur.
+RTK_VERSION="${RTK_VERSION:-$(curl -sSf https://api.github.com/repos/rtk-ai/rtk/releases/latest \
+    | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")}"
 
 if [[ -z "${RTK_VERSION}" ]]; then
     die "Impossible de récupérer la version rtk depuis GitHub API"
 fi
+# La version entre telle quelle dans l'URL : un format libre (ex. « ../ ») pourrait viser un autre dépôt.
+if [[ ! "${RTK_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    die "RTK_VERSION invalide (attendu vX.Y.Z) : ${RTK_VERSION}"
+fi
 
-# Normalise x86_64 → amd64 si nécessaire selon les assets GitHub
 case "$(uname -m)" in
-    x86_64)  RTK_ARCH="x86_64" ;;
-    aarch64) RTK_ARCH="aarch64" ;;
-    *)       RTK_ARCH="$(uname -m)" ;;
+    x86_64)  RTK_TARGET="x86_64-unknown-linux-musl" ;;
+    aarch64) RTK_TARGET="aarch64-unknown-linux-gnu" ;;
+    *)       die "Architecture $(uname -m) non publiée par rtk-ai/rtk" ;;
 esac
-RTK_URL="https://github.com/rtk-ai/rtk/releases/download/${RTK_VERSION}/rtk-${RTK_ARCH}-unknown-linux-musl"
+RTK_ASSET="rtk-oss-${RTK_TARGET}.tar.gz"
+RTK_BASE="https://github.com/rtk-ai/rtk/releases/download/${RTK_VERSION}"
+RTK_TMP="$(mktemp -d)"
+trap 'rm -rf "$RTK_TMP"' EXIT
 
-curl -sSfL "$RTK_URL" -o "$HOME/.local/bin/rtk" \
+curl --proto '=https' --proto-redir '=https' -sSfL "${RTK_BASE}/${RTK_ASSET}" -o "${RTK_TMP}/${RTK_ASSET}" \
     || die "Téléchargement rtk échoué — vérifier les assets sur github.com/rtk-ai/rtk/releases"
-chmod +x "$HOME/.local/bin/rtk"
+curl --proto '=https' --proto-redir '=https' -sSfL "${RTK_BASE}/checksums.txt" -o "${RTK_TMP}/checksums.txt" \
+    || die "checksums.txt introuvable pour rtk ${RTK_VERSION}"
+# Nom d'asset comparé à l'identique (pas de regex) ; exactement une entrée attendue.
+(cd "$RTK_TMP" && tr -d '\r' < checksums.txt \
+    | awk -v a="$RTK_ASSET" 'NF == 2 && $2 == a { print; n++ } END { exit n != 1 }' \
+    | sha256sum -c --status) \
+    || die "Somme de contrôle rtk invalide ou entrée ${RTK_ASSET} absente/ambiguë — téléchargement refusé"
+tar -xzf "${RTK_TMP}/${RTK_ASSET}" -C "$RTK_TMP" --no-same-owner --no-same-permissions rtk \
+    || die "Archive rtk inattendue (membre « rtk » absent à la racine)"
+[[ -f "${RTK_TMP}/rtk" && ! -L "${RTK_TMP}/rtk" ]] \
+    || die "Membre rtk invalide (lien symbolique ou non-fichier) — installation refusée"
+install -m 0755 "${RTK_TMP}/rtk" "$HOME/.local/bin/rtk"
 
 if ! has_cmd rtk; then
     die "rtk introuvable après installation"
 fi
-ok "rtk ${RTK_VERSION} installé"
+ok "rtk-oss ${RTK_VERSION} installé"
 
 info "Initialisation rtk (hook global Claude Code)..."
 rtk init -g --auto-patch

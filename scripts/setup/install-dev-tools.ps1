@@ -76,27 +76,62 @@ ok "pipx pret"
 #          Le rtk chrysa vient de github.com/rtk-ai/rtk
 info "Installation rtk depuis github.com/rtk-ai/rtk..."
 
-$RTK_VERSION = (Invoke-RestMethod "https://api.github.com/repos/rtk-ai/rtk/releases/latest").tag_name
+# Edition rtk-oss : Apache-2.0 seule. Depuis la 1.0 (13/10/2026), l'edition par defaut "rtk" embarque le moteur
+# engine/ sous BUSL-1.1 (non open source) ; rtk-oss garde le meme binaire et les memes hooks, sans ce moteur.
+$RTK_VERSION = if ($env:RTK_VERSION) { $env:RTK_VERSION } else { (Invoke-RestMethod "https://api.github.com/repos/rtk-ai/rtk/releases/latest").tag_name }
 if (-not $RTK_VERSION) {
     die "Impossible de recuperer la version rtk depuis GitHub API"
+}
+# La version entre telle quelle dans l'URL : un format libre (ex. "../") pourrait viser un autre depot.
+if ($RTK_VERSION -cnotmatch '\Av[0-9]+\.[0-9]+\.[0-9]+\z') {
+    die "RTK_VERSION invalide (attendu vX.Y.Z) : $RTK_VERSION"
 }
 
 $RTK_DIR = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $RTK_DIR | Out-Null
 
-$RTK_URL = "https://github.com/rtk-ai/rtk/releases/download/$RTK_VERSION/rtk-x86_64-pc-windows-msvc.exe"
+$RTK_ASSET = "rtk-oss-x86_64-pc-windows-msvc.zip"
+$RTK_BASE = "https://github.com/rtk-ai/rtk/releases/download/$RTK_VERSION"
+$RTK_TMP = Join-Path ([System.IO.Path]::GetTempPath()) ("rtk-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Force -Path $RTK_TMP | Out-Null
+# Tous les echecs passent par throw : le finally nettoie le dossier temporaire, puis die (transcript ferme).
+$rtkError = $null
 try {
-    Invoke-WebRequest -Uri $RTK_URL -OutFile "$RTK_DIR\rtk.exe" -UseBasicParsing
+    try {
+        Invoke-WebRequest -Uri "$RTK_BASE/$RTK_ASSET" -OutFile "$RTK_TMP\$RTK_ASSET" -UseBasicParsing
+        Invoke-WebRequest -Uri "$RTK_BASE/checksums.txt" -OutFile "$RTK_TMP\checksums.txt" -UseBasicParsing
+    } catch {
+        throw "Telechargement rtk echoue — verifier les assets sur github.com/rtk-ai/rtk/releases"
+    }
+    # Nom d'asset compare a l'identique (pas de regex) ; exactement une entree attendue.
+    $lines = @(Get-Content -LiteralPath "$RTK_TMP\checksums.txt" | Where-Object {
+        $f = @(($_ -replace "`r", '').Trim() -split '\s+')
+        $f.Count -eq 2 -and $f[1] -ceq $RTK_ASSET
+    })
+    if ($lines.Count -ne 1) { throw "checksums.txt : entree $RTK_ASSET absente ou ambigue — telechargement refuse" }
+    $expected = (@($lines[0].Trim() -split '\s+')[0]).ToLower()
+    $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath "$RTK_TMP\$RTK_ASSET").Hash.ToLower()
+    if ($expected -ne $actual) { throw "Somme de controle rtk invalide — telechargement refuse" }
+    $RTK_X = Join-Path $RTK_TMP "x"
+    Expand-Archive -LiteralPath "$RTK_TMP\$RTK_ASSET" -DestinationPath $RTK_X
+    $rtkExe = Get-Item -LiteralPath (Join-Path $RTK_X "rtk.exe") -Force -ErrorAction SilentlyContinue
+    if (-not $rtkExe -or $rtkExe.PSIsContainer -or ($rtkExe.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+        throw "Membre rtk.exe invalide (absent, dossier ou lien) — installation refusee"
+    }
+    Copy-Item -Force -LiteralPath $rtkExe.FullName -Destination "$RTK_DIR\rtk.exe"
 } catch {
-    die "Telechargement rtk echoue — verifier les assets sur github.com/rtk-ai/rtk/releases"
+    $rtkError = $_.Exception.Message
+} finally {
+    Remove-Item -Recurse -Force -LiteralPath $RTK_TMP -ErrorAction SilentlyContinue
 }
+if ($rtkError) { die $rtkError }
 
 if ($env:PATH -notlike "*$RTK_DIR*") {
     $env:PATH = "$RTK_DIR;$env:PATH"
 }
 
 if (-not (has_cmd "rtk")) { die "rtk introuvable apres installation" }
-ok "rtk $RTK_VERSION installe"
+ok "rtk-oss $RTK_VERSION installe"
 
 info "Initialisation rtk (hook global Claude Code)..."
 rtk init -g --auto-patch

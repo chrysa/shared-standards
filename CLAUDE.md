@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # shared-standards
 
 <!-- @[claude-sonnet-4-6] -->
@@ -137,17 +139,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 
 ## CLI
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->
-
+Follow the /cli skill.
 
 <!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->
 # chrysa — Transverse Standards (core)
@@ -171,7 +163,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - Branch model — `main` is production, `develop` is the workspace
 - Merge
 - One PR per issue
-- Every PR references a Shortcut story
+- Every PR references a Shortcut story — except in public open-source repos (DEC-V3-006), where a linked GitHub issue is enough; Shortcut stays the internal tracker
 - Issues and PRs are type-driven
 
 ### Architecture, decoupling & portability · `standards/rules/architecture.md`
