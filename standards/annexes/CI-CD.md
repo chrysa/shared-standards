@@ -95,6 +95,57 @@ site. Floating on `main` is also how a broken action takes down the whole fleet 
 Pinning without an update mechanism freezes the fleet years behind. The `github-actions`
 ecosystem is declared in `dependabot.yml`, and its pull requests are reviewed like any other.
 
+### CI-065 — The three foundations release in one order
+
+`chrysa/pre-commit-tools`, `chrysa/github-actions` and `chrysa/shared-standards` consume each
+other, so their dependency graph has three loops. Each loop has one edge pinned by version and
+one return edge:
+
+| Loop | Pinned edge (forward) | Return edge |
+| --- | --- | --- |
+| `pre-commit-tools` → `github-actions` | `github-actions/.pre-commit-config.yaml` pins `pre-commit-tools` by `rev` | `pre-commit-tools/.github/workflows/` call `github-actions` by tag |
+| `github-actions` → `shared-standards` | `shared-standards` CI, `templates/`, `workflows/` and `scripts/` call `github-actions` by tag | `shared-standards` distributes its files into `github-actions` |
+| `pre-commit-tools` → `shared-standards` | `shared-standards/.pre-commit-config.yaml` and `templates/github-config/pre-commit-common.yaml` pin `pre-commit-tools` by `rev` | `shared-standards` distributes its files into `pre-commit-tools` |
+
+Without an order, a release can wait for a release that waits for it, and one bump takes two
+rounds. The order follows the forward edges only:
+
+1. **`pre-commit-tools`** — tag the release.
+2. **`github-actions`** — bump `.pre-commit-config.yaml` to the tag of step 1, then tag. Its
+   workflows keep calling its own composite actions at an already published tag; that
+   self-reference moves in the next release, never inside the same tag.
+3. **`shared-standards`** — in one pull request, move every pin of the two other foundations
+   (its own CI, `.pre-commit-config.yaml`, `templates/`, `workflows/`, `scripts/`) to the tags
+   of steps 1 and 2, then tag.
+4. **The fleet** — through the Dependabot `chrysa-socles` group and the distribution scripts.
+
+The return edges never block a release. They are refreshed after the wave, by Dependabot (the
+`github-actions` pin in `pre-commit-tools`) or by the next distribution run.
+
+Three rules keep the order checkable:
+
+- **A pin names a published tag** — never `@main`, a branch or an untagged commit, inside the
+  three foundations and in the templates they ship (CI-011).
+- **`shared-standards` serves one version of each foundation.** After step 3, every reference
+  to `chrysa/github-actions` resolves to one tag and every `chrysa/pre-commit-tools` `rev` to
+  one tag. Two versions in service means the wave stopped half-way.
+- **Tags only go up.** Each new release of a foundation carries a higher version than every
+  earlier tag of that repository; otherwise Dependabot and `pre-commit autoupdate` never
+  offer it.
+
+Verification before tagging `shared-standards` (step 3) — each command prints one line, the
+new tag:
+
+```bash
+git grep -hoE 'chrysa/github-actions[^@ ]*@[^ ]+' -- .github templates workflows scripts \
+  | sed 's/.*@//' | sort | uniq -c
+git grep -hE -A1 'repo: https://github.com/chrysa/pre-commit-tools' \
+  -- .pre-commit-config.yaml templates | grep -oE 'rev: [^ ]+' | sort | uniq -c
+```
+
+For the fleet (step 4), `scripts/github_actions_pin.py` (audit mode) lists the repositories
+whose `chrysa/github-actions` pins lag behind the target tag.
+
 ### CI-013 — No long-lived credential where a short-lived one works
 
 Cloud access uses OIDC (`permissions: id-token: write`) against a role, not a stored key.
@@ -496,6 +547,7 @@ ______________________________________________________________________
 | CI-040 | any permanently red check is an issue with an owner |
 | CI-045, CI-048 | GitVersion (ContinuousDeployment) computes a unique version per commit; a merge that does not move it is investigated |
 | CI-053 | per-profile budget file; CI measures and blocks significant regressions |
+| CI-065 | reviewed when a foundation is tagged, with the two verification commands of the rule; fleet lag via `scripts/github_actions_pin.py` (audit) |
 
 Rules not yet mechanised are declared as manually reviewed — a rule claiming automation with no
 check behind it is misdeclared (`GOVERNANCE.md` GV-012).
