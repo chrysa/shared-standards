@@ -38,6 +38,7 @@ rules:
   "App containers ship the app only \u2014 the platform layer is the owner's responsibility": containers
   "Avoid lambdas and anonymous constructs \u2014 a named function is the default": code-quality
   Basic optimisations and known anti-patterns are caught in review and in CI: code-quality
+  "Before UI work, read the product's `DESIGN.md` and the specs it links": design
   "Branch model \u2014 `main` is production, `develop` is the workspace": scm
   Branches: scm
   "Code is read far more often than it is written \u2014 optimise for the reader, and standardise the form": code-quality

@@ -31,6 +31,12 @@
   --font-mono: ui-monospace, monospace;
   --density: 2.5rem;      /* control height */
   --motion: 160ms;
+
+  /* content entrance (FE-053) — optional roles with safe defaults; apps may retune them */
+  --motion-enter: 220ms;            /* per element, <= 250ms */
+  --motion-enter-distance: 6px;     /* small translate, <= 8px */
+  --motion-stagger: 40ms;           /* x at most 5 items: a group settles within 400ms */
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root.light {
@@ -47,10 +53,32 @@
   --danger: #dc2626;
 }
 
+/*
+ * Basic content entrance (FE-053). Add class="enter" to a view, panel, list item or newly
+ * inserted row; set style="--enter-index: N" on list items to stagger the first five.
+ * Opacity + transform only, so it never shifts layout. The animation runs once, on insertion:
+ * keep stable keys so refetched or live-updated content is not re-mounted and does not replay.
+ */
+@keyframes chrysa-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-distance));
+  }
+}
+
+.enter {
+  animation: chrysa-enter var(--motion-enter) var(--ease-enter) both;
+  animation-delay: calc(min(var(--enter-index, 0), 5) * var(--motion-stagger));
+}
+
 /* a11y floor — applies to every brand, do not remove */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+
+  .enter {
+    animation: none;
   }
 }

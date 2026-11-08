@@ -30,6 +30,8 @@
   /* --- density / motion personality --- */
   --density: /* TODO */;
   --motion: /* TODO */;
+  /* optional: retune the content entrance (FE-053); defaults live in contract.css */
+  /* --motion-enter: 220ms; --motion-enter-distance: 6px; --motion-stagger: 40ms; */
 }
 
 :root.light {

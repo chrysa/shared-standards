@@ -272,6 +272,7 @@ copilot-instructions/
   python-library.md
   react19.md
 docs/
+  DESIGN-CONTRACT.md
   DESIGN-SYSTEM.md
   INTERFACE-REVIEW-LEDGER.md
   MAKEFILE-STANDARD.md
@@ -520,7 +521,6 @@ templates/
   CLAUDE.md
   CODEOWNERS
   CONTRIBUTING.md
-  DESIGN.md
   DESIGN.template.md
   GitVersion.yml
   LICENSE.mit

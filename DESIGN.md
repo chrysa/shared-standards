@@ -1,71 +1,99 @@
 # shared-standards — Design contract
 
-Baseline contract for the human-facing surface documented in this repository. This change documents requirements; it does not redesign or certify the implementation.
+> Contract for this repository's one human-facing surface, the **standards console**
+> (`console/`). The fleet-wide design rules live in the canon (`standards/STANDARDS.chrysa.md`,
+> *Design system*), the method in [docs/DESIGN-CONTRACT.md](docs/DESIGN-CONTRACT.md) and the
+> template in [templates/DESIGN.template.md](templates/DESIGN.template.md) — they are not
+> repeated here.
+>
+> Status: **[implemented]** links the code · **[decided]** names who and when ·
+> **[proposed]** is not agreed yet. This file documents the console; it does not redesign it.
 
-## Scope and priority journeys
+## 1. Surface and status
 
-Product UI: organise navigation around user tasks and domain objects rather than
-copying a generic dashboard layout.
+- **Surface:** local web app — FastAPI JSON API + React 19/Vite SPA. **[implemented]**
+  ([console/README.md](console/README.md))
+- **Lifecycle:** shipped as a local, single-operator tool. Monitoring data comes from the
+  hosted guideline-checker server when configured.
+- **Detailed specs:** none beyond this file and the console README.
 
-1. Inspect current standards and conformance.
-2. Compare proposed changes or drift.
-3. Navigate to canonical rules and supporting evidence.
+## 2. Users, devices and priority tasks
 
-## Sources and implementation evidence
+| User | Context and device | Priority tasks |
+| ---- | ------------------ | -------------- |
+| Fleet owner / maintainer | Desktop browser on the workstation, own GitHub token, occasional sessions | 1. see each repo's status and compliance · 2. check or apply a standards distribution · 3. edit the canon and open a PR |
 
-- [README.md](README.md)
-- [console/web/index.html](console/web/index.html)
-- [console/web/src/App.tsx](console/web/src/App.tsx)
-- [console/web/src/components/Banner.tsx](console/web/src/components/Banner.tsx)
-- [console/web/src/components/Nav.tsx](console/web/src/components/Nav.tsx)
-- [console/web/src/components/ui/badge.tsx](console/web/src/components/ui/badge.tsx)
-- [console/web/src/components/ui/button.tsx](console/web/src/components/ui/button.tsx)
-- [console/web/src/index.css](console/web/src/index.css)
-- [templates/contract.css](templates/contract.css)
-- [templates/theme.template.css](templates/theme.template.css)
-- [docs/DESIGN-SYSTEM.md](docs/DESIGN-SYSTEM.md)
-- [docs/UX-UI-GUIDELINES.md](docs/UX-UI-GUIDELINES.md)
-- [docs/UX-UI-SKILLS-AUDIT.md](docs/UX-UI-SKILLS-AUDIT.md)
+Primary action per view: **Fleet** — change a repo's status and save; **Distribution** — run
+*check* (safe) before *apply*; **Standard** — submit the edit as a PR.
 
-These are repository evidence, not proof that every desired journey is implemented.
-Where source code and product intent differ, record the gap explicitly.
+## 3. Journeys and navigation
 
-## Visual language and components
+- **J1 — Review the fleet:** open Fleet → scan compliance badges → open a repo on GitHub or
+  change its status → save → row refreshes. Failure: an error banner shows the API message.
+  **[implemented]** ([Fleet.tsx](console/web/src/pages/Fleet.tsx))
+- **J2 — Distribute:** Distribution → optional repo subset → *check* or *apply* (apply asks for
+  confirmation) → result banner → recent runs and open sync PRs. **[implemented]**
+  ([Distribution.tsx](console/web/src/pages/Distribution.tsx))
+- **J3 — Edit the canon:** Standard → edit → submit → banner with the opened PR.
+  **[implemented]** ([Standard.tsx](console/web/src/pages/Standard.tsx))
+- **Information architecture:** three top-level sections in a header tab bar
+  ([Nav.tsx](console/web/src/components/Nav.tsx)), one content column (`max-w-5xl`).
+- **Density:** compact tables — the content is a list of ~100 repositories scanned by an expert.
 
-Existing style/token sources: [console/web/src/index.css](console/web/src/index.css), [templates/contract.css](templates/contract.css), [templates/theme.template.css](templates/theme.template.css).
-Use the existing semantic variables and component conventions. Record inconsistencies
-as design debt; do not invent a replacement palette during an unrelated feature.
+## 4. Identity
 
-Use a legible body face and reserve monospace for code, identifiers and numeric data.
-Prefer clear hierarchy, predictable spacing and restrained, functional transitions.
-Keep dense operational data scannable; progressively disclose advanced controls.
-Reuse components and document default, focus, active, disabled and error states.
-Do not introduce a light/dark switch or new brand persona without a product decision.
+- A neutral operational tool: system font stack, blue primary, success/destructive roles, light
+  and dark themes. **[implemented]** No brand brief exists; none is needed for a
+  single-operator tool unless it is published. **[proposed]**
 
-## UX acceptance and verification
+## 5. Tokens and components (owned elsewhere)
 
-- Make the primary task visible; preserve navigation, filters, input and focus across updates.
-- Define loading, empty, validation error, unavailable dependency, stale data and recovery
-  states where relevant. Never display a failed operation as successful.
-- Use text or icons with labels as well as colour for status. Keep keyboard focus visible,
-  navigation predictable and motion optional; respect reduced-motion preferences.
-- For web content, target WCAG 2.2 AA; use at least 4.5:1 contrast for ordinary text
-  (3:1 for qualifying large text), and aim for 44 CSS px touch controls. Verify the
-  complete applicable standard, not only these examples. Apply equivalent native
-  accessibility APIs to desktop controls; do not claim web certification for a native UI.
-- Test the primary journey, empty data, a failed operation and recovery at representative
-  viewport/window sizes. Verify keyboard use, long labels and realistic data volumes.
-  Keep screenshots or other reproducible evidence with the UI change; document checks
-  that could not run. Static lint is not evidence of usability or accessibility compliance.
-- Maintain provenance and licence records for fonts, icons, artwork and generated assets;
-  serve assets locally where feasible. Do not copy a reference brand's logos or identity.
-- Keep detailed journeys/acceptance evidence in existing project documentation. Update
-  this contract alongside UI changes; preserve existing component and token ownership.
+| Concern | Source of truth | Rules of use |
+| ------- | --------------- | ------------ |
+| Colour roles, themes | [console/web/src/index.css](console/web/src/index.css), mapped in [tailwind.config.js](console/web/tailwind.config.js) | semantic names only (`primary`, `muted`, `destructive`, `success`) |
+| Typography | system stack in `index.css`; monospace for paths and identifiers | no ad-hoc sizes outside Tailwind's scale |
+| Components | [console/web/src/components/ui/](console/web/src/components/ui/) | reuse `Button`, `Badge`, `Table`, `Select`, `Banner` |
 
-## Agent and lint integration
+- **Shared contract:** `contract.css` is **not** imported; token names follow the shadcn
+  convention, not the brand-theme registry. Known drift. **[implemented]**
 
-Consult this file before UI work and keep it aligned with the implementation. The
-filename alone does not load it into Claude Code or other agents. Use an explicit
-on-demand reference from the repository's instruction files. Prism validates the
-instruction document's size, imports and dead local references; it does not choose
-an aesthetic, enforce this product's UX or certify the resulting interface.
+## 6. Interaction and states
+
+- **Feedback:** mutations disable their button while pending; results show a `Banner`
+  (`role="alert"` / `role="status"`). Per-row status saves show only ✓/✗. **[implemented]**
+- **Data states:** loading is a text line; load errors show a banner on Fleet and Standard;
+  Distribution shows no load-error state. No offline / stale / reconnect handling. **[implemented]**
+- **Motion:** none. **[implemented]**
+
+## 7. Responsive and support conventions
+
+Desktop-first, single centred column; tables are not adapted to narrow widths. **[implemented]**
+
+## 8. Accessibility
+
+Labelled section navigation with `aria-current`, labelled per-row selects, live-region banners,
+FR/EN switch. Contrast of the token pairs has not been measured in this pass.
+
+## 9. Assets
+
+No image, icon font or webfont is shipped; the header glyph is a Unicode character.
+
+## 10. Acceptance criteria and evidence
+
+- **Criteria:** the observable list in [docs/DESIGN-CONTRACT.md](docs/DESIGN-CONTRACT.md) §3
+  applies; J1–J3 are the representative journeys.
+- **Evidence log:**
+
+  | Date | Change | Checks run | Result | Not run, and why |
+  | ---- | ------ | ---------- | ------ | ---------------- |
+  | 2026-11-08 | contract written from the code | source review of `console/web/src` | gaps listed in §11 | no browser run: documentation-only change |
+
+## 11. Open choices, known gaps and maintenance
+
+- **Known gaps (from the code, 2026-11-08):** active tab and theme are not persisted or
+  URL-addressable (canon *UI state survives reload & focus*); per-row save feedback is a bare
+  ✓/✗; Distribution lacks a load-error state; no API-down banner (FE-050); loading is text, not a
+  skeleton (FE-070); `apply` uses `window.confirm`; no content entrance motion (FE-053).
+- **Open choices [proposed]:** adopt `contract.css` names or record the console as exempt from
+  the brand-theme registry; fix the gaps above in a scoped UI change with a browser check.
+- **Maintenance:** console changes update this file in the same PR.
