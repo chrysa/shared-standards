@@ -1426,21 +1426,34 @@ and CI invokes `pre-commit`, not `make`.
   by `chrysa/pre-commit-tools`), not a script bolted onto git. The single sanctioned
   exception is the host-global pre-push (`dotfiles/git-hooks-global/pre-push`), which is
   machine-level, not repo-level, and itself only invokes `pre-commit`.
-- **The gate is host-native — no strong coupling to the project's containers.** pre-commit
-  runs with only `pre-commit` installed on the host (via `pipx`/`uv`, outside any repo); it
-  provisions each hook's isolated environment itself (`~/.cache/pre-commit`), so a commit
-  needs **no project image and no running container**. Local hooks are `language: system` /
-  `python` (or another native language) invoking **host** tools — **never** `docker compose
-  run`, and `language: docker` / `language: docker_image` is **forbidden**. A check that
-  genuinely needs the project image (Django settings, a DB, a compiled tool) **degrades gracefully on the host**:
-  it probes for the tool and skips with a message when absent
+- **The gate is host-native by default — a hook may run in a container, never through the
+  project's stack.** pre-commit runs with only `pre-commit` installed on the host (via
+  `pipx`/`uv`, outside any repo); it provisions each hook's isolated environment itself
+  (`~/.cache/pre-commit`), so a commit needs **no project image and no running container**.
+  Hooks are native by default: `language: system` / `python` (or another native language)
+  invoking **host** tools. **`language: docker_image` and `language: docker` are allowed, not
+  required** (ADR `D-0020`), for a check whose toolchain is better pinned in an image than
+  installed on the host (a linter with system dependencies, a compiled tool, a version the
+  host does not carry). A container hook:
+  - names a **pinned** image: `docker_image` with an explicit tag (a digest where the registry
+    gives one), never `:latest`; or `language: docker`, built from the hook repository's own
+    `Dockerfile`;
+  - runs **only through pre-commit's own `docker run`** (work tree mounted at `/src`, the
+    caller's uid) — **never** `docker compose run`, never the project's dev stack, a running
+    service or a database;
+  - has its counterpart in CI like any other hook (`CI-036`).
+  Docker is already one of the three sanctioned host tools (*container-runtime policy*): a repo
+  that adopts a container hook needs the daemon to commit, and says so in its
+  `CONTRIBUTING.md`. A check that genuinely needs the **project** image (Django settings, a
+  DB) still **degrades gracefully on the host**: it probes for the tool and skips with a
+  message when absent
   (`command -v <tool> >/dev/null 2>&1 && <run> || echo 'skipping — runs in CI/Docker'`),
-  it does **not** spin up a container. Container-side enforcement is CI's job **and is
-  mandatory**: a check skipped on the host **and** absent from CI is not a gate — it runs
-  nowhere (`CI-036`). Locally the gate is best-effort and never blocks on the Docker daemon
-  being up. This does not
-  contradict the container-runtime policy — the *application* runs in a container; the
-  *commit gate*, like git, is a host tool.
+  it does **not** spin up the project's containers. Container-side enforcement is CI's job
+  **and is mandatory**: a check skipped on the host **and** absent from CI is not a gate — it
+  runs nowhere (`CI-036`). Native hooks never block on the Docker daemon being up; container
+  hooks do, by design, and only in the repos that chose them. This does not contradict the
+  container-runtime policy — the *application* runs in a container; the *commit gate*, like
+  git, is a host tool that may start a throwaway container for one check.
 - **Two stages, two scopes — do not mix them:**
   - **commit stage** (`pre-commit run`, default): auto-fixers + fast lints —
     `ruff`, `end-of-file-fixer`, `trailing-whitespace`, `detect-secrets`/`gitleaks`,
@@ -1458,15 +1471,18 @@ and CI invokes `pre-commit`, not `make`.
 - **The global pre-push hook** (`dotfiles/git-hooks-global/pre-push`) mirrors pre-commit's
   own installed pre-push hook: it runs the `pre-push` stage over the range only, then the
   code-quality analysis service quality gate. No `make`, no `--all-files`, no tree mutation.
-- **The shared hook package is Docker-free by construction.** `chrysa/pre-commit-tools`
-  — the hook-decentralisation package the whole fleet consumes — publishes every hook as
-  `language: python` (or another native pre-commit language) with its dependencies declared
-  in the hook definition. **Forbidden in that package:** `language: docker`,
-  `language: docker_image`, and any `docker` / `docker compose` invocation inside a hook
-  entrypoint. A published hook MUST run identically on a host where Docker is not installed
-  at all; if a check cannot work without the daemon, it is a CI job, not a hook. This keeps
-  the fleet gate installable with a single `pipx install pre-commit` and immune to the
-  daemon being down.
+- **The shared hook package is native by default.** `chrysa/pre-commit-tools` — the
+  hook-decentralisation package the whole fleet consumes — publishes every hook of its
+  **default set** as `language: python` (or another native pre-commit language) with its
+  dependencies declared in the hook definition; a default-set hook MUST run identically on a
+  host where Docker is not installed at all. A hook that genuinely needs a toolchain image may
+  be published as `language: docker_image` (pinned image) under its **own id**: it is
+  **opt-in** per repo, never added to the default set distributed to the fleet, and never the
+  only form of a check that has a native one (ADR `D-0020`). **Forbidden in that package:**
+  any `docker` / `docker compose` invocation inside a hook entrypoint — pre-commit starts the
+  container itself. This keeps the fleet gate installable with a single
+  `pipx install pre-commit` and immune to the daemon being down for every repo that did not opt
+  in.
 - Hooks are **pinned by `rev`**; shared hooks come from `chrysa/pre-commit-tools`.
   `detect-secrets`/`gitleaks` respect the repo's secret allowlist.
 - **Hook logic is centralised in `chrysa/pre-commit-tools` — `repo: local` is glue only.**
