@@ -27,6 +27,7 @@
   "key_directories": [
     ".claude",
     ".claude-plugin",
+    ".codex",
     ".github",
     ".vscode",
     "compliance",

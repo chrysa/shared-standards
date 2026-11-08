@@ -131,6 +131,9 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     verification-loop/
       SKILL.md
   thresholds.json
+.codex/
+  rules/
+    prism-ai-lint.rules
 .editorconfig
 .env.example
 .gitattributes
