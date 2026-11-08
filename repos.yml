@@ -504,3 +504,7 @@ repos:
   public: false
   runtime: exempt:native  # Unity 6 project, like transport-simulator
   status: dev
+- name: steamdeck-config
+  public: false
+  runtime: exempt:native  # on-device SteamOS scripts and systemd timer, like pc-doctor
+  status: dev
