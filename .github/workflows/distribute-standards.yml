@@ -89,10 +89,10 @@ jobs:
                   CORE_ONLY: ${{ github.event.inputs.core_only }}
               run: |
                   chmod +x shared-standards/scripts/*.sh
-                  flags=""
-                  if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then flags="--dry-run"; fi
-                  if [ "$CORE_ONLY" = "true" ]; then flags="$flags --core-only"; fi
-                  bash shared-standards/scripts/distribute-standards.sh $flags "$GITHUB_WORKSPACE/target"
+                  flags=()
+                  if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then flags+=(--dry-run); fi
+                  if [ "$CORE_ONLY" = "true" ]; then flags+=(--core-only); fi
+                  bash shared-standards/scripts/distribute-standards.sh "${flags[@]}" "$GITHUB_WORKSPACE/target"
 
             - name: Open sync PR
               if: ${{ github.event.inputs.dry_run != 'true' && steps.base.outputs.skip != 'true' }}
