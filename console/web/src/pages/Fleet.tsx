@@ -59,6 +59,8 @@ function StatusCell({ row, meta }: { row: FleetRow; meta?: Meta }) {
 export function Fleet({ meta }: { meta?: Meta }) {
   const { t } = useTranslation();
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({ queryKey: ["fleet"], queryFn: api.fleet });
+  // A failed first load shows the error and Retry, never an empty table.
+  const showTable = !isLoading && !(isError && !data);
 
   return (
     <section>
@@ -78,9 +80,8 @@ export function Fleet({ meta }: { meta?: Meta }) {
         </Banner>
       )}
       {data?.central_unreachable && <Banner kind="error">{data.central_unreachable}</Banner>}
-      {isLoading ? (
-        <p className="text-muted-foreground">{t("common.loading")}</p>
-      ) : isError && !data ? null : (
+      {isLoading && <p className="text-muted-foreground">{t("common.loading")}</p>}
+      {showTable && (
         <Table>
           <THead>
             <TR>

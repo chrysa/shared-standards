@@ -96,7 +96,7 @@ No image, icon font or webfont is shipped; the header glyph is a Unicode charact
   | Date | Change | Checks run | Result | Not run, and why |
   | ---- | ------ | ---------- | ------ | ---------------- |
   | 2026-11-08 | contract written from the code | source review of `console/web/src` | gaps listed in §11 | no browser run: documentation-only change |
-  | 2026-11-08 | FE-053 entrance pilot; Fleet error Retry; narrow-screen overflow | vitest (9 tests), eslint, `tsc -b`, build — in Docker; Playwright 1.57 Chromium with mocked `/api`, 14 rows incl. a 64-character name: timing ≤ 250 ms per row and 370 ms per list, CLS < 0.01, refetch keeps rows mounted with no replay, view change plays the entrance, `reducedMotion: "reduce"` removes it, keyboard focus visible, 503 → alert + Retry → data, 1280 px and 375 px (no page overflow) | all 14 checks pass; negative control (reduced-motion rule removed) fails as expected | screen reader, real backend and GitHub data, light theme screenshots |
+  | 2026-11-08 | FE-053 entrance pilot; Fleet error Retry; narrow-screen overflow | vitest (11 tests), eslint, `tsc -b`, build — in Docker; Playwright 1.57 Chromium with mocked `/api`, 14 rows incl. a 64-character name: timing ≤ 250 ms per row and 370 ms per list, CLS < 0.01, refetch keeps rows mounted with no replay, view change plays the entrance, `reducedMotion: "reduce"` removes it, keyboard focus visible, 503 → alert + Retry → data, 1280 px and 375 px (no page overflow) | all 14 checks pass; negative control (reduced-motion rule removed) fails as expected | screen reader, real backend and GitHub data, light theme screenshots |
 
 ## 11. Open choices, known gaps and maintenance
 
