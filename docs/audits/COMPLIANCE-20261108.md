@@ -95,7 +95,7 @@ branch-commit trailers out of `develop`. It does not.
 | Branch policy: `develop` default, `main`/`develop` protected | satisfactory-hexa-gfn-assisstant, herdr-cockpit, second-souffle, arena-techno, chrysa-llm, gource-live, ops-monitoring | re-read through the API: all seven conform |
 | Canonical merge settings and labels | chrysa-llm, satisfactory-hexa-gfn-assisstant, second-souffle, herdr-cockpit, ops-monitoring, arena-techno, gource-live, homepage, game-solver-platform | `apply-repo-settings.sh --check`: 9/9 conform |
 | Author identity rewritten on branch commits | fastapi-autoload #151, #136; eka #235, #236 | no foreign identity left, trees identical |
-| Branch commits cleaned (identity and assistant trailers, procedure of §7) | 116 open-PR branches in 62 repositories: 1,964 commits recreated, 449 of them carrying trailers | per branch, re-read after the move: no dirty commit left, head tree identical |
+| Branch commits cleaned (identity and assistant trailers, procedure of §7) | 117 open-PR branches in 62 repositories: 2,105 commits recreated, 488 of them carrying trailers | per branch, re-read after the move: no dirty commit left, head tree identical |
 | Back-merge `main` → `develop` | herdr-cockpit#62, second-souffle#4 (drafts) | `main` 4 and 1 commits ahead, 0 behind |
 
 `apply-branch-policy.sh` excluded `agent-panel` (fork, not `status: dev`) and
@@ -105,8 +105,8 @@ branch-commit trailers out of `develop`. It does not.
 
 1. **Clean the branch commits of the PRs still dirty.** Done for 116 branches (§6). Left:
    chrysa-portfolio-viz#1012, dev-nexus#649 and #650 (the comparison exceeds what the API
-   returns: rewrite from a clone instead), sport-intelligence-hub#537 (network error mid-run:
-   re-run). github-actions#337 has `main` as its head: out of scope, its trailers sit on the
+   returns: rewrite from a clone instead). sport-intelligence-hub#537 failed on a network
+   error and was cleaned on a re-run. github-actions#337 has `main` as its head: out of scope, its trailers sit on the
    trunk. Two dependabot branches were rewritten by mistake (coach#221, gaming-os#367):
    dependabot no longer rebases an edited branch, so ask it to recreate them
    (`@dependabot recreate`). The tool now refuses trunks, `dependabot/` branches and forks.
