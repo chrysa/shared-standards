@@ -79,6 +79,15 @@ repos:
   repo: https://github.com/hadolint/hadolint
   rev: v2.15.1
 - hooks:
+  # Ruff is the Python linter and formatter of the standard. The pre-commit-tools
+  # detectors deprecated in favour of Ruff codes are pruned only once this hook runs.
+  - args:
+    - --fix
+    id: ruff-check
+  - id: ruff-format
+  repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.17.4
+- hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
   rev: v8.30.0
@@ -207,5 +216,7 @@ repos:
 exclude: (^|/)quality_gate\.py$|^\.claude/ape/|^\.claude/_extracted/
 default_install_hook_types:
 - pre-commit
+- commit-msg
+- pre-push
 - post-merge
 - post-checkout
