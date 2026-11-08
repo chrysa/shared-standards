@@ -95,15 +95,21 @@ branch-commit trailers out of `develop`. It does not.
 | Branch policy: `develop` default, `main`/`develop` protected | satisfactory-hexa-gfn-assisstant, herdr-cockpit, second-souffle, arena-techno, chrysa-llm, gource-live, ops-monitoring | re-read through the API: all seven conform |
 | Canonical merge settings and labels | chrysa-llm, satisfactory-hexa-gfn-assisstant, second-souffle, herdr-cockpit, ops-monitoring, arena-techno, gource-live, homepage, game-solver-platform | `apply-repo-settings.sh --check`: 9/9 conform |
 | Author identity rewritten on branch commits | fastapi-autoload #151, #136; eka #235, #236 | no foreign identity left, trees identical |
+| Branch commits cleaned (identity and assistant trailers, procedure of §7) | 116 open-PR branches in 62 repositories: 1,964 commits recreated, 449 of them carrying trailers | per branch, re-read after the move: no dirty commit left, head tree identical |
+| Back-merge `main` → `develop` | herdr-cockpit#62, second-souffle#4 (drafts) | `main` 4 and 1 commits ahead, 0 behind |
 
 `apply-branch-policy.sh` excluded `agent-panel` (fork, not `status: dev`) and
 `homeassistant-config` (diverged branches) on purpose.
 
 ## 7. Remaining actions
 
-1. **Clean the branch commits of open PRs** (identity and assistant trailers):
-   eka#236, fastapi-autoload#136 (trailers only, identity already fixed), coach#222, dev-kit#21,
-   then the 126 other open PRs with assistant trailers (63 repositories, 122 of them drafts).
+1. **Clean the branch commits of the PRs still dirty.** Done for 116 branches (§6). Left:
+   chrysa-portfolio-viz#1012, dev-nexus#649 and #650 (the comparison exceeds what the API
+   returns: rewrite from a clone instead), sport-intelligence-hub#537 (network error mid-run:
+   re-run). github-actions#337 has `main` as its head: out of scope, its trailers sit on the
+   trunk. Two dependabot branches were rewritten by mistake (coach#221, gaming-os#367):
+   dependabot no longer rebases an edited branch, so ask it to recreate them
+   (`@dependabot recreate`). The tool now refuses trunks, `dependabot/` branches and forks.
    Procedure, per PR, through the Git Data API (no clone needed):
    1. Skip the PR if it is not open.
    2. List its own commits with `GET compare/{base}...{head}`. Abort if `total_commits` exceeds
@@ -117,8 +123,10 @@ branch-commit trailers out of `develop`. It does not.
    5. Re-read the comparison: no dirty commit left, and the head tree is identical to the old one.
    The step force-updates each branch: local checkouts and any session working on these branches
    must re-fetch (`git fetch && git branch -f <branch> origin/<branch>`) before working on them again.
-2. **Retarget to `develop`**: herdr-cockpit #58, #55, #46; second-souffle #3, #1; then
-   prism-ai-lint #107, #109, #110, #111 once #112 is merged.
+2. **Retarget to `develop`**: herdr-cockpit#55 and second-souffle#3 once the back-merges
+   (herdr-cockpit#62, second-souffle#4) are merged; prism-ai-lint #107, #109, #110, #111 once #112
+   is merged. herdr-cockpit#58 and second-souffle#1 were merged into `main` hours after the
+   default-branch switch, and herdr-cockpit#46 was closed.
 3. **Decide on the fastapi-autoload#147 leak** already on `develop`: keep it in history, or
    rewrite the protected trunk.
 4. **Merge** shared-standards#642, shared-standards#649 (then dispatch `distribute-standards.yml`,
@@ -148,3 +156,10 @@ branch-commit trailers out of `develop`. It does not.
   PR base edits. Those steps go into an owner runbook instead of being retried.
 - A PR merged between the snapshot and the remediation turns a planned branch fix into a trunk
   leak: re-check PR state immediately before acting.
+- A runbook step that rewrites history must fail closed. The cleanup step compared its plan
+  flag as an exact string, so a pasted `--plan,` ran the rewrite without a plan. The step now
+  plans by default, writes only with `--apply`, and aborts on any extra argument.
+- Exclude trunks and bot branches from history rewrites up front. Branch protection rejected the
+  one PR whose head was `main`; nothing stopped the two dependabot branches.
+- Switching the default branch does not move PRs that already target `main`, and other sessions
+  kept merging them. Retarget in the same step as the switch.
