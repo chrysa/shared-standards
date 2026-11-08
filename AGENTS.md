@@ -81,6 +81,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 
 ### Frontend & web semantics · `standards/rules/frontend.md`
 - TypeScript is strict by contract
+- TypeScript is linted by the canonical ESLint flat config
 - The JS/TS package manager is `pnpm` — `npm` and `yarn` are forbidden
 - React is a presentation layer, not the domain
 - The frontend says when the backend is unreachable or unstable

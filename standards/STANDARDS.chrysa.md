@@ -138,6 +138,14 @@ That record deliberately names products; where it and this canon disagree, **thi
   boundaries; external data validated at **runtime** even when typed; contract types
   generated from OpenAPI/AsyncAPI, never hand-copied. One committed lockfile, frozen CI
   installs, no `latest` dependency. Detail: annexe `FRONTEND.md` §1.
+- **TypeScript is linted by the canonical ESLint flat config.** Every TS repo carries
+  `templates/eslint.config.js` at its root: `typescript-eslint` `strictTypeChecked` with
+  `projectService`, plus `no-console`, `no-unreachable` and
+  `@typescript-eslint/no-explicit-any` as errors. These rules replace the deprecated
+  pre-commit-tools console/unreachable/any detectors, which stay only until the repo runs
+  this config. ESLint runs through pnpm (`pnpm exec eslint .`) in CI or pre-push, never
+  through `mirrors-eslint`, which cannot resolve repo-local plugins. Pin TypeScript to
+  6.x until typescript-eslint supports TypeScript 7.
 - **The JS/TS package manager is `pnpm` — `npm` and `yarn` are forbidden.** Every
   Node/TypeScript repo (app, library, workspace, tooling) installs, runs scripts, and
   resolves dependencies with **pnpm**. Concretely: the committed lockfile is

@@ -78,6 +78,10 @@ def _repos_block_offset(lines: list[str]) -> int | None:
     return None
 
 
+# Dash indent of a sequence nested under its key: yamllint's default `indent-sequences`.
+DEFAULT_SEQUENCE_OFFSET = 2
+
+
 def detect_offset(text: str) -> int:
     """Detect the repo's top-level sequence offset (dash indent) under `repos:`.
 
@@ -101,11 +105,11 @@ def decide_offset(text: str) -> int:
     unless the repo explicitly disabled the rule.
     """
     off = detect_offset(text)
-    if off >= 2:
+    if off >= DEFAULT_SEQUENCE_OFFSET:
         return off
     if re.search(r"indent-sequences:\s*(false|disable)", text):
         return 0
-    return 2
+    return DEFAULT_SEQUENCE_OFFSET
 
 
 def configure_indent(offset: int) -> None:
@@ -160,6 +164,10 @@ HOOK_GROUPS = {
         # Remediated to 0 in product code on 2026-08-05, re-verified on fresh clones.
         "python-untyped-raise",
         "python-dispatch-ladder",
+        # Ruff (astral-sh/ruff-pre-commit) is the Python linter and formatter of the
+        # standard, and the replacement the deprecated detectors are pruned against.
+        "ruff-check",
+        "ruff-format",
     },
     "jsts": {
         "console-log-detection",
@@ -206,7 +214,13 @@ REPLACEMENT_RUFF_CODES: dict[str, tuple[str, ...]] = {
     "python-mutable-default": ("B006",),
     "python-logger-detection": ("LOG015",),
     "no-sync-in-async": (
-        "ASYNC210", "ASYNC212", "ASYNC220", "ASYNC221", "ASYNC222", "ASYNC230", "ASYNC251",
+        "ASYNC210",
+        "ASYNC212",
+        "ASYNC220",
+        "ASYNC221",
+        "ASYNC222",
+        "ASYNC230",
+        "ASYNC251",
     ),
 }
 RUFF_HOOK_REPO = "https://github.com/astral-sh/ruff-pre-commit"
@@ -280,6 +294,24 @@ EXCLUDE_ALIGNED_IDS = {
 # fleet, or every consumer's pre-commit fails with "executable not found".
 NON_DISTRIBUTED_REPOS = {"local"}
 
+# A baseline hook counts as present when the target declares any equivalent id, in any
+# repo entry: `ruff` is the legacy id of `ruff-check`, and a repo may run Ruff as a
+# `repo: local` hook. Adding the baseline hook next to it would lint every file twice.
+HOOK_EQUIVALENTS: dict[str, frozenset[str]] = {
+    "ruff-check": frozenset({"ruff", "ruff-check"}),
+    "ruff-format": frozenset({"ruff-format"}),
+}
+
+# Hook stages a plain `pre-commit install` must set up. Without commit-msg and pre-push
+# the conventional-commit and regression gates never run on a workstation.
+CANONICAL_INSTALL_HOOK_TYPES: tuple[str, ...] = (
+    "pre-commit",
+    "commit-msg",
+    "pre-push",
+    "post-merge",
+    "post-checkout",
+)
+
 # Distributed canonical files a consumer must never let its own autofixers rewrite:
 # they are managed copies kept byte-identical to source by the drift gate. Per-hook
 # excludes miss the autofixers that carry none (ruff-format, add-trailing-comma,
@@ -338,6 +370,32 @@ def enforced_hooks(brepo: dict, allowed: set[str]) -> dict:
     }
 
 
+def declared_hook_ids(target: dict) -> set[str]:
+    """Every hook id the target declares, across all repo entries."""
+    return {
+        hook_id for repo in target.get("repos", []) for hook_id in index_hooks(repo)
+    }
+
+
+def satisfied_elsewhere(hook_id: str, declared: set[str]) -> bool:
+    """True when an equivalent of `hook_id` already runs in the target."""
+    equivalents = HOOK_EQUIVALENTS.get(hook_id)
+    return bool(equivalents and equivalents & declared)
+
+
+def install_type_gaps(target: dict) -> list[str]:
+    """Canonical install hook types the target does not set up, in canonical order."""
+    current = target.get("default_install_hook_types") or []
+    return [t for t in CANONICAL_INSTALL_HOOK_TYPES if t not in current]
+
+
+def ensure_install_hook_types(target: dict) -> None:
+    """Append the missing canonical install hook types; existing entries keep their order."""
+    missing = install_type_gaps(target)
+    if missing:
+        target.setdefault("default_install_hook_types", []).extend(missing)
+
+
 def describe_actions(gaps: list[str]) -> str:
     """Summarise what the merge did, keeping the two actions distinct.
 
@@ -370,7 +428,9 @@ def _prefix_weight(code: str, selectors: list[str]) -> int:
 
 def ruff_code_armed(code: str, lint: dict) -> bool:
     """Whether one `[tool.ruff.lint]` table enables the code (per-file ignores aside)."""
-    selected = list(lint.get("select", RUFF_DEFAULT_SELECT)) + list(lint.get("extend-select", []))
+    selected = list(lint.get("select", RUFF_DEFAULT_SELECT)) + list(
+        lint.get("extend-select", [])
+    )
     ignored = list(lint.get("ignore", [])) + list(lint.get("extend-ignore", []))
     return _prefix_weight(code, selected) > _prefix_weight(code, ignored)
 
@@ -378,11 +438,18 @@ def ruff_code_armed(code: str, lint: dict) -> bool:
 def ruff_lint_tables(repo_root: Path) -> list[dict]:
     """The lint tables of every pyproject (root and one level down) declaring [tool.ruff]."""
     tables: list[dict] = []
-    for candidate in [repo_root / "pyproject.toml", *sorted(repo_root.glob("*/pyproject.toml"))]:
+    for candidate in [
+        repo_root / "pyproject.toml",
+        *sorted(repo_root.glob("*/pyproject.toml")),
+    ]:
         if not candidate.is_file() or candidate.is_symlink():
             continue
         try:
-            ruff = tomllib.loads(candidate.read_text(encoding="utf-8")).get("tool", {}).get("ruff")
+            ruff = (
+                tomllib.loads(candidate.read_text(encoding="utf-8"))
+                .get("tool", {})
+                .get("ruff")
+            )
         except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError):
             continue
         if isinstance(ruff, dict):
@@ -394,7 +461,10 @@ def ruff_lint_tables(repo_root: Path) -> list[dict]:
 def _declares_hook(config: dict, url: str, hook_ids: set[str] | None = None) -> bool:
     return any(
         repo.get("repo") == url
-        and (hook_ids is None or any(h.get("id") in hook_ids for h in repo.get("hooks", [])))
+        and (
+            hook_ids is None
+            or any(h.get("id") in hook_ids for h in repo.get("hooks", []))
+        )
         for repo in config.get("repos", [])
     )
 
@@ -407,10 +477,12 @@ def replacement_policy(repo_root: Path, baseline: dict, target: dict) -> PrunePo
     the Ruff merge must run before this one (apply-repo-standard.sh orders it so).
     """
     tables = ruff_lint_tables(repo_root)
-    ruff_runs = _declares_hook(target, RUFF_HOOK_REPO, RUFF_LINT_HOOK_IDS) or _declares_hook(
-        baseline, RUFF_HOOK_REPO, RUFF_LINT_HOOK_IDS
+    ruff_runs = _declares_hook(
+        target, RUFF_HOOK_REPO, RUFF_LINT_HOOK_IDS
+    ) or _declares_hook(baseline, RUFF_HOOK_REPO, RUFF_LINT_HOOK_IDS)
+    hadolint_runs = _declares_hook(target, HADOLINT_REPO) or _declares_hook(
+        baseline, HADOLINT_REPO
     )
-    hadolint_runs = _declares_hook(target, HADOLINT_REPO) or _declares_hook(baseline, HADOLINT_REPO)
 
     def can_prune(hook_id: str) -> bool:
         if hook_id == "dockerfile-no-latest":
@@ -444,7 +516,11 @@ def deprecated_present(target: dict, can_prune: PrunePolicy = _prune_all) -> lis
     A hook whose replacement is not armed is not drift: it stays, as the only gate.
     """
     url = next(iter(DEPRECATION_PRUNED_REPOS))
-    return [f"{url}#{hook_id}!deprecated" for hook_id in deprecated_hooks(target) if can_prune(hook_id)]
+    return [
+        f"{url}#{hook_id}!deprecated"
+        for hook_id in deprecated_hooks(target)
+        if can_prune(hook_id)
+    ]
 
 
 def prune_deprecated(target: dict, can_prune: PrunePolicy = _prune_all) -> None:
@@ -484,12 +560,17 @@ def missing_items(
     baseline: dict, target: dict, allowed: set[str], can_prune: PrunePolicy = _prune_all
 ) -> list[str]:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
+    declared = declared_hook_ids(target)
     gaps: list[str] = []
     for brepo in baseline.get("repos", []):
         url = brepo.get("repo")
         if url in NON_DISTRIBUTED_REPOS:
             continue
-        wanted = enforced_hooks(brepo, allowed)
+        wanted = {
+            hid: hook
+            for hid, hook in enforced_hooks(brepo, allowed).items()
+            if not satisfied_elsewhere(hid, declared)
+        }
         if not wanted:
             continue
         if url not in target_by_url:
@@ -515,6 +596,7 @@ def missing_items(
     if canon_py and target_python(target) not in (None, canon_py):
         gaps.append(f"default_language_version.python={canon_py}")
     gaps.extend(f"exclude:{pattern}" for pattern in _exclude_gaps(target))
+    gaps.extend(f"default_install_hook_types+={t}" for t in install_type_gaps(target))
     gaps.extend(deprecated_present(target, can_prune))
     return gaps
 
@@ -557,11 +639,16 @@ def merge(
     baseline: dict, target: dict, allowed: set[str], can_prune: PrunePolicy = _prune_all
 ) -> dict:
     target_by_url = {r.get("repo"): r for r in target.get("repos", [])}
+    declared = declared_hook_ids(target)
     for brepo in baseline.get("repos", []):
         url = brepo.get("repo")
         if url in NON_DISTRIBUTED_REPOS:
             continue
-        wanted = enforced_hooks(brepo, allowed)
+        wanted = {
+            hid: hook
+            for hid, hook in enforced_hooks(brepo, allowed).items()
+            if not satisfied_elsewhere(hid, declared)
+        }
         if not wanted:
             continue
         _merge_single_repo(brepo, target, target_by_url, wanted)
@@ -572,15 +659,20 @@ def merge(
     if canon_py and target_python(target) not in (None, canon_py):
         target["default_language_version"]["python"] = canon_py
     ensure_top_level_exclude(target)
+    ensure_install_hook_types(target)
     prune_deprecated(target, can_prune)
     return target
 
 
 def report_kept_deprecated(target: dict, can_prune: PrunePolicy) -> None:
     """Say which deprecated hooks stay because their replacement is not armed yet."""
-    kept = sorted({hook_id for hook_id in deprecated_hooks(target) if not can_prune(hook_id)})
+    kept = sorted(
+        {hook_id for hook_id in deprecated_hooks(target) if not can_prune(hook_id)}
+    )
     if kept:
-        sys.stderr.write("kept deprecated (replacement not armed yet): " + ", ".join(kept) + "\n")
+        sys.stderr.write(
+            "kept deprecated (replacement not armed yet): " + ", ".join(kept) + "\n"
+        )
 
 
 def parse_stacks(argv: list[str]) -> set[str]:
@@ -607,7 +699,7 @@ def main() -> int:
             continue
         positional.append(a)
     check = "--check" in sys.argv
-    if len(positional) != 2:
+    if len(positional) != len(("baseline", "target")):
         sys.stderr.write(__doc__ or "")
         return 2
     allowed = enforced_ids(parse_stacks(sys.argv[1:]))
