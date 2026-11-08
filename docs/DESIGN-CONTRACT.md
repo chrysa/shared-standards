@@ -202,10 +202,14 @@ and its sources.
 
 - **Template:** copy `templates/DESIGN.template.md` to the repository root as `DESIGN.md` when the
   first human-facing surface is started; fill §1–§3 before choosing an identity.
-- **`project-init`:** its `frontend` profile is the natural place to require the contract for new
-  UI repositories. [proposed]
+- **`project-init`** (checked 2026-11-08) scaffolds backends through the FastAPI forge and resolves
+  standards profiles; it has no frontend engine, so it has nothing to render. Its `frontend`
+  profile selects the standards domains, and the canon rule above already applies to any UI repo.
+  When a frontend engine is added there, it copies the template. The older `repo-bootstrap` skill
+  is superseded by `project-init` and is not extended.
 - **Forge-Stack-Workshop generators** are independent tools: they may scaffold a neutral
-  `DESIGN.md` entry point for generated apps, without any chrysa-specific policy.
+  `DESIGN.md` entry point for generated apps, without any chrysa-specific policy —
+  `react-app-generator` does so (its PR #178, draft).
 
 ## 10. Adoption checklist
 
