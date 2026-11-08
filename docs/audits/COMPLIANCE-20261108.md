@@ -97,23 +97,33 @@ branch-commit trailers out of `develop`. It does not.
 | Author identity rewritten on branch commits | fastapi-autoload #151, #136; eka #235, #236 | no foreign identity left, trees identical |
 | Branch commits cleaned (identity and assistant trailers, procedure of §7) | 117 open-PR branches in 62 repositories: 2,105 commits recreated, 488 of them carrying trailers | per branch, re-read after the move: no dirty commit left, head tree identical |
 | Back-merge `main` → `develop` | herdr-cockpit#62, second-souffle#4 (drafts) | `main` 4 and 1 commits ahead, 0 behind |
+| Local checkouts moved onto the rewritten heads (`git update-ref` with old-value check, no push) | 79 local branches; 24 left for a manual resync (uncommitted work on a stale branch, or local commits) | `status -sb` in sync with `origin`, uncommitted changes intact |
 
 `apply-branch-policy.sh` excluded `agent-panel` (fork, not `status: dev`) and
 `homeassistant-config` (diverged branches) on purpose.
 
 ## 7. Remaining actions
 
-1. **Clean the branch commits of the PRs still dirty.** Done for 116 branches (§6). Left:
-   chrysa-portfolio-viz#1012, dev-nexus#649 and #650 (the comparison exceeds what the API
-   returns: rewrite from a clone instead). sport-intelligence-hub#537 failed on a network
-   error and was cleaned on a re-run. github-actions#337 has `main` as its head: out of scope, its trailers sit on the
-   trunk. Two dependabot branches were rewritten by mistake (coach#221, gaming-os#367):
-   dependabot no longer rebases an edited branch, so ask it to recreate them
-   (`@dependabot recreate`). The tool now refuses trunks, `dependabot/` branches and forks.
+1. **Repair the 23 main-based branches, then clean the last three PRs.** The first cleanup
+   took a PR's commits as `compare/{base}...{head}`. For a PR that targets `main` from a
+   branch cut off `develop`, that list includes every `develop` commit not yet promoted, so
+   those were recreated too: 1,789 copies on 23 PRs. Content is unchanged (identical trees),
+   but the branches no longer share `develop`'s history, and a retarget to `develop` would
+   show hundreds of duplicate commits. The repair rebuilds each branch from its original head
+   and recreates only the PR's own commits (procedure below); where every dirty commit was a
+   `develop` commit (sport-intelligence-hub #534 to #537, among others) the branch simply
+   returns to its original head. The same rule makes chrysa-portfolio-viz#1012 and dev-nexus
+   #649 and #650 small enough for the API (66, 5 and 4 own commits). github-actions#337 has
+   `main` as its head: out of scope, its trailers sit on the trunk. Two dependabot branches
+   were rewritten by mistake (coach#221, gaming-os#367): dependabot no longer rebases an edited
+   branch, so ask it to recreate them (`@dependabot recreate`). The tool now refuses trunks,
+   `dependabot/` branches and forks.
    Procedure, per PR, through the Git Data API (no clone needed):
    1. Skip the PR if it is not open.
-   2. List its own commits with `GET compare/{base}...{head}`. Abort if `total_commits` exceeds
-      the returned list: the endpoint truncates large comparisons.
+   2. List its own commits: the commits of `GET compare/{trunk}...{head}` for the trunk
+      (`develop` or `main`) with the fewest, minus those the other trunk already contains.
+      Never use the PR base alone. Abort if `total_commits` exceeds the returned list: the
+      endpoint truncates large comparisons.
    3. Walk the commits oldest first. Recreate a commit (`POST git/commits`, same tree, same dates)
       when its author or committer is not a chrysa identity (replaced by the chrysa GitHub
       noreply identity), when its message has an assistant trailer
@@ -163,3 +173,8 @@ branch-commit trailers out of `develop`. It does not.
   one PR whose head was `main`; nothing stopped the two dependabot branches.
 - Switching the default branch does not move PRs that already target `main`, and other sessions
   kept merging them. Retarget in the same step as the switch.
+- A PR's own commits are the commits on no trunk, not the commits missing from its base. Using
+  the base turned 23 main-based PRs into copies of `develop` (1,789 commits) and had to be
+  repaired from the original heads.
+- The Git Data API (`git/commits/{sha}`) wants full shas; `commits/{sha}` resolves short ones.
+  Keep full shas in run logs.
