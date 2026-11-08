@@ -1,0 +1,47 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.sh"
+            ],
+            "command": "bash",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/read_guard.py"
+            ],
+            "command": "python3",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "Read"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/session-context.sh"
+            ],
+            "command": "bash",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
