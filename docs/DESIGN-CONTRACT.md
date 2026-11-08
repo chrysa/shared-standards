@@ -122,9 +122,14 @@ The chrysa wiring follows from this:
 2. **The contract loads on demand.** An agent reads `DESIGN.md` when it starts UI work. Do not
    `@DESIGN.md`-import it: that loads the whole contract in every session, UI or not. An import is
    justified only for a very small contract in a repository whose work is almost all UI.
-3. **Nested specs are linked from the root contract.** A repository instruction adds a location
+3. **Repositories outside the distribution keep one local pointer.** The standards distribution
+   serves `status: dev` repositories of `repos.yml`; forks, `non-dev` repositories, repositories
+   absent from `repos.yml` and Forge-Stack-Workshop tools do not receive the generated line. They
+   carry the pointer once, in the file Claude Code loads (`CLAUDE.md` if it exists, else
+   `AGENTS.md`) — never in both.
+4. **Nested specs are linked from the root contract.** A repository instruction adds a location
    only when a spec is not reachable from the root `DESIGN.md`.
-4. **Optional path-scoped trigger.** A repository may add a `.claude/rules/` file with `paths`
+5. **Optional path-scoped trigger.** A repository may add a `.claude/rules/` file with `paths`
    matching its UI files (`src/**/*.{tsx,css}`) whose only content is the pointer: it loads when
    Claude touches those files, at no cost otherwise.
 
