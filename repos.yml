@@ -487,3 +487,20 @@ repos:
   public: false
   runtime: container
   status: dev
+# Registered 2026-11-08: repos created after the STD-08 sweep.
+- name: chrysa-llm
+  public: false
+  runtime: pending  # local-first LLM gateway, only pyproject.toml so far
+  status: dev
+- name: pre-commit-hooks-changelog
+  public: true
+  runtime: exempt:lib  # pre-commit hook package, like pre-commit-tools
+  status: dev
+- name: satisfactory-hexa-gfn-assisstant
+  public: false
+  runtime: pending  # README only, no application code yet
+  status: dev
+- name: second-souffle
+  public: false
+  runtime: exempt:native  # Unity 6 project, like transport-simulator
+  status: dev
