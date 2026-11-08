@@ -153,8 +153,10 @@ branch-commit trailers out of `develop`. It does not.
 2. Switch the dependabot template prefix from `[SKIP CI] [GA]` to `chore(deps):` / `ci(deps):`
    with `[skip ci]` in the body: the prefix breaks the Conventional Commit rule and git-cliff.
 3. Distribute `SECURITY.md` and the issue forms from the socle.
-4. **Priority.** A reusable PR check, next to `enforce-shortcut-link`, that rejects assistant
-   trailers and non-chrysa identities in PR commits. §5 shows merge settings cannot do it.
+4. **Priority.** A PR check that rejects assistant trailers and non-chrysa identities in PR
+   commits. §5 shows merge settings cannot do it. Implemented as the `check-commit-hygiene`
+   composite action (chrysa/github-actions#346, draft, info-first); the caller template is
+   distributed from the socle once it ships in a release tag.
 5. Mechanise TS-014 and TS-015 (#649) in `guideline-checker`, at `info` first (GV-020).
 
 ## 9. Notes for the next audit
