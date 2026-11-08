@@ -1507,10 +1507,12 @@ automatically opens a GitHub issue** via the error-tracking service's native Git
 No relay, no PAT in the repo — the integration owns the link, so an error-tracking issue maps to
 exactly one GitHub issue (no duplicates).
 
-Mechanism: a per-project error-tracking **issue alert rule** with
-condition `FirstSeenEventCondition` (a new issue is created) and action
-`GitHubCreateTicketAction` targeting `chrysa/<repo>`, labels `sentry`, `bug`.
-Provision it across all projects with
+Mechanism: a per-project error-tracking **alert workflow** attached to the project's
+issue-stream detector, with trigger `first_seen_event` (a new issue is created) and a GitHub
+action that creates an issue in `chrysa/<repo>`, labels `sentry`, `bug`. The legacy per-project
+issue alert rules API is retired (it answers 404), and the API is served by the organization's
+region host (`https://de.sentry.io` for chrysa). Create the workflow once by hand on one project
+(the template), then copy it to every project with
 `shared-standards/scripts/sentry-github-issues.sh` (idempotent, `--dry-run` first).
 
 Per-project activation checklist:
