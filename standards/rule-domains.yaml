@@ -100,6 +100,7 @@ rules:
   The frontend says when the backend is unreachable or unstable: frontend
   "The repository architecture is legible to an agent \u2014 optimised for Claude, not only for humans": architecture
   Tool caches & deps never touch the project tree: containers
+  TypeScript is linted by the canonical ESLint flat config: frontend
   TypeScript is strict by contract: frontend
   UI state survives reload & focus: frontend
   "URL-addressable frontend navigation \u2014 mandatory": frontend
