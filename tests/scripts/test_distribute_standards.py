@@ -105,3 +105,55 @@ def test_check_reports_drift_on_a_fresh_consumer(consumer: Path) -> None:
     # Nothing distributed yet → --check must flag drift (exit 1), never a false green.
     check = _run("--check", "--standards-only", str(consumer))
     assert check.returncode == 1
+
+
+# The per-repo Claude copies (layers 3-4) that --core-only leaves to the chrysa-standards plugin.
+_CLAUDE_COPIES = {
+    ".claude/skills": _ROOT / ".claude" / "skills",
+    ".claude/agents": _ROOT / "templates" / "claude" / "agents",
+    ".claude/commands": _ROOT / "templates" / "claude" / "commands",
+    ".claude/workflows": _ROOT / "templates" / "claude" / "workflows",
+}
+
+
+def test_core_only_skips_the_claude_copies(consumer: Path) -> None:
+    # --no-apply keeps the test off apply-repo-standard.sh (layer 5), as in the other tests.
+    result = _run("--core-only", "--no-apply", str(consumer))
+    assert result.returncode == 0, result.stderr
+    assert "skipped (--core-only)" in result.stdout
+    for rel in _CLAUDE_COPIES:
+        assert not (consumer / rel).exists(), f"{rel} copied despite --core-only"
+
+    # The rules system and the other layers are still delivered.
+    claude = (consumer / "CLAUDE.md").read_text(encoding="utf-8")
+    assert _block_body(claude, "claude") == gav.emit("claude")
+    agents = (consumer / "AGENTS.md").read_text(encoding="utf-8")
+    assert _block_body(agents, "agents") == gav.emit("agents")
+    assert sorted(p.name for p in (consumer / "standards" / "rules").glob("*.md")) == sorted(
+        p.name for p in _RULES_SRC.glob("*.md")
+    )
+    assert (consumer / "opencode.json").read_bytes() == (
+        _ROOT / "templates" / "opencode.json"
+    ).read_bytes()
+    assert "chrysa:opencode-env:start" in (consumer / ".env.example").read_text(encoding="utf-8")
+
+    # The skipped copies are not drift for a core-only repo.
+    check = _run("--check", "--core-only", "--no-apply", str(consumer))
+    assert check.returncode == 0, check.stdout + check.stderr
+
+
+def test_default_run_still_copies_the_claude_assets(consumer: Path) -> None:
+    # Without --core-only nothing changes: every shared agent, command and workflow template
+    # lands as a byte-identical copy, and the shared skills are copied.
+    result = _run("--no-apply", str(consumer))
+    assert result.returncode == 0, result.stderr
+    assert "--core-only" not in result.stdout
+    for rel, src_dir in _CLAUDE_COPIES.items():
+        dest_dir = consumer / rel
+        assert dest_dir.is_dir(), f"{rel} missing from the default run"
+        if rel == ".claude/skills":
+            continue  # profile-scoped: only the skills tagged for this repo travel
+        for src in sorted(p for p in src_dir.rglob("*") if p.is_file()):
+            dest = dest_dir / src.relative_to(src_dir)
+            assert dest.read_bytes() == src.read_bytes(), f"{dest} diverged"
+    assert _run("--check", "--no-apply", str(consumer)).returncode == 0
