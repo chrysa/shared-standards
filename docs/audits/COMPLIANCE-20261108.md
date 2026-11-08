@@ -35,8 +35,10 @@ Previous audit: [`COMPLIANCE-20260615.md`](COMPLIANCE-20260615.md).
 | Issue forms | 25/95 | 25/95 | not distributed by the socle |
 
 The eight repositories missing from `repos.yml` had never received a distribution: they explain
-most of the template, pre-commit and settings gaps. `repos.yml` also holds 11 entries for
-repositories that were archived, renamed or migrated.
+most of the template, pre-commit and settings gaps (#642 registers all eight, the last one being
+`steamdeck-config`). The 10 entries that match no live repository are not ghosts: they carry
+`status: archived` or `status: migrated` (with the new home in a comment), and
+`list-dev-repos.sh` already excludes them from distribution.
 
 ## 3. Branch-model drift
 
@@ -153,8 +155,7 @@ branch-commit trailers out of `develop`. It does not.
 3. Distribute `SECURITY.md` and the issue forms from the socle.
 4. **Priority.** A reusable PR check, next to `enforce-shortcut-link`, that rejects assistant
    trailers and non-chrysa identities in PR commits. §5 shows merge settings cannot do it.
-5. Remove the 11 ghost entries from `repos.yml`.
-6. Mechanise TS-014 and TS-015 (#649) in `guideline-checker`, at `info` first (GV-020).
+5. Mechanise TS-014 and TS-015 (#649) in `guideline-checker`, at `info` first (GV-020).
 
 ## 9. Notes for the next audit
 
