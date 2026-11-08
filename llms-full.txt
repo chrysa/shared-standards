@@ -250,6 +250,7 @@ console/
     pnpm-workspace.yaml
     postcss.config.js
     src/
+      App.test.tsx
       App.tsx
       api/
       components/
