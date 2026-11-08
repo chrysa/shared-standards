@@ -286,28 +286,35 @@ purge_legacy() {
     ok "stripped legacy import block in $claude"
 }
 
-# Strip the GitNexus block from $1, plus the blank line that follows it. Only well-formed
-# blocks are removed: if a start marker has no end marker (or the reverse), the file is left
-# untouched and reported, so a damaged file never loses the text after a dangling marker.
+# Strip the GitNexus block from $1, plus the blank line that follows it.
+# Some repos lost the end marker (a later edit cut the last table rows): then the block ends at
+# the next `<!-- chrysa:` managed-block marker, and only if every line in it is one GitNexus
+# writes (blank, table row, GitNexus heading or rule). Anything else (no end and no managed
+# marker after it, any other line, a nested start) leaves the file untouched and reported:
+# a damaged file never loses repo-specific text.
 purge_gitnexus() {
     local f="$1"
-    [[ -f "$f" ]] && grep -qF "$GITNEXUS_MARK_START" "$f" || return 0
+    [[ -f "$f" ]] && grep -qxF "$GITNEXUS_MARK_START" "$f" || return 0
+    local tmp; tmp="$(mktemp)"
     if ! awk -v s="$GITNEXUS_MARK_START" -v e="$GITNEXUS_MARK_END" '
-            $0==s {if (open) bad=1; open=1; n++}
-            $0==e {if (!open) bad=1; open=0}
-            END {exit (bad || open || !n)}' "$f"; then
-        warn "$f: unpaired gitnexus marker · left untouched, remove the block by hand"
+            function gitnexus_line(line) {
+                return line == "" || line ~ /^\|/ || tolower(line) ~ /gitnexus/ \
+                    || line ~ /^- (\*\*MUST|NEVER)/ || line == "Follow the /cli skill." \
+                    || line ~ /^## (Always Do|Never Do|Resources|CLI|Tools Quick Reference|Impact Risk Levels|Self-Check Before Finishing|Keeping the Index Fresh|When Debugging|When Refactoring)$/
+            }
+            $0==s {if (skip) bad=1; skip=1; foreign=0; next}
+            skip && $0==e {skip=0; eat=1; next}
+            skip && /^<!-- chrysa:/ {skip=0; if (foreign) bad=1; print; next}
+            skip {if (!gitnexus_line($0)) foreign=1; next}
+            eat && $0=="" {eat=0; next}
+            {eat=0; print}
+            END {exit (bad || skip)}' "$f" > "$tmp"; then
+        rm -f "$tmp"
+        warn "$f: damaged gitnexus block (no end marker before repo text) · left untouched, remove it by hand"
         return 0
     fi
-    if $CHECK;   then warn "drift: gitnexus block in $f"; mark_drift; return 0; fi
-    if $DRY_RUN; then info "[dry-run] would strip gitnexus block in $f"; mark_drift; return 0; fi
-    local tmp; tmp="$(mktemp)"
-    awk -v s="$GITNEXUS_MARK_START" -v e="$GITNEXUS_MARK_END" '
-        $0==s {skip=1; next}
-        skip && $0==e {skip=0; eat=1; next}
-        skip {next}
-        eat && $0=="" {eat=0; next}
-        {eat=0; print}' "$f" > "$tmp"
+    if $CHECK;   then rm -f "$tmp"; warn "drift: gitnexus block in $f"; mark_drift; return 0; fi
+    if $DRY_RUN; then rm -f "$tmp"; info "[dry-run] would strip gitnexus block in $f"; mark_drift; return 0; fi
     cat "$tmp" > "$f"; rm -f "$tmp"; normalize_eof "$f"
     ok "stripped gitnexus block in $f"
 }

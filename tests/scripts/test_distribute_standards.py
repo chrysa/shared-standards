@@ -137,15 +137,47 @@ def test_distribution_strips_the_gitnexus_block(consumer: Path) -> None:
     assert _run("--check", "--standards-only", str(consumer)).returncode == 0
 
 
-def test_unpaired_gitnexus_marker_is_left_untouched(consumer: Path) -> None:
-    # A start marker without its end marker: stripping would eat the rest of the file.
+_GITNEXUS_NO_END = (
+    "<!-- gitnexus:start -->\n"
+    "# GitNexus — Code Intelligence\n"
+    "\n"
+    "- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.\n"
+    "\n"
+    "## CLI\n"
+    "\n"
+    "| Task | Read this skill file |\n"
+    "| Trace bugs | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |\n"
+    "\n"
+)
+
+
+def test_gitnexus_block_without_end_marker_stops_at_the_managed_block(consumer: Path) -> None:
+    # Fleet case (dev-nexus, floating-agent): the end marker and the last table rows were cut,
+    # and the managed agents block follows. The block ends at that managed marker.
     agents_md = consumer / "AGENTS.md"
-    damaged = "<!-- gitnexus:start -->\n# GitNexus\n\nLocal text after a lost end marker.\n"
+    start, end = _MARKERS["agents"]
+    agents_md.write_text(
+        f"{_GITNEXUS_NO_END}{start}\n{gav.emit('agents')}{end}\n", encoding="utf-8"
+    )
+
+    result = _run("--standards-only", str(consumer))
+    assert result.returncode == 0, result.stderr
+    text = agents_md.read_text(encoding="utf-8")
+    assert "gitnexus" not in text.lower()
+    assert text.startswith(start)
+    assert _block_body(text, "agents") == gav.emit("agents")
+
+
+def test_damaged_gitnexus_block_before_repo_text_is_left_untouched(consumer: Path) -> None:
+    # No end marker, and repo text before the next managed block: stripping up to that block
+    # would delete the repo text, so the file is left as it is and the run reports it.
+    agents_md = consumer / "AGENTS.md"
+    damaged = _GITNEXUS_NO_END + "Local text after a lost end marker.\n"
     agents_md.write_text(damaged, encoding="utf-8")
 
     result = _run("--standards-only", str(consumer))
     assert result.returncode == 0, result.stderr
-    assert "unpaired gitnexus marker" in result.stdout
+    assert "damaged gitnexus block" in result.stdout
     text = agents_md.read_text(encoding="utf-8")
     assert text.startswith(damaged)
     assert "Local text after a lost end marker." in text
