@@ -304,6 +304,7 @@ docs/
     D-0015-python-version-freeze.md
     D-0016-required-status-checks.md
     D-0017-realtime-first-ui.md
+    D-0019-sonarcloud-visibility-mirrors-github.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md
