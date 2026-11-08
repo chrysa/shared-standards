@@ -78,6 +78,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 ### Testing · `standards/rules/testing.md`
 - Tests: pytest only
 - Frontend tests: Vitest + Testing Library + MSW — from the scaffold, not later
+- Non-regression is a gate, not a habit
 
 ### Frontend & web semantics · `standards/rules/frontend.md`
 - TypeScript is strict by contract
