@@ -117,3 +117,25 @@ The type discipline is mechanised and, per GV-020, introduced at `info` before a
 
 A finding here is a defect to fix (add the missing section, correct the type), not a warning to
 carry once the gate is promoted.
+
+## SC-016 — PR commits carry no assistant attribution and no foreign identity
+
+Every commit of a pull request is authored and committed by a chrysa identity, and no commit
+message carries assistant attribution: no `Co-authored-by` trailer naming an assistant, no
+`Generated with …` line, no `Claude-Session:` or other session-link trailer. Other co-authors
+(dependabot, the owner's own aliases) are legitimate and stay.
+
+The rule binds the **branch commits**, not only the PR body. On a squash-merge GitHub appends a
+`---------` block of `Co-authored-by` lines built from the squashed commits (authors that differ
+from the merger, and their co-author trailers), **whatever the squash-message setting**: the
+`PR_BODY` setting only chooses the text above that block. Verified on 2026-11-08
+(fastapi-autoload#147, see `docs/audits/COMPLIANCE-20261108.md` §5). Canonical merge settings
+stop `COMMIT_MESSAGES` from copying the other lines; they cannot stop this one.
+
+A branch that breaks the rule is cleaned **before** merge: its own commits are recreated with
+the same trees and dates, a chrysa identity, and the trailers removed, then the branch is moved
+to the new head. After merge the only fix is rewriting a protected trunk, which is an owner
+decision. Prevention sits upstream: the assistant configuration disables attribution
+(`attribution` block of `.claude/settings.json`), and the git identity is set before the first
+commit of every clone and worktree (worktrees inherit the global identity). A PR-time check
+follows SC-015: info-first.
