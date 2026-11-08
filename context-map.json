@@ -14,7 +14,8 @@
     "D-0015-gate-develop-branch.md",
     "D-0015-python-version-freeze.md",
     "D-0016-required-status-checks.md",
-    "D-0017-realtime-first-ui.md"
+    "D-0017-realtime-first-ui.md",
+    "D-0020-container-pre-commit-hooks.md"
   ],
   "contracts": [
     "standards"
@@ -27,6 +28,7 @@
   "key_directories": [
     ".claude",
     ".claude-plugin",
+    ".codex",
     ".github",
     ".vscode",
     "compliance",

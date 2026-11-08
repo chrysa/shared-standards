@@ -131,6 +131,9 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     verification-loop/
       SKILL.md
   thresholds.json
+.codex/
+  rules/
+    prism-ai-lint.rules
 .editorconfig
 .env.example
 .gitattributes
@@ -298,6 +301,7 @@ docs/
     D-0015-python-version-freeze.md
     D-0016-required-status-checks.md
     D-0017-realtime-first-ui.md
+    D-0020-container-pre-commit-hooks.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md
