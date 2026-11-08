@@ -61,13 +61,22 @@ Primary action per view: **Fleet** — change a repo's status and save; **Distri
 
 - **Feedback:** mutations disable their button while pending; results show a `Banner`
   (`role="alert"` / `role="status"`). Per-row status saves show only ✓/✗. **[implemented]**
-- **Data states:** loading is a text line; load errors show a banner on Fleet and Standard;
-  Distribution shows no load-error state. No offline / stale / reconnect handling. **[implemented]**
-- **Motion:** none. **[implemented]**
+- **Data states:** loading is a text line. A failed Fleet load shows the error with a **Retry**
+  action and no empty table ([Fleet.tsx](console/web/src/pages/Fleet.tsx)); Standard shows a load
+  error; Distribution shows no load-error state. No offline / stale / reconnect handling.
+  **[implemented]**
+- **Motion:** basic content entrance (FE-053) — the active view, table rows and banners fade in
+  with a 6 px rise, 220 ms per element, first five rows staggered by 30 ms (whole list within
+  370 ms), opacity and transform only. Refetched rows keep their keys, so they are not re-mounted
+  and do not replay it; `prefers-reduced-motion: reduce` removes it. Roles mirror
+  `templates/contract.css` ([index.css](console/web/src/index.css),
+  [enter.ts](console/web/src/lib/enter.ts)). **[implemented]**
 
 ## 7. Responsive and support conventions
 
-Desktop-first, single centred column; tables are not adapted to narrow widths. **[implemented]**
+Desktop-first, single centred column. On narrow screens the header wraps and wide tables scroll
+inside their own box, so the page never scrolls sideways (checked at 375 px). Table columns are
+not re-laid out for mobile. **[implemented]**
 
 ## 8. Accessibility
 
@@ -80,20 +89,22 @@ No image, icon font or webfont is shipped; the header glyph is a Unicode charact
 
 ## 10. Acceptance criteria and evidence
 
-- **Criteria:** the observable list in [docs/DESIGN-CONTRACT.md](docs/DESIGN-CONTRACT.md) §3
+- **Criteria:** the observable list in [docs/DESIGN-CONTRACT.md](docs/DESIGN-CONTRACT.md) §4
   applies; J1–J3 are the representative journeys.
 - **Evidence log:**
 
   | Date | Change | Checks run | Result | Not run, and why |
   | ---- | ------ | ---------- | ------ | ---------------- |
   | 2026-11-08 | contract written from the code | source review of `console/web/src` | gaps listed in §11 | no browser run: documentation-only change |
+  | 2026-11-08 | FE-053 entrance pilot; Fleet error Retry; narrow-screen overflow | vitest (9 tests), eslint, `tsc -b`, build — in Docker; Playwright 1.57 Chromium with mocked `/api`, 14 rows incl. a 64-character name: timing ≤ 250 ms per row and 370 ms per list, CLS < 0.01, refetch keeps rows mounted with no replay, view change plays the entrance, `reducedMotion: "reduce"` removes it, keyboard focus visible, 503 → alert + Retry → data, 1280 px and 375 px (no page overflow) | all 14 checks pass; negative control (reduced-motion rule removed) fails as expected | screen reader, real backend and GitHub data, light theme screenshots |
 
 ## 11. Open choices, known gaps and maintenance
 
 - **Known gaps (from the code, 2026-11-08):** active tab and theme are not persisted or
   URL-addressable (canon *UI state survives reload & focus*); per-row save feedback is a bare
   ✓/✗; Distribution lacks a load-error state; no API-down banner (FE-050); loading is text, not a
-  skeleton (FE-070); `apply` uses `window.confirm`; no content entrance motion (FE-053).
+  skeleton (FE-070); `apply` uses `window.confirm`; the Retry button keeps the banner's error
+  colour.
 - **Open choices [proposed]:** adopt `contract.css` names or record the console as exempt from
   the brand-theme registry; fix the gaps above in a scoped UI change with a browser check.
 - **Maintenance:** console changes update this file in the same PR.

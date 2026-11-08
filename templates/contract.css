@@ -35,7 +35,7 @@
   /* content entrance (FE-053) — optional roles with safe defaults; apps may retune them */
   --motion-enter: 220ms;            /* per element, <= 250ms */
   --motion-enter-distance: 6px;     /* small translate, <= 8px */
-  --motion-stagger: 40ms;           /* x at most 5 items: a group settles within 400ms */
+  --motion-stagger: 30ms;           /* x at most 5 items + 220ms: a group settles within 400ms */
   --ease-enter: cubic-bezier(0.2, 0, 0, 1);
 }
 

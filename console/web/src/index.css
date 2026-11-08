@@ -20,6 +20,12 @@
   --success: 142 71% 38%;
   --success-foreground: 0 0% 100%;
   --radius: 0.5rem;
+
+  /* Content entrance (FE-053): same roles and defaults as shared-standards templates/contract.css */
+  --motion-enter: 220ms;
+  --motion-enter-distance: 6px;
+  --motion-stagger: 30ms;
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
 }
 
 .dark {
@@ -48,4 +54,23 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Basic content entrance (FE-053): opacity + transform only, so it never shifts layout. */
+@keyframes console-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-distance));
+  }
+}
+
+.enter {
+  animation: console-enter var(--motion-enter) var(--ease-enter) both;
+  animation-delay: calc(var(--enter-index, 0) * var(--motion-stagger));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    animation: none;
+  }
 }

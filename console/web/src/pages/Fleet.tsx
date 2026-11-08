@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
+import { enterProps } from "@/lib/enter";
 
 function ComplianceBadge({ row }: { row: FleetRow }) {
   const { t } = useTranslation();
@@ -57,7 +58,7 @@ function StatusCell({ row, meta }: { row: FleetRow; meta?: Meta }) {
 
 export function Fleet({ meta }: { meta?: Meta }) {
   const { t } = useTranslation();
-  const { data, isLoading, isError, error } = useQuery({ queryKey: ["fleet"], queryFn: api.fleet });
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({ queryKey: ["fleet"], queryFn: api.fleet });
 
   return (
     <section>
@@ -66,11 +67,20 @@ export function Fleet({ meta }: { meta?: Meta }) {
         {t("fleet.subtitle", { manifest: "repos.yml" })}
         {meta && !meta.central_configured ? ` · ${t("fleet.centralOff")}` : ""}
       </p>
-      {isError && <Banner kind="error">{(error as Error).message}</Banner>}
+      {isError && (
+        <Banner kind="error">
+          <span className="flex flex-wrap items-center justify-between gap-3">
+            {(error as Error).message}
+            <Button size="sm" variant="outline" disabled={isFetching} onClick={() => void refetch()}>
+              {t("common.retry")}
+            </Button>
+          </span>
+        </Banner>
+      )}
       {data?.central_unreachable && <Banner kind="error">{data.central_unreachable}</Banner>}
       {isLoading ? (
         <p className="text-muted-foreground">{t("common.loading")}</p>
-      ) : (
+      ) : isError && !data ? null : (
         <Table>
           <THead>
             <TR>
@@ -81,8 +91,8 @@ export function Fleet({ meta }: { meta?: Meta }) {
             </TR>
           </THead>
           <TBody>
-            {data?.rows.map((row) => (
-              <TR key={row.name}>
+            {data?.rows.map((row, index) => (
+              <TR key={row.name} {...enterProps(index)}>
                 <TD>
                   <a className="text-primary hover:underline" href={row.html_url} target="_blank" rel="noopener noreferrer">
                     {row.name}
