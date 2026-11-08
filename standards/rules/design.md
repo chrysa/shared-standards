@@ -12,7 +12,7 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   through the generated views, so repository instructions add at most the location of a spec the
   root file does not already link — never a copy of the contract. A repository without a
   human-facing surface has no `DESIGN.md`. Detail: *Design system* below and
-  `docs/DESIGN-CONTRACT.md`.
+  `shared-standards/docs/DESIGN-CONTRACT.md`.
 
 ## Design system
 
@@ -20,12 +20,12 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 repository that ships, prototypes or actively builds such a surface — web app, Django Admin
 customisation, native or overlay app, browser/editor extension, interactive TUI, game menu/HUD,
 UI library, configured dashboard — keeps a root `DESIGN.md` started from
-`templates/DESIGN.template.md`. A repository without one needs no placeholder; a retired or
+`shared-standards/templates/DESIGN.template.md`. A repository without one needs no placeholder; a retired or
 migrating surface records that status instead of new requirements. The contract:
 
 - **Starts from the product, not an aesthetic** — users, devices, priority tasks, journeys and
   navigation come first; the visual identity is then chosen for that product and justified (the
-  brand-brief method in `docs/DESIGN-SYSTEM.md`). No uniform dashboard, palette or library is
+  brand-brief method in `shared-standards/docs/DESIGN-SYSTEM.md`). No uniform dashboard, palette or library is
   imposed across products. Public `DESIGN.md` catalogues and other references are inspiration
   only: no third-party logo, proprietary typeface, trade dress or layout is copied.
 - **Owns no token values** — colours, type, spacing, radii, motion and component variants live
@@ -38,7 +38,7 @@ migrating surface records that status instead of new requirements. The contract:
   link), *decided* (by whom, when) or *proposed*; known gaps and open choices are listed, never
   presented as shipped.
 - **Turns "modern and ergonomic" into observable criteria** — the acceptance list of
-  `docs/DESIGN-CONTRACT.md`, adapted to the support: identifiable primary action, predictable
+  `shared-standards/docs/DESIGN-CONTRACT.md`, adapted to the support: identifiable primary action, predictable
   navigation, density fitted to the content, explicit forms that keep input after an error,
   keyboard use with visible focus, understandable action feedback, behaviour across screen or
   window sizes, functional motion with reduced-motion support, and loading / empty / error /

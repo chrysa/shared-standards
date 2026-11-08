@@ -1,6 +1,7 @@
 # <APP_NAME> — Design contract
 
-> Product design contract. Rule: `standards/rules/design.md` · method and acceptance criteria:
+> Product design contract. Rule: `standards/rules/design.md` (distributed with the standards) ·
+> method and acceptance criteria:
 > `shared-standards/docs/DESIGN-CONTRACT.md` · design system: `shared-standards/docs/DESIGN-SYSTEM.md`.
 > Read it before any interface, component, style, navigation, interaction or asset work, and
 > update it in the same change.
