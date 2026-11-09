@@ -1502,24 +1502,31 @@ except: gh issue create --title "[chrysa] failure" --label "chrysa-error"
 
 ## Observability — error-tracking → GitHub issues (norm)
 
-Every status:dev repo ships an error-tracking project, and **a new error-tracking issue
-automatically opens a GitHub issue** via the error-tracking service's native GitHub integration.
-No relay, no PAT in the repo — the integration owns the link, so an error-tracking issue maps to
-exactly one GitHub issue (no duplicates).
+Every status:dev repo ships an error-tracking project, and every new error-tracking issue ends
+up as exactly one tracked work item. Use the error-tracking service's **native** features first;
+what is native depends on the service plan, so check the plan before building anything.
 
-Mechanism: a per-project error-tracking **issue alert rule** with
-condition `FirstSeenEventCondition` (a new issue is created) and action
-`GitHubCreateTicketAction` targeting `chrysa/<repo>`, labels `sentry`, `bug`.
-Provision it across all projects with
-`shared-standards/scripts/sentry-github-issues.sh` (idempotent, `--dry-run` first).
+On the plan in use (Sentry Developer, verified 2026-11-09), alert actions are **email only**:
+no GitHub, chat, tracker or webhook action, and linking an issue to GitHub or the tracker needs
+a paid plan. The mechanism is therefore:
+
+1. The error-tracking alert emails the owner (default alert rules are enough).
+2. A mail filter routes those emails to the action label (e.g. `1 Action/Dev`), never to spam.
+3. The owner opens the work item by hand when the error matters (tracker story, or GitHub issue
+   labelled `sentry`, `bug`).
+4. Releases and commits are sent to the error-tracking service from CI, so that a commit message
+   `fixes <ISSUE-ID>` resolves the error natively when the release is deployed.
+
+When the plan allows integration alert actions (Sentry Business for automatic GitHub issue
+creation, Team for manual linking and chat alerts), switch to the native action — no relay and no
+custom provisioning script. Decision record: owner decision DEC-V14-134 (2026-11-09).
 
 Per-project activation checklist:
 
 1. Org GitHub integration installed once in the error-tracking service (Settings → Integrations
-   → GitHub) with access to the chrysa repos.
+   → GitHub) with access to the chrysa repos (needed for suspect commits and releases).
 2. The repo has an error-tracking project whose slug matches the repo name.
-3. The auto-issue alert rule exists (run the provisioning script, or add it in
-   Alerts → Create Alert → Issues → action "Create a GitHub issue").
+3. CI sends releases and commits for every deployment.
 4. The GitHub repo has a `sentry` label (CI label sync provides it).
 
 ## Session lifecycle (primer + memory + hindsight)
