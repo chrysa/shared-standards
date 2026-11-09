@@ -92,21 +92,21 @@ branch-commit trailers out of `develop`. It does not.
 |---|---|---|
 | Retitled `chore(release): promote develop to main (v1.32.0)` | guideline-checker#487 | title check passes |
 | Registered `chrysa-llm`, `pre-commit-hooks-changelog`, `satisfactory-hexa-gfn-assisstant`, `second-souffle` | shared-standards#642 (draft) | `validate-repos-runtime.sh` passes |
-| Back-merge `main` → `develop` | prism-ai-lint#112 (draft) | — |
+| Back-merge `main` → `develop` | prism-ai-lint#112 (merged 2026-11-08) | — |
 | Non-regression testing rules TS-012 to TS-016 and the non-regression map | shared-standards#649 (draft) | pre-commit, `gen_agent_views --check`, distribution dry-run |
 | Branch policy: `develop` default, `main`/`develop` protected | satisfactory-hexa-gfn-assisstant, herdr-cockpit, second-souffle, arena-techno, chrysa-llm, gource-live, ops-monitoring | re-read through the API: all seven conform |
 | Canonical merge settings and labels | chrysa-llm, satisfactory-hexa-gfn-assisstant, second-souffle, herdr-cockpit, ops-monitoring, arena-techno, gource-live, homepage, game-solver-platform | `apply-repo-settings.sh --check`: 9/9 conform |
 | Author identity rewritten on branch commits | fastapi-autoload #151, #136; eka #235, #236 | no foreign identity left, trees identical |
-| Branch commits cleaned (identity and assistant trailers, procedure of §7) | 117 open-PR branches in 62 repositories: 2,105 commits recreated, 488 of them carrying trailers | per branch, re-read after the move: no dirty commit left, head tree identical |
+| Branch commits cleaned (identity and assistant trailers, procedure of §7) | 122 open-PR branches in 64 repositories; the 22 main-based ones were then rebuilt from their original heads (§7, item 1) | per branch, re-read after the move: no dirty commit left, head tree identical |
 | Back-merge `main` → `develop` | herdr-cockpit#62, second-souffle#4 (drafts) | `main` 4 and 1 commits ahead, 0 behind |
-| Local checkouts moved onto the rewritten heads (`git update-ref` with old-value check, no push) | 79 local branches; 24 left for a manual resync (uncommitted work on a stale branch, or local commits) | `status -sb` in sync with `origin`, uncommitted changes intact |
+| Local checkouts moved onto the rewritten heads (`git update-ref` with old-value check, no push) | 95 local branches (dirty checkouts with `git reset --keep` after a stash copy); 20 left that need a human choice (local `.claude/` edits that differ from the remote, or local commits) | `status -sb` in sync with `origin`, uncommitted changes intact |
 
 `apply-branch-policy.sh` excluded `agent-panel` (fork, not `status: dev`) and
 `homeassistant-config` (diverged branches) on purpose.
 
 ## 7. Remaining actions
 
-1. **Repair the 23 main-based branches, then clean the last three PRs.** The first cleanup
+1. **Done on 2026-11-09: repair the 23 main-based branches, then clean the last three PRs.** The first cleanup
    took a PR's commits as `compare/{base}...{head}`. For a PR that targets `main` from a
    branch cut off `develop`, that list includes every `develop` commit not yet promoted, so
    those were recreated too: 1,789 copies on 23 PRs. Content is unchanged (identical trees),
@@ -135,8 +135,11 @@ branch-commit trailers out of `develop`. It does not.
    5. Re-read the comparison: no dirty commit left, and the head tree is identical to the old one.
    The step force-updates each branch: local checkouts and any session working on these branches
    must re-fetch (`git fetch && git branch -f <branch> origin/<branch>`) before working on them again.
-2. **Retarget to `develop`**: herdr-cockpit#55 and second-souffle#3 once the back-merges
-   (herdr-cockpit#62, second-souffle#4) are merged. prism-ai-lint needs nothing more: #107,
+2. **Merge the back-merges, then retarget.** herdr-cockpit#62 and second-souffle#4 merge with a
+   merge commit; second-souffle#4 is red only because its jobs never started (item 6).
+   herdr-cockpit#55 is already retargeted and shows `main`'s extra commits until #62 lands;
+   second-souffle#3 was merged into `main` meanwhile; dotfiles#57 (`fix/…`) still targets `main`.
+   prism-ai-lint needs nothing more: #107,
    #109, #110 and #111 were merged into `main` on 2026-11-08 around 12:16Z, and the back-merge
    #112 (merged 17:20Z) brought them into `develop`. herdr-cockpit#58 and second-souffle#1 were merged into `main` hours after the
    default-branch switch, and herdr-cockpit#46 was closed.
@@ -144,8 +147,14 @@ branch-commit trailers out of `develop`. It does not.
    rewrite the protected trunk.
 4. **Merge** shared-standards#642, shared-standards#649 (then dispatch `distribute-standards.yml`,
    which only runs on a release or a dispatch), shared-standards#657, github-actions#346, and the
-   open `chore/sync-shared-standards` PRs.
-5. **Reconcile by hand** `homeassistant-config` and `dotfiles`.
+   open `chore/sync-shared-standards` PRs: 61 of the 74 are mergeable, 13 conflict and need a
+   re-dispatch of `distribute-standards.yml` to be regenerated.
+5. **Decide on `homeassistant-config`**: it uses `main` as its trunk (default branch, open PRs to
+   `main`; `main` 69 commits ahead and 83 behind `develop` over 93 files). Adopt the develop model
+   and reconcile by hand, or exempt it. `dotfiles` needs nothing more: `main` has no commit of
+   its own left.
+6. **Unblock GitHub Actions billing.** Jobs on private repositories no longer start ("recent
+   account payments have failed"), so most PR checks there are red without having run.
 
 ## 8. Proposed follow-ups (no story created yet)
 
