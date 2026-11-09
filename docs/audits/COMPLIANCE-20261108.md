@@ -136,14 +136,15 @@ branch-commit trailers out of `develop`. It does not.
    The step force-updates each branch: local checkouts and any session working on these branches
    must re-fetch (`git fetch && git branch -f <branch> origin/<branch>`) before working on them again.
 2. **Retarget to `develop`**: herdr-cockpit#55 and second-souffle#3 once the back-merges
-   (herdr-cockpit#62, second-souffle#4) are merged; prism-ai-lint #107, #109, #110, #111 once #112
-   is merged. herdr-cockpit#58 and second-souffle#1 were merged into `main` hours after the
+   (herdr-cockpit#62, second-souffle#4) are merged. prism-ai-lint needs nothing more: #107,
+   #109, #110 and #111 were merged into `main` on 2026-11-08 around 12:16Z, and the back-merge
+   #112 (merged 17:20Z) brought them into `develop`. herdr-cockpit#58 and second-souffle#1 were merged into `main` hours after the
    default-branch switch, and herdr-cockpit#46 was closed.
 3. **Decide on the fastapi-autoload#147 leak** already on `develop`: keep it in history, or
    rewrite the protected trunk.
 4. **Merge** shared-standards#642, shared-standards#649 (then dispatch `distribute-standards.yml`,
-   which only runs on a release or a dispatch), prism-ai-lint#112 (merge commit), and the open
-   `chore/sync-shared-standards` PRs.
+   which only runs on a release or a dispatch), shared-standards#657, github-actions#346, and the
+   open `chore/sync-shared-standards` PRs.
 5. **Reconcile by hand** `homeassistant-config` and `dotfiles`.
 
 ## 8. Proposed follow-ups (no story created yet)
