@@ -121,4 +121,17 @@ sections:
   Release & changelog config (canonical): ci-cd
   Session lifecycle (primer + memory + hindsight): docs
   Shared skills (load on demand from shared-standards/.claude/skills/): dev-loop
+summary:
+- Agent actions are governed
+- An agent writes only where the owner owns
+- "Branch model — `main` is production, `develop` is the workspace"
+- Commits
+- "Cross-cutting stack (settled ADRs — do not relitigate)"
+- "Everything runs in a container — the only exception is the slice of a repo genuinely bound to the host OS"
+- External dependencies are installed in containers, never on the host
+- "Governance — strategic pillars & ADR format"
+- Language
+- "Pre-commit & git hooks (native, via pre-commit.com — never wrapped in make)"
+- "Security scanning is a gate, not an afterthought — it runs in pre-commit and in CI"
+- 'Tests: pytest only'
 version: 1

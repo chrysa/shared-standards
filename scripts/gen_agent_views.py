@@ -12,13 +12,20 @@ every agent (Claude, AGENTS.md, GitHub Copilot) and the always-on context stays 
                                          the body ``distribute-standards.sh`` inlines into
                                          every repo's ``CLAUDE.md`` managed block
   * this repo's ``CLAUDE.md`` block    — the same core, injected between the managed markers
-  * ``AGENTS.md``                      — the same core, in a managed block
+  * ``AGENTS.md``                      — a short summary, in a managed block: the canon rules
+                                         listed under ``summary:`` in the mapping, then the
+                                         per-domain detail files. Every repo's ``CLAUDE.md``
+                                         imports ``@AGENTS.md`` and already carries the core,
+                                         so repeating the full index here costs every session
+                                         the same ~2 k tokens twice.
   * ``.github/copilot-instructions.md``— the same core, in a managed block
 
 Rules are classified by domain through ``standards/rule-domains.yaml`` (a committed
 side-mapping — the canon prose stays clean, no inline tags). A rule with no mapping entry
 falls back to the ``general`` domain and is reported (never a hard failure), so adding a
-rule to the canon always flows through to every view.
+rule to the canon always flows through to every view (to the AGENTS summary through its
+domain file). A ``summary:`` title that is not a canon rule is a hard failure: a typo
+must not silently drop a non-negotiable rule from the summary.
 
 Run ``python -m scripts.gen_agent_views`` to (re)write the views, or
 ``python -m scripts.gen_agent_views --check`` to fail on drift (the ``agent-views-drift``
@@ -78,6 +85,13 @@ _GEN_HEADER = (
     "-->"
 )
 _BOLD = re.compile(r"\*\*(.+?)\*\*", re.DOTALL)
+# A ``- **Label**: text`` bullet: its title is a bare label, so the summary keeps the text.
+_LABELLED = re.compile(r"^- \*\*(?P<label>[^*]+?)\*\*:\s*(?P<text>.+)$", re.DOTALL)
+_SENTENCE_END = re.compile(r"(?<=\.)\s")
+
+
+class SummaryRuleMissingError(ValueError):
+    """A ``summary:`` title in the mapping matches no rule of the canon."""
 
 
 @dataclass
@@ -160,6 +174,12 @@ def _load_mapping() -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
     return rules, sections, labels
 
 
+def _load_summary() -> list[str]:
+    """Titles of the canon rules the AGENTS.md summary lists (``summary:`` in the mapping)."""
+    data = yaml.safe_load(MAPPING.read_text(encoding="utf-8"))
+    return [str(title) for title in (data.get("summary") or [])]
+
+
 def parse_rules() -> tuple[list[Rule], list[str]]:
     """Parse the canon into classified rules. Returns (rules, warnings)."""
     text = CANON.read_text(encoding="utf-8")
@@ -210,7 +230,7 @@ def _label(domain: str) -> str:
 
 
 def _rule_index() -> list[str]:
-    """The slim rule index shared byte-for-byte by the core, AGENTS and copilot views."""
+    """The slim rule index shared byte-for-byte by the core and copilot views."""
     rules, _ = parse_rules()
     lines: list[str] = []
     for domain in _domain_order(rules):
@@ -294,16 +314,42 @@ def _inject(text: str, start: str, end: str, block_body: str) -> str:
 # ------------------------------------------------------------------------- outputs
 
 
+def _summary_rules(rules: list[Rule]) -> list[Rule]:
+    """The ``summary:`` rules, in canon order. Raises when a title is not a canon rule."""
+    by_title = {rule.title: rule for rule in rules}
+    wanted = _load_summary()
+    missing = [title for title in wanted if title not in by_title]
+    if missing:
+        raise SummaryRuleMissingError(f"summary titles not found in the canon: {missing}")
+    picked = {by_title[title].order: by_title[title] for title in wanted}
+    return [picked[order] for order in sorted(picked)]
+
+
+def _summary_line(rule: Rule) -> str:
+    """One summary bullet: the rule title, or label + first sentence for a ``Label:`` rule."""
+    text = rule.title
+    match = _LABELLED.match(re.sub(r"\s+", " ", rule.body).strip())
+    if match and not rule.is_section:
+        sentence = _SENTENCE_END.split(match["text"], maxsplit=1)[0]
+        text = f"{match['label'].strip()}: {sentence}"
+    return f"- {text} · `{rule.domain}`"
+
+
 def _agents_view() -> str:
+    rules, _ = parse_rules()
+    domains = ",".join(_domain_order(rules))
     body = [
-        "# chrysa standards — agent view (generated)",
+        "# chrysa standards — summary (generated)",
         "",
-        "> The same rules as `CLAUDE.md`, for any AGENTS.md-aware tool. Detail loads on "
-        "demand from `standards/rules/<domain>.md`; the canon is "
-        "`standards/STANDARDS.chrysa.md`.",
+        "> Always-on summary of the canon `standards/STANDARDS.chrysa.md`. Every canon rule "
+        "applies, not only these. Full rule index: the `chrysa:standards` block of "
+        "`CLAUDE.md`. Detail, on demand: the `chrysa-standards` skill, or "
+        "`standards/rules/<domain>.md`.",
         "",
+        "Non-negotiable (domain in backticks):",
     ]
-    body.extend(_rule_index())
+    body.extend(_summary_line(rule) for rule in _summary_rules(rules))
+    body.extend(["", f"Domains: `standards/rules/{{{domains}}}.md`"])
     return "\n".join(body).rstrip() + "\n"
 
 
@@ -412,7 +458,14 @@ def check() -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
+    try:
+        return _run(argv if argv is not None else sys.argv[1:])
+    except SummaryRuleMissingError as error:
+        sys.stderr.write(f"standards/rule-domains.yaml: {error}\n")
+        return 1
+
+
+def _run(args: list[str]) -> int:
     if args and args[0] == "--emit":
         match args[1:]:
             case [view] if view in _VIEW_BODIES:

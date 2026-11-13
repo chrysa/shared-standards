@@ -14,8 +14,11 @@
 #   1b. On-demand rule detail  standards/rules/<domain>.md -> <repo>/standards/rules/  (managed copies).
 #                              These are the full per-domain rules the CORE's pointers resolve to;
 #                              the consumer path mirrors shared-standards so the pointers work verbatim.
-#   1c. AGENTS + Copilot views AGENTS.md + .github/copilot-instructions.md each get the same core in a
-#                              managed block, so every agent tool sees one synchronised rule index.
+#   1c. AGENTS + Copilot views AGENTS.md gets a short summary (CLAUDE.md imports it and already
+#                              carries the core); .github/copilot-instructions.md gets the core.
+#                              Both are managed blocks generated from the same canon.
+#   1d. GitNexus purge         strip the `<!-- gitnexus:start/end -->` block from AGENTS.md and
+#                              CLAUDE.md: it points to GitNexus MCP tools no chrysa repo configures.
 #   2.  Legacy migration       remove any old `.chrysa/standards-import` block + the vendored
 #                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
 #   3.  Shared skills          .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
@@ -23,7 +26,8 @@
 #   5.  Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
 # Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md / AGENTS.md /
-# copilot-instructions.md is preserved; only the delimited managed blocks are touched.
+# copilot-instructions.md is preserved; only the delimited managed blocks (and, in AGENTS.md /
+# CLAUDE.md, a GitNexus block: layer 1d) are touched.
 #
 # Usage:
 #   distribute-standards.sh <repo_path>              # apply
@@ -83,6 +87,11 @@ OLD_MARK_START='<!-- chrysa:standards-import:start -->'
 OLD_MARK_END='<!-- chrysa:standards-import:end -->'
 OLD_VENDOR='.chrysa/STANDARDS.md'
 
+# Block written by `npx gitnexus analyze`. It tells agents to call GitNexus MCP tools, and no
+# chrysa repo configures a GitNexus MCP server, so it only costs tokens (~0.6 k per session).
+GITNEXUS_MARK_START='<!-- gitnexus:start -->'
+GITNEXUS_MARK_END='<!-- gitnexus:end -->'
+
 DRY_RUN=false
 CHECK=false
 NO_APPLY=false
@@ -95,7 +104,7 @@ for arg in "$@"; do
         --check)          CHECK=true ;;
         --no-apply)       NO_APPLY=true ;;
         --standards-only) STANDARDS_ONLY=true; NO_APPLY=true ;;
-        -h|--help)  sed -n '2,35p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        -h|--help)  awk 'NR==1 {next} /^#/ {sub(/^# ?/, ""); print; next} {exit}' "$0"; exit 0 ;;
         *)          [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
     esac
 done
@@ -277,6 +286,39 @@ purge_legacy() {
     ok "stripped legacy import block in $claude"
 }
 
+# Strip the GitNexus block from $1, plus the blank line that follows it.
+# Some repos lost the end marker (a later edit cut the last table rows): then the block ends at
+# the next `<!-- chrysa:` managed-block marker, and only if every line in it is one GitNexus
+# writes (blank, table row, GitNexus heading or rule). Anything else (no end and no managed
+# marker after it, any other line, a nested start) leaves the file untouched and reported:
+# a damaged file never loses repo-specific text.
+purge_gitnexus() {
+    local f="$1"
+    [[ -f "$f" ]] && grep -qxF "$GITNEXUS_MARK_START" "$f" || return 0
+    local tmp; tmp="$(mktemp)"
+    if ! awk -v s="$GITNEXUS_MARK_START" -v e="$GITNEXUS_MARK_END" '
+            function gitnexus_line(line) {
+                return line == "" || line ~ /^\|/ || tolower(line) ~ /gitnexus/ \
+                    || line ~ /^- (\*\*MUST|NEVER)/ || line == "Follow the /cli skill." \
+                    || line ~ /^## (Always Do|Never Do|Resources|CLI|Tools Quick Reference|Impact Risk Levels|Self-Check Before Finishing|Keeping the Index Fresh|When Debugging|When Refactoring)$/
+            }
+            $0==s {if (skip) bad=1; skip=1; foreign=0; next}
+            skip && $0==e {skip=0; eat=1; next}
+            skip && /^<!-- chrysa:/ {skip=0; if (foreign) bad=1; print; next}
+            skip {if (!gitnexus_line($0)) foreign=1; next}
+            eat && $0=="" {eat=0; next}
+            {eat=0; print}
+            END {exit (bad || skip)}' "$f" > "$tmp"; then
+        rm -f "$tmp"
+        warn "$f: damaged gitnexus block (no end marker before repo text) · left untouched, remove it by hand"
+        return 0
+    fi
+    if $CHECK;   then rm -f "$tmp"; warn "drift: gitnexus block in $f"; mark_drift; return 0; fi
+    if $DRY_RUN; then rm -f "$tmp"; info "[dry-run] would strip gitnexus block in $f"; mark_drift; return 0; fi
+    cat "$tmp" > "$f"; rm -f "$tmp"; normalize_eof "$f"
+    ok "stripped gitnexus block in $f"
+}
+
 # Upsert the opencode provider env vars into <repo>/.env.example (managed block).
 # Only documents variable NAMES + safe defaults — never secret values.
 # @tag @[claude-opus-4-8]  opencode multi-provider fleet block (PR #570)
@@ -375,6 +417,9 @@ main() {
     inject_standards "$repo"
     # 1b. + 1c. On-demand rule detail + AGENTS/Copilot views (the rest of the slim-core system).
     deploy_agent_views "$repo"
+    # 1d. Dead GitNexus block (no GitNexus MCP server anywhere in the fleet).
+    purge_gitnexus "$repo/AGENTS.md"
+    purge_gitnexus "$repo/CLAUDE.md"
 
     if $STANDARDS_ONLY; then
         if $CHECK; then

@@ -14,6 +14,8 @@ from __future__ import annotations
 import textwrap
 from pathlib import Path
 
+import pytest
+
 from scripts import gen_agent_views as g
 
 MIN_CANON = """\
@@ -71,9 +73,13 @@ class TestMultiAgentGuarantee:
         copilot = g._copilot_view()
         domain_file = g._domain_file("testing", rules)
 
-        # View 1-3: the slim renderings each list the new rule's title.
-        for view in (core, agents, copilot):
+        # View 1-2: the core and copilot renderings each list the new rule's title.
+        for view in (core, copilot):
             assert new_title in view
+        # View 3: the AGENTS summary lists only the `summary:` rules, but it always names
+        # the domain file where the new rule lives.
+        assert new_title not in agents
+        assert "`standards/rules/{testing,design}.md`" in agents
         # View 4: the per-domain detail file carries the rule's body verbatim.
         assert "body of the injected rule" in domain_file
 
@@ -89,6 +95,71 @@ class TestMultiAgentGuarantee:
         )
         assert injected.domain == g.DEFAULT_DOMAIN
         assert any("A brand new canon rule for the test" in w for w in warnings)
+
+
+LABELLED_CANON = """\
+<!-- header -->
+-->
+
+## Non-negotiable conventions
+
+- **Language**: English — all code and docs. A second sentence the summary drops.
+
+- **An existing mapped rule** — body of the first rule.
+
+## Design system
+
+- **Some design token rule** — body.
+"""
+
+SUMMARY_MAPPING = """\
+version: 1
+domains:
+  governance: Governance
+  testing: Testing
+  design: Design system
+sections:
+  Design system: design
+rules:
+  Language: governance
+  An existing mapped rule: testing
+summary:
+- Design system
+- Language
+"""
+
+
+class TestAgentsSummary:
+    def test_lists_only_the_summary_rules_in_canon_order(self, monkeypatch, tmp_path):
+        _point_at_tmp(monkeypatch, tmp_path, LABELLED_CANON, SUMMARY_MAPPING)
+        lines = g._agents_view().splitlines()
+        bullets = [line for line in lines if line.startswith("- ")]
+        # Canon order, not mapping order; a section is listed by its title.
+        assert bullets == [
+            "- Language: English — all code and docs. · `governance`",
+            "- Design system · `design`",
+        ]
+        assert "- An existing mapped rule · `testing`" not in lines
+        assert lines[-1] == "Domains: `standards/rules/{governance,testing,design}.md`"
+
+    def test_unknown_summary_title_fails_loudly(self, monkeypatch, tmp_path, capsys):
+        mapping = SUMMARY_MAPPING + "- A rule that is not in the canon\n"
+        _point_at_tmp(monkeypatch, tmp_path, LABELLED_CANON, mapping)
+        with pytest.raises(g.SummaryRuleMissingError, match="A rule that is not in the canon"):
+            g._agents_view()
+        # The CLI (pre-commit drift hook, distribute --emit) exits 1 with a readable message.
+        assert g.main(["--emit", "agents"]) == 1
+        assert "A rule that is not in the canon" in capsys.readouterr().err
+
+    def test_committed_summary_stays_small_and_points_to_the_detail(self):
+        # The token saving is the point of the summary (card CFC-09): keep it under 2.5 KB,
+        # a third of the full index, and keep the pointers that replace the index.
+        agents = g._agents_view()
+        assert len(agents.encode("utf-8")) < 2500
+        assert len(agents.encode("utf-8")) * 3 < len(g._copilot_view().encode("utf-8"))
+        assert "`chrysa-standards` skill" in agents
+        assert "`standards/rules/<domain>.md`" in agents
+        assert len(g._load_summary()) <= 15
 
 
 class TestParsing:
