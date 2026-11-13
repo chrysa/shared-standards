@@ -46,6 +46,7 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
 - The frontend says when the backend is unreachable or unstable
 - The frontend is reactive and real-time by default
 - UI state survives reload & focus
+- The interface refreshes on focus, and notifications surface in the tab title
 - Everything is semantic — the markup, the data, and the URLs
 - URL-addressable frontend navigation — mandatory
 

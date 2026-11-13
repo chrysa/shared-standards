@@ -79,6 +79,17 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   never shows stale state after the user comes back. A reload that loses the user's place,
   or a change that fails to propagate on focus/reload, is a bug.
 
+- **The interface refreshes on focus, and notifications surface in the tab title.** When the
+  window or tab regains focus (`focus` / `visibilitychange` to `visible`), the interface
+  revalidates its server state, not only its local view state: stale queries are refetched and
+  the live channel is checked and reconnected if it dropped. Notifications (new messages,
+  completed jobs, errors needing attention) are **counted while the site is in the background**:
+  the live channel stays subscribed when the tab is hidden, and unread notifications are
+  accumulated in state rather than dropped or deferred until focus. The unread count is shown in
+  `document.title` as a prefix (e.g. `(3) Portfolio`), updated as it changes and cleared when the
+  user has seen the items. A notification that exists only in the page DOM, or that is lost while
+  the tab is hidden, is a defect.
+
 - **Everything is semantic — the markup, the data, and the URLs.** A surface must be
   understandable by a machine that never sees the pixels: a screen reader, a crawler, an
   AI agent, another service. Meaning lives in the markup and the address, never only in the
