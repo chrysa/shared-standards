@@ -829,7 +829,7 @@ That record deliberately names products; where it and this canon disagree, **thi
   `docker/entrypoints/` (entrypoint scripts), `docker/commands/` (command/CMD wrapper scripts) — so
   a Dockerfile and its entrypoint sit beside each other under one roof instead of scattered across
   the tree. Compose files themselves stay where tooling expects them (`docker-compose*.yml` at the
-  repo root), not under `docker/`.
+  repo root), not under `docker/`. Detail + layout tree: annexe `CONTAINERS-K3S.md` CT-005.
 - **App containers ship the app only — the platform layer is the owner's responsibility.** An
   application image/container **never embeds a reverse proxy** (any TLS-terminating or routing
   front). The app container exposes its own port and speaks plain HTTP;
