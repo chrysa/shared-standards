@@ -92,6 +92,26 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   `production`+`dev` two-stage rule per image — each image is single-purpose. Such images still must
   not embed a reverse proxy and still run as non-root where they bind-mount host paths.
 
+- **One Dockerfile lives at the repo root; two or more are gathered under `docker/dockerfiles/` and
+  named `<role>.Dockerfile`.** A repo with a single application Dockerfile keeps it as the bare
+  `Dockerfile` at the repo root — no folder, no suffix. The moment a repo needs **two or more**
+  Dockerfiles (a separate test image, a worker image, a docs builder, several services in a
+  monorepo), they are **all** moved into `docker/dockerfiles/` and each is named for the thing it
+  builds with the suffix form `<role>.Dockerfile` — `docker/dockerfiles/production.Dockerfile`,
+  `docker/dockerfiles/test.Dockerfile`, `docker/dockerfiles/worker.Dockerfile`. The suffix form
+  (`.Dockerfile`) is the only naming scheme — the prefix form `Dockerfile.<x>` is not used, so one
+  convention holds across the ecosystem and editors key syntax highlighting off the extension. A
+  loose `Dockerfile.dev`/`Dockerfile.test` sitting next to the root `Dockerfile`, or a second
+  Dockerfile left at the root, is a defect: either collapse to one multi-stage file (the default —
+  `--target` selects the image, see *Dockerfiles are multi-stage*) or move the set into
+  `docker/dockerfiles/`. Compose and build commands point at the moved file explicitly
+  (`build.dockerfile: docker/dockerfiles/production.Dockerfile`). `docker/` is the container-support
+  directory: `dockerfiles/` holds the images, and its siblings hold what those images need —
+  `docker/entrypoints/` (entrypoint scripts), `docker/commands/` (command/CMD wrapper scripts) — so
+  a Dockerfile and its entrypoint sit beside each other under one roof instead of scattered across
+  the tree. Compose files themselves stay where tooling expects them (`docker-compose*.yml` at the
+  repo root), not under `docker/`. Detail + layout tree: annexe `CONTAINERS-K3S.md` CT-005.
+
 - **App containers ship the app only — the platform layer is the owner's responsibility.** An
   application image/container **never embeds a reverse proxy** (any TLS-terminating or routing
   front). The app container exposes its own port and speaks plain HTTP;
@@ -197,5 +217,7 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
   in the consumer's environment; provides a `docker-test` target (CI runs the suite in a container).
 - `exempt:config` — no executable runtime (config, knowledge base, deploy manifests). Nothing to run.
 - `exempt:native` — bound to a host OS, device, cloud platform, or editor (desktop integration,
-  hardware, Apps Script, VS Code extension, infra/Helm). Optional `Dockerfile.test` for CI.
+  hardware, Apps Script, VS Code extension, infra/Helm). Optional CI test image: a bare
+  `Dockerfile` at the root if it is the only one, else `docker/dockerfiles/test.Dockerfile` (see
+  the Dockerfile-naming rule above).
 - `pending` — pre-code scaffold; flips to `container` at first code.

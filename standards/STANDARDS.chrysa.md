@@ -92,19 +92,14 @@ That record deliberately names products; where it and this canon disagree, **thi
   with a merge commit) · force push forbidden · auto-merge requires CI + owner.
 - **One PR per issue**, scoped tight. Every PR references an issue (`Closes/Fixes/Refs #N`).
   Exception: label `hotfix`. The `enforce-issue-link` workflow is a blocking status check.
-- **Every PR references a Shortcut story — except in public open-source repos (DEC-V3-006),
-  where a linked GitHub issue is enough; Shortcut stays the internal tracker.** The story is
-  the unit of work tracking; a PR with no story is invisible to the fleet's planning surface
-  and is a defect. Carry the reference as `sc-<id>` (or the `app.shortcut.com/.../story/<id>`
-  URL) in the branch name (`feat/sc-1234-short-desc`), the PR title, or the PR body — the PR
-  template has a required field for it. dependabot is exempt; a genuinely story-less PR must
-  carry the `no-story` label, which records the waiver. The `enforce-shortcut-link` workflow
-  is a blocking status check. A story beyond `In Progress` must itself link the branch/commit
-  (native VCS integration), so the thread reads both ways. On a public open-source repo the
-  caller is `templates/workflows-oss/enforce-shortcut-link.yml` (`@v1.11.0`,
-  `accept-github-issue: true`): a reference to an issue of that repository (`#123`,
-  `closes #123`, `.../issues/123`) satisfies the gate as well — a PR number does not — so an
-  external contributor only needs to open an issue first, or reference an existing one.
+- **Every PR references a Shortcut story.** The story is the unit of work tracking; a PR
+  with no story is invisible to the fleet's planning surface and is a defect. Carry the
+  reference as `sc-<id>` (or the `app.shortcut.com/.../story/<id>` URL) in the branch name
+  (`feat/sc-1234-short-desc`), the PR title, or the PR body — the PR template has a required
+  field for it. dependabot is exempt; a genuinely story-less PR must carry the `no-story`
+  label, which records the waiver. The `enforce-shortcut-link` workflow is a blocking status
+  check. A story beyond `In Progress` must itself link the branch/commit (native VCS
+  integration), so the thread reads both ways.
 - **Issues and PRs are type-driven.** Every issue declares exactly one **type** from a fixed
   taxonomy (bug · feature · enhancement · chore · docs · ci · security · research · epic),
   carried as a canonical label and backed by a committed per-type issue form; every PR's type is
@@ -816,6 +811,25 @@ That record deliberately names products; where it and this canon disagree, **thi
   utility/tool container images (e.g. `usefull-containers`), not one application, is exempt from the
   `production`+`dev` two-stage rule per image — each image is single-purpose. Such images still must
   not embed a reverse proxy and still run as non-root where they bind-mount host paths.
+- **One Dockerfile lives at the repo root; two or more are gathered under `docker/dockerfiles/` and
+  named `<role>.Dockerfile`.** A repo with a single application Dockerfile keeps it as the bare
+  `Dockerfile` at the repo root — no folder, no suffix. The moment a repo needs **two or more**
+  Dockerfiles (a separate test image, a worker image, a docs builder, several services in a
+  monorepo), they are **all** moved into `docker/dockerfiles/` and each is named for the thing it
+  builds with the suffix form `<role>.Dockerfile` — `docker/dockerfiles/production.Dockerfile`,
+  `docker/dockerfiles/test.Dockerfile`, `docker/dockerfiles/worker.Dockerfile`. The suffix form
+  (`.Dockerfile`) is the only naming scheme — the prefix form `Dockerfile.<x>` is not used, so one
+  convention holds across the ecosystem and editors key syntax highlighting off the extension. A
+  loose `Dockerfile.dev`/`Dockerfile.test` sitting next to the root `Dockerfile`, or a second
+  Dockerfile left at the root, is a defect: either collapse to one multi-stage file (the default —
+  `--target` selects the image, see *Dockerfiles are multi-stage*) or move the set into
+  `docker/dockerfiles/`. Compose and build commands point at the moved file explicitly
+  (`build.dockerfile: docker/dockerfiles/production.Dockerfile`). `docker/` is the container-support
+  directory: `dockerfiles/` holds the images, and its siblings hold what those images need —
+  `docker/entrypoints/` (entrypoint scripts), `docker/commands/` (command/CMD wrapper scripts) — so
+  a Dockerfile and its entrypoint sit beside each other under one roof instead of scattered across
+  the tree. Compose files themselves stay where tooling expects them (`docker-compose*.yml` at the
+  repo root), not under `docker/`. Detail + layout tree: annexe `CONTAINERS-K3S.md` CT-005.
 - **App containers ship the app only — the platform layer is the owner's responsibility.** An
   application image/container **never embeds a reverse proxy** (any TLS-terminating or routing
   front). The app container exposes its own port and speaks plain HTTP;
@@ -1297,7 +1311,9 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
   in the consumer's environment; provides a `docker-test` target (CI runs the suite in a container).
 - `exempt:config` — no executable runtime (config, knowledge base, deploy manifests). Nothing to run.
 - `exempt:native` — bound to a host OS, device, cloud platform, or editor (desktop integration,
-  hardware, Apps Script, VS Code extension, infra/Helm). Optional `Dockerfile.test` for CI.
+  hardware, Apps Script, VS Code extension, infra/Helm). Optional CI test image: a bare
+  `Dockerfile` at the root if it is the only one, else `docker/dockerfiles/test.Dockerfile` (see
+  the Dockerfile-naming rule above).
 - `pending` — pre-code scaffold; flips to `container` at first code.
 
 ## Release & changelog config (canonical)
@@ -1317,19 +1333,7 @@ Every repo carries a `runtime:` field in `repos.yml`, machine-checked by `audit-
 - **Registry** — application images publish to the **private container registry** (`ghcr.io/chrysa/{repo}`, tags mirror
   the git tag + `:latest`); CI authenticates with the workflow `GITHUB_TOKEN` (or least-privilege
   `packages:write`), never a plaintext PAT. Distributable libraries publish to public PyPI via
-  Trusted Publishing (OIDC), never a token in plaintext. **Open-source repositories** also publish a
-  public image on Docker Hub (`docker.io/chrys4/{repo}`, version tag + `:latest`) and their PyPI
-  package through Trusted Publishing (OIDC); GHCR stays private for internal images (DEC-V3-010,
-  2026-10-28).
-- **Version policy — latest stable, latest LTS where an LTS track exists.** Every project targets
-  the **latest stable version** of each language, runtime, package and dependency. Where an
-  ecosystem ships Long-Term-Support releases (Node, Python per its support policy, base OS
-  images, major frameworks), target the **latest supported LTS** rather than a bleeding-edge
-  non-LTS release. Updates land through Dependabot with a green CI gate; an outdated pin is never
-  kept silently. **Exception:** a freeze to an older version is allowed only with an ADR that
-  states why a current version breaks a foundational component (e.g. a transitive wheel missing
-  for a new Python like `torch` on 3.14), and the freeze is **temporary and dated with its
-  lift condition** — it is revisited, not left to rot.
+  Trusted Publishing (OIDC), never a token in plaintext.
 
 ## GitHub Actions (reuse first · custom actions centralised · thin workflows)
 
@@ -1573,19 +1577,23 @@ requires an ADR with a kill-test, not a shrug.
    the machine or self-hosted** — an interpreter/weights the owner runs (Ollama, llama.cpp, a
    vLLM/TGI server on chrysa infrastructure), never a third-party hosted API dressed up as
    "local". The independence is only proven when one of the tested adapters needs no external
-   provider to answer. **Every LLM call reaches its model through the common contract of
-   `AI-080`** — an OpenAI-compatible endpoint read from `LLM_BASE_URL` / `LLM_MODEL`, local by
-   default — never through a vendor SDK or a hard-coded provider endpoint in a product's business
-   code. A shared gateway (e.g. a fleet `chrysa-LLM` service) is **optional**: it is introduced
-   only when a measured need — routing or fallback between models, central cost and token
-   budgets, shared caching, rate limiting, centralised evaluation or observability — is recorded
-   in an ADR, and it then becomes one value of `LLM_BASE_URL`, not a code change. Until then the
-   ≥2 tested adapters are proven through that contract (e.g. a local Ollama endpoint and a hosted
-   endpoint), and each product degrades to a documented no-AI / fallback mode when its endpoint
-   is unreachable. Products built on top of a gateway — e.g. `ai-aggregator` — consume the same
-   contract; they are not alternative provider wirings. This is the transport-level application
-   of *no code duplication* and *external servers addressed through the environment*: the model
-   endpoint arrives by env, and the adapters stay behind that one contract.
+   provider to answer. **Every LLM call — internal or external — goes through the `chrysa-LLM`
+   gateway**, never a vendor SDK or raw provider endpoint called directly from a product's
+   business code. `chrysa-LLM` *is* the local port of this pillar made concrete across the
+   fleet: it owns provider selection and the ≥2 tested adapters, and it is the one place where
+   routing, fallback, prompt/model/version pinning, evaluation, cost and token budgets, caching,
+   rate limiting and observability live (satisfying the *AI feature is evaluated* and *agent
+   actions are governed* obligations once, not per repo). A product calls it as a **versioned
+   contract** through a thin local adapter (*projects talk through versioned contracts only*)
+   and degrades to a documented no-AI / fallback mode when it is unreachable — it never reaches
+   a model by any other path. A direct call to Claude, OpenAI, Ollama, or any inference endpoint
+   that bypasses `chrysa-LLM` is a defect, not a shortcut; the single documented exception is
+   `chrysa-LLM` itself, which owns the real adapters. Products built *on top of* the gateway —
+   e.g. `ai-aggregator`, a showcase/front consuming `chrysa-LLM` — are consumers of this
+   contract, not alternative gateways: they route through `chrysa-LLM` like everything else and
+   never re-implement provider access. This is the transport-level application of *no code
+   duplication* and *external servers addressed through the environment*: the gateway's endpoint
+   arrives by env, and the adapters exist once, there.
 2. **GAFAM independence** — every managed-cloud dependency has a documented self-hosted exit
    path; the cloud SDK stays confined to an adapter (`BlobStore`, not `S3Client`).
 3. **Portable personalisation data** — all user/personal data is exportable to an open format
@@ -1622,4 +1630,3 @@ no `Killed` entry has kill-tests that are too lax. Scaffold a new record with `/
 - **Ported, reconstructible memory.** Vector storage and RAG sit behind a port with a reconstructible, provenance-tagged index; auto-extracted memory is a validatable candidate, never a canonical fact directly (`AI-040`, `AI-050`).
 - **Untrusted active content is isolated.** Content from an agent, MCP server, document or preview is untrusted by default and sandboxed; embedded instructions are data, not commands (`AI-060`).
 - **Gateway identity end to end.** A common API/agent gateway applies auth, scopes, quotas and telemetry without re-implementing auth or business logic; workloads use service identities and least privilege, with mutual TLS when risk or exposure requires (`AI-070`).
-- **One LLM contract, read from the environment.** Every product reaches its model through an OpenAI-compatible endpoint configured by `LLM_BASE_URL` and `LLM_MODEL` (plus `LLM_API_KEY` only when the endpoint needs one); the default is the local endpoint of the settled stack, so a fresh checkout answers offline; a cloud model or a gateway is a value of `LLM_BASE_URL`, never a code change (`AI-080`).

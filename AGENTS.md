@@ -62,7 +62,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - Branch model — `main` is production, `develop` is the workspace
 - Merge
 - One PR per issue
-- Every PR references a Shortcut story — except in public open-source repos (DEC-V3-006), where a linked GitHub issue is enough; Shortcut stays the internal tracker
+- Every PR references a Shortcut story
 - Issues and PRs are type-driven
 
 ### Architecture, decoupling & portability · `standards/rules/architecture.md`
@@ -161,6 +161,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - No virtualenv in a repo — ever
 - Tool caches & deps never touch the project tree
 - Dockerfiles are multi-stage, with a `production` and a `dev` stage — mandatory
+- One Dockerfile lives at the repo root; two or more are gathered under `docker/dockerfiles/` and named `<role>.Dockerfile`
 - App containers ship the app only — the platform layer is the owner's responsibility
 - Only a publicly useful port is published — everything else stays on the container network
 - A compose file is minimal — declare only what the stack needs, default the rest

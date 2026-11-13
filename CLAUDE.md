@@ -139,7 +139,17 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 
 ## CLI
 
-Follow the /cli skill.
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
+<!-- gitnexus:end -->
+
 
 <!-- chrysa:standards:start · managed by distribute-standards.sh · DO NOT EDIT -->
 # chrysa — Transverse Standards (core)
@@ -163,7 +173,7 @@ Follow the /cli skill.
 - Branch model — `main` is production, `develop` is the workspace
 - Merge
 - One PR per issue
-- Every PR references a Shortcut story — except in public open-source repos (DEC-V3-006), where a linked GitHub issue is enough; Shortcut stays the internal tracker
+- Every PR references a Shortcut story
 - Issues and PRs are type-driven
 
 ### Architecture, decoupling & portability · `standards/rules/architecture.md`
@@ -262,6 +272,7 @@ Follow the /cli skill.
 - No virtualenv in a repo — ever
 - Tool caches & deps never touch the project tree
 - Dockerfiles are multi-stage, with a `production` and a `dev` stage — mandatory
+- One Dockerfile lives at the repo root; two or more are gathered under `docker/dockerfiles/` and named `<role>.Dockerfile`
 - App containers ship the app only — the platform layer is the owner's responsibility
 - Only a publicly useful port is published — everything else stays on the container network
 - A compose file is minimal — declare only what the stack needs, default the rest

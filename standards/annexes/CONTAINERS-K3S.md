@@ -52,6 +52,39 @@ Named stages present · a distinct production target exists · non-root runtime 
 documented otherwise · no build/dev tooling in the final image · vulnerability, size, and
 content analysis · required targets built and tested before publish.
 
+### CT-005 — Dockerfile layout: one at the root, several under `docker/dockerfiles/`
+
+**Single Dockerfile → repo root, bare name.** A repo with one application Dockerfile keeps it as
+`Dockerfile` at the repo root. No folder, no suffix. `--target` selects production/dev/tests from
+that one multi-stage file (CT-001).
+
+**Two or more → `docker/dockerfiles/<role>.Dockerfile`.** As soon as a repo needs a second
+Dockerfile (a CI test image, a worker, a docs builder, several services in a monorepo), **all** of
+them move into `docker/dockerfiles/`, each named for what it builds with the **suffix** form:
+
+```text
+docker/
+  dockerfiles/
+    production.Dockerfile
+    test.Dockerfile
+    worker.Dockerfile
+  entrypoints/        # entrypoint scripts the images call
+  commands/           # CMD / command wrapper scripts
+```
+
+- **Suffix only.** `<role>.Dockerfile` is the one naming scheme; the prefix form `Dockerfile.<x>`
+  (`Dockerfile.dev`, `Dockerfile.test`) is retired, so editors key syntax highlighting off the
+  `.Dockerfile` extension and one convention holds fleet-wide.
+- **`docker/` is the container-support home.** `dockerfiles/` holds the images; its siblings hold
+  what those images need — `entrypoints/`, `commands/` — so a Dockerfile and its entrypoint sit
+  together instead of scattered across the tree.
+- **Compose stays at the repo root** (`docker-compose*.yml`), never under `docker/`. A moved
+  Dockerfile is addressed explicitly: `build.dockerfile: docker/dockerfiles/production.Dockerfile`.
+
+A second Dockerfile left at the root, or a loose `Dockerfile.dev`/`Dockerfile.test` beside the root
+`Dockerfile`, is a defect: collapse to one multi-stage file, or move the set into
+`docker/dockerfiles/`.
+
 ### CT-004 — Healthchecks live in the Dockerfile, native and language-agnostic
 
 **Placement.** The healthcheck belongs to the image: every service image built from the repo
