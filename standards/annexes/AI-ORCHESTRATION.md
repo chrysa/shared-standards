@@ -13,7 +13,8 @@
 
 Local/offline inference, the orchestration chain (control plane → agents → typed tools → local
 models → infrastructure), the protocol boundary (MCP / A2A / capability registry), agent-facing
-memory, and the cost discipline that keeps work local. Business contracts stay owned by their
+memory, the cost discipline that keeps work local, and the parity of the coding assistants a
+repository supports (AI-090). Business contracts stay owned by their
 services; this annexe fixes the common invariants, not a project's implementation.
 
 ## AI-000 — Offline-first, local-first
@@ -107,6 +108,41 @@ provider wiring:
 - **Degraded mode.** When the endpoint is unreachable the product shows a documented no-AI
   fallback; it does not crash or silently call another provider.
 
+## AI-090 — Coding assistants at parity, behind one neutral source
+
+A repository works the same with every **supported coding assistant**. Today the supported set is
+**Claude Code and Codex, at parity**. The set is open: adding a tool (opencode, an agent driven by
+a local model, the next assistant) means adding an adapter, never rewriting the repo for it.
+
+- **One neutral source, one thin adapter per tool.** Instructions, rules and shared capabilities
+  are written once, in a tool-neutral form: the canon and the repo's own rules. Every tool's
+  entry file is generated from that source by the same generator (`CLAUDE.md`, `AGENTS.md`,
+  `.github/copilot-instructions.md`), and each tool's configuration is a thin adapter
+  (`.claude/settings.json`; `.codex/config.toml` and `.codex/rules/`; `opencode.json`). An
+  adapter adds only what its tool needs; it never forks the content, and no entry file is
+  hand-diverged.
+- **The same guard rails in every tool.** A `deny`/`ask` rule set for one tool exists for every
+  supported tool (Claude Code `deny`/`ask` ↔ Codex `forbidden`/`prompt`). A protection that one
+  tool can only give through a tool-specific hook is also a pre-commit or CI gate, so it holds
+  whatever tool made the change. `prism-ai-lint --align` checks this alignment and repairs it;
+  a rule present in one tool and missing in another is a defect.
+- **Shared capabilities come from one source.** Skills, commands and subagents are distributed
+  once (the `chrysa-standards` plugin for Claude Code, and the matching export for each other
+  tool as it becomes available), never copied per repo and per tool. A capability that exists
+  for one tool only is listed as such in the adapter, with the gap tracked in an issue; it is
+  never missing silently.
+- **No assistant setup requires one vendor's model.** The model is a setting of each adapter,
+  not a requirement of the shared content. A model tier set for one tool (for example a
+  subagent's `model:`) names a role, so another tool can map that role to its own models.
+  Consistent with pillar 1 and AI-000: at least one supported assistant can run on a local
+  model.
+- **A new tool joins by adapter.** Supporting another assistant means: its adapter generated
+  from the neutral source, its rules added to `prism-ai-lint --align`, and a smoke check that
+  the tool loads the repo's instructions. Nothing in the shared content is duplicated for it.
+- **Tool-specific features are allowed, documented.** A feature with no equivalent in the other
+  tools (a hook event, a setting) may be used. The adapter states what is missing elsewhere, and
+  when the feature protects something, the shared gate above covers it.
+
 ## Manual verification
 
 No single linter covers this annexe. In review, check: a degraded/offline path exists and is tested
@@ -116,4 +152,6 @@ protocol-agnostic with MCP/A2A as projections (AI-030); vector/RAG sit behind a 
 reconstructible index (AI-040); auto-extracted memory is a validatable candidate (AI-050); fetched
 active content is sandboxed (AI-060); gateway-mediated calls keep identity and least privilege end
 to end (AI-070); the model endpoint comes from `LLM_BASE_URL`/`LLM_MODEL` with a local default
-and no vendor SDK in business code (AI-080).
+and no vendor SDK in business code (AI-080); every supported coding assistant gets the same
+instructions and guard rails from one neutral source, `prism-ai-lint --align` reports no gap,
+and no assistant setup requires one vendor's model (AI-090).
