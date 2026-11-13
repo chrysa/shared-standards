@@ -101,7 +101,13 @@ and fails with `could not read Username for 'https://github.com'`.
 Per chrysa-lib `DECISIONS.md` D-0004, fetch the private dependency with a BuildKit secret —
 never an `ARG`/`ENV`/`COPY` (those persist the token in an image layer).
 
-`Dockerfile.test`:
+> **Naming & layout.** A repo with a single Dockerfile keeps it as the bare `Dockerfile` at the
+> repo root. The moment a second one appears (here, a test image), **all** Dockerfiles move into
+> `docker/dockerfiles/` named `<role>.Dockerfile` — `docker/dockerfiles/production.Dockerfile`,
+> `docker/dockerfiles/test.Dockerfile`. Prefix forms (`Dockerfile.test`) are retired. Entrypoint and
+> command scripts sit beside them under `docker/entrypoints/` and `docker/commands/`.
+
+`docker/dockerfiles/test.Dockerfile`:
 ```dockerfile
 # syntax=docker/dockerfile:1
 RUN --mount=type=secret,id=ghtoken,required=true \
@@ -116,7 +122,7 @@ The token is mounted (never written to a layer); the `rm -f /root/.gitconfig` in
 ```makefile
 docker-test: ## Run tests in Docker (CI parity; private dep fetch via D-0004 BuildKit secret)
 	GH_TOKEN="$${GH_TOKEN:-$${GITHUB_TOKEN:-$$(gh auth token 2>/dev/null)}}" \
-		DOCKER_BUILDKIT=1 docker build -f Dockerfile.test --secret id=ghtoken,env=GH_TOKEN -t <image>-test .
+		DOCKER_BUILDKIT=1 docker build -f docker/dockerfiles/test.Dockerfile --secret id=ghtoken,env=GH_TOKEN -t <image>-test .
 	docker run --rm <image>-test
 ```
 Local dev resolves the token from `gh auth token`; CI passes its `GH_TOKEN`/`GITHUB_TOKEN`.
