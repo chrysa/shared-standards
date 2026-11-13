@@ -32,6 +32,21 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     security-auditor.md
     standards-drift-auditor.md
     test-runner.md
+  commands/
+    adr-new.md
+    commit.md
+    custom-init.md
+    help-commands.md
+    issue.md
+    reviewpr.md
+    test.md
+    wf-bugfix.md
+    wf-decision.md
+    wf-feature.md
+    wf-fleet-sweep.md
+    wf-issue.md
+    wf-pr-review.md
+    wf-release-lib.md
   config/
     hooks-config.json
   hooks/
@@ -131,6 +146,12 @@ Shared GitHub Copilot instructions, generic workflows, templates, and Claude Cod
     verification-loop/
       SKILL.md
   thresholds.json
+  workflows/
+    README.md
+    bugfix.js
+    feature.js
+    fleet-sweep.js
+    pr-review.js
 .codex/
   rules/
     prism-ai-lint.rules
@@ -301,6 +322,7 @@ docs/
     D-0015-python-version-freeze.md
     D-0016-required-status-checks.md
     D-0017-realtime-first-ui.md
+    D-0019-sonarcloud-visibility-mirrors-github.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md
@@ -451,7 +473,6 @@ scripts/
   rewrite-coverage-paths.py
   security_gate_edit.py
   seed-tooling-ecosystem-stories.sh
-  sentry-github-issues.sh
   setup-branch-protection.sh
   setup-org-secrets.sh
   setup/
