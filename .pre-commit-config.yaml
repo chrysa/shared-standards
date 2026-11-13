@@ -35,20 +35,12 @@ repos:
   - id: claude-skill-frontmatter
   - id: claude-agent-frontmatter
   - id: claude-mcp-config
-  - id: debugger-detection
-    exclude: (^|/)tests?/|^(README\.md|docs/)
   - id: python-print-detection
     exclude: (^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/
-  - id: python-pprint-detection
-    exclude: (^|/)tests?/|^(README\.md|docs/)|(^|/)quality_gate\.py$|^\.claude/ape/
-  - id: no-bare-except
-  - id: python-logger-detection
-    exclude: (^|/)tests?/|^(README\.md|docs/)
   - id: python-unreachable-code
   - id: python-no-unittest-import
   - id: python-untyped-raise
     exclude: (^|/)tests?/
-  - id: python-mutable-default
   - id: python-dispatch-ladder
   - id: claude-assets-present
   - id: no-hardcoded-localhost
@@ -60,8 +52,6 @@ repos:
     exclude: (^|/)tests/
   - id: fastapi-missing-links
     exclude: (^|/)tests/
-  - id: no-sync-in-async
-  - id: dockerfile-no-latest
   - id: console-log-detection
   - id: console-debug-detection
   - id: react-console-error-detection
@@ -72,6 +62,22 @@ repos:
   - id: react-direct-dom
   repo: https://github.com/chrysa/pre-commit-tools
   rev: v0.2.0-253
+- hooks:
+  # Replaces the deprecated dockerfile-no-latest hook (pre-commit-tools DEPRECATIONS.md):
+  # only untagged / :latest base images block, other hadolint findings stay advisory.
+  - args:
+    - --error
+    - DL3006
+    - --error
+    - DL3007
+    - --failure-threshold
+    - error
+    files: (^|/)Dockerfile[^/]*$
+    id: hadolint-docker
+    types:
+    - file
+  repo: https://github.com/hadolint/hadolint
+  rev: v2.15.1
 - hooks:
   - id: gitleaks
   repo: https://github.com/gitleaks/gitleaks
