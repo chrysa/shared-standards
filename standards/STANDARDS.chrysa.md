@@ -240,6 +240,17 @@ That record deliberately names products; where it and this canon disagree, **thi
   browser `storage` event and re-read on `window` `focus`, so a view opened while hidden
   never shows stale state after the user comes back. A reload that loses the user's place,
   or a change that fails to propagate on focus/reload, is a bug.
+
+- **The interface refreshes on focus, and notifications surface in the tab title.** When the
+  window or tab regains focus (`focus` / `visibilitychange` to `visible`), the interface
+  revalidates its server state, not only its local view state: stale queries are refetched and
+  the live channel is checked and reconnected if it dropped. Notifications (new messages,
+  completed jobs, errors needing attention) are **counted while the site is in the background**:
+  the live channel stays subscribed when the tab is hidden, and unread notifications are
+  accumulated in state rather than dropped or deferred until focus. The unread count is shown in
+  `document.title` as a prefix (e.g. `(3) Portfolio`), updated as it changes and cleared when the
+  user has seen the items. A notification that exists only in the page DOM, or that is lost while
+  the tab is hidden, is a defect.
 - **Notion logging**: every advancement and modification (progress, decisions, state
   changes) is logged in Notion — the single source of truth **for project state**. Run
   `@notion-sync` after any state change; on conflict about project state, Notion wins.

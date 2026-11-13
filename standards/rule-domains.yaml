@@ -102,6 +102,7 @@ rules:
   Tool caches & deps never touch the project tree: containers
   TypeScript is strict by contract: frontend
   UI state survives reload & focus: frontend
+  The interface refreshes on focus, and notifications surface in the tab title: frontend
   "URL-addressable frontend navigation \u2014 mandatory": frontend
   '`.dockerignore` mandatory & exhaustive': containers
 sections:

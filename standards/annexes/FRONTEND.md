@@ -282,6 +282,10 @@ A surface reflects the current state of the system without a manual refresh. The
 - **Cross-tab & focus.** Live updates and cache invalidation propagate across the app's own
   tabs/windows and on refocus (the socle *UI state survives reload & focus* rule), so a background
   tab is never left showing a superseded view.
+- **Focus refresh & title notifications.** On `focus` / `visibilitychange` to `visible` the
+  interface revalidates server state and reconnects a dropped live channel. The live channel stays
+  subscribed while the tab is hidden; notifications accumulate as unread state and the count is
+  shown as a `document.title` prefix (e.g. `(3) Portfolio`), cleared once seen.
 
 The transport, reconnection, and backpressure details are a realtime concern shared with the
 backend contract; the frontend rule is that the **default posture is reactive** — a screen that

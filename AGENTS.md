@@ -86,6 +86,7 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - The frontend says when the backend is unreachable or unstable
 - The frontend is reactive and real-time by default
 - UI state survives reload & focus
+- The interface refreshes on focus, and notifications surface in the tab title
 - Everything is semantic — the markup, the data, and the URLs
 - URL-addressable frontend navigation — mandatory
 
