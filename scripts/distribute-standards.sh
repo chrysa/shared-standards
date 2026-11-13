@@ -20,6 +20,8 @@
 #                              `.chrysa/STANDARDS.md` file left by the previous mechanism.
 #   3.  Shared skills          .claude/skills/*            -> <repo>/.claude/skills/   (managed copies)
 #   4.  Shared agents+commands+workflows templates/claude/{agents,commands,workflows}/* -> <repo>/.claude/
+#                              Layers 3-4 are skipped with --core-only: the chrysa-standards
+#                              Claude Code plugin ships them once, instead of a copy per repo.
 #   5.  Workflows + lint/quality + pre-commit  -> delegate to apply-repo-standard.sh
 #
 # Managed paths are overwritten on every run. Repo-specific content in CLAUDE.md / AGENTS.md /
@@ -31,6 +33,8 @@
 #   distribute-standards.sh --check <repo_path>      # report drift, exit 1 if any
 #   distribute-standards.sh --no-apply <repo_path>   # skip apply-repo-standard.sh delegation
 #   distribute-standards.sh --standards-only <repo>  # only the slim-core standards system + legacy purge
+#   distribute-standards.sh --core-only <repo_path>  # everything except the Claude skills/agents/
+#                                                    # commands/workflows copies (layers 3-4)
 #
 # Exit: 0 ok (or no drift) · 1 drift found (--check) / error · 2 repo absent
 set -uo pipefail
@@ -87,6 +91,7 @@ DRY_RUN=false
 CHECK=false
 NO_APPLY=false
 STANDARDS_ONLY=false
+CORE_ONLY=false
 TARGET_REPO=""
 
 for arg in "$@"; do
@@ -95,7 +100,8 @@ for arg in "$@"; do
         --check)          CHECK=true ;;
         --no-apply)       NO_APPLY=true ;;
         --standards-only) STANDARDS_ONLY=true; NO_APPLY=true ;;
-        -h|--help)  sed -n '2,35p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        --core-only)      CORE_ONLY=true ;;
+        -h|--help)  awk 'NR==1 {next} /^#/ {sub(/^# ?/, ""); print; next} {exit}' "$0"; exit 0 ;;
         *)          [[ -z "$TARGET_REPO" ]] && TARGET_REPO="$arg" ;;
     esac
 done
@@ -383,13 +389,20 @@ main() {
         log "done (standards-only)"; return 0
     fi
 
-    # 3. Shared skills (managed copies), scoped to the repo's profiles.
-    deploy_skills "$SKILLS_SRC" "$repo/.claude/skills" "${REPO_NAME:-$(basename "$repo")}"
+    if $CORE_ONLY; then
+        # 3.-4. skipped: the chrysa-standards plugin ships the skills, agents, commands and
+        # workflows. Copies already in the repo are left as they are (removing them is a
+        # separate, per-repo decision).
+        info "Claude skills/agents/commands/workflows copies · skipped (--core-only)"
+    else
+        # 3. Shared skills (managed copies), scoped to the repo's profiles.
+        deploy_skills "$SKILLS_SRC" "$repo/.claude/skills" "${REPO_NAME:-$(basename "$repo")}"
 
-    # 4. Shared agents + commands + workflows (managed copies).
-    deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
-    deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
-    deploy_dir "$WORKFLOWS_SRC" "$repo/.claude/workflows"
+        # 4. Shared agents + commands + workflows (managed copies).
+        deploy_dir "$AGENTS_SRC" "$repo/.claude/agents"
+        deploy_dir "$COMMANDS_SRC" "$repo/.claude/commands"
+        deploy_dir "$WORKFLOWS_SRC" "$repo/.claude/workflows"
+    fi
 
     # 4b. opencode agent config (managed copy — ollama default, claude/chatgpt opt-in).
     deploy_file "$OPENCODE_TPL" "$repo/opencode.json"
