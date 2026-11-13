@@ -16,3 +16,10 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   accessible tree, and every fixed bug ships a regression test. E2E (Playwright) covers
   critical journeys only; **its gate status is declared per repo** in the local `CLAUDE.md` —
   fleet default is non-blocking. Detail: annexe `FRONTEND.md` §4, `TESTING.md`.
+
+- **Non-regression is a gate, not a habit.** Every fixed bug ships a regression test that
+  names its story, was seen failing without the fix, and stays in the default suite of every
+  PR; skipping or removing one is justified in the PR body. Snapshots and golden files are
+  re-recorded only in a reviewed PR, never by CI. Contract, migration, performance, AI-quality
+  and visual regressions each have one named guard. Detail: annexe `TESTING.md` §3
+  (TS-012–TS-016, non-regression map).
