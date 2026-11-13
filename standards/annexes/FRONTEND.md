@@ -225,6 +225,35 @@ of the **brand kit** (a design-system asset, not a per-repo afterthought) and, w
 allows (SVG with `prefers-color-scheme`), adapts to light and dark. A tab left showing the
 browser's default globe icon is an unfinished page.
 
+### FE-053 — Content is introduced with a basic entrance effect
+
+Interfaces are dynamic: content arrives visibly instead of popping in. The effect is basic and
+functional — it orients attention to what is new — never a show.
+
+- **What animates.** A route/view change, an opened panel or dialog, the first render of a list
+  or grid, and an item **newly inserted** by the user or a live update. A short **fade and/or
+  small translate** (≤ 8 px) is the vocabulary; scale, blur, bounce and parallax are not.
+- **Budget.** Opacity and transform only (compositor-friendly, no layout property animated);
+  ≤ 250 ms per element with an `ease-out` entrance; a list staggers at most the first visible
+  items so the whole group settles within 400 ms. Durations, easing and stagger come from the
+  motion tokens (socle *no hardcoded constants*), never from literals in components.
+- **Never in the way.** Content is interactive and readable from its first frame — an entrance
+  never gates input, never delays the primary action, and never reflows the page (the final box
+  is reserved, FE-070). Content already on screen is **not re-animated** when it refetches,
+  re-sorts or receives a live update (FE-080): stable keys keep it mounted, and only the genuinely
+  new row enters.
+- **Reduced motion.** Under `prefers-reduced-motion: reduce` (or the platform equivalent: the OS
+  "reduce motion" setting for native apps, an in-game option for HUDs) the entrance is instant or
+  a plain cross-fade with no translate. The `contract.css` reduced-motion block covers CSS
+  transitions; a JavaScript- or engine-driven animation checks the preference itself.
+- **Per support.** Web: CSS transitions/`@starting-style` or the Web Animations API — no
+  animation library is required for this vocabulary. Native/overlay: the toolkit's property
+  animation on opacity/position. Game menus/HUD: an engine tween, skippable and never on
+  gameplay-critical readouts. Terminal/TUI: no animation; a progress line or spinner only.
+- **Testable.** The Definition of Done checks the entrance once with motion and once with
+  `reducedMotion: "reduce"` emulated (Playwright), asserts no layout shift (CLS budget, CI-053),
+  and confirms a live refresh does not replay it.
+
 ______________________________________________________________________
 
 ## 6. Environment & configuration
@@ -279,6 +308,12 @@ A surface reflects the current state of the system without a manual refresh. The
   (FE-037) and the API-down contract (FE-050): when the live channel drops, the UI shows the last
   known state plus the reconnection banner and refetches on recovery — it does not freeze, and it
   does not present stale data as current.
+- **Updates preserve the interaction in progress.** Applying a live change never takes focus,
+  clears or overwrites a field being edited, drops a selection, jumps the scroll position, or moves
+  a button, row or menu under the pointer. Updates to the item being edited are held and surfaced
+  ("updated by someone else — review") rather than written over the input; new rows are inserted
+  without pushing what the user is reading (anchor the scroll, or announce "3 new items" with a
+  control to reveal them) and are announced through a polite live region.
 - **Cross-tab & focus.** Live updates and cache invalidation propagate across the app's own
   tabs/windows and on refocus (the socle *UI state survives reload & focus* rule), so a background
   tab is never left showing a superseded view.
@@ -335,6 +370,7 @@ prevent. They are therefore **mechanised**, and, per GV-020, land as `info` befo
 | A fetching/lazy container renders a **spinner or bare area** instead of a shape-accurate skeleton | FE-070 | `guideline-checker` · **info** |
 | A skeleton/media box does not reserve its final size (measurable **CLS**) | FE-070 | Lighthouse/CI budget (CI-053) |
 | Skeleton or progress motion ignores `prefers-reduced-motion`; placeholder missing `aria-busy` | FE-037/038/070 | axe / a11y check |
+| An entrance or live-update animation ignores `prefers-reduced-motion`, shifts layout, or replays on refresh | FE-053/FE-080 | Playwright `reducedMotion` emulation + CLS budget (CI-053) · manual review |
 
 Two of these are directly measurable and enforced today, not just heuristic: **CLS** is a
 performance budget (CI-053) — a placeholder that does not reserve its box regresses it and blocks;

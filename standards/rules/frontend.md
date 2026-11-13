@@ -66,7 +66,9 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
   updates propagate across the app's own tabs and on refocus (see *UI state survives reload &
   focus*). Real-time is **layered over a correct offline/degraded state**, not a substitute for it:
   losing the live channel degrades to the last known state with the API-down banner (FE-050), never
-  to a frozen or lying screen. A surface that shows data a refresh would change is a defect. Detail:
+  to a frozen or lying screen. A live update **never disturbs the interaction in progress**: it does not take focus, clear
+  or overwrite input being edited, drop a selection, jump the scroll position or move a control
+  under the pointer. A surface that shows data a refresh would change is a defect. Detail:
   annexe `FRONTEND.md` FE-080.
 
 - **UI state survives reload & focus** — human-facing surfaces persist their navigation

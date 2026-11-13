@@ -192,6 +192,7 @@ CLAUDE.md
 CODEOWNERS
 CONTRIBUTING.md
 DECISIONS.md
+DESIGN.md
 GitVersion.yml
 LICENSE
 Makefile
@@ -252,6 +253,7 @@ console/
     pnpm-workspace.yaml
     postcss.config.js
     src/
+      App.test.tsx
       App.tsx
       api/
       components/
@@ -274,6 +276,7 @@ copilot-instructions/
   python-library.md
   react19.md
 docs/
+  DESIGN-CONTRACT.md
   DESIGN-SYSTEM.md
   INTERFACE-REVIEW-LEDGER.md
   MAKEFILE-STANDARD.md
@@ -301,6 +304,7 @@ docs/
     D-0015-python-version-freeze.md
     D-0016-required-status-checks.md
     D-0017-realtime-first-ui.md
+    D-0019-sonarcloud-visibility-mirrors-github.md
   audits/
     COMPLIANCE-20260615.md
     DEEP-INSPECTION-20260615.md

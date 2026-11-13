@@ -93,6 +93,10 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - A real-time backend has channel contracts and never blocks
 - APIs, SDKs & public contracts follow the `STD-API-001` contract
 
+### Design system · `standards/rules/design.md`
+- Before UI work, read the product's `DESIGN.md` and the specs it links
+- Design system
+
 ### Accessibility · `standards/rules/accessibility.md`
 - Dark mode
 - Every site is usable by the majority of disabilities — not only the screen-reader case
@@ -170,9 +174,6 @@ This project is indexed by GitNexus as **shared-standards** (318 symbols, 312 re
 - `.dockerignore` mandatory & exhaustive
 - Healthchecks live in the Dockerfile, and are language-agnostic and native
 - Container-runtime policy
-
-### Design system · `standards/rules/design.md`
-- Design system
 
 ### Developer loop & tooling · `standards/rules/dev-loop.md`
 - Makefile targets

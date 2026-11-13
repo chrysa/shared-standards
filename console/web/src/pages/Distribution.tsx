@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
+import { enterProps } from "@/lib/enter";
 
 export function Distribution() {
   const { t } = useTranslation();
@@ -60,8 +61,8 @@ export function Distribution() {
             </TR>
           </THead>
           <TBody>
-            {data?.runs.map((r) => (
-              <TR key={r.html_url}>
+            {data?.runs.map((r, index) => (
+              <TR key={r.html_url} {...enterProps(index)}>
                 <TD>
                   <a className="text-primary hover:underline" href={r.html_url} target="_blank" rel="noopener noreferrer">
                     {r.created_at}
