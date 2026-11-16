@@ -77,6 +77,7 @@ rules:
   No hardcoded constants: code-quality
   "No literal HTTP status codes \u2014 use the constants the framework already ships": code-quality
   "No virtualenv in a repo \u2014 ever": containers
+  Non-regression is a gate, not a habit: testing
   Notion logging: docs
   Numbers are displayed with a space thousands separator: design
   Observability & production readiness follow the `STD-OPS-001` contract: observability
