@@ -1,124 +1,43 @@
 ---
 # Mutation testing workflow template (chrysa ecosystem)
 #
-# Usage: copy to .github/workflows/mutation-testing.yml and adapt.
-# ⚠️ This file lives in workflows/ (NOT .github/workflows/) — it cannot be
-#    called via `uses: chrysa/shared-standards/...`. Copy it to your repo.
+# Usage: copy to .github/workflows/mutation-testing.yml and set the default
+# paths. The job itself lives in chrysa/github-actions (mutation-testing.yml),
+# which runs mutmut 3: there is nothing to maintain in the consumer repository.
 #
-# Parameters when used as a standalone workflow:
-#   with:
-#     python-version: "3.12"            # optional, default 3.12
-#     paths-to-mutate: "src/engine/"    # required
-#     test-runner: "pytest tests/ -x -q --no-header"  # optional
-#     threshold: 70                      # optional, default 70
+# Inputs of the shared workflow (all optional):
+#   paths              comma-separated paths to mutate (ignored when
+#                      the repo already configures mutmut)
+#   threshold          minimum mutation score, 0-100 (default 70)
+#   python-version     default "3.14"
+#   working-directory  folder holding pyproject.toml (default ".")
+#   test-paths         comma-separated pytest paths (default: pytest discovery)
+#   install-command    default: pip install -e ".[dev]"
 #
 # Designed for weekly schedule runs, NOT PR gates.
 
-name: Mutation Testing (reusable)
+name: Mutation Testing
 
 on:
-    workflow_call:
+    schedule:
+        - cron: "0 3 * * 1"
+    workflow_dispatch:
         inputs:
-            python-version:
-                description: Python version
+            paths:
+                description: "Comma-separated paths to mutate (default: src/)"
                 required: false
-                type: string
-                default: "3.12"
-            paths-to-mutate:
-                description: Comma-separated paths to mutate (e.g. "src/engine/,src/domain/")
-                required: true
-                type: string
-            test-runner:
-                description: Command mutmut uses to run tests
-                required: false
-                type: string
-                default: "python -m pytest tests/ -x -q --no-header"
+                default: "src/"
             threshold:
-                description: Minimum mutation score (0–100) to pass
+                description: "Minimum mutation score (0-100)"
                 required: false
-                type: number
-                default: 70
-            install-command:
-                description: Command to install project + dev dependencies
-                required: false
-                type: string
-                default: "pip install -e .[dev]"
-        secrets:
-            DISCORD_WEBHOOK:
-                required: false
+                default: "70"
 
 permissions:
     contents: read
 
 jobs:
     mutation:
-        name: Mutmut
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v6
-
-            - name: Set up Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: ${{ inputs.python-version }}
-
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  ${{ inputs.install-command }}
-
-            - name: Run mutmut
-              run: |
-                  mutmut run \
-                    --paths-to-mutate "${{ inputs.paths-to-mutate }}" \
-                    --runner "${{ inputs.test-runner }}" \
-                    --no-progress \
-                    || true
-
-            - name: Compute mutation score
-              id: score
-              run: |
-                  KILLED=$(mutmut results 2>/dev/null | grep -c "^Killed" || echo 0)
-                  SURVIVED=$(mutmut results 2>/dev/null | grep -c "^Survived" || echo 0)
-                  TOTAL=$((KILLED + SURVIVED))
-                  SCORE=$([ "$TOTAL" -eq 0 ] && echo 100 || echo $((KILLED * 100 / TOTAL)))
-                  echo "score=$SCORE" >> "$GITHUB_OUTPUT"
-                  echo "killed=$KILLED" >> "$GITHUB_OUTPUT"
-                  echo "survived=$SURVIVED" >> "$GITHUB_OUTPUT"
-                  echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
-
-            - name: Show surviving mutants
-              if: always()
-              run: mutmut results || true
-
-            - name: Fail if score below threshold
-              run: |
-                  SCORE=${{ steps.score.outputs.score }}
-                  THRESHOLD=${{ inputs.threshold }}
-                  echo "Mutation score: ${SCORE}% (threshold: ${THRESHOLD}%)"
-                  if [ "$SCORE" -lt "$THRESHOLD" ]; then
-                    echo "❌ Score ${SCORE}% below threshold ${THRESHOLD}%"
-                    exit 1
-                  fi
-                  echo "✅ Score ${SCORE}% meets threshold ${THRESHOLD}%"
-
-            - name: Notify Discord on failure
-              if: failure() && secrets.DISCORD_WEBHOOK != ''
-              uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9 # 0.3.2
-              env:
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-              with:
-                  args: |
-                      ❌ **Mutation score regression** on `${{ github.repository }}`
-                      Score: ${{ steps.score.outputs.score }}% (threshold: ${{ inputs.threshold }}%)
-                      Survived: ${{ steps.score.outputs.survived }}/${{ steps.score.outputs.total }}
-                      Branch: `${{ github.ref_name }}`
-
-            - name: Upload mutmut cache
-              if: always()
-              uses: actions/upload-artifact@v7
-              with:
-                  name: mutmut-cache
-                  path: .mutmut-cache
-                  retention-days: 14
+        uses: chrysa/github-actions/.github/workflows/mutation-testing.yml@v1.11.2
+        with:
+            paths: ${{ inputs.paths || 'src/' }}
+            threshold: ${{ inputs.threshold || '70' }}

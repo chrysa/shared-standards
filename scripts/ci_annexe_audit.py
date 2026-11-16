@@ -187,6 +187,28 @@ def action_pin_violations(text: str) -> list[str]:
     return found
 
 
+def only_reusable_calls(text: str) -> bool:
+    """True if every job only calls a reusable workflow (`uses:` and no `steps:`)."""
+    blocks = job_blocks(text)
+    return bool(blocks) and all("uses:" in block and "steps:" not in block for _, block in blocks)
+
+
+def needs_concurrency(text: str) -> bool:
+    """CI-031: a PR-triggered workflow without a concurrency group.
+
+    A workflow whose jobs only call reusable workflows is exempt. In a called workflow
+    `github.workflow` is the caller's name, so a caller group
+    `${{ github.workflow }}-${{ github.ref }}` equals the group the chrysa/github-actions
+    workflow already declares, and GitHub cancels the run at start-up ("Canceling since a
+    deadlock was detected for concurrency group"). The called workflow owns its group.
+    """
+    return (
+        bool(re.search(r"^\s*pull_request(_target)?:", text, re.M))
+        and not re.search(r"^concurrency:", text, re.M)
+        and not only_reusable_calls(text)
+    )
+
+
 def missing_job_timeout(text: str) -> bool:
     """True if any real job (not a bare reusable-workflow call) declares no timeout — CI-030."""
     for _, block in job_blocks(text):
@@ -211,9 +233,7 @@ def inspect(text: str, name: str) -> list[str]:
         found.append("CI-022")
     if missing_job_timeout(text):
         found.append("CI-030")
-    if re.search(r"^\s*pull_request(_target)?:", text, re.M) and not re.search(
-        r"^concurrency:", text, re.M
-    ):
+    if needs_concurrency(text):
         found.append("CI-031")
     return sorted(set(found))
 
@@ -247,9 +267,7 @@ def fix(text: str, name: str) -> str | None:
     """Deterministic fixes only: concurrency group (CI-031) and job timeout (CI-030)."""
     patched = dedupe_timeouts(text)
 
-    if re.search(r"^\s*pull_request(_target)?:", patched, re.M) and not re.search(
-        r"^concurrency:", patched, re.M
-    ):
+    if needs_concurrency(patched):
         cancel = "false" if is_deploy(name, patched) else "true"
         block = concurrency_block(patched, cancel)
         anchor = re.search(r"^jobs:\s*$", patched, re.M)
@@ -263,7 +281,13 @@ def fix(text: str, name: str) -> str | None:
     # first occurrence and the later jobs would silently keep no timeout at all.
     blocks = job_blocks(patched)
     if blocks:
-        head = patched[: patched.index(blocks[0][1])]
+        start = patched.index(blocks[0][1])
+        head = patched[:start]
+        # job_blocks stops at the next top-level key. On a key-sorted workflow `jobs:` comes
+        # before `name:`, `on:` and `permissions:`: everything after the last job must be
+        # carried over, or the rebuilt file silently loses its triggers.
+        end = start + sum(len(block) for _, block in blocks)
+        tail = patched[end:]
         rebuilt = [head]
         for _, block in blocks:
             if "timeout-minutes:" not in block and not ("uses:" in block and "steps:" not in block):
@@ -274,6 +298,7 @@ def fix(text: str, name: str) -> str | None:
                         line, f"{line}\n{indent}timeout-minutes: {DEFAULT_TIMEOUT}", 1
                     )
             rebuilt.append(block)
+        rebuilt.append(tail)
         patched = "".join(rebuilt)
 
     return patched if patched != text else None
