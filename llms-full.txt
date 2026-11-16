@@ -213,6 +213,7 @@ CLAUDE.md
 CODEOWNERS
 CONTRIBUTING.md
 DECISIONS.md
+DESIGN.md
 GitVersion.yml
 LICENSE
 Makefile
@@ -273,6 +274,7 @@ console/
     pnpm-workspace.yaml
     postcss.config.js
     src/
+      App.test.tsx
       App.tsx
       api/
       components/
@@ -295,6 +297,7 @@ copilot-instructions/
   python-library.md
   react19.md
 docs/
+  DESIGN-CONTRACT.md
   DESIGN-SYSTEM.md
   INTERFACE-REVIEW-LEDGER.md
   MAKEFILE-STANDARD.md

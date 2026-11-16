@@ -85,6 +85,11 @@ Shape / depth / type / density / motion roles: `--radius`, `--border-weight`,
 No app may invent a new token name or drop one of these; that is the line that keeps
 `@chrysa/ui` and the audit working across the fleet.
 
+Optional **content-entrance** roles (FE-053) have safe defaults in `contract.css`, so an app sets
+them only to retune its motion personality: `--motion-enter`, `--motion-enter-distance`,
+`--motion-stagger`, `--ease-enter`. The `.enter` class in `contract.css` applies them and is
+disabled under `prefers-reduced-motion`.
+
 ---
 
 ## 2. The brand theme (per app)
@@ -112,7 +117,8 @@ Everything below is the app's to design. Seven elements:
    shell; that shell is the smell this element exists to catch.
 
 The brand theme is captured per repo in `<repo>/DESIGN.md` from
-`templates/DESIGN.template.md`.
+`templates/DESIGN.template.md`. The full product contract (users, journeys, states, assets,
+evidence) and its method are in [DESIGN-CONTRACT.md](DESIGN-CONTRACT.md).
 
 ---
 

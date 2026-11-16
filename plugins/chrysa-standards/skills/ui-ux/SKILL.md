@@ -22,6 +22,16 @@ Auto-invoke when building or reviewing ANY human-facing surface, not only web:
 
 Web stack: React 19 + TS + Vite, shadcn/ui + Tailwind, TanStack Query + Zustand, react-i18next.
 
+## Start from the product contract
+- Read the repo's root `DESIGN.md` and the specs it links **before** changing UI, components,
+  styles, navigation, interactions or assets. No file is loaded by its name: this is the pointer.
+- Follow its users, journeys, tokens and states; mark anything you add **[proposed]** with its
+  reasoning — never present your preference as a decision. Method and acceptance criteria:
+  `shared-standards/docs/DESIGN-CONTRACT.md`.
+- Update the contract and its evidence log in the same change; record checks you could not run.
+- No `DESIGN.md` and the repo has a human-facing surface? Start one from
+  `templates/DESIGN.template.md` (§1–§3 first), do not invent an identity.
+
 ## Non-negotiable everywhere
 - **Feedback + error recovery** — every action confirms success/failure; errors give cause + next step.
 - **Reversibility** — destructive actions confirmed/undoable; dry-run where feasible.
@@ -74,6 +84,9 @@ return <List items={data} />;
 - One `<h1>`/page, ordered headings, landmarks, skip link.
 - `aria-live` for toasts/dynamic updates. `<html lang>` follows locale.
 - Honor `prefers-reduced-motion`.
+- Introduce new content with a basic entrance (fade/small translate ≤ 250 ms, `.enter` from
+  `contract.css`, FE-053); never replay it on refetch or live update.
+- Live updates never move focus, clear input, drop selection or jump scroll (FE-080).
 - Tooling: `eslint-plugin-jsx-a11y` + automated axe check + **manual keyboard/SR pass (required)**.
 
 ### Dark mode

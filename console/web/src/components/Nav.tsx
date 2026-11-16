@@ -18,7 +18,7 @@ export function Nav({ tab, onTab, meta }: NavProps) {
   const toggleTheme = () => document.documentElement.classList.toggle("dark");
 
   return (
-    <header className="flex items-center gap-6 border-b border-border bg-card px-5 py-3">
+    <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-border bg-card px-5 py-3">
       <b className="text-primary">⬡ standards console</b>
       <nav className="flex gap-1" aria-label="Sections">
         {tabs.map((id) => (
@@ -34,7 +34,7 @@ export function Nav({ tab, onTab, meta }: NavProps) {
           </Button>
         ))}
       </nav>
-      <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+      <div className="ml-auto flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         {meta && (
           <span>
             {meta.standards_full_name}@{meta.branch}

@@ -2,7 +2,12 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
-  return <table className={cn("w-full border-collapse text-sm", className)} {...props} />;
+  // Wide tables scroll inside this box on narrow screens; the page never scrolls sideways.
+  return (
+    <div className="w-full overflow-x-auto">
+      <table className={cn("w-full border-collapse text-sm", className)} {...props} />
+    </div>
+  );
 }
 
 export function THead(props: React.HTMLAttributes<HTMLTableSectionElement>) {

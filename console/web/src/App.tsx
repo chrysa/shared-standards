@@ -5,6 +5,7 @@ import { Nav, type Tab } from "@/components/Nav";
 import { Fleet } from "@/pages/Fleet";
 import { Distribution } from "@/pages/Distribution";
 import { Standard } from "@/pages/Standard";
+import { enterProps } from "@/lib/enter";
 
 export function App() {
   const [tab, setTab] = useState<Tab>("fleet");
@@ -14,9 +15,12 @@ export function App() {
     <>
       <Nav tab={tab} onTab={setTab} meta={meta} />
       <main className="mx-auto max-w-5xl p-6">
-        {tab === "fleet" && <Fleet meta={meta} />}
-        {tab === "distribution" && <Distribution />}
-        {tab === "standard" && <Standard meta={meta} />}
+        {/* keyed by tab: a view change re-mounts the view, so its entrance plays once (FE-053) */}
+        <div key={tab} {...enterProps()}>
+          {tab === "fleet" && <Fleet meta={meta} />}
+          {tab === "distribution" && <Distribution />}
+          {tab === "standard" && <Standard meta={meta} />}
+        </div>
       </main>
     </>
   );
