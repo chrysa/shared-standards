@@ -157,3 +157,20 @@ Canonical source of truth is the canon; edit there, then run `make gen-agent-vie
      a severity threshold, or `--no-verify` on a security gate is a governed decision recorded
      in `DECISIONS.md`, not a convenience a single commit grants itself. A pre-existing
      unrelated failure is skipped by name (`SKIP=<hook>`), never by turning the gate off.
+
+- **Every project owns its own scope and its own credentials — nothing is shared across
+  projects.** A credential is bound to exactly one repository; one that reaches two projects
+  is a defect to rotate and split, not a convenience to keep. From the scaffold:
+  1. **SonarCloud: one project key per repo** (`chrysa_<repo>`), analysed under its own
+     `SONAR_TOKEN` stored as a per-repo secret, never reused across repos and passed by name
+     to the workflow (`secrets: {SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}}`; `secrets: inherit`
+     stays banned). Every `status:dev` repo has a SonarCloud project and the `SonarCloud`
+     check reports on its PRs — a repo without one is non-compliant debt, tracked and
+     resolved, not a tolerated exception.
+  2. **Sentry: one project per repo** (slug = repo name, see `OBSERVABILITY-OPS.md`), so one
+     **DSN per project**. The DSN and the Sentry token are per-repo secrets, never shared
+     between repos, and every `status:dev` repo ships and actually wires its error-tracking
+     project (a provisioned-but-silent project is non-compliant debt).
+  3. **The rule generalises to every credentialed tool** (Sonar, Sentry, and any future
+     service): the scope is the project. No fleet-wide or group-wide credential stands in for
+     a per-project one; a shared token is rotated and decomposed into per-project tokens.
