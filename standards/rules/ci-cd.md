@@ -102,6 +102,12 @@ Five of its rules are load-bearing enough to state here:
   `contents:write` only on the job that needs it), never a plaintext PAT where the
   workflow `GITHUB_TOKEN` or OIDC works. Dependabot keeps the `github-actions` ecosystem
   up to date.
+- **The three foundations release in one order** (`CI-065`): `chrysa/pre-commit-tools`,
+  then `chrysa/github-actions`, then `chrysa/shared-standards`, then the fleet. A release
+  follows only these forward edges; the return edges (the `github-actions` pin in
+  `pre-commit-tools`, the files `shared-standards` distributes back) move after the wave and
+  never block it. Every pin names a published tag, never `@main`; `shared-standards` serves
+  one version of each foundation at a time; tags only go up.
 - **Secrets are passed explicitly — `secrets: inherit` is banned.** A reusable workflow
   receives only the secrets it actually uses, named one by one under `secrets:`
   (`secrets: {SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}}`). `secrets: inherit` hands the
