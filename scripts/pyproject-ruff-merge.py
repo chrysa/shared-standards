@@ -56,6 +56,21 @@ CANONICAL_RULES: tuple[str, ...] = (
     "RUF059",  # unused-unpacked-variable
     "RUF100",  # unused-noqa — autofixable, keeps suppressions honest
     "PLR2004",  # magic-value-comparison — the `no hardcoded constants` gate; tests/** exempt (see CANONICAL_TEST_IGNORES)
+    # LOT 2 — native replacements for the chrysa/pre-commit-tools hooks deprecated in
+    # favour of Ruff (see pre-commit-tools DEPRECATIONS.md). Legacy `# <hook>: disable`
+    # comments are rewritten to `# noqa: <code>` by migrate-deprecated-hook-comments.py.
+    "T100",  # debugger — replaces debugger-detection
+    "T203",  # p-print — replaces python-pprint-detection; tests exempt
+    "E722",  # bare-except — replaces no-bare-except
+    "B006",  # mutable-argument-default — replaces python-mutable-default
+    "LOG015",  # root-logger-call — replaces python-logger-detection
+    "ASYNC210",  # blocking HTTP call in async — replaces no-sync-in-async
+    "ASYNC212",  # blocking httpx call in async
+    "ASYNC220",  # subprocess in async
+    "ASYNC221",  # run-process in async
+    "ASYNC222",  # wait-for-process in async
+    "ASYNC230",  # blocking open() in async
+    "ASYNC251",  # time.sleep in async
 )
 
 # The one per-file-ignore this distributor manages: high-volume rules whose findings
@@ -64,16 +79,23 @@ CANONICAL_RULES: tuple[str, ...] = (
 # tests, so arming it fleet-wide requires exempting them here — the remaining ~350 src
 # findings are the tracked `no hardcoded constants` extraction backlog. Every other
 # per-file-ignore is repo-owned and left untouched.
+# T201/T203 join it: the print hooks they replace always excluded tests (T201 is only
+# managed once armed — see DELIBERATELY_EXCLUDED).
 CANONICAL_TEST_IGNORES: dict[str, tuple[str, ...]] = {
-    "**/tests/**": ("PLR2004",),
-    "**/test_*.py": ("PLR2004",),
-    "**/conftest.py": ("PLR2004",),
+    "**/tests/**": ("PLR2004", "T201", "T203"),
+    "**/test_*.py": ("PLR2004", "T201", "T203"),
+    "**/conftest.py": ("PLR2004", "T201", "T203"),
 }
 
 # Rules the `PLR*`/`RUF` shorthand in the standards block would imply, excluded on
 # purpose. Named here so the decision is visible at the point of distribution rather
 # than only in an issue — see STANDARDS.chrysa.md, *known anti-patterns*.
 DELIBERATELY_EXCLUDED: dict[str, str] = {
+    "T201": (
+        "print — 1866 findings on 64 repos (2026-11-06; scripts/ 736, src/ 337, functional/ 220): "
+        "the python-print-detection hook only ever saw changed files. It stays the gate until "
+        "that backlog is cleared, then T201 joins LOT 2 and the hook is pruned"
+    ),
     "RUF001": "ambiguous-unicode — 493 findings on 4 repos, all French prose; arm locally with allowed-confusables",
 }
 
@@ -199,17 +221,19 @@ def _current_ignores(data: dict) -> dict:
     return dict(data.get("tool", {}).get("ruff", {}).get("per-file-ignores", {}))
 
 
-def missing_test_ignores(data: dict) -> dict[str, list[str]]:
+def missing_test_ignores(data: dict, rules: tuple[str, ...] = CANONICAL_RULES) -> dict[str, list[str]]:
     """Return, per canonical glob, the codes not yet ignored there (canonical order).
 
     A glob absent from the repo, or present without the code, needs the code added.
     A glob that already lists the code (or a covering prefix) counts as present.
+    Only codes of the active rule set are managed: an ignore is the companion of an
+    armed rule, so a --rules= override leaves the ignores of unarmed codes alone.
     """
     current = _current_ignores(data)
     out: dict[str, list[str]] = {}
     for glob, codes in CANONICAL_TEST_IGNORES.items():
         have = set(current.get(glob, []))
-        need = [c for c in codes if not any(c.startswith(sel) for sel in have)]
+        need = [c for c in codes if c in rules and not any(c.startswith(sel) for sel in have)]
         if need:
             out[glob] = need
     return out
@@ -336,9 +360,9 @@ def main(argv: list[str]) -> int:
         return 2
 
     missing = missing_rules(data, rules)
-    # The canonical test-ignore is the companion of arming PLR2004; only manage it when
-    # PLR2004 is in the active set (a --rules= override without it leaves ignores alone).
-    ignores = missing_test_ignores(data) if "PLR2004" in rules else {}
+    # Canonical test-ignores are companions of armed rules (PLR2004, T201, T203); only
+    # the codes of the active set are managed.
+    ignores = missing_test_ignores(data, rules)
     excludes = missing_extend_exclude(data)
     if "--check" in argv:
         problems = []

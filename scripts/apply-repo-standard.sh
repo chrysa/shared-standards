@@ -322,6 +322,19 @@ merge_ruff_rules() {
     fi
     local merger="$SCRIPT_DIR/pyproject-ruff-merge.py"
     [[ -f "$merger" ]] || { warn "pyproject-ruff-merge.py missing · ruff rules skipped"; return 0; }
+    # LOT 2 arms the Ruff codes of the deprecated pre-commit-tools hooks; their legacy
+    # `# <hook>: disable` comments must become `# noqa: <code>` first or CI breaks.
+    local comments="$SCRIPT_DIR/migrate-deprecated-hook-comments.py"
+    if $CHECK; then
+        python3 "$comments" "$repo" --check && ok "no legacy hook opt-out comment" \
+            || warn "legacy hook opt-out comments to convert (see above)"
+    elif $DRY_RUN; then
+        python3 "$comments" "$repo" --check >/dev/null 2>&1 \
+            && info "[dry-run] no legacy hook opt-out comment" \
+            || info "[dry-run] would convert legacy hook opt-out comments to noqa"
+    else
+        python3 "$comments" "$repo" && ok "legacy hook opt-out comments converted"
+    fi
     local target rel
     while IFS= read -r target; do
         [[ -n "$target" ]] || continue
@@ -347,15 +360,17 @@ apply_one() {
     # `.git` is a directory in a normal clone but a file in a worktree; -e covers both.
     [[ -e "$repo/.git" ]] || { warn "$name: not a git repo · skip"; return 0; }
     log "═══ $name ═══"
-    if $CHECK; then merge_precommit "$repo"; merge_ruff_rules "$repo"; return 0; fi
+    # Ruff before pre-commit: a deprecated hook is pruned only once the Ruff code that
+    # replaces it is armed in pyproject.toml (pre-commit-merge.py replacement_policy).
+    if $CHECK; then merge_ruff_rules "$repo"; merge_precommit "$repo"; return 0; fi
     deploy_hygiene "$repo"
     deploy_release_tooling "$repo"
     deploy_quality_gate "$repo"
     deploy_context_files "$repo"
     deploy_governance "$repo"
     if $NO_CI; then info "ci.yml · skipped (--no-ci)"; else deploy_stack_ci "$repo"; fi
-    merge_precommit "$repo"
     merge_ruff_rules "$repo"
+    merge_precommit "$repo"
     local proc="$SCRIPT_DIR/apply-ci-process.sh"
     if [[ -x "$proc" || -f "$proc" ]]; then
         local flags=""; $DRY_RUN && flags="--dry-run"
