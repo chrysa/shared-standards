@@ -1,7 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "autoCompact": true,
-  "autoCompactThreshold": 0.85,
   "effortLevel": "medium",
   "hooks": {
     "Notification": [
